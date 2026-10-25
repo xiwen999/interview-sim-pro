@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>浏览题库 · 模拟面试训练</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+.toolbar{position:sticky;top:66px;z-index:40;padding:14px 0;background:linear-gradient(rgba(8,13,29,.92),rgba(8,13,29,.75));backdrop-filter:blur(10px)}
+.search-box{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
+  border-radius:13px;padding:11px 16px;margin-bottom:12px;transition:.2s}
+.search-box:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.14)}
+.search-box svg{color:var(--ink3);flex:none}
+.search-box input{flex:1;background:none;border:none;outline:none;font-size:14px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters .fg-lab{font-size:12px;color:var(--ink3);align-self:center;margin:0 2px 0 6px}
+.count-line{font-size:12px;color:var(--ink3);margin:14px 2px 12px}
+.q-item{border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;background:var(--card);transition:.2s}
+.q-item:hover{border-color:var(--line2)}
+.q-item .qi-h{display:flex;align-items:center;gap:11px;padding:17px 20px;cursor:pointer}
+.q-item .qi-h .qt{flex:1;font-size:14.5px;font-weight:700;line-height:1.6}
+.q-item .qi-h .chev{color:var(--ink3);display:flex;transition:.25s;flex:none}
+.q-item.open .qi-h .chev{transform:rotate(180deg)}
+.q-item .qi-b{display:none;padding:0 20px 18px;border-top:1px dashed var(--line)}
+.q-item.open .qi-b{display:block;animation:rise .3s both}
+.q-item .qi-b h5{font-size:12px;font-weight:800;color:var(--acc2);margin:14px 0 8px}
+.q-item .qi-b li{list-style:none;font-size:13px;line-height:1.8;color:var(--ink2);padding-left:17px;position:relative;margin-bottom:5px}
+.q-item .qi-b .ans li::before{content:"▸";position:absolute;left:0;color:var(--acc)}
+.q-item .qi-b .tip li::before{content:"💡";position:absolute;left:-4px;font-size:10.5px;top:3px}
+.qi-practice{flex:none;font-size:12px;padding:7px 14px;border-radius:9px;background:rgba(108,140,255,.15);
+  border:1px solid rgba(108,140,255,.4);color:#cdd8ff;transition:.18s}
+.qi-practice:hover{background:rgba(108,140,255,.3)}
+.empty{text-align:center;padding:60px 20px;color:var(--ink3);font-size:13.5px}
+.empty .e-ic{font-size:44px;display:block;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar rise">
+    <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…"></div>
+    <div class="filters" id="scFilter"></div>
+    <div class="filters" style="margin-top:8px" id="lvFilter"></div>
+  </div>
+  <div class="count-line" id="cntLine"></div>
+  <div id="list" class="rise d1"></div>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>
+if(!initPage('bank',true))throw new Error('login required');
+document.getElementById('srchIc').innerHTML=ICONS.search;
+
+var F={scene:'all',lv:0,kw:'',fav:false};
+
+/* 场景筛选 */
+var scF=document.getElementById('scFilter');
+scF.innerHTML='<button class="chip on" data-k="all">全部场景</button>'+Object.keys(SCENES).map(function(k){
+  return '<button class="chip" data-k="'+k+'"><span style="width:8px;height:8px;border-radius:50%;background:'+SCENE_COLOR[k]+'"></span>'+SCENES[k].name+'</button>'}).join('');
+$$('#scFilter .chip').forEach(function(b){b.onclick=function(){F.scene=b.dataset.k;$$('#scFilter .chip').forEach(function(x){x.classList.toggle('on',x===b)});render()}});
+
+/* 难度筛选 */
+var lvF=document.getElementById('lvFilter');
+lvF.innerHTML='<span class="fg-lab">难度</span><button class="chip on" data-k="0">全部</button>'+[1,2,3].map(function(l){
+  return '<button class="chip" data-k="'+l+'">'+LV_NAME[l]+'</button>'}).join('')+
+  '<span class="fg-lab" style="margin-left:10px">收藏</span><button class="chip" id="onlyFav">⭐ 只看收藏</button>';
+$$('#lvFilter .chip').forEach(function(b){b.onclick=function(){if(b.id==='onlyFav')return;F.lv=+b.dataset.k;$$('#lvFilter .chip').forEach(function(x){x.classList.toggle('on',x===b||x.id==='onlyFav')});render()}});
+document.getElementById('onlyFav').onclick=function(){F.fav=!F.fav;this.classList.toggle('on',F.fav);render()};
+
+var kwTimer=null;
+document.getElementById('kw').addEventListener('input',function(){
+  var v=this.value.trim();
+  clearTimeout(kwTimer);
+  kwTimer=setTimeout(function(){F.kw=v;render()},200); /* 200ms debounce，避免每敲一个字就全量重渲染 */
+});
+
+function render(){
+  var favs=getFavs();
+  var list=QUESTIONS.filter(function(q){
+    if(F.scene!=='all'&&q.scene!==F.scene)return false;
+    if(F.lv&&q.lv!==F.lv)return false;
+    if(F.kw&&q.q.toLowerCase().indexOf(F.kw.toLowerCase())<0)return false;
+    if(F.fav&&!isFav(q.id))return false;
+    return true;
+  });
+  document.getElementById('cntLine').textContent='共 '+list.length+' 道题 · 已收藏 '+favs.length+' 道';
+  if(!list.length){document.getElementById('list').innerHTML='<div class="empty"><span class="e-ic">🔍</span>'+(F.fav?'还没有收藏的题目，点 ⭐ 收藏喜欢的题':'没有匹配的题目，换个关键词或筛选条件试试')+'</div>';return}
+  document.getElementById('list').innerHTML=list.map(function(q,i){
+    var favIcon=isFav(q.id)?'⭐':'☆';
+    return '<div class="q-item" data-id="'+q.id+'">'+
+      '<div class="qi-h">'+
+        '<span class="tag" style="background:'+SCENE_COLOR[q.scene]+'22;color:'+SCENE_COLOR[q.scene]+';flex:none">'+SCENES[q.scene].name+'</span>'+
+        '<span class="qt">'+esc(q.q)+'</span>'+
+        '<button class="qi-fav" data-id="'+q.id+'" title="收藏/取消" style="font-size:16px;padding:6px 8px;border-radius:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:#ffd68a;cursor:pointer">'+favIcon+'</button>'+
+        '<span class="tag" style="background:rgba(108,140,255,.13);color:#8ABDFF;flex:none">'+LV_NAME[q.lv]+'</span>'+
+        '<button class="qi-practice" data-s="'+q.scene+'">练这道 →</button>'+
+        '<span class="chev">'+ICONS.chev+'</span>'+
+      '</div>'+
+      '<div class="qi-b">'+
+        '<h5>🎯 考察点</h5><div style="font-size:13px;color:var(--ink2);line-height:1.7">'+esc(q.point)+'</div>'+
+        '<h5>💡 作答技巧</h5><ul class="tip">'+q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'+
+        '<h5>✅ 参考要点</h5><ul class="ans">'+q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('')+'</ul>'+
+      '</div></div>';
+  }).join('');
+  $$('#list .qi-h').forEach(function(h){h.addEventListener('click',function(e){
+    if(e.target.classList.contains('qi-practice')||e.target.classList.contains('qi-fav'))return;
+    h.parentNode.classList.toggle('open')})});
+  $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){e.stopPropagation();location.href='interview.html?scene='+b.dataset.s}});
+  $$('#list .qi-fav').forEach(function(b){b.onclick=function(e){e.stopPropagation();toggleFav(b.dataset.id);render()}});
+}
+render();
+</script>
+</body>
+</html>

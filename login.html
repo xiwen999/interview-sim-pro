@@ -1,0 +1,273 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登录 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px 16px;overflow:hidden}
+#stars{position:fixed;inset:0;z-index:-1}
+.fq{position:absolute;padding:10px 16px;border-radius:14px;font-size:12.5px;color:var(--ink2);
+  background:rgba(255,255,255,.05);border:1px solid var(--line);backdrop-filter:blur(8px);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);animation:floaty linear infinite;pointer-events:none;white-space:nowrap;z-index:0}
+@keyframes floaty{0%{transform:translateY(110vh) rotate(-4deg);opacity:0}8%{opacity:.85}92%{opacity:.85}100%{transform:translateY(-30vh) rotate(5deg);opacity:0}}
+
+/* 左右布局 */
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:50px;width:min(1100px,96vw);animation:rise .6s both;position:relative;z-index:2}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:30px}}
+
+/* 左侧品牌区（旧版背景文字保留） */
+.brand{display:flex;flex-direction:column;justify-content:center;min-height:520px;padding:10px 0}
+.brand .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:99px;font-size:12.5px;
+  color:#cdd8ff;background:rgba(108,140,255,.14);border:1px solid rgba(108,140,255,.35);margin-bottom:22px}
+.brand h1{font-size:clamp(32px,4.8vw,52px);font-weight:900;line-height:1.25;letter-spacing:1px}
+.brand h1 .grad{background:linear-gradient(90deg,#8ABDFF,#41E0C8,#B7A6F9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .type-line{margin-top:16px;font-size:15px;color:var(--ink2);min-height:26px;line-height:1.6}
+.brand .type-line .caret{display:inline-block;width:2px;height:1.1em;background:var(--acc2);vertical-align:-2px;margin-left:2px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+.brand .feats{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.brand .feats span{font-size:12.5px;color:var(--ink2);padding:8px 14px;border-radius:11px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(6px)}
+.brand .foot-text{margin-top:28px;font-size:11.5px;color:var(--ink3);line-height:1.8}
+
+/* 右侧登录卡片 */
+.lc{position:relative}
+.lc::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;z-index:-1;
+  background:linear-gradient(150deg,rgba(108,140,255,.7),rgba(65,224,200,.25),rgba(183,166,249,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.lc{border-radius:36px}
+.lc-inner{background:rgba(17,24,46,.92);backdrop-filter:blur(20px);border-radius:36px;padding:38px 32px 30px;border:1px solid var(--line2)}
+
+.l-logo{width:64px;height:64px;margin:0 auto 16px;border-radius:24px;background:linear-gradient(135deg,#4f6ef0,#8ABDFF,#41E0C8);
+  display:grid;place-items:center;box-shadow:0 14px 44px rgba(79,110,240,.5);position:relative;animation:logoIn .8s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes logoIn{from{transform:scale(.5) rotate(-12deg);opacity:0}}
+.l-logo svg{width:30px;height:30px;stroke:#fff;stroke-width:2}
+.l-title{text-align:center;font-size:20px;font-weight:900;letter-spacing:.5px}
+.l-sub{text-align:center;font-size:12px;color:var(--ink3);margin-top:6px;margin-bottom:20px}
+
+.l-field{margin-top:12px}
+.l-field .f-lab{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}
+.l-field .f-in{padding:11px 14px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;font-size:13.5px;transition:.2s}
+.l-field .f-in:focus{border-color:var(--acc);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(108,140,255,.15)}
+.l-row{display:flex;gap:10px;align-items:center}
+.l-row .f-in{flex:1}
+.l-row .btn-sms{flex:none;padding:10px 13px;border-radius:11px;background:rgba(108,140,255,.15);border:1px solid rgba(108,140,255,.4);color:#cdd8ff;font-size:12px;font-weight:600;transition:.18s;white-space:nowrap}
+.l-row .btn-sms:hover:not(:disabled){background:rgba(108,140,255,.28)}
+.l-row .btn-sms:disabled{opacity:.5;cursor:not-allowed}
+
+.btn-main{width:100%;margin-top:18px;padding:13px;font-size:14.5px;font-weight:700;border-radius:16px;letter-spacing:.5px;
+  background:linear-gradient(135deg,#4f6ef0,#8ABDFF,#41E0C8);color:#fff;border:none;cursor:pointer;transition:.25s;
+  box-shadow:0 10px 32px rgba(79,110,240,.4)}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(79,110,240,.55)}
+.btn-guest{width:100%;margin-top:10px;padding:11px;font-size:13px;font-weight:600;border-radius:14px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink2);cursor:pointer;transition:.2s}
+.btn-guest:hover{background:rgba(255,255,255,.09);border-color:var(--line2);color:var(--ink)}
+.l-aux{margin-top:14px;display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3)}
+.l-aux a{color:var(--acc);opacity:.8}
+.l-aux a:hover{opacity:1;text-decoration:underline}
+.l-foot{margin-top:16px;text-align:center;font-size:11px;color:var(--ink3);line-height:1.7}
+.sms-hint{display:none;margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(65,224,200,.1);border:1px dashed rgba(65,224,200,.35);font-size:11.5px;color:#9ee5d8}
+.sms-hint.show{display:block}
+.pwd-match{font-size:11.5px;margin-top:4px}
+.pwd-match.ok{color:#41E0C8}.pwd-match.no{color:#fb7185}
+
+/* 入口视图 / 表单视图 切换 */
+.l-view{transition:opacity .28s ease,transform .28s ease}
+.l-view.hiding{opacity:0;transform:translateY(12px);pointer-events:none}
+.l-form-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.l-back{font-size:12px;color:var(--acc);cursor:pointer;padding:6px 10px;border-radius:9px;background:rgba(108,140,255,.1);border:1px solid rgba(108,140,255,.3);transition:.18s;white-space:nowrap}
+.l-back:hover{background:rgba(108,140,255,.22)}
+.entry-slogan{margin:18px 0 20px;padding:14px 16px;border-radius:14px;background:rgba(108,140,255,.07);border:1px dashed rgba(108,140,255,.3);font-size:12.5px;color:var(--ink2);line-height:1.9;text-align:center}
+</style>
+</head>
+<body>
+<div class="bg-fx"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div></div>
+<canvas id="stars"></canvas>
+
+<div class="wrap">
+  <!-- 左侧品牌区（旧版背景文字保留） -->
+  <div class="brand">
+    <div class="badge">🎯 校招 · 实习 · 求职面试训练平台</div>
+    <h1>把每一次练习<br>都当成<span class="grad">真正的面试</span></h1>
+    <div class="type-line"><span id="typeText"></span><span class="caret"></span></div>
+    <div class="feats">
+      <span>🎤 语音作答</span><span>⏱️ 限时训练</span><span>📊 复盘报告</span><span>📚 50 道高频题</span><span>🏅 成就系统</span>
+    </div>
+    <div class="foot-text">
+      支持真实面试节奏的全真模拟 · 5 大场景覆盖高频考点<br>
+      本地运行 · 无需注册 · 随时随地练起来
+    </div>
+  </div>
+
+  <!-- 右侧登录卡片：入口视图（默认）/ 表单视图（点击展开） -->
+  <div class="lc">
+    <div class="lc-inner">
+
+      <!-- 入口视图：默认的小东西 -->
+      <div class="l-view" id="viewEntry">
+        <div class="l-logo" id="lcLogo"></div>
+        <div class="l-title">模拟面试训练营 Pro</div>
+        <div class="l-sub">让每一次开口，都成为你的主场</div>
+        <div class="entry-slogan">🎤 语音作答 · ⏱️ 限时训练<br>📊 复盘报告 · 🏅 成就系统</div>
+        <button class="btn-main" id="btnEntryReg"><span>✨ 注册 / 登录</span></button>
+        <button class="btn-guest" id="guestBtn">🚀 游客快速体验</button>
+        <div class="l-aux" style="justify-content:center">
+          <a id="oldLogin">👉 旧版一键登录</a>
+        </div>
+        <div class="l-foot">数据保存在本地浏览器 · 无需真实手机号<br>登录即代表同意：仅用于训练，不会上传任何信息</div>
+      </div>
+
+      <!-- 表单视图：点进来后才显示 -->
+      <div class="l-view" id="viewForm" hidden>
+        <div class="l-form-head">
+          <a class="l-back" id="backEntry">← 返回</a>
+          <div style="font-size:15px;font-weight:800">注册 / 登录</div>
+        </div>
+
+        <div class="l-field">
+          <div class="f-lab">你的昵称 <span style="color:var(--danger)">*</span></div>
+          <input class="f-in" id="nick" maxlength="12" placeholder="给自己起个名字">
+        </div>
+
+        <div class="l-field">
+          <div class="f-lab">手机号 / 邮箱</div>
+          <input class="f-in" id="contact" placeholder="方便找回登录状态">
+        </div>
+
+        <div class="l-field">
+          <div class="f-lab">6 位验证码</div>
+          <div class="l-row">
+            <input class="f-in" id="sms" maxlength="6" placeholder="输入下方本地验证码">
+            <button class="btn-sms" id="smsBtn">获取验证码</button>
+          </div>
+          <div class="sms-hint" id="smsHint">✨ 本地验证码已生成：<b id="smsCode" style="color:#fff;letter-spacing:3px;font-size:14px;margin-left:4px">------</b>（仅本地演示，不会真发短信）</div>
+        </div>
+
+        <div class="l-field">
+          <div class="f-lab">本次登录密码 <span style="color:var(--ink3);font-weight:400">(可选)</span></div>
+          <input class="f-in" id="pwd" type="password" placeholder="方便下次一键登录（留空也行）">
+        </div>
+
+        <div class="l-field">
+          <div class="f-lab">确认密码</div>
+          <input class="f-in" id="pwd2" type="password" placeholder="如果上方留空，这里也留空">
+          <div class="pwd-match" id="pwdMatch"></div>
+        </div>
+
+        <button class="btn-main" id="loginBtn"><span>注册并登录 →</span></button>
+
+        <div class="l-aux">
+          <a id="randNick">🎲 随机昵称</a>
+          <span style="opacity:.7">带 * 为必填</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>
+if(getUser())location.replace('index.html');
+document.getElementById('lcLogo').innerHTML='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.7"/><circle cx="12" cy="12" r="4.5" stroke="#fff" stroke-width="1.7"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>';
+
+var cv=document.getElementById('stars'),cx=cv.getContext('2d'),stars=[];
+function resize(){cv.width=innerWidth;cv.height=innerHeight;
+  stars=[];for(var i=0;i<80;i++)stars.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+.3,s:Math.random()*.35+.06,tw:Math.random()*6.28});}
+resize();addEventListener('resize',resize);
+(function loop(){cx.clearRect(0,0,cv.width,cv.height);
+  for(var i=0;i<stars.length;i++){var s=stars[i];s.y-=s.s;if(s.y<-4){s.y=cv.height+4;s.x=Math.random()*cv.width}
+    s.tw+=.04;cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.28);cx.fillStyle='rgba(180,200,255,'+(.3+Math.sin(s.tw)*.3)+')';cx.fill()}
+  requestAnimationFrame(loop)})();
+
+/* 飘浮题卡 */
+['自我介绍','你的缺点是什么？','为什么选我们公司？','讲讲你的项目','职业规划？','数据倾斜怎么排查','面试紧张怎么办','5 星自评','完成一场训练','写复盘报告'].forEach(function(q){
+  var d=document.createElement('div');d.className='fq';d.textContent='💬 '+q;
+  d.style.left=(8+Math.random()*80)+'%';
+  d.style.animationDuration=(18+Math.random()*14)+'s';
+  d.style.animationDelay=(-Math.random()*24)+'s';
+  document.body.appendChild(d);
+});
+
+var LINES=['模拟真实面试节奏，限时作答 + 自评复盘','覆盖技术 / 数据 / 产品 / 行为五大场景','签签到 · 解解锁成就 · 玩着也能练面试'];
+var li=0,ci=0,deleting=false,tt=document.getElementById('typeText');
+(function type(){
+  var line=LINES[li];
+  if(!deleting){ci++;if(ci>=line.length){ci=line.length;deleting=true;setTimeout(type,1800);tt.textContent=line;return}}
+  else{ci--;if(ci<=0){ci=0;deleting=false;li=(li+1)%LINES.length}}
+  tt.textContent=line.slice(0,ci);
+  setTimeout(type,deleting?24:65);
+})();
+
+var myCode=null,timer=null,smsBtn=document.getElementById('smsBtn');
+smsBtn.onclick=function(){
+  if(timer){toast('验证码 60 秒后才能再次获取','warn');return}
+  myCode=String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('smsCode').textContent=myCode;
+  document.getElementById('smsHint').classList.add('show');
+  smsBtn.disabled=true;
+  var s=60;timer=setInterval(function(){s--;smsBtn.textContent=s+'s 后重发';if(s<=0){clearInterval(timer);timer=null;smsBtn.disabled=false;smsBtn.textContent='获取验证码';document.getElementById('smsHint').classList.remove('show')}} ,1000);
+  toast('本地验证码已生成','ok');
+};
+
+/* 密码匹配提示 */
+var pwd=document.getElementById('pwd'),pwd2=document.getElementById('pwd2'),pwMatch=document.getElementById('pwdMatch');
+function checkPwd(){
+  if(!pwd2.value){pwMatch.textContent='';pwMatch.className='pwd-match';return}
+  if(pwd.value===pwd2.value){pwMatch.textContent='✓ 两次密码一致';pwMatch.className='pwd-match ok'}
+  else{pwMatch.textContent='✗ 两次密码不一致';pwMatch.className='pwd-match no'}
+}
+pwd.addEventListener('input',checkPwd);pwd2.addEventListener('input',checkPwd);
+
+var NICKS=['面试锦鲤','offer收割机','答题小钢炮','临场不乱','逻辑大师','复盘狂魔','秋招战士','面霸预备役','STAR 熟练工','复盘高手'];
+document.getElementById('randNick').onclick=function(){
+  document.getElementById('nick').value=NICKS[Math.floor(Math.random()*NICKS.length)]+Math.floor(Math.random()*90+10);
+};
+document.getElementById('oldLogin').onclick=function(){
+  var m=openMask(
+    '<div class="m-head"><div><h3>一键登录</h3><div class="m-sub">输个昵称直接开始</div></div><button class="m-x" id="olX">✕</button></div>'+
+    '<div class="f-lab">你的昵称</div>'+
+    '<input class="f-in" id="olName" maxlength="12" placeholder="比如 面试锦鲤">'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<button class="btn gho" id="olCancel" style="flex:1">取消</button>'+
+      '<button class="btn pri" id="olOk" style="flex:2">进入训练营</button>'+
+    '</div>'
+  );
+  $('#olX').onclick=closeMask;$('#olCancel').onclick=closeMask;
+  $('#olOk').onclick=function(){
+    var name=$('#olName').value.trim();if(!name){toast('昵称不能为空','warn');return}
+    closeMask();
+    storeSet('ivsim_user',{name:name,avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)],bg:BG_PRESETS[0]});
+    toast('欢迎 '+name,'ok');setTimeout(function(){location.href='index.html'},400);
+  };
+};
+
+function doLogin(name){
+  storeSet('ivsim_user',{name:name,avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)],bg:BG_PRESETS[0]});
+  toast('登录成功，欢迎 '+name,'ok');
+  setTimeout(function(){location.href='index.html'},450);
+}
+document.getElementById('loginBtn').onclick=function(){
+  var name=document.getElementById('nick').value.trim();
+  if(!name){miniPop('昵称还没填哦','注册登录只需要一个昵称，其他都是可选的。');document.getElementById('nick').classList.add('err');return}
+  var p1=pwd.value.trim(),p2=pwd2.value.trim();
+  if((p1||p2)&&p1!==p2){miniPop('两次密码不一致','请确认两次输入的密码完全相同，或者都留空也行。');return}
+  doLogin(name);
+};
+document.getElementById('guestBtn').onclick=function(){doLogin('访客'+Math.floor(Math.random()*9000+1000))};
+document.getElementById('nick').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('loginBtn').click()});
+
+var vE=document.getElementById('viewEntry'),vF=document.getElementById('viewForm');
+function swapView(hideEl,showEl,after){
+  hideEl.classList.add('hiding');
+  setTimeout(function(){
+    hideEl.hidden=true;showEl.hidden=false;showEl.classList.add('hiding');
+    requestAnimationFrame(function(){requestAnimationFrame(function(){showEl.classList.remove('hiding')})});
+    if(after)after();
+  },260);
+}
+document.getElementById('btnEntryReg').onclick=function(){swapView(vE,vF,function(){document.getElementById('nick').focus()})};
+document.getElementById('backEntry').onclick=function(){swapView(vF,vE)};
+</script>
+</body>
+</html>

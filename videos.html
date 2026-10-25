@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>面试视频 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+.wrap{max-width:960px;margin:0 auto;padding:26px clamp(14px,4vw,40px) 90px}
+.vtabs{display:flex;gap:8px;margin:16px 0 18px;flex-wrap:wrap}
+.vtab{padding:9px 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:.18s}
+.vtab:hover{border-color:var(--acc);color:var(--ink)}
+.vtab.on{background:linear-gradient(135deg,#4f6ef0,#6C8CFF);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(79,110,240,.35)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.vcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;cursor:pointer}
+.vcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(79,110,240,.18),rgba(65,224,200,.1));position:relative}
+.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
+.vcard:hover .vplay{opacity:1}
+.vthumb .vplay span{width:52px;height:52px;border-radius:50%;background:rgba(108,140,255,.9);display:grid;place-items:center;font-size:20px;color:#fff}
+.vbody{padding:12px 14px}
+.vtitle{font-size:13.5px;font-weight:700;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vmeta{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--ink3);flex-wrap:wrap}
+.vbadge{font-size:10.5px;padding:2px 8px;border-radius:999px;font-weight:700}
+.vbadge.pending{background:rgba(251,191,36,.15);color:#ffd68a}
+.vbadge.approved{background:rgba(65,224,200,.15);color:#7dead6}
+.vbadge.rejected{background:rgba(251,113,133,.15);color:#fda4af}
+.vactions{display:flex;gap:6px;margin-top:10px}
+.vactions .btn{flex:1;padding:7px 0;font-size:11.5px;border-radius:10px}
+.vempty{text-align:center;padding:60px 20px;color:var(--ink3);font-size:13px}
+.vempty .big{font-size:44px;margin-bottom:10px}
+.up-card{max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 24px}
+.up-drop{border:2px dashed var(--line2);border-radius:16px;padding:34px 16px;text-align:center;color:var(--ink3);font-size:13px;cursor:pointer;transition:.2s;margin-bottom:14px}
+.up-drop:hover,.up-drop.has{border-color:var(--acc);color:var(--ink2);background:rgba(108,140,255,.06)}
+.up-drop .big{font-size:36px;display:block;margin-bottom:8px}
+.up-note{margin-top:12px;font-size:11.5px;color:var(--ink3);line-height:1.8;padding:10px 14px;border-radius:12px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3)}
+.review-tip{margin-bottom:14px;padding:10px 14px;border-radius:12px;background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.35);font-size:12px;color:var(--ink2);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2 style="font-size:22px;font-weight:900;margin-top:14px">🎬 面试视频</h2>
+  <p style="font-size:12.5px;color:var(--ink3);margin-top:6px">看你的模拟面试回放 · 上传满意作品 · 审核通过后展示到广场</p>
+
+  <div class="vtabs">
+    <button class="vtab on" data-t="mine">🎬 我的回放</button>
+    <button class="vtab" data-t="upload">⬆️ 上传视频</button>
+    <button class="vtab" data-t="review">🛡️ 审核中心 <span id="pendCnt"></span></button>
+    <a class="vtab" href="square.html" style="text-decoration:none;margin-left:auto">🌐 去视频广场 →</a>
+  </div>
+
+  <div id="pane"></div>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>
+if(!initPage('videos',true))throw new Error('login required');
+
+var TAB='mine';
+var pane=document.getElementById('pane');
+var SCENE_KEYS=Object.keys(SCENES);
+
+$$('.vtab').forEach(function(b){b.onclick=function(){
+  TAB=b.dataset.t;$$('.vtab').forEach(function(x){x.classList.toggle('on',x===b)});render();
+}});
+
+function fmtTime(ts){var d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function badge(st){return st==='pending'?'<span class="vbadge pending">⏳ 审核中</span>':st==='rejected'?'<span class="vbadge rejected">✕ 未通过</span>':'<span class="vbadge approved">✓ 已通过</span>'}
+function sceneTag(sc){var s=SCENES[sc];return s?'<span class="tag" style="background:'+SCENE_COLOR[sc]+'22;color:'+SCENE_COLOR[sc]+'">'+s.name+'</span>':''}
+
+function vCard(v,actions){
+  return '<div class="vcard" data-id="'+v.id+'">'+
+    '<div class="vthumb">'+(v.src==='interview'?'🎤':'📹')+'<div class="vplay"><span>▶</span></div></div>'+
+    '<div class="vbody">'+
+      '<div class="vtitle">'+esc(v.title)+'</div>'+
+      '<div class="vmeta">'+badge(v.status)+sceneTag(v.scene)+'<span>'+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
+      (actions?'<div class="vactions">'+actions+'</div>':'')+
+    '</div></div>';
+}
+function emptyHtml(ic,txt){return '<div class="vempty"><div class="big">'+ic+'</div>'+txt+'</div>'}
+
+function render(){
+  var me=(getUser()||{}).name||'访客';
+  var all=getVideos();
+  document.getElementById('pendCnt').textContent=all.filter(function(v){return v.status==='pending'}).length||'';
+  if(TAB==='mine'){
+    var mine=all.filter(function(v){return v.owner===me});
+    pane.innerHTML=mine.length?('<div class="vgrid">'+mine.map(function(v){
+      var acts='<button class="btn gho sm act-del">🗑 删除</button>';
+      if(!v.shared&&v.status!=='pending')acts='<button class="btn pri sm act-share">🌐 投稿到广场</button>'+acts;
+      else if(v.shared)acts='<button class="btn gho sm" disabled>'+(v.status==='pending'?'等待审核':v.status==='approved'?'已在广场':'未通过，可重新投稿')+'</button>'+acts;
+      return vCard(v,acts);
+    }).join('')+'</div>'):emptyHtml('🎬','还没有回放。<br>去「模拟面试」录制视频作答，或在「上传视频」投稿你的作品');
+  }else if(TAB==='upload'){
+    renderUpload();
+  }else{
+    renderReview(all);
+  }
+  bindCards();
+}
+
+function getReviewLog(){return storeGet('ivsim_review_log',[])}
+function addReviewLog(action,v){
+  var l=getReviewLog();
+  l.unshift({ts:Date.now(),action:action,title:v.title,owner:v.owner});
+  storeSet('ivsim_review_log',l.slice(0,20));
+}
+
+var ADMIN_PWD='admin123';
+function isAdmin(){return sessionStorage.getItem('ivsim_admin')==='1'}
+function renderReview(all){
+  if(!isAdmin()){
+    pane.innerHTML='<div class="up-card rise" style="max-width:400px;text-align:center">'+
+      '<div style="font-size:44px;margin-bottom:10px">🔒</div>'+
+      '<div style="font-size:16px;font-weight:800;margin-bottom:6px">后台审核 · 需要管理员身份</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-bottom:16px;line-height:1.8">视频审核属于后台运营功能，普通用户不可见。<br>真实产品中由管理员账号在后台系统完成，这里用密码模拟。<br>（演示密码：<b style="color:var(--acc)">admin123</b>）</div>'+
+      '<input class="f-in" id="admPwd" type="password" placeholder="输入管理员密码" style="text-align:center">'+
+      '<button class="btn pri" id="admOk" style="width:100%;margin-top:12px">进入审核后台</button>'+
+    '</div>';
+    document.getElementById('admOk').onclick=function(){
+      var p=document.getElementById('admPwd').value.trim();
+      if(p===ADMIN_PWD){sessionStorage.setItem('ivsim_admin','1');playSound('checkin');toast('管理员验证通过','ok');render()}
+      else{playSound('fail');toast('密码错误','warn')}
+    };
+    document.getElementById('admPwd').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('admOk').click()});
+    return;
+  }
+  var pend=all.filter(function(v){return v.status==='pending'});
+  var log=getReviewLog();
+  pane.innerHTML='<div class="review-tip">🛡️ <b>审核后台已解锁</b>（本次会话有效）。待审核 <b>'+pend.length+'</b> 条 · 通过后展示到「视频广场」，拒绝则作者可在「我的回放」重新投稿。<button class="btn gho sm" id="admOut" style="margin-left:10px;padding:4px 12px">退出后台</button></div>'+
+    (pend.length?('<div class="vgrid">'+pend.map(function(v){
+      return vCard(v,'<button class="btn pri sm act-ok">✓ 通过</button><button class="btn dan sm act-no">✕ 拒绝</button>');
+    }).join('')+'</div>'):emptyHtml('✅','太棒了，没有待审核的视频'))+
+    (log.length?('<div style="margin-top:26px"><div style="font-size:14px;font-weight:800;margin-bottom:10px">📜 最近审核记录</div>'+
+      '<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 16px">'+
+      log.map(function(r){
+        return '<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px">'+
+          '<span style="flex:none">'+(r.action==='approved'?'<span class="vbadge approved">✓ 通过</span>':'<span class="vbadge rejected">✕ 拒绝</span>')+'</span>'+
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">'+esc(r.title)+'</span>'+
+          '<span style="flex:none;color:var(--ink3)">'+esc(r.owner)+'</span>'+
+          '<span style="flex:none;color:var(--ink3)">'+fmtTime(r.ts)+'</span></div>';
+      }).join('')+'</div></div>'):'');
+  document.getElementById('admOut').onclick=function(){sessionStorage.removeItem('ivsim_admin');toast('已退出审核后台','ok');render()};
+}
+
+function bindCards(){
+  $$('#pane .vcard').forEach(function(c){
+    var id=c.dataset.id;
+    c.querySelector('.vthumb').onclick=function(){playVideo(id)};
+    var share=c.querySelector('.act-share');
+    if(share)share.onclick=function(e){e.stopPropagation();
+      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到广场','ok');render();
+    };
+    var del=c.querySelector('.act-del');
+    if(del)del.onclick=function(e){e.stopPropagation();
+      removeVideo(id).then(function(){toast('已删除','ok');render()});
+    };
+    var ok=c.querySelector('.act-ok');
+    if(ok)ok.onclick=function(e){e.stopPropagation();
+      var v=getVideos().filter(function(x){return x.id===id})[0];
+      updateVideoMeta(id,{status:'approved'});if(v)addReviewLog('approved',v);
+      playSound('unlock');toast('已通过，视频展示到广场','ok');render();
+    };
+    var no=c.querySelector('.act-no');
+    if(no)no.onclick=function(e){e.stopPropagation();
+      var v2=getVideos().filter(function(x){return x.id===id})[0];
+      updateVideoMeta(id,{status:'rejected'});if(v2)addReviewLog('rejected',v2);
+      playSound('fail');toast('已拒绝','warn');render();
+    };
+  });
+}
+
+function playVideo(id){
+  getVideoBlob(id).then(function(blob){
+    if(!blob){toast('视频文件不存在（可能已清理）','warn');return}
+    var url=URL.createObjectURL(blob);
+    var v=getVideos().filter(function(x){return x.id===id})[0]||{};
+    var m=openMask('<div class="m-head"><div><h3>'+esc(v.title||'视频回放')+'</h3><div class="m-sub">'+esc(v.owner||'')+' · '+fmtTime(v.ts||Date.now())+'</div></div><button class="m-x" id="vpX">✕</button></div>'+
+      '<video src="'+url+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
+    m.querySelector('#vpX').onclick=function(){closeMask()};
+    m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(url)},300)});
+  });
+}
+
+function renderUpload(){
+  var scOpts=SCENE_KEYS.map(function(k){return '<option value="'+k+'">'+SCENES[k].name+'</option>'}).join('');
+  pane.innerHTML='<div class="up-card rise">'+
+    '<div class="up-drop" id="upDrop"><span class="big">📹</span><span id="upDropTxt">点击选择本地视频文件（mp4 / webm，建议 &lt; 200MB）</span><input type="file" id="upFile" accept="video/*" style="display:none"></div>'+
+    '<div class="f-lab">视频标题 <span style="color:var(--danger)">*</span></div>'+
+    '<input class="f-in" id="upTitle" maxlength="30" placeholder="比如：我的产品经理自我介绍实录">'+
+    '<div class="f-lab" style="margin-top:12px">所属场景</div>'+
+    '<select class="f-in" id="upScene">'+scOpts+'</select>'+
+    '<button class="btn pri" id="upBtn" style="width:100%;margin-top:16px">提交审核</button>'+
+    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「视频广场」，其他用户才能看到。视频文件仅保存在本机浏览器（IndexedDB），不会上传到服务器。</div>'+
+  '</div>';
+  var file=null;
+  var drop=document.getElementById('upDrop'),fi=document.getElementById('upFile');
+  drop.onclick=function(){fi.click()};
+  fi.onchange=function(){
+    file=fi.files[0];
+    if(file){drop.classList.add('has');document.getElementById('upDropTxt').textContent='✅ '+file.name+'（'+(file.size/1048576).toFixed(1)+'MB）'}
+  };
+  document.getElementById('upBtn').onclick=function(){
+    var title=document.getElementById('upTitle').value.trim();
+    var scene=document.getElementById('upScene').value;
+    if(!file){toast('请先选择视频文件','warn');return}
+    if(file.size>200*1048576){toast('文件超过 200MB，请压缩后再传','warn');return}
+    if(!title){toast('请填写视频标题','warn');return}
+    var id='v_'+Date.now();
+    saveVideoBlob(id,file).then(function(){
+      addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',status:'pending',ts:Date.now(),src:'upload',shared:true});
+      playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到广场','ok');
+      TAB='mine';$$('.vtab').forEach(function(x){x.classList.toggle('on',x.dataset.t==='mine')});render();
+    }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
+  };
+}
+
+render();
+</script>
+</body>
+</html>

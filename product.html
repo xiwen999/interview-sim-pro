@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>产品蓝图 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+.wrap{max-width:1100px;margin:0 auto;padding:26px clamp(16px,4vw,44px) 90px}
+
+/* Hero */
+.hero{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--line);margin-top:18px}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(79,110,240,.85),rgba(108,140,255,.5),rgba(65,224,200,.3));z-index:0}
+.hero>*{position:relative;z-index:1}
+.hero-top{padding:42px clamp(24px,5vw,60px) 20px;display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center}
+@media (max-width:760px){.hero-top{grid-template-columns:1fr;padding:32px 22px}}
+.hero .h-badge{display:inline-flex;padding:6px 14px;border-radius:99px;font-size:12px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);margin-bottom:14px}
+.hero h1{font-size:clamp(26px,4vw,42px);font-weight:900;letter-spacing:.5px;line-height:1.2}
+.hero p{margin-top:12px;font-size:14px;color:rgba(255,255,255,.85);line-height:1.75;max-width:500px}
+.hero .cta{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}
+.hero-img{aspect-ratio:4/3;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);display:grid;place-items:center}
+.hero-img img{width:100%;height:100%;object-fit:cover;filter:brightness(1.05)}
+.hero-img .ph{color:rgba(255,255,255,.5);font-size:13px;text-align:center;padding:20px}
+
+/* 版本标签 */
+.tag-row{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.tag-pill{padding:7px 15px;border-radius:99px;font-size:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;display:inline-flex;align-items:center;gap:6px}
+.tag-pill.ok::before{content:"✓";color:#41E0C8}
+.tag-pill.nw::before{content:"◇";color:#FBBF24}
+
+/* 板块卡片 */
+.sec-head{display:flex;align-items:center;gap:10px;margin-top:46px;margin-bottom:16px}
+.sec-head .sh-num{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#fff;font-size:14px;flex:none}
+.sec-head h2{font-size:19px;font-weight:900}
+.sec-head .sh-sub{font-size:12px;color:var(--ink3);margin-left:auto}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.mod{padding:20px;border-radius:16px;background:var(--card);border:1px solid var(--line);transition:.2s;position:relative;overflow:hidden}
+.mod:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,0,0,.3)}
+.mod .m-ic{font-size:22px;margin-bottom:8px}
+.mod .m-t{font-weight:800;font-size:14.5px;margin-bottom:6px}
+.mod .m-d{font-size:12.5px;color:var(--ink2);line-height:1.7}
+.mod .m-badge{position:absolute;top:12px;right:12px;font-size:10px;padding:3px 9px;border-radius:99px;background:rgba(65,224,200,.15);border:1px solid rgba(65,224,200,.4);color:#9ee5d8;font-weight:700}
+.mod .m-badge.nw{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.35);color:#ffd68a}
+
+/* 技术架构分层 */
+.layer{padding:18px 20px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:12px;position:relative}
+.layer .l-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.layer .l-ic{font-size:20px;flex:none}
+.layer .l-t{font-weight:800;font-size:14.5px;flex:1}
+.layer .l-badge{font-size:10px;padding:3px 9px;border-radius:99px;background:rgba(65,224,200,.15);border:1px solid rgba(65,224,200,.4);color:#9ee5d8;font-weight:700}
+.layer .l-d{font-size:12.5px;color:var(--ink2);line-height:1.8}
+.layer .l-mods{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap}
+.layer .l-mods span{padding:5px 10px;border-radius:7px;font-size:11.5px;background:rgba(108,140,255,.1);border:1px solid rgba(108,140,255,.25);color:#cdd8ff}
+.layer.enhance{border-color:rgba(251,191,36,.35);background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(183,166,249,.05))}
+.layer.enhance .l-badge{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.35);color:#ffd68a}
+
+/* 底部总结 */
+.summary{margin-top:36px;padding:28px;border-radius:20px;background:linear-gradient(135deg,rgba(79,110,240,.12),rgba(65,224,200,.07));border:1px solid rgba(108,140,255,.3)}
+.summary h3{font-size:17px;font-weight:900;margin-bottom:10px}
+.summary p{font-size:13px;color:var(--ink2);line-height:1.9}
+.summary .up{margin-top:14px;padding-top:14px;border-top:1px dashed rgba(255,255,255,.15);font-size:12.5px;color:#ffd68a;line-height:1.8}
+
+footer{margin-top:50px;text-align:center;font-size:12px;color:var(--ink3);line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Hero -->
+  <div class="hero rise">
+    <div class="hero-top">
+      <div>
+        <span class="h-badge">📐 产品蓝图 · Web 版模拟面试训练</span>
+        <h1>做一个成熟的模拟面试产品<br>需要哪些板块？</h1>
+        <p>本文档梳理了成熟模拟面试产品的 5 大核心板块、技术架构分层与内容运营要点，并结合我们当前版本标注了「已交付」与「增强层」。</p>
+        <div class="tag-row">
+          <span class="tag-pill ok">内容资产层 · 已交付</span>
+          <span class="tag-pill ok">功能模块层 · 已交付</span>
+          <span class="tag-pill ok">技术实现层 · 已交付</span>
+          <span class="tag-pill nw">增强层 · 按需扩展</span>
+        </div>
+        <div class="cta">
+          <button class="btn pri" onclick="location.href='interview.html'">🚀 开始练一场</button>
+          <button class="btn gho" onclick="document.getElementById('techSec').scrollIntoView({behavior:'smooth'})">看技术分层 ↓</button>
+        </div>
+      </div>
+      <div class="hero-img"><img src="architecture.png" alt="四层产品架构图" onerror="this.style.display='none';document.querySelector('.hero-img .ph').style.display='block'">
+        <div class="ph" style="display:none">📐 四层产品架构图（见本地 architecture.png）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 板块 1 -->
+  <div class="sec-head rise"><span class="sh-num">1</span><h2>账号与用户体系</h2><span class="sh-sub">让训练有身份、有档案</span></div>
+  <div class="board rise">
+    <div class="mod"><div class="m-ic">🔐</div><div class="m-t">注册 / 登录</div><div class="m-d">手机号/邮箱验证码登录、微信扫码登录（成熟产品必备）。我们目前支持昵称一键登录 + 本地验证码。</div><span class="m-badge ok">已交付基础版</span></div>
+    <div class="mod"><div class="m-ic">👤</div><div class="m-t">个人中心</div><div class="m-d">头像上传、基础信息（学历、目标岗位、工作年限）、简历上传（PDF/Word 解析）。当前版本支持头像 + 背景色自定义。</div><span class="m-badge nw">增强层</span></div>
+    <div class="mod"><div class="m-ic">📊</div><div class="m-t">数据看板</div><div class="m-d">历史面试记录、能力雷达图（表达/逻辑/专业）、成就徽章墙。当前版本有累计场次、平均自评、13 个成就。</div><span class="m-badge ok">已交付基础版</span></div>
+  </div>
+
+  <!-- 板块 2 -->
+  <div class="sec-head rise d1"><span class="sh-num">2</span><h2>模拟面试核心区</h2><span class="sh-sub">产品的灵魂，用户停留时间最长的地方</span></div>
+  <div class="board rise d1">
+    <div class="mod"><div class="m-ic">🎯</div><div class="m-t">面试模式选择</div><div class="m-d">文字模式（打字输入）、语音模式（录音 + 自动转写）、视频模式（进阶，摄像头录制 + 微表情分析）。</div><span class="m-badge nw">增强层</span></div>
+    <div class="mod"><div class="m-ic">⚙️</div><div class="m-t">面试配置</div><div class="m-d">题量、面试类型（技术面/HR 面/压力面）、难度（初/中/高）、计时器开关。</div><span class="m-badge ok">已交付</span></div>
+    <div class="mod"><div class="m-ic">🎤</div><div class="m-t">沉浸式答题</div><div class="m-d">逐题展示、语音朗读（TTS）、倒计时提醒、答题卡草稿区。当前版本支持语音作答（Web Speech API）。</div><span class="m-badge ok">已交付</span></div>
+    <div class="mod"><div class="m-ic">📋</div><div class="m-t">复盘报告</div><div class="m-d">逐题回顾、字数统计、AI 智能打分与点评、参考答案解析。当前版本有教练点评 + 逐题展开。</div><span class="m-badge ok">已交付基础版</span></div>
+  </div>
+
+  <!-- 板块 3 -->
+  <div class="sec-head rise d2"><span class="sh-num">3</span><h2>智能 AI 助手（核心壁垒）</h2><span class="sh-sub">差异化竞争力，需要接入大模型 API</span></div>
+  <div class="board rise d2">
+    <div class="mod"><div class="m-ic">🤖</div><div class="m-t">AI 模拟面试官</div><div class="m-d">基于大模型（GPT-4 / 文心 / 通义），根据用户回答进行追问（"你提到的 XX 项目，高并发怎么解决？"）。</div><span class="m-badge nw">增强层 · 需 API</span></div>
+    <div class="mod"><div class="m-ic">💬</div><div class="m-t">AI 面试顾问</div><div class="m-d">随时解答面试技巧、话术、薪资谈判。当前版本有规则匹配的面试小助手（21 条 FAQ）。</div><span class="m-badge ok">已交付基础版</span></div>
+    <div class="mod"><div class="m-ic">📄</div><div class="m-t">AI 简历诊断</div><div class="m-d">上传简历 → AI 指出与目标岗位不匹配的地方并给出修改建议。</div><span class="m-badge nw">增强层</span></div>
+  </div>
+
+  <!-- 板块 4 -->
+  <div class="sec-head rise d3"><span class="sh-num">4</span><h2>题库与学习资源</h2><span class="sh-sub">没有好题库，工具就是空壳</span></div>
+  <div class="board rise d3">
+    <div class="mod"><div class="m-ic">📚</div><div class="m-t">多维题库</div><div class="m-d">按岗位（前端/后端/产品/运营）、按类型（综合/行为/技术/HR/压力面）、按公司（大厂真题/面经）分类。当前 50 题覆盖 5 场景。</div><span class="m-badge ok">已交付基础版</span></div>
+    <div class="mod"><div class="m-ic">🔍</div><div class="m-t">搜索与收藏</div><div class="m-d">关键词检索 + 一键收藏重点题目（个人中心收藏夹）。当前版本支持搜索，收藏可后续扩展。</div><span class="m-badge ok">已交付基础版</span></div>
+    <div class="mod"><div class="m-ic">📅</div><div class="m-t">每日一练</div><div class="m-d">每日推送一道高频题，保持粘性。当前版本有"每日挑战"（按日期固定题目）。</div><span class="m-badge ok">已交付</span></div>
+  </div>
+
+  <!-- 板块 5 -->
+  <div class="sec-head rise d4"><span class="sh-num">5</span><h2>运营与互动功能</h2><span class="sh-sub">让用户愿意每天回来</span></div>
+  <div class="board rise d4">
+    <div class="mod"><div class="m-ic">🔥</div><div class="m-t">打卡与倒计时</div><div class="m-d">连续打卡奖励机制，设置"目标面试日"倒计时。当前版本有签到日历 + 连签统计。</div><span class="m-badge ok">已交付</span></div>
+    <div class="mod"><div class="m-ic">🎭</div><div class="m-t">社区 / 留言板</div><div class="m-d">给 OFF（面试官）留言求助、用户之间分享面经。当前版本有"反馈给官方"通道。</div><span class="m-badge ok">已交付基础版</span></div>
+    <div class="mod"><div class="m-ic">🎨</div><div class="m-t">外观设置</div><div class="m-d">深色/浅色模式、主题配色更换（动态粒子背景）。当前版本有 6 套渐变背景 + 动效开关。</div><span class="m-badge ok">已交付</span></div>
+    <div class="mod"><div class="m-ic">🏅</div><div class="m-t">成就系统</div><div class="m-d">13 个成就（初次面试、全场景王者、连签、人格测试等），解锁有即时反馈。</div><span class="m-badge ok">已交付</span></div>
+    <div class="mod"><div class="m-ic">🔮</div><div class="m-t">趣味训练</div><div class="m-d">每日面试运势、随机快答、知识翻卡、面试人格测试、面试梗百科。</div><span class="m-badge ok">已交付</span></div>
+  </div>
+
+  <!-- 技术架构分层 -->
+  <div class="sec-head" id="techSec" style="margin-top:56px"><span class="sh-num">T</span><h2>技术架构分层</h2><span class="sh-sub">四层自下而上，下层支撑上层</span></div>
+
+  <div class="layer" style="animation:rise .5s .05s both">
+    <div class="l-h"><span class="l-ic">🧠</span><div class="l-t">内容资产层（灵魂）</div><span class="l-badge">✓ 已交付</span></div>
+    <div class="l-d">没有好题库就没法练，质量决定价值。每道题四件套：问题 + 考察意图 + 参考答案要点 + 答题技巧；按岗位/场景分类覆盖高频题。另有自评/评分口径、训练记录结构。</div>
+    <div class="l-mods"><span>50 道精选题</span><span>5 大场景</span><span>星级评分口径</span><span>教练点评模板</span></div>
+  </div>
+
+  <div class="layer" style="animation:rise .5s .12s both">
+    <div class="l-h"><span class="l-ic">⚙️</span><div class="l-t">技术实现层（地基）</div><span class="l-badge">✓ 已交付</span></div>
+    <div class="l-d">前端单文件 HTML + CSS + 原生 JS 直接跑，无后端；localStorage 保存训练记录；Web Speech API 支持语音作答；统一状态机控制会话流程。</div>
+    <div class="l-mods"><span>原生 HTML/CSS/JS</span><span>localStorage</span><span>Web Speech API</span><span>状态机路由</span></div>
+  </div>
+
+  <div class="layer" style="animation:rise .5s .19s both">
+    <div class="l-h"><span class="l-ic">🧩</span><div class="l-t">功能模块层（答题闭环）</div><span class="l-badge">✓ 已交付</span></div>
+    <div class="l-d">用户完整练习路径：场景选择 → 限时作答 → 参考答案对照 → 自评打分 → 复盘报告；外加签到、成就、趣味卡、题库浏览。</div>
+    <div class="l-mods"><span>限时作答</span><span>参考答案</span><span>1-5 星自评</span><span>复盘报告</span><span>签到成就</span><span>题库搜索</span></div>
+  </div>
+
+  <div class="layer enhance" style="animation:rise .5s .26s both">
+    <div class="l-h"><span class="l-ic">✨</span><div class="l-t">增强层（可选，让模拟更真实）</div><span class="l-badge">◇ 按需扩展</span></div>
+    <div class="l-d">接入大模型 API 实现 AI 面试官追问、AI 简历诊断；加后端 + 数据库实现跨设备同步；加账号与进度体系；加视频/多人模拟实现真实面场景。</div>
+    <div class="l-mods"><span>AI 面试官对话</span><span>后端 + 数据库</span><span>账号进度体系</span><span>视频/多人模拟</span><span>AI 简历诊断</span></div>
+  </div>
+
+  <!-- 技术栈建议 -->
+  <div class="sec-head"><span class="sh-num">⚡</span><h2>推荐技术栈（开发侧）</h2><span class="sh-sub">如果要升级到增强层</span></div>
+  <div class="board">
+    <div class="mod"><div class="m-ic">🎨</div><div class="m-t">前端</div><div class="m-d">Vue 3 / React + Element Plus / Ant Design + Canvas 粒子 / Lottie 动画 + MediaRecorder / SpeechSynthesis / getUserMedia</div></div>
+    <div class="mod"><div class="m-ic">🛠️</div><div class="m-t">后端</div><div class="m-d">Node.js (Express/NestJS) / Java (Spring Boot) / Python (FastAPI) + MySQL/PostgreSQL + Redis + 阿里云 OSS/腾讯云 COS</div></div>
+    <div class="mod"><div class="m-ic">🧠</div><div class="m-t">AI / 语音</div><div class="m-d">OpenAI API / 百度文心 / 阿里通义 + 专属 Prompt 工程 + 科大讯飞 / 阿里云智能语音识别</div></div>
+    <div class="mod"><div class="m-ic">🔑</div><div class="m-t">第三方</div><div class="m-d">阿里云短信 / SendGrid 邮件 + 微信支付 / 支付宝（商业化时）+ 微信扫码登录 SDK</div></div>
+  </div>
+
+  <!-- 总结 -->
+  <div class="summary">
+    <h3>✅ 当前已交付版</h3>
+    <p>= 内容资产层 + 功能模块层 + 技术实现层（原生 HTML + localStorage 单文件即可运行）。升级建议顺序：<b>先加 AI 面试官对话</b> → <b>再加后端与账号体系</b> → <b>最后视频/多人模拟</b>。</p>
+    <div class="up">💡 技术只是外壳，内容才是灵魂。高质量题库（HR / 资深技术整理真实高频题 + 有指导意义的参考答案）和 AI 提示词库（不同行业/岗位的专属角色和评分维度）是核心护城河。</div>
+  </div>
+
+  <!-- 第三部分：内容与运营准备 -->
+  <div class="sec-head rise d4" style="margin-top:56px"><span class="sh-num">三</span><h2>内容与运营准备</h2><span class="sh-sub">技术只是外壳，内容才是灵魂</span></div>
+
+  <div class="mod"><div class="m-ic">📋</div><div class="m-t">高质量题库</div><div class="m-d">需要懂业务的人（HR、资深技术人员）整理真实的高频面试题，并写出有指导意义的"参考答案"——不是标准答案，而是"答题思路 + 得分要点 + 常见误区 + 加分项"。当前版本已覆盖 50 题、5 场景、3 难度，后续可继续扩充大厂真题与面经。</div><span class="m-badge ok">已交付基础版</span></div>
+
+  <div class="mod"><div class="m-ic">🤖</div><div class="m-t">AI 提示词库</div><div class="m-d">针对不同行业和岗位，预设不同的 AI 角色和评分维度：比如"严格的 10 年技术面试官 · 评分维度：技术深度 40%、架构能力 30%、表达能力 20%、经验匹配 10%"，或者"温和的 HR · 评分维度：价值观匹配 40%、稳定性 30%、沟通能力 20%、成长意愿 10%"。每个角色配套专属追问策略和点评话术库。</div><span class="m-badge">增强层</span></div>
+
+  <div class="mod"><div class="m-ic">🎓</div><div class="m-t">用户引导</div><div class="m-d">新手教程：首次登录时 4 步弹层告诉用户"选择场景 → 配置题目 → 开口练习 → 查看报告"。题库内每道题的考察点、作答技巧、参考要点三位一体；复盘报告自动生成能力雷达图、教练点评和逐题回顾。让用户第一次打开就能顺畅上手。</div><span class="m-badge ok">已交付基础版</span></div>
+
+  <div class="sec-head" style="margin-top:40px"><span class="sh-num">📈</span><h2>商业化方向（可选）</h2><span class="sh-sub">当产品跑通用户价值后</span></div>
+  <div class="summary" style="margin-top:16px">
+    <ul style="font-size:13px;line-height:2;color:var(--ink2);padding-left:18px">
+      <li><b>会员订阅：</b>解锁 AI 无限对话、视频面试分析、大厂真题包、专属题库推荐</li>
+      <li><b>简历诊断付费：</b>上传简历 + 目标岗位 JD，AI 输出匹配度评分 + 修改建议（PDF 报告）</li>
+      <li><b>企业版：</b>HR/面试官账号批量导入题库、团队管理候选人面试记录、数据看板</li>
+      <li><b>课程/训练营：</b>和资深面试官合作录制系统课程，或做 7 天 AI 模拟面试训练营</li>
+    </ul>
+  </div>
+
+  <footer>模拟面试训练营 Pro · 产品蓝图 v2.0<br>让每一次开口，都成为你的主场</footer>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>if(!initPage('product',true))throw new Error('login required');</script>
+</body>
+</html>

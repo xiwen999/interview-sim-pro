@@ -1,0 +1,1039 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>开始模拟面试 · 模拟面试训练</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+.stage{max-width:760px;margin:0 auto}
+.view{display:none}
+.view.on{display:block;animation:rise .45s both}
+
+/* 设置视图 */
+.setup{padding:30px}
+.opt-row{margin-top:20px}
+.opt-row .o-lab{font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:10px}
+.opts{display:flex;gap:9px;flex-wrap:wrap}
+.sc-pick{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:13px;background:var(--card);
+  border:1.5px solid var(--line);font-size:13.5px;font-weight:600;transition:.18s}
+.sc-pick:hover{border-color:var(--line2)}
+.sc-pick.on{border-color:var(--acc);background:rgba(108,140,255,.14);box-shadow:0 0 0 3px rgba(108,140,255,.12)}
+
+/* 面试视图 */
+.s-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.prog{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
+.s-cnt{font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.qcard{padding:28px;position:relative}
+.q-meta{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.q-text{font-size:19px;font-weight:800;line-height:1.65;margin-bottom:8px}
+.q-point{font-size:12.5px;color:var(--ink3);margin-bottom:18px}
+/* 计时环 */
+.timer{position:absolute;top:22px;right:24px;width:66px;height:66px}
+.timer svg{transform:rotate(-90deg)}
+.timer .t-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:15px}
+.timer.danger .t-num{color:var(--danger)}
+.ans-ta{width:100%;min-height:150px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;
+  padding:15px;font-size:14px;line-height:1.75;outline:none;resize:vertical;transition:.2s}
+.ans-ta:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.15)}
+.ans-bar{display:flex;align-items:center;gap:10px;margin-top:14px}
+.mic-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;font-size:12.5px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink2);transition:.2s}
+.mic-btn:hover{border-color:var(--line2);color:var(--ink)}
+.mic-btn.on{color:#fff;background:rgba(251,113,133,.2);border-color:rgba(251,113,133,.55);animation:micp 1.2s infinite}
+.mic-btn.recording{color:#fff;background:rgba(251,113,133,.25);border-color:#fb7185;animation:micp 1s infinite}
+.vrec-box{margin-top:10px;border:1px solid rgba(251,113,133,.4);border-radius:14px;padding:10px;background:rgba(251,113,133,.06)}
+.vrec-box video{width:100%;max-height:180px;border-radius:10px;background:#000}
+@keyframes micp{50%{box-shadow:0 0 0 6px rgba(251,113,133,.12)}}
+.hint{font-size:11.5px;color:var(--ink3)}
+
+.m-picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:640px){.m-picks{grid-template-columns:1fr}}
+.m-pick{text-align:left;padding:14px 15px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);
+  transition:.18s;cursor:pointer;width:100%}
+.m-pick:hover{border-color:var(--line2)}
+.m-pick.on{border-color:var(--acc);background:rgba(108,140,255,.14);box-shadow:0 0 0 3px rgba(108,140,255,.12)}
+.m-pick .mp-ic{font-size:23px;line-height:1}
+.m-pick .mp-t{font-size:13.5px;font-weight:800;margin:7px 0 3px}
+.m-pick .mp-d{font-size:11.5px;color:var(--ink3);line-height:1.6}
+
+.chat-card{padding:20px 22px}
+.ai-row{display:flex;gap:13px;align-items:flex-start}
+.ai-avatar{position:relative;width:66px;height:66px;flex:none;border-radius:21px;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(108,140,255,.25),rgba(65,224,200,.13));
+  border:1.5px solid rgba(108,140,255,.4);transition:box-shadow .25s,border-color .25s}
+.ai-face{width:42px;height:42px;color:#cdd8ff}
+.ai-eye{transform-origin:center;animation:aiblink 4.6s infinite}
+@keyframes aiblink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+.ai-mouth{transform-origin:center}
+.ai-avatar.speaking{border-color:#8ABDFF;box-shadow:0 0 20px rgba(108,140,255,.5);animation:aipop 1.1s infinite}
+.ai-avatar.speaking .ai-mouth{animation:aitalk .32s infinite}
+.ai-avatar.listening{border-color:#fb7185;box-shadow:0 0 20px rgba(251,113,133,.45)}
+.ai-avatar.thinking{border-color:#FBBF24;box-shadow:0 0 20px rgba(251,191,36,.35)}
+@keyframes aipop{50%{transform:translateY(-3px) scale(1.045)}}
+@keyframes aitalk{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.35)}}
+.ai-wave{display:none;gap:3px;align-items:center;position:absolute;bottom:9px;height:13px}
+.ai-wave i{width:3px;height:7px;border-radius:2px;background:#fb7185;animation:aiwv .8s infinite ease-in-out}
+.ai-wave i:nth-child(2){animation-delay:.15s;height:12px}
+.ai-wave i:nth-child(3){animation-delay:.3s}
+.ai-wave i:nth-child(4){animation-delay:.45s;height:12px}
+.ai-avatar.listening .ai-wave{display:flex}
+.ai-avatar.listening .ai-mouth{opacity:0}
+@keyframes aiwv{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1.35)}}
+.ai-name{font-size:12.5px;font-weight:800;color:var(--ink2);margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-state{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.08);color:var(--ink3)}
+.ai-state.speaking{background:rgba(108,140,255,.2);color:#8ABDFF}
+.ai-state.listening{background:rgba(251,113,133,.2);color:#fda4af}
+.ai-state.thinking{background:rgba(251,191,36,.2);color:#ffd68a}
+.ai-mute{margin-left:auto;font-size:13px;padding:3px 9px;border-radius:9px;background:rgba(255,255,255,.06);
+  border:1px solid var(--line);color:var(--ink2)}
+.ai-bubble{padding:14px 17px;border-radius:6px 17px 17px 17px;font-size:15.5px;line-height:1.8;font-weight:700;
+  background:rgba(108,140,255,.12);border:1px solid rgba(108,140,255,.28)}
+.ai-caret{display:inline-block;width:2px;height:16px;background:#8ABDFF;margin-left:2px;vertical-align:-2px;animation:aiblink 1s infinite}
+.ai-point{font-size:11.5px;color:var(--ink3);margin-top:9px;line-height:1.6}
+.anim-meta{display:flex;align-items:center;gap:12px;margin:16px 0 2px}
+.mini-timer{width:48px;height:48px;position:relative;flex:none}
+.mini-timer svg{transform:rotate(-90deg)}
+.mini-timer .mt-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:12px}
+.mini-timer.danger .mt-num{color:var(--danger)}
+.us-row{display:flex;gap:12px;align-items:flex-start;flex-direction:row-reverse;margin-top:16px}
+.us-av{width:42px;height:42px;flex:none;border-radius:15px;display:grid;place-items:center;font-size:21px;
+  background:rgba(183,166,249,.22);border:1px solid rgba(183,166,249,.45)}
+.us-bubble{padding:12px 16px;border-radius:17px 6px 17px 17px;
+  background:linear-gradient(135deg,rgba(108,140,255,.92),rgba(94,108,235,.92));color:#fff;
+  font-size:14px;line-height:1.8;min-height:26px;max-width:82%;word-break:break-word}
+.us-bubble.live::after{content:'●';color:#ffd68a;margin-left:7px;font-size:10px;animation:aiblink 1s infinite}
+.us-who{font-size:11px;color:var(--ink3);margin-top:5px;text-align:right}
+.cam-stage{position:relative;margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid rgba(251,113,133,.42);background:#000;display:none}
+.cam-stage.on{display:block}
+.cam-stage video{width:100%;max-height:250px;object-fit:cover;display:block}
+.cam-tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);font-size:11px;padding:3px 11px;border-radius:99px;color:#fff;display:flex;gap:7px;align-items:center}
+.cam-tag i{width:7px;height:7px;border-radius:50%;background:#fb7185;animation:aiblink 1.1s infinite}
+.cam-fail{display:none;margin-top:12px;padding:11px 14px;border-radius:12px;font-size:12px;line-height:1.6;
+  background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.4);color:#fda4af}
+.voice-bar{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+/* 反馈视图 */
+.fb{padding:28px}
+.fb h4{font-size:13px;font-weight:800;color:var(--acc2);margin:18px 0 9px;display:flex;align-items:center;gap:7px}
+.fb .ans-list li,.fb .tip-list li{font-size:13.5px;line-height:1.8;color:var(--ink2);margin-bottom:6px;padding-left:18px;position:relative;list-style:none}
+.fb .ans-list li::before{content:"▸";position:absolute;left:0;color:var(--acc)}
+.fb .tip-list li::before{content:"💡";position:absolute;left:-4px;font-size:11px;top:2px}
+.my-ans{font-size:13px;line-height:1.8;color:var(--ink2);background:rgba(255,255,255,.05);border:1px solid var(--line);
+  border-radius:12px;padding:13px 16px;white-space:pre-wrap;max-height:140px;overflow-y:auto}
+.stars{display:flex;gap:7px;margin:6px 0 4px}
+.stars button{width:42px;height:42px;padding:5px;transition:.18s}
+.stars button svg{width:100%;height:100%;fill:rgba(255,255,255,.14);stroke:rgba(255,255,255,.3);stroke-width:1;transition:.18s}
+.stars button:hover svg{fill:rgba(251,191,36,.5)}
+.stars button.lit svg{fill:#FBBF24;stroke:#FBBF24;filter:drop-shadow(0 0 6px rgba(251,191,36,.5))}
+.rate-lab{font-size:12px;color:var(--ink3)}
+
+/* 复盘 */
+.rv{padding:30px}
+.rv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+@media (max-width:600px){.rv-grid{grid-template-columns:repeat(2,1fr)}}
+.rv-grid .card{padding:16px;text-align:center}
+.rv-grid .v{font-size:23px;font-weight:900;background:linear-gradient(90deg,#8ABDFF,#41E0C8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rv-grid .l{font-size:11.5px;color:var(--ink3);margin-top:4px}
+.coach{padding:16px 20px;border-radius:14px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.3);
+  font-size:13.5px;line-height:1.8;color:var(--ink2);margin-bottom:18px}
+.rv-item{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;background:rgba(255,255,255,.04)}
+.rv-item .ri-h{display:flex;align-items:center;gap:10px;padding:14px 17px;cursor:pointer;font-size:13.5px;font-weight:600}
+.rv-item .ri-h:hover{background:rgba(255,255,255,.04)}
+.rv-item .ri-h .chev{margin-left:auto;transition:.25s;color:var(--ink3);display:flex}
+.rv-item.open .ri-h .chev{transform:rotate(180deg)}
+.rv-item .ri-b{display:none;padding:0 17px 16px;font-size:12.5px;color:var(--ink2);line-height:1.8}
+.rv-item.open .ri-b{display:block}
+.ri-stars{display:inline-flex;gap:2px}
+.ri-stars svg{width:13px;height:13px;fill:#FBBF24}
+.ri-stars svg.dim{fill:rgba(255,255,255,.15)}
+
+/* 丰富设置页 */
+.setup-tipbar{display:flex;gap:10px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.1),rgba(65,224,200,.06));border:1px solid rgba(108,140,255,.28);margin-bottom:18px;align-items:flex-start}
+.setup-tipbar .ti-ic{font-size:22px;flex:none;margin-top:1px}
+.setup-tipbar .ti-body{flex:1}
+.setup-tipbar .ti-t{font-weight:700;font-size:13px;color:#cdd8ff;margin-bottom:2px}
+.setup-tipbar .ti-d{font-size:12px;color:var(--ink2);line-height:1.7}
+.sc-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+@media (max-width:700px){.sc-preview{grid-template-columns:repeat(2,1fr)}}
+.sc-preview .sp-card{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;line-height:1.6;color:var(--ink2)}
+.sc-preview .sp-card .sp-tag{font-size:10.5px;margin-bottom:6px}
+.warmup{display:flex;gap:10px;margin-top:16px;padding:14px;border-radius:14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35)}
+.warmup .w-ic{font-size:24px;flex:none}
+.warmup .w-body{flex:1;font-size:12px;color:var(--ink2);line-height:1.7}
+.warmup .w-body b{color:#ffd68a}
+.warmup button{flex:none}
+.setup-why{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;font-size:11.5px;color:var(--ink3)}
+.setup-why div{padding:10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+
+    <!-- 设置 -->
+    <div class="view on" id="vSetup">
+      <div class="card setup rise">
+        <h2 style="font-size:21px;font-weight:900">🎬 开始一场模拟面试</h2>
+        <p style="font-size:12.5px;color:var(--ink3);margin-top:7px;line-height:1.7">随机抽取题目，限时作答后对照参考要点自评，最后生成复盘报告。</p>
+
+        <div class="setup-tipbar">
+          <span class="ti-ic">💡</span>
+          <div class="ti-body">
+            <div class="ti-t">面试小 tips（本轮随机 3 条）</div>
+            <div class="ti-d" id="tipBox"></div>
+          </div>
+        </div>
+
+        <div class="opt-row"><div class="o-lab">① 选择面试场景</div><div class="opts" id="scOpts"></div></div>
+        <div class="opt-row"><div class="o-lab">② 题目数量</div><div class="opts" id="cntOpts"></div></div>
+        <div class="opt-row"><div class="o-lab">③ 每题限时</div><div class="opts" id="secOpts"></div></div>
+        <div class="opt-row"><div class="o-lab">④ 面试类型</div><div class="opts" id="typeOpts"></div></div>
+        <div class="opt-row"><div class="o-lab">⑤ 难度偏向</div><div class="opts" id="lvOpts"></div></div>
+        <div class="opt-row"><div class="o-lab">⑥ 选择作答方式</div><div class="m-picks" id="modePicks"></div></div>
+
+        <div class="setup-why">
+          <div>🎤 支持<br><b style="color:var(--acc2)">语音输入</b></div>
+          <div>⭐ 答完<br><b style="color:var(--acc2)">5 星自评</b></div>
+          <div>📊 结束<br><b style="color:var(--acc2)">教练点评</b></div>
+        </div>
+
+        <div class="sc-preview" id="scPreview"></div>
+
+        <div class="warmup">
+          <span class="w-ic">🔥</span>
+          <div class="w-body">
+            <b>热身模式：</b>不计时快速答 1 道题，直接看参考要点和技巧，适合刚登录先找找状态。
+          </div>
+          <button class="btn gho sm" id="warmBtn">⚡ 快速答一题</button>
+        </div>
+
+        <button class="btn pri" id="startBtn" style="width:100%;margin-top:22px;padding:14px;font-size:15px">🚀 进入面试间 →</button>
+        <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:10px">提示：超时会自动提交当前作答 · 语音识别推荐 Chrome 浏览器</div>
+      </div>
+    </div>
+
+    <!-- 作答 -->
+    <div class="view" id="vSession">
+      <div class="s-head rise">
+        <div class="prog"><i id="progBar"></i></div>
+        <span class="s-cnt" id="progTxt"></span>
+      </div>
+      <div id="textPanel">
+      <div class="card qcard rise d1">
+        <div class="timer" id="timerBox">
+          <svg width="66" height="66"><circle cx="33" cy="33" r="28" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="5"/>
+          <circle id="ring" cx="33" cy="33" r="28" fill="none" stroke="#6C8CFF" stroke-width="5" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="0"/></svg>
+          <div class="t-num" id="tNum"></div>
+        </div>
+        <div class="q-meta" id="qMeta"></div>
+        <div class="q-text" id="qText"></div>
+        <div class="q-point" id="qPoint"></div>
+        <textarea class="ans-ta" id="ansTa" placeholder="在这里写下你的回答思路，或点下方麦克风语音作答…"></textarea>
+        <div class="vrec-box" id="vrecBox" style="display:none">
+          <div style="font-size:11.5px;color:#fda4af;margin-bottom:6px">● 正在录制本题作答，点「⏹ 停止并保存」结束 · <span id="vrecTimer"></span></div>
+          <video id="vrecPrev" autoplay muted playsinline></video>
+        </div>
+        <div class="ans-bar">
+          <button class="mic-btn" id="micBtn"></button>
+          <span class="hint" id="micHint" style="color:#fda4af"></span>
+          <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
+          <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「视频 · 我的回放」">📹 录制</button>
+          <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
+          <span class="hint" id="wordCnt">已输入 0 字</span>
+          <button class="btn pri" id="submitBtn" style="margin-left:auto">提交作答</button>
+        </div>
+      </div>
+      </div><!-- /textPanel -->
+
+      <!-- 动画互动面板（模式2/3 共用） -->
+      <div id="animPanel" style="display:none">
+        <div class="card chat-card rise d1">
+          <div class="ai-row">
+            <div class="ai-avatar" id="aiAvatar">
+              <svg class="ai-face" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="8" width="16" height="12" rx="3.2"/>
+                <path d="M12 8V4.5M8.5 4.5h7"/>
+                <circle cx="12" cy="3" r="1.4" fill="currentColor" stroke="none"/>
+                <g class="ai-eye"><circle cx="9.2" cy="13" r="1.25" fill="currentColor" stroke="none"/><circle cx="14.8" cy="13" r="1.25" fill="currentColor" stroke="none"/></g>
+                <path class="ai-mouth" d="M9.6 16.6h4.8"/>
+              </svg>
+              <div class="ai-wave"><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="ai-name"><span id="aiTags"></span><span>AI 面试官</span><span class="ai-state" id="aiState">准备好了</span>
+                <button class="ai-mute" id="aiMute" title="开关面试官朗读">🔊</button>
+              </div>
+              <div class="ai-bubble" id="aiBubble"><span id="aiBubbleText"></span><span class="ai-caret" id="aiCaret"></span></div>
+              <div class="ai-point" id="aiPoint"></div>
+            </div>
+          </div>
+
+          <div class="anim-meta">
+            <div class="mini-timer" id="atBox">
+              <svg width="48" height="48"><circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="4"/>
+              <circle id="atRing" cx="24" cy="24" r="20" fill="none" stroke="#6C8CFF" stroke-width="4" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="0"/></svg>
+              <div class="mt-num" id="atNum"></div>
+            </div>
+            <div class="hint" style="font-size:12px">点击问题可直接展开全文 · 计时同步进行，时间到自动提交</div>
+          </div>
+
+          <!-- 用户侧（模式3：语音实时转写；模式2：作答后展示） -->
+          <div class="us-row" id="usRow">
+            <div class="us-av" id="usAv">🧑‍💼</div>
+            <div style="max-width:82%">
+              <div class="us-bubble" id="usBubble"><span id="usText"></span><span id="usPlaceholder" style="font-weight:400;font-size:12.5px;opacity:.7">🎤 面试官提问结束后，你的语音回答会实时转写在这里</span></div>
+              <div class="us-who" id="usWho"></div>
+            </div>
+          </div>
+
+          <!-- 摄像头预览（模式3） -->
+          <div class="cam-stage" id="camStage">
+            <video id="camVideo" autoplay muted playsinline></video>
+            <div class="cam-tag"><i></i><span id="camTag">摄像头已开启</span></div>
+          </div>
+
+          <!-- 模式2：文字作答 -->
+          <div id="animCtrls">
+            <textarea class="ans-ta" id="animTa" style="min-height:115px;margin-top:14px" placeholder="在这里写下你的回答，也可以点麦克风语音输入…"></textarea>
+            <div class="ans-bar">
+              <button class="mic-btn" id="animMicBtn"></button>
+              <span class="hint" id="animMicHint" style="color:#fda4af"></span>
+              <button class="mic-btn" id="animTtsBtn" style="padding:9px 12px">📢 重听题目</button>
+              <span class="hint" id="animWordCnt">已输入 0 字</span>
+              <button class="btn pri" id="animSubmit" style="margin-left:auto">提交作答</button>
+            </div>
+          </div>
+
+          <!-- 模式3：语音作答 -->
+          <div id="camCtrls" style="display:none">
+            <div class="voice-bar">
+              <button class="mic-btn" id="camMicBtn" style="padding:10px 18px;font-size:13px"></button>
+              <span class="hint" id="camHint" style="font-size:12.5px"></span>
+              <button class="btn pri" id="camSubmit" style="margin-left:auto">完成作答</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /animPanel -->
+    </div>
+
+    <!-- 反馈 -->
+    <div class="view" id="vFb">
+      <div class="card fb rise">
+        <div class="q-meta" id="fbMeta"></div>
+        <div class="q-text" id="fbQ"></div>
+        <h4>📝 我的作答</h4><div class="my-ans" id="fbMy"></div>
+        <h4>🎯 考察点</h4><div style="font-size:13.5px;color:var(--ink2);line-height:1.7" id="fbPoint"></div>
+        <h4>✅ 参考要点</h4><ul class="ans-list" id="fbAns"></ul>
+        <h4>💡 作答技巧</h4><ul class="tip-list" id="fbTips"></ul>
+        <h4>⭐ 给自己打个分</h4>
+        <div class="stars" id="starBox"></div>
+        <div class="rate-lab" id="rateLab">根据你覆盖了多少参考要点来评</div>
+        <button class="btn pri" id="nextBtn" style="width:100%;margin-top:20px" disabled>下一题 →</button>
+      </div>
+    </div>
+
+    <!-- 复盘 -->
+    <div class="view" id="vReview">
+      <div class="card rv rise">
+        <h2 style="font-size:21px;font-weight:900">📊 本场复盘报告</h2>
+        <div class="rv-grid" id="rvGrid"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px">
+          <canvas id="rvRadar" width="240" height="240" style="max-width:100%"></canvas>
+          <div>
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（按自评 + 回答长度 + 要点覆盖估算）</div>
+            <div id="radarDesc" style="font-size:12px;color:var(--ink2);line-height:1.8"></div>
+          </div>
+        </div>
+        <div class="coach" id="rvCoach"></div>
+        <h4 style="font-size:14px;font-weight:800;margin-bottom:12px">逐题回顾</h4>
+        <div id="rvList"></div>
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button class="btn gho" style="flex:1" onclick="location.href='index.html'">回首页</button>
+          <button class="btn gho" style="flex:1" onclick="location.href='bank.html'">去题库巩固</button>
+          <button class="btn pri" style="flex:1" onclick="location.reload()">再练一场</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>
+if(!initPage('interview',true))throw new Error('login required');
+
+var RING_LEN=175.9;
+var S={scene:'job',count:5,sec:90,type:'general',lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null};
+
+var scOpts=document.getElementById('scOpts');
+scOpts.innerHTML=Object.keys(SCENES).map(function(k){var s=SCENES[k];
+  return '<button class="sc-pick'+(k===S.scene?' on':'')+'" data-k="'+k+'">'+ICONS[s.icon]+s.name+'</button>'}).join('');
+$$('#scOpts .sc-pick').forEach(function(b){b.onclick=function(){S.scene=b.dataset.k;$$('#scOpts .sc-pick').forEach(function(x){x.classList.toggle('on',x===b)});renderPreview(S.scene)}});
+var cntOpts=document.getElementById('cntOpts');
+cntOpts.innerHTML=[3,5,8].map(function(n){return '<button class="chip'+(n===5?' on':'')+'" data-n="'+n+'">'+n+' 题</button>'}).join('');
+$$('#cntOpts .chip').forEach(function(b){b.onclick=function(){S.count=+b.dataset.n;$$('#cntOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+var secOpts=document.getElementById('secOpts');
+secOpts.innerHTML=[[60,'60 秒 · 快答'],[90,'90 秒 · 标准'],[120,'120 秒 · 充分']].map(function(p){
+  return '<button class="chip'+(p[0]===90?' on':'')+'" data-n="'+p[0]+'">'+p[1]+'</button>'}).join('');
+$$('#secOpts .chip').forEach(function(b){b.onclick=function(){S.sec=+b.dataset.n;$$('#secOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+
+/* 面试类型 */
+var TYPE_OPTS=[{k:'general',t:'综合面试'},{k:'tech',t:'技术面'},{k:'hr',t:'HR 面'},{k:'pressure',t:'压力面'}];
+var typeOpts=document.getElementById('typeOpts');
+typeOpts.innerHTML=TYPE_OPTS.map(function(o){return '<button class="chip'+(o.k==='general'?' on':'')+'" data-k="'+o.k+'">'+o.t+'</button>'}).join('');
+$$('#typeOpts .chip').forEach(function(b){b.onclick=function(){S.type=b.dataset.k;$$('#typeOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+
+/* 难度偏向 */
+var lvOpts=document.getElementById('lvOpts');
+lvOpts.innerHTML=['不限','初级','中级','高级'].map(function(t,i){return '<button class="chip'+(i===0?' on':'')+'" data-n="'+(i-1)+'">'+t+'</button>'}).join('');
+$$('#lvOpts .chip').forEach(function(b){b.onclick=function(){S.lv=+b.dataset.n;$$('#lvOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+
+/* 作答方式：经典文字 / 动画互动文字 / 摄像头语音 */
+var MODE_OPTS=[
+  {k:'text',ic:'📝',t:'经典文字',d:'安静看题，文本框打字作答，专注不被打扰'},
+  {k:'anim',ic:'🤖',t:'动画互动',d:'AI 面试官动画提问并朗读题目，你用文字回答'},
+  {k:'cam', ic:'🎥',t:'摄像头语音',d:'模拟真实视频面试，全程开口语音作答（推荐 Chrome）'}
+];
+var savedMode=storeGet('ivsim_ans_mode','text');
+if(!MODE_OPTS.some(function(m){return m.k===savedMode}))savedMode='text';
+S.mode=savedMode;
+var modePicks=document.getElementById('modePicks');
+modePicks.innerHTML=MODE_OPTS.map(function(o){
+  return '<button type="button" class="m-pick'+(o.k===S.mode?' on':'')+'" data-k="'+o.k+'">'+
+    '<div class="mp-ic">'+o.ic+'</div><div class="mp-t">'+o.t+'</div><div class="mp-d">'+o.d+'</div></button>';
+}).join('');
+$$('#modePicks .m-pick').forEach(function(b){b.onclick=function(){
+  S.mode=b.dataset.k;storeSet('ivsim_ans_mode',S.mode);
+  $$('#modePicks .m-pick').forEach(function(x){x.classList.toggle('on',x===b)});
+}});
+
+/* Tips 随机 3 条渲染 */
+var TIPS_POOL=[
+ '自我介绍建议用"我是谁→我有什么→为什么适合"三段式，控制在 1-2 分钟',
+ '讲项目时一定要说"你负责的部分"，面试官能分辨集体 vs 个人贡献',
+ '被问到"优缺点"时，缺点选真实但不致命的，然后给出具体改进动作',
+ '技术面深挖项目时，用"现象→定位→根因→解决→验证"链路讲清楚',
+ '数据分析题先对齐口径，再讲方法，最后落到业务价值',
+ '产品题用"用户-场景-价值"框架拆，别光说功能',
+ '行为面试用 STAR 法则：情境→任务→行动→结果',
+ '反问环节别问薪资，优先问业务方向、团队分工、新人培养',
+ '紧张很正常，把面试当聊天，开口前深呼吸 3 秒',
+ '语音识别识别错了别怕，手动改一下就行',
+ '复盘报告里的教练点评很重要，别看完就关掉',
+ '每日签到 + 面试训练，坚持 2 周效果肉眼可见'
+];
+function renderTips(){
+  var pick=shuffle(TIPS_POOL).slice(0,3);
+  document.getElementById('tipBox').innerHTML=pick.map(function(t,i){return (i>0?'<br>':'')+(i+1)+'. '+esc(t)}).join('');
+}
+function renderPreview(sc){
+  var pool=QUESTIONS.filter(function(q){return q.scene===sc}).slice(0,3);
+  document.getElementById('scPreview').innerHTML=
+    '<div class="sp-card" style="grid-column:span 3;font-size:11px;color:var(--ink3);margin-bottom:-2px">'+SCENES[sc].name+' 前 3 道预览：</div>'+
+    pool.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+SCENE_COLOR[q.scene]+'">'+LV_NAME[q.lv]+' · '+SCENES[q.scene].name+'</div>'+esc(q.q)+'</div>'}).join('');
+}
+renderTips();renderPreview(S.scene);
+
+/* URL 场景参数 */
+var qs=new URLSearchParams(location.search);
+if(qs.get('scene')&&SCENES[qs.get('scene')]){S.scene=qs.get('scene');
+  $$('#scOpts .sc-pick').forEach(function(x){x.classList.toggle('on',x.dataset.k===S.scene)});renderPreview(S.scene)}
+
+/* 进入会话前的准备：摄像头语音模式需先拿到摄像头/麦克风并确认语音识别可用 */
+function enterSession(done){
+  if(S.mode==='cam'){
+    var SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SRc){miniPop('当前浏览器不支持语音识别','摄像头语音模式需要语音识别能力，请使用最新版 Chrome / Edge，或改用「🤖 动画互动」文字模式。');return}
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){miniPop('无法调用摄像头','当前浏览器不支持摄像头/麦克风，请改用其他作答方式。');return}
+    toast('正在申请摄像头和麦克风权限…');
+    navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:400}},audio:true}).then(function(st){
+      S.camStream=st;showCamPreview();done();
+    }).catch(function(){
+      miniPop('无法访问摄像头/麦克风','请点击地址栏的摄像头图标，允许摄像头和麦克风权限后重试；也可以改用「🤖 动画互动」或「📝 经典文字」模式。');
+    });
+    return;
+  }
+  done();
+}
+
+/* 热身按钮 */
+document.getElementById('warmBtn').onclick=function(){
+  var pool=buildPool(S.scene,S.type,S.lv);
+  S.qs=[pool[Math.floor(Math.random()*pool.length)]];
+  S.idx=0;S.recs=[];S.warmup=true;S.sec=999;
+  enterSession(function(){
+    toast('热身模式开始 · 不计时','ok');
+    beginWarmView();
+  });
+};
+function beginWarmView(){
+  show('vSession');
+  var q=S.qs[0];
+  document.getElementById('qMeta').innerHTML=metaHtml(q)+'<span class="tag" style="background:rgba(251,191,36,.15);color:#ffd68a">热身模式</span>';
+  document.getElementById('qText').textContent='热身 · '+q.q;
+  document.getElementById('qPoint').textContent='快速答一下思路，答完直接看参考要点';
+  document.getElementById('progBar').style.width='100%';
+  document.getElementById('progTxt').textContent='热身 · 1 道';
+  clearInterval(S.timer);S.left=999;ring.style.stroke='#FBBF24';timerBox.classList.remove('danger');tNum.textContent='∞';
+  applyModeUI();
+  if(S.mode!=='text'){
+    document.getElementById('aiTags').innerHTML='<span class="tag" style="background:rgba(251,191,36,.15);color:#ffd68a">热身模式</span>';
+    syncMiniTimer();
+    aiAsk(q);
+  }
+}
+
+function show(id){$$('.view').forEach(function(v){v.classList.remove('on')});document.getElementById(id).classList.add('on');scrollTo(0,0)}
+
+function buildPool(scene,type,lv){
+  var pool=QUESTIONS.slice();
+  // 类型筛选
+  if(type==='tech'){pool=pool.filter(function(q){return q.scene==='tech'||q.scene==='data'});if(pool.length<3)pool=QUESTIONS.filter(function(q){return q.scene===scene})}
+  else if(type==='hr'){pool=pool.filter(function(q){return q.scene==='job'||q.scene==='general'})}
+  else if(type==='pressure'){// 压力面：选 lv2/3 且偏短的题
+    pool=pool.filter(function(q){return q.lv>=2&&(q.q.length<40||q.lv===3)});if(pool.length<3)pool=QUESTIONS.filter(function(q){return q.scene===scene})}
+  else{// general：按场景
+    pool=pool.filter(function(q){return q.scene===scene})}
+  // 难度筛选
+  if(lv>=1)pool=pool.filter(function(q){return q.lv>=lv});
+  else if(lv===-1)pool=pool.filter(function(q){return q.lv===1});
+  return pool;
+}
+document.getElementById('startBtn').onclick=function(){
+  var pool=buildPool(S.scene,S.type,S.lv);
+  S.qs=shuffle(pool).slice(0,Math.min(S.count,pool.length));
+  S.idx=0;S.recs=[];S.t0=Date.now();
+  enterSession(function(){
+    toast((S.type==='pressure'?'压力面来了，稳住！':'面试开始，深呼吸，加油！'),'ok');
+    nextQ();
+  });
+};
+
+var VR={stream:null,mr:null,chunks:[],on:false,timer:null,maxSec:0,remain:0,elapsed:0,autoStopped:false};
+var vrecBtn=document.getElementById('vrecBtn'),vrecBox=document.getElementById('vrecBox'),vrecPrev=document.getElementById('vrecPrev');
+vrecBtn.onclick=function(){VR.on?stopVRec():startVRec()};
+
+/* 单次录制最长时长（秒），0=不限；选择持久化，开始录制时固化到本次 VR.maxSec */
+var REC_LIMITS=[[30,'30 秒'],[60,'60 秒'],[90,'90 秒（推荐）'],[180,'3 分钟'],[300,'5 分钟'],[0,'不限时长']];
+var REC_MIN=0,REC_MAX=600; /* 边界裁剪：最长 10 分钟，防止异常值 */
+var vrecLimitSel=document.getElementById('vrecLimit'),vrecTimer=document.getElementById('vrecTimer');
+vrecLimitSel.innerHTML=REC_LIMITS.map(function(p){return '<option value="'+p[0]+'">'+p[1]+'</option>'}).join('');
+(function(){var saved=Math.min(REC_MAX,Math.max(REC_MIN,+storeGet('ivsim_recmax',90)||0));var ok=REC_LIMITS.some(function(p){return p[0]===saved});vrecLimitSel.value=String(ok?saved:90)})();
+vrecLimitSel.onchange=function(){storeSet('ivsim_recmax',+this.value)};
+function fmtClock(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x}
+function startRecTick(){
+  clearInterval(VR.timer);VR.elapsed=0;VR.autoStopped=false;
+  if(!VR.maxSec){
+    vrecTimer.textContent='不限时长 · 已录 00:00';
+    VR.timer=setInterval(function(){VR.elapsed++;vrecTimer.textContent='不限时长 · 已录 '+fmtClock(VR.elapsed)},1000);
+    return;
+  }
+  VR.remain=VR.maxSec;
+  vrecTimer.textContent='最长 '+fmtClock(VR.maxSec)+' · 剩余 '+fmtClock(VR.remain);
+  VR.timer=setInterval(function(){
+    VR.remain--;VR.elapsed++;
+    if(VR.remain<=0){
+      clearInterval(VR.timer);VR.timer=null;
+      vrecTimer.textContent='已达最长时长 '+fmtClock(VR.maxSec)+'，自动保存…';
+      VR.autoStopped=true;stopVRec();return;
+    }
+    vrecTimer.textContent='最长 '+fmtClock(VR.maxSec)+' · 剩余 '+fmtClock(VR.remain);
+  },1000);
+}
+function startVRec(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('当前浏览器不支持录制','warn');return}
+  navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(st){beginRec(st,false)}).catch(function(){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){toast('摄像头不可用，已切换为仅录音','warn');beginRec(st,true)}).catch(function(){toast('无法访问摄像头/麦克风，请检查权限','warn')});
+  });
+}
+/* 选择当前浏览器支持的录制格式，并限制码率防止视频过大撑爆 IndexedDB（约 75KB/s） */
+function pickRecOpts(st){
+  var hasVideo=st.getVideoTracks().length>0;
+  var cands=hasVideo?['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+                   :['audio/webm;codecs=opus','audio/webm'];
+  var mime='';
+  if(window.MediaRecorder&&typeof MediaRecorder.isTypeSupported==='function'){
+    for(var i=0;i<cands.length;i++){try{if(MediaRecorder.isTypeSupported(cands[i])){mime=cands[i];break}}catch(e){}}
+  }
+  var opts={};
+  if(mime)opts.mimeType=mime;
+  if(hasVideo)opts.videoBitsPerSecond=500000; /* 500kbps */
+  opts.audioBitsPerSecond=96000;              /* 96kbps */
+  return opts;
+}
+function beginRec(st,audioOnly){
+  VR.stream=st;VR.chunks=[];
+  VR.maxSec=Math.min(REC_MAX,Math.max(REC_MIN,+vrecLimitSel.value||0)); /* 本次录制的上限，录制中改选择器不影响本次 */
+  try{VR.mr=new MediaRecorder(st,pickRecOpts(st))}catch(e){toast('当前浏览器不支持录制','warn');st.getTracks().forEach(function(t){t.stop()});return}
+  VR.mr.ondataavailable=function(e){if(e.data&&e.data.size)VR.chunks.push(e.data)};
+  VR.mr.onstop=onVRecStop;
+  VR.mr.start();VR.on=true;
+  vrecPrev.style.display=audioOnly?'none':'block';
+  if(!audioOnly){vrecPrev.srcObject=st;vrecPrev.play()}
+  vrecBox.style.display='block';vrecBtn.textContent='⏹ 停止并保存';vrecBtn.classList.add('recording');
+  vrecLimitSel.disabled=true;
+  startRecTick();
+  toast(VR.maxSec?'开始录制，最长 '+fmtClock(VR.maxSec)+'，到时自动保存':'开始录制本题作答（不限时长）','ok');
+}
+function stopVRec(){if(VR.mr&&VR.on){VR.mr.stop();VR.on=false}}
+function onVRecStop(){
+  if(VR.timer){clearInterval(VR.timer);VR.timer=null}
+  var wasAuto=VR.autoStopped,recSec=VR.elapsed;
+  var blob=new Blob(VR.chunks,{type:(VR.mr&&VR.mr.mimeType)||'video/webm'});
+  if(VR.stream)VR.stream.getTracks().forEach(function(t){t.stop()});
+  vrecPrev.srcObject=null;vrecBox.style.display='none';vrecBtn.textContent='📹 录制';vrecBtn.classList.remove('recording');
+  vrecLimitSel.disabled=false;
+  var id='v_'+Date.now();
+  saveVideoBlob(id,blob).then(function(){
+    addVideoMeta({id:id,title:(lastQ||'模拟面试作答').slice(0,30),scene:S.scene,owner:(getUser()||{}).name||'访客',status:'approved',ts:Date.now(),src:'interview',shared:false});
+    playSound('unlock');
+    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「视频 · 我的回放」，可投稿到广场','ok');
+  }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
+}
+
+function metaHtml(q){
+  return '<span class="tag" style="background:'+SCENE_COLOR[q.scene]+'22;color:'+SCENE_COLOR[q.scene]+'">'+SCENES[q.scene].name+'</span>'+
+    '<span class="tag" style="background:rgba(108,140,255,.15);color:#8ABDFF">'+LV_NAME[q.lv]+'</span>';
+}
+
+var ring=document.getElementById('ring'),tNum=document.getElementById('tNum'),timerBox=document.getElementById('timerBox');
+function nextQ(){
+  if(S.idx>=S.qs.length){stopCam();finish();return}
+  var q=S.qs[S.idx];
+  document.getElementById('qMeta').innerHTML=metaHtml(q);
+  document.getElementById('qText').textContent='Q'+(S.idx+1)+' · '+q.q;
+  document.getElementById('qPoint').textContent='考察点：'+q.point;
+  document.getElementById('ansTa').value='';
+  document.getElementById('animTa').value='';
+  document.getElementById('progBar').style.width=(S.idx/S.qs.length*100)+'%';
+  document.getElementById('progTxt').textContent='第 '+(S.idx+1)+' / '+S.qs.length+' 题';
+  lastQ=q.q;ttsBtn.textContent='📢 朗读题目';document.getElementById('animTtsBtn').textContent='📢 重听题目';stopSpeak();
+  updateWordCnt();updateAnimWord();
+  show('vSession');
+  applyModeUI();
+  startTimer();
+  if(S.mode!=='text')aiAsk(q);
+}
+var RING_MINI=125.66;
+var atRing=document.getElementById('atRing'),atNum=document.getElementById('atNum'),atBox=document.getElementById('atBox');
+function startTimer(){
+  clearInterval(S.timer);
+  S.left=S.sec;ring.style.stroke='#6C8CFF';timerBox.classList.remove('danger');
+  tick();
+  S.timer=setInterval(function(){S.left--;tick();
+    if(S.left<=0){clearInterval(S.timer);toast('时间到，自动提交','warn');submit()}},1000);
+}
+function syncMiniTimer(){
+  if(!atRing)return;
+  atNum.textContent=S.sec===999?'∞':S.left;
+  atRing.style.strokeDashoffset=RING_MINI*(1-S.left/S.sec);
+  atRing.style.stroke=ring.style.stroke||'#6C8CFF';
+  atBox.classList.toggle('danger',timerBox.classList.contains('danger'));
+}
+function tick(){
+  tNum.textContent=S.left;
+  ring.style.strokeDashoffset=RING_LEN*(1-S.left/S.sec);
+  if(S.left<=10){ring.style.stroke='#fb7185';timerBox.classList.add('danger')}
+  else if(S.left<=S.sec/2){ring.style.stroke='#FBBF24'}
+  syncMiniTimer();
+}
+document.getElementById('submitBtn').onclick=function(){submit()};
+
+function currentAns(){
+  if(S.mode==='cam')return (document.getElementById('usText').textContent||'').trim();
+  if(S.mode==='anim')return document.getElementById('animTa').value.trim();
+  return document.getElementById('ansTa').value.trim();
+}
+function submit(){
+  clearInterval(S.timer);
+  stopSpeak();
+  var q=S.qs[S.idx];
+  var ans=currentAns();
+  stopMic();
+  if(S.mode!=='text')aiState('thinking');
+  S.recs.push({q:q,ans:ans||'（未作答）',score:0,used:S.sec-Math.max(S.left,0)});
+  stopVRec();
+  if(S.mode==='cam'&&S.idx>=S.qs.length-1)stopCam(); /* 最后一题提交后释放摄像头 */
+  renderFb(q,S.recs[S.recs.length-1]);
+}
+
+var RATE_WORDS=['','完全没思路，回去补一补','说了一点但不全','覆盖主要要点','要点全+表达顺','亮点突出，可迁移'];
+function renderFb(q,rec){
+  document.getElementById('fbMeta').innerHTML=metaHtml(q);
+  document.getElementById('fbQ').textContent=q.q;
+  document.getElementById('fbMy').textContent=rec.ans;
+  document.getElementById('fbPoint').textContent=q.point;
+  document.getElementById('fbAns').innerHTML=q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('');
+  document.getElementById('fbTips').innerHTML=q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('');
+  S.rated=0;
+  var box=document.getElementById('starBox');
+  box.innerHTML='';
+  for(var i=1;i<=5;i++){(function(n){
+    var b=document.createElement('button');b.innerHTML=ICONS.star;
+    b.onclick=function(){S.rated=n;rec.score=n;
+      Array.prototype.forEach.call(box.children,function(x,k){x.classList.toggle('lit',k<n)});
+      document.getElementById('rateLab').textContent=RATE_WORDS[n];
+      document.getElementById('nextBtn').disabled=false;};
+    box.appendChild(b)})(i)}
+  document.getElementById('rateLab').textContent='根据你覆盖了多少参考要点来评';
+  var nb=document.getElementById('nextBtn');
+  if(S.warmup){
+    S.warmup=false;nb.disabled=false;nb.textContent='热身结束，返回首页';
+    nb.onclick=function(){location.href='index.html'};
+    // 评分区改成热身说明
+    var box=document.getElementById('starBox');box.innerHTML='<div style="font-size:12px;color:var(--ink3)">⭐ 热身模式 · 可不打分，看完要点直接返回</div>';
+  }else{
+    nb.disabled=true;
+    nb.textContent=S.idx+1>=S.qs.length?'查看复盘报告 →':'下一题 →';
+    nb.onclick=function(){S.idx++;nextQ()};
+  }show('vFb');
+}
+
+function finish(){
+  var total=S.recs.length;
+  var sum=S.recs.reduce(function(s,r){return s+r.score},0);
+  var avg=(sum/total).toFixed(1);
+  var used=Math.round((Date.now()-S.t0)/1000);
+  var st=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0});
+  st.times++;st.questions+=total;st.scoreSum+=sum;storeSet('ivsim_stat',st);
+  document.getElementById('rvGrid').innerHTML=
+    '<div class="card"><div class="v">'+total+'</div><div class="l">完成题数</div></div>'+
+    '<div class="card"><div class="v">'+avg+'</div><div class="l">平均自评</div></div>'+
+    '<div class="card"><div class="v">'+fmtSec(used)+'</div><div class="l">本场用时</div></div>'+
+    '<div class="card"><div class="v">'+st.times+'</div><div class="l">累计场次</div></div>';
+  var cm;
+  if(avg>=4.5)cm='🏆 教练点评：表现非常出色！回答覆盖全面、表达清晰。接下来可以挑战更高难度题，并练习控制节奏。';
+  else if(avg>=3.5)cm='👍 教练点评：基础扎实，大部分要点都能答到。建议针对低分题，把参考要点里的关键词背熟，再练一遍。';
+  else if(avg>=2.5)cm='💪 教练点评：已经有思路了，但完整度还不够。建议对照参考要点逐题梳理框架，用"总-分-总"结构表达。';
+  else cm='🌱 教练点评：别灰心，起步阶段最重要是开口。先去题库把高频题的答题框架读熟，再来练一场，进步会非常明显。';
+  document.getElementById('rvCoach').textContent=cm;
+
+  /* 雷达图：5 维度能力评估 */
+  var totalAnsLen=S.recs.reduce(function(s,r){return s+(r.ans?' '+r.ans:'').replace(/\s/g,'').length},0);
+  var avgAnsLen=Math.round(totalAnsLen/total);
+  var dims=['知识覆盖','表达流畅度','思考结构','时间管理','情绪抗压'];
+  var dimsVals=[
+    Number(avg),                         // 知识覆盖 = 平均自评
+    Math.min(5,2+(avgAnsLen/40)),        // 表达流畅度 = 回答长度
+    Math.min(5,Math.max(0,Number((avg*0.9+(totalAnsLen>total*200?0.3:0)).toFixed(1)))), // 思考结构
+    Math.min(5,2.5+(S.sec===60?1:S.sec===120?0:0.5)),       // 时间管理
+    Math.min(5,Math.max(0,Number((avg*0.8+(total>=5?0.5:0)).toFixed(1))))              // 情绪抗压
+  ];
+  drawRadar(document.getElementById('rvRadar'),dims,dimsVals,{w:240,h:240,max:5});
+  var radarDescs=[
+    '知识覆盖：自评 '+avg+' 星 → 要点覆盖度 '+(avg>=4?'较强':'可提升')+';',
+    '表达流畅度：平均 '+avgAnsLen+' 字回答 → '+(avgAnsLen>=80?'内容充实':avgAnsLen>=40?'基本够':'偏短，建议多说关键点')+';',
+    '思考结构：自评 + 长度 → '+(avg>=3.5?'框架感不错':'建议用"总-分-总"结构明确表达')+';',
+    '时间管理：限时 '+S.sec+'s/题 → '+(S.sec<=60?'快答模式':'标准模式')+';',
+    '情绪抗压：'+(total>=5?'多题稳定发挥，心态 OK':'题目少，下次可以多练几道')+'。'
+  ];
+  document.getElementById('radarDesc').innerHTML=radarDescs.map(function(s){return '· '+s}).join('<br>');
+
+  /* 场次数记录，供全场景判断成就 */
+  var stat=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0,scenes:{}});
+  stat.scenes=stat.scenes||{};
+  stat.scenes[S.scene]=(stat.scenes[S.scene]||0)+1;
+  storeSet('ivsim_stat',stat);tryUnlockAll();
+  document.getElementById('rvList').innerHTML=S.recs.map(function(r,i){
+    var stars='';for(var k=1;k<=5;k++)stars+='<svg viewBox="0 0 24 24" class="'+(k<=r.score?'':'dim')+'"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18l-5.8 3.1 1.1-6.5L2.6 9.6l6.5-.9z"/></svg>';
+    return '<div class="rv-item"><div class="ri-h" data-i="'+i+'">'+
+      '<span style="color:'+SCENE_COLOR[r.q.scene]+';flex:none">Q'+(i+1)+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.q.q)+'</span>'+
+      '<span class="ri-stars" style="flex:none">'+stars+'</span><span class="chev">'+ICONS.chev+'</span></div>'+
+      '<div class="ri-b"><b style="color:var(--acc2)">我的作答：</b>'+esc(r.ans)+'<br><b style="color:var(--acc2)">参考要点：</b>'+r.q.ans.map(function(a){return '· '+esc(a)}).join('<br>')+'</div></div>';
+  }).join('');
+  $$('#rvList .ri-h').forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open')}});
+  document.getElementById('progBar').style.width='100%';
+  show('vReview');
+}
+
+var recog=null,micOn=false,micMode='ta',micFinal='',micWantRun=false;
+var micBtn=document.getElementById('micBtn');
+micBtn.innerHTML=ICONS.mic+' 语音作答';
+function startMic(mode){
+  var st=storeGet('ivsim_settings',{});
+  if(st.voiceOff){miniPop('语音功能已关闭','可在右上角「设置」里重新开启语音作答。');return false}
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){miniPop('浏览器不支持语音','当前浏览器不支持语音识别，推荐使用最新版 Chrome / Edge 体验语音作答。');return false}
+  if(micOn){if(micMode===mode)return true;stopMic()}
+  micMode=mode||'ta';
+  /* bubble 模式支持中途暂停后续听，保留已识别的 final 文本 */
+  micFinal=(micMode==='bubble')?(document.getElementById('usText').textContent||''):'';
+  recog=new SR();recog.lang='zh-CN';recog.continuous=true;recog.interimResults=true;
+  recog.onresult=function(e){
+    var interim='';
+    for(var i=0;i<e.results.length;i++){
+      var tr=e.results[i][0].transcript;
+      if(e.results[i].isFinal)micFinal+=tr;else interim+=tr;
+    }
+    dispatchMic((micFinal+interim).trim());
+  };
+  recog.onerror=function(ev){
+    micWantRun=false;
+    var code=ev&&ev.error;
+    if(code==='not-allowed'||code==='service-not-allowed')toast('麦克风权限被拒绝，请检查浏览器设置','warn');
+    else if(code!=='no-speech'&&code!=='aborted')toast('语音识别中断，点麦克风可重新开始','warn');
+    if(recog){recog.onend=null;try{recog.abort?recog.abort():recog.stop()}catch(_){}recog=null}
+    micOn=false;setMicVisuals(false);
+  };
+  recog.onend=function(){
+    /* bubble 模式下 no-speech / 网络抖动会自动 end，按意愿自动续听 */
+    if(micWantRun&&recog){try{recog.start();return}catch(_){}}
+    if(recog)recog=null;
+    micOn=false;setMicVisuals(false);
+  };
+  try{recog.start()}catch(e){recog=null;micOn=false;setMicVisuals(false);return false}
+  micOn=true;micWantRun=(micMode==='bubble');
+  setMicVisuals(true);
+  return true;
+}
+function pauseMic(){
+  micWantRun=false;
+  if(recog){recog.onend=null;try{recog.stop()}catch(_){}}
+  recog=null;micOn=false;setMicVisuals(false);
+}
+function stopMic(){
+  micWantRun=false;
+  if(recog){recog.onend=null;recog.onerror=null;try{recog.abort?recog.abort():recog.stop()}catch(_){}recog=null}
+  micOn=false;setMicVisuals(false);
+}
+function setMicVisuals(on){
+  var taOn=on&&micMode==='ta';
+  micBtn.classList.toggle('on',taOn);
+  micBtn.innerHTML=ICONS.mic+(taOn?' 停止语音':' 语音作答');
+  var mh=document.getElementById('micHint');if(mh)mh.textContent=taOn?'正在聆听…说完点“停止语音”':'';
+  var anOn=on&&micMode==='anim';
+  var ab=document.getElementById('animMicBtn');
+  if(ab){ab.classList.toggle('on',anOn);ab.innerHTML=ICONS.mic+(anOn?' 停止语音':' 语音输入')}
+  var ah=document.getElementById('animMicHint');if(ah)ah.textContent=anOn?'正在聆听…':'';
+  var camOn=on&&micMode==='bubble';
+  var cb=document.getElementById('camMicBtn');
+  if(cb){cb.classList.toggle('on',camOn);cb.textContent=camOn?'⏸ 暂停聆听':'🎤 开始回答'}
+  var ch=document.getElementById('camHint');
+  if(ch)ch.textContent=camOn?'正在聆听，请开口作答…':(micMode==='bubble'?'点「开始回答」说出你的答案':'面试官提问结束后自动开始聆听…');
+  var ub=document.getElementById('usBubble');if(ub)ub.classList.toggle('live',camOn);
+  var ph=document.getElementById('usPlaceholder');
+  if(ph){var txt=(document.getElementById('usText').textContent||'');ph.style.display=(!camOn&&!txt)?'':'none'}
+  if(micMode==='bubble')aiState(camOn?'listening':'idle');
+}
+function dispatchMic(txt){
+  if(micMode==='ta'){ansTa.value=txt;updateWordCnt()}
+  else if(micMode==='anim'){animTa.value=txt;updateAnimWord()}
+  else{
+    document.getElementById('usText').textContent=txt;
+    var ph=document.getElementById('usPlaceholder');if(ph)ph.style.display=txt?'none':'';
+  }
+}
+micBtn.onclick=function(){if(micOn&&micMode==='ta')stopMic();else startMic('ta')};
+
+/* TTS 朗读 */
+var ttsBtn=document.getElementById('ttsBtn'),lastQ='';
+ttsBtn.onclick=function(){
+  if(!canTTS()){toast('浏览器不支持朗读（SpeechSynthesis）','warn');return}
+  if(ttsOn){stopSpeak();ttsBtn.textContent='📢 朗读题目';return}
+  var qText=lastQ||document.getElementById('qText').textContent||'';
+  if(!qText){toast('还没有题目可以朗读','warn');return}
+  speakTTS(qText);ttsBtn.textContent='⏹ 停止朗读';
+  ttsUttr.onend=function(){ttsBtn.textContent='📢 朗读题目'};
+};
+
+/* 字数统计 */
+var ansTa=document.getElementById('ansTa');
+function updateWordCnt(){
+  var n=ansTa.value.replace(/\s/g,'').length;
+  document.getElementById('wordCnt').textContent='已输入 '+n+' 字';
+}
+ansTa.addEventListener('input',updateWordCnt);
+ansTa.addEventListener('focus',updateWordCnt);
+
+var textPanel=document.getElementById('textPanel');
+var animPanel=document.getElementById('animPanel');
+var animCtrls=document.getElementById('animCtrls');
+var camCtrls=document.getElementById('camCtrls');
+var usRow=document.getElementById('usRow');
+var aiAvatar=document.getElementById('aiAvatar');
+var aiStateEl=document.getElementById('aiState');
+var aiBubble=document.getElementById('aiBubble');
+var aiBubbleText=document.getElementById('aiBubbleText');
+var aiCaret=document.getElementById('aiCaret');
+var aiPoint=document.getElementById('aiPoint');
+var aiTags=document.getElementById('aiTags');
+var aiMute=document.getElementById('aiMute');
+var usBubble=document.getElementById('usBubble');
+var usText=document.getElementById('usText');
+var usWho=document.getElementById('usWho');
+var usAv=document.getElementById('usAv');
+var camStage=document.getElementById('camStage');
+var camVideo=document.getElementById('camVideo');
+var camTag=document.getElementById('camTag');
+var animTa=document.getElementById('animTa');
+var animMicBtn=document.getElementById('animMicBtn');
+var animMicHint=document.getElementById('animMicHint');
+var animWordCnt=document.getElementById('animWordCnt');
+var animSubmit=document.getElementById('animSubmit');
+var animTtsBtn=document.getElementById('animTtsBtn');
+var camMicBtn=document.getElementById('camMicBtn');
+var camHint=document.getElementById('camHint');
+var camSubmit=document.getElementById('camSubmit');
+var vrecLimitSel=document.getElementById('vrecLimit');
+
+var typeTimer=null;
+var AI_STATE_TEXT={idle:'准备好了，请作答',speaking:'面试官正在提问…',listening:'正在聆听你的回答',thinking:'正在记录…'};
+
+function aiState(s){
+  if(!aiAvatar)return;
+  aiAvatar.className='ai-avatar '+s;
+  aiStateEl.className='ai-state '+s;
+  aiStateEl.textContent=AI_STATE_TEXT[s]||'';
+}
+
+/* 气泡逐字打字机；点击气泡可立即显示全文 */
+function typeBubble(txt,onTyped){
+  clearInterval(typeTimer);
+  aiCaret.style.display='inline-block';
+  var i=0,finished=false;
+  function show(n){aiBubbleText.textContent=txt.slice(0,n)}
+  show(0);
+  function finish(){
+    if(finished)return;finished=true;
+    clearInterval(typeTimer);typeTimer=null;
+    show(txt.length);aiCaret.style.display='none';
+    if(onTyped)onTyped();
+  }
+  aiBubble.onclick=finish;
+  typeTimer=setInterval(function(){
+    i+=2;
+    if(i>=txt.length){i=txt.length;show(i);finish()}else show(i);
+  },26);
+}
+
+function ttsEnabled(){return storeGet('ivsim_anim_tts','1')==='1'}
+function renderMuteBtn(){aiMute.textContent=ttsEnabled()?'🔊':'🔇';aiMute.title=ttsEnabled()?'点击静音面试官朗读':'点击开启面试官朗读'}
+aiMute.onclick=function(){
+  var on=!ttsEnabled();
+  storeSet('ivsim_anim_tts',on?'1':'0');
+  renderMuteBtn();
+  if(!on)stopSpeak();
+  toast(on?'面试官朗读已开启':'面试官朗读已静音','ok');
+};
+
+/* 面试官提问：气泡打字 + TTS 朗读，两者都完成后进入作答状态 */
+function aiAsk(q){
+  clearInterval(typeTimer);
+  stopSpeak();
+  stopMic();
+  resetUserBubble();
+  aiTags.innerHTML=metaHtml(q);
+  aiPoint.textContent='考察点：'+q.point;
+  aiState('speaking');
+  var tDone=false,sDone=false,entered=false,safety=null;
+  function ready(){
+    if(entered)return;entered=true;
+    if(safety)clearTimeout(safety);
+    if(S.mode==='cam'){
+      /* 摄像头模式：自动开始语音聆听，失败则允许手动再点 */
+      if(!startMic('bubble'))setMicVisuals(false);
+    }else{
+      aiState('idle');
+    }
+  }
+  function tryReady(){if(tDone&&sDone)ready()}
+  typeBubble('Q'+(S.idx+1)+' · '+q.q,function(){tDone=true;tryReady()});
+  if(ttsEnabled()&&canTTS()){
+    speakTTS(q.q);
+    ttsUttr.onend=function(){ttsOn=false;sDone=true;tryReady()};
+    ttsUttr.onerror=function(){ttsOn=false;sDone=true;tryReady()};
+    /* 兜底：个别浏览器 TTS 不回调 onend，20 秒后强制进入作答状态 */
+    safety=setTimeout(function(){sDone=true;tryReady()},20000);
+  }else{
+    sDone=true;
+  }
+}
+
+/* 重听当前题目 */
+animTtsBtn.onclick=function(){
+  if(!canTTS()){toast('浏览器不支持朗读（SpeechSynthesis）','warn');return}
+  stopSpeak();aiState('speaking');
+  speakTTS(lastQ);
+  animTtsBtn.textContent='🔊 朗读中…';
+  ttsUttr.onend=function(){
+    ttsOn=false;animTtsBtn.textContent='📢 重听题目';
+    if(S.mode==='cam'){if(!micOn)startMic('bubble')}else aiState('idle');
+  };
+  ttsUttr.onerror=function(){ttsOn=false;animTtsBtn.textContent='📢 重听题目';aiState('idle')};
+};
+
+function resetUserBubble(){
+  usText.textContent='';
+  var ph=document.getElementById('usPlaceholder');if(ph)ph.style.display='';
+  usBubble.classList.remove('live');
+}
+
+/* 摄像头 */
+function showCamPreview(){
+  if(!S.camStream)return;
+  camVideo.srcObject=S.camStream;
+  var p=camVideo.play();if(p&&p.catch)p.catch(function(){});
+  camStage.classList.add('on');
+  camTag.textContent='● 摄像头已开启';
+}
+function stopCam(){
+  if(S.camStream){
+    try{S.camStream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+    S.camStream=null;
+  }
+  try{camVideo.srcObject=null}catch(e){}
+  camStage.classList.remove('on');
+  camTag.textContent='摄像头未开启';
+}
+window.addEventListener('beforeunload',stopCam);
+
+/* 每次进入题目视图时，按模式切换面板与控件 */
+function applyModeUI(){
+  var m=S.mode;
+  textPanel.style.display=(m==='text')?'block':'none';
+  animPanel.style.display=(m==='text')?'none':'block';
+  animCtrls.style.display=(m==='anim')?'block':'none';
+  camCtrls.style.display=(m==='cam')?'flex':'none';
+  usRow.style.display=(m==='cam')?'flex':'none';
+  /* cam 模式摄像头占用中，隐藏原有视频录制，避免重复申请权限 */
+  var vr=document.getElementById('vrecBtn');if(vr)vr.style.display=(m==='cam')?'none':'';
+  var vl=document.getElementById('vrecLimit');if(vl)vl.style.display=(m==='cam')?'none':'';
+  if(m==='cam'&&S.camStream)showCamPreview();
+  var u=getUser()||{};
+  usAv.textContent=u.avatar||'🧑‍💼';
+  usWho.textContent=(u.name||'我')+' · 语音作答';
+  resetUserBubble();
+  renderMuteBtn();
+  animMicBtn.innerHTML=ICONS.mic+' 语音输入';
+  animMicHint.textContent='';
+  camMicBtn.textContent='🎤 开始回答';
+  camHint.textContent='面试官提问结束后自动开始聆听…';
+  aiState('idle');
+  syncMiniTimer();
+}
+
+/* 模式2：文本框字数 + 语音输入 + 提交 */
+function updateAnimWord(){
+  var n=animTa.value.replace(/\s/g,'').length;
+  animWordCnt.textContent='已输入 '+n+' 字';
+}
+animTa.addEventListener('input',updateAnimWord);
+animMicBtn.onclick=function(){if(micOn&&micMode==='anim')stopMic();else startMic('anim')};
+animSubmit.onclick=function(){submit()};
+
+/* 模式3：开始/暂停聆听 + 完成作答 */
+camMicBtn.onclick=function(){
+  if(micOn&&micMode==='bubble')pauseMic();
+  else startMic('bubble');
+};
+camSubmit.onclick=function(){
+  pauseMic();
+  var txt=(usText.textContent||'').trim();
+  if(!txt){miniPop('还没有识别到回答','请点「🎤 开始回答」说出你的答案，或再试一次；确定交白卷也可以，我们会按「未作答」记录。');return}
+  submit();
+};
+</script>
+</body>
+</html>
