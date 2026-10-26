@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>面试视频 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=4">
+<link rel="stylesheet" href="shared.css?v=202610261">
 <style>
 .wrap{max-width:960px;margin:0 auto;padding:26px clamp(14px,4vw,40px) 90px}
 .vtabs{display:flex;gap:8px;margin:16px 0 18px;flex-wrap:wrap}
@@ -52,7 +52,7 @@
   <div id="pane"></div>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="shared.js?v=202610261"></script>
 <script>
 if(!initPage('videos',true))throw new Error('login required');
 
@@ -195,12 +195,13 @@ function renderUpload(){
   '</div>';
   var file=null;
   var drop=document.getElementById('upDrop'),fi=document.getElementById('upFile');
-  drop.onclick=function(){fi.click()};
+  drop.onclick=function(){if(!canUseFeature())return;fi.click()};
   fi.onchange=function(){
     file=fi.files[0];
     if(file){drop.classList.add('has');document.getElementById('upDropTxt').textContent='✅ '+file.name+'（'+(file.size/1048576).toFixed(1)+'MB）'}
   };
   document.getElementById('upBtn').onclick=function(){
+    if(!canUseFeature())return;
     var title=document.getElementById('upTitle').value.trim();
     var scene=document.getElementById('upScene').value;
     if(!file){toast('请先选择视频文件','warn');return}

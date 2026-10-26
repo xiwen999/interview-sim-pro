@@ -1,0 +1,466 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>首页 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=4">
+<style>
+/* ---- 轮播 ---- */
+.hero{position:relative;border-radius:24px;overflow:hidden;height:300px;border:1px solid var(--line)}
+.slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.25,.9,.3,1)}
+.slide{min-width:100%;height:100%;position:relative;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(24px,5vw,64px);overflow:hidden}
+.slide::before{content:"";position:absolute;inset:0;z-index:0}
+.slide.s1::before{background:linear-gradient(115deg,rgba(59,76,192,.85),rgba(23,162,184,.55)),radial-gradient(600px 300px at 85% 20%,rgba(65,224,200,.4),transparent)}
+.slide.s2::before{background:linear-gradient(115deg,rgba(124,58,180,.8),rgba(219,74,140,.5)),radial-gradient(600px 300px at 80% 80%,rgba(244,114,182,.35),transparent)}
+.slide.s3::before{background:linear-gradient(115deg,rgba(180,120,20,.75),rgba(190,60,60,.5)),radial-gradient(600px 300px at 85% 25%,rgba(251,191,36,.35),transparent)}
+.slide>*{position:relative;z-index:1}
+.slide .s-tag{display:inline-flex;width:max-content;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);margin-bottom:14px}
+.slide h2{font-size:clamp(22px,3.4vw,34px);font-weight:900;letter-spacing:1px;text-shadow:0 3px 16px rgba(0,0,0,.3)}
+.slide p{margin:10px 0 20px;font-size:14px;color:rgba(255,255,255,.82);max-width:480px;line-height:1.7}
+.slide .btn{width:max-content}
+.hero .arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;background:rgba(10,15,32,.5);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:19px;color:#fff;transition:.2s;backdrop-filter:blur(6px)}
+.hero .arrow:hover{background:rgba(10,15,32,.8);transform:translateY(-50%) scale(1.08)}
+.hero .prev{left:16px}.hero .next{right:16px}
+.hero .dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.hero .dots button{width:9px;height:9px;border-radius:99px;background:rgba(255,255,255,.35);transition:.3s}
+.hero .dots button.on{width:26px;background:#fff}
+
+/* ---- 统计条 ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{padding:18px 20px;text-align:center}
+.stat .v{font-size:27px;font-weight:900;background:linear-gradient(90deg,#8ABDFF,#41E0C8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{font-size:12px;color:var(--ink3);margin-top:5px}
+.stat .sub{font-size:10.5px;color:var(--ink3);margin-top:3px;opacity:.7}
+
+/* ---- 签到 + 成就预览 ---- */
+.side{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:22px}
+@media (max-width:820px){.side{grid-template-columns:1fr}}
+.checkin-card{padding:22px}
+.checkin-card h4,.ach-card h4{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:12px}
+.ch-day-mini{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--ink3);transition:.15s}
+.ch-day-mini.done{background:linear-gradient(135deg,rgba(108,140,255,.35),rgba(65,224,200,.25));border-color:rgba(108,140,255,.55);color:#fff}
+.ch-day-mini.today{outline:2px solid var(--acc);outline-offset:1px}
+.ach-card{padding:22px}
+.ach-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ach-item{padding:9px 4px;text-align:center;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.ach-item .ai-ic{font-size:18px;filter:grayscale(1) opacity(.4)}
+.ach-item.on .ai-ic{filter:none}
+.ach-item .ai-t{font-size:10px;color:var(--ink3);margin-top:2px;line-height:1.4}
+.ach-item.on{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.35)}
+.ach-item.on .ai-t{color:#cdd8ff}
+
+/* ---- 场景卡 ---- */
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.scene-card{padding:20px;cursor:pointer;transition:.25s;position:relative}
+.scene-card:hover{transform:translateY(-4px);border-color:var(--line2)}
+.scene-card .sc-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:13px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.scene-card .sc-nm{font-weight:800;font-size:15.5px;margin-bottom:6px}
+.scene-card .sc-ds{font-size:12px;color:var(--ink3);line-height:1.6}
+.scene-card .sc-go{position:absolute;right:16px;top:18px;font-size:12px;color:var(--ink3);opacity:0;transition:.25s}
+.scene-card:hover .sc-go{opacity:1;transform:translateX(3px)}
+
+/* ---- 趣味区（2 行多卡） ---- */
+.fun-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+@media (max-width:520px){.fun-grid{grid-template-columns:1fr}}
+.fun-card{padding:22px;position:relative;overflow:hidden}
+.fun-card .fc-t{font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.fun-card .fc-d{font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px}
+.fortune-box{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.4);margin-bottom:12px}
+.fortune-box .f-ic{font-size:30px}.fortune-box .f-t{font-weight:800;font-size:15px}.fortune-box .f-d{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.6}
+.quick-q{font-size:14px;line-height:1.7;padding:14px 16px;border-radius:14px;background:rgba(108,140,255,.09);border:1px dashed rgba(108,140,255,.45);margin-bottom:12px;min-height:64px}
+.quick-ans{display:none;font-size:12.5px;color:var(--ink2);line-height:1.8;padding:12px 16px;border-radius:14px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.3);margin-bottom:12px}
+.quick-ans.show{display:block;animation:rise .4s both}
+
+/* 每日挑战 */
+.dc-card{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.08));border:1px solid rgba(108,140,255,.3);margin-bottom:12px}
+.dc-card .dc-date{font-size:11px;color:#9ee5d8;margin-bottom:6px}
+.dc-card .dc-q{font-size:14px;font-weight:700;line-height:1.6}
+
+/* 知识翻卡 */
+.flip-wrap{perspective:1000px;height:150px;margin-bottom:12px}
+.flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer}
+.flip-card.flipped{transform:rotateY(180deg)}
+.flip-face{position:absolute;inset:0;border-radius:14px;padding:14px 16px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.flip-f{background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.flip-f .fc-tag{font-size:10.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px}
+.flip-f .fc-ic{font-size:20px;margin-bottom:6px}
+.flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));border:1px solid rgba(65,224,200,.3);transform:rotateY(180deg)}
+.flip-b .fc-tip{font-size:13px;line-height:1.8;color:#cdd8ff}
+.flip-b .fc-q{font-size:10.5px;color:var(--ink3);margin-top:8px}
+
+/* 面试梗 */
+.meme-card{padding:14px;border-radius:14px;background:rgba(183,166,249,.08);border:1px dashed rgba(183,166,249,.4);margin-bottom:12px}
+.meme-card .m-t{font-size:14.5px;font-weight:800;color:#c4b9ff;margin-bottom:6px}
+.meme-card .m-d{font-size:12px;color:var(--ink2);line-height:1.8}
+
+/* 人格测试 */
+.pq{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:10px}
+.pq .pq-q{font-size:13px;font-weight:700;margin-bottom:8px;line-height:1.6}
+.pq .pq-opts{display:flex;flex-direction:column;gap:6px}
+.pq button.popt{text-align:left;padding:9px 12px;border-radius:10px;font-size:12.5px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);transition:.15s;cursor:pointer}
+.pq button.popt:hover{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.4)}
+.pq button.popt.on{background:rgba(108,140,255,.2);border-color:var(--acc);color:#fff}
+.persona-result{padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(183,166,249,.1));border:1px solid rgba(108,140,255,.3);margin-bottom:12px;text-align:center}
+.persona-result .pr-ic{font-size:42px}
+.persona-result .pr-t{font-size:16px;font-weight:900;margin-top:4px}
+.persona-result .pr-rate{font-size:12px;color:var(--acc2);margin-top:3px}
+.persona-result .pr-d{font-size:12px;color:var(--ink2);line-height:1.8;margin-top:10px;text-align:left}
+
+footer{margin-top:60px;text-align:center;font-size:12px;color:var(--ink3);line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <!-- 轮播 -->
+  <div class="hero rise" id="hero">
+    <div class="slides" id="slides">
+      <div class="slide s1">
+        <span class="s-tag">🎤 全真模拟</span>
+        <h2>开始一场限时模拟面试</h2>
+        <p>随机抽题 · 倒计时作答 · 语音输入 · 自评复盘，把每一次练习当成真正的面试现场。</p>
+        <button class="btn pri" onclick="location.href='interview.html'">开始模拟面试 →</button>
+      </div>
+      <div class="slide s2">
+        <span class="s-tag">📚 50 道高频题</span>
+        <h2>覆盖 5 大面试场景</h2>
+        <p>求职实习、技术开发、数据分析、产品运营、通用行为，每题附考察点、技巧和参考要点。</p>
+        <button class="btn grn" onclick="location.href='bank.html'">浏览题库 →</button>
+      </div>
+      <div class="slide s3">
+        <span class="s-tag">� 趣味训练</span>
+        <h2>签到、成就、每日挑战、人格测试</h2>
+        <p>低成本练胆量，解锁 13 个面试成就，让训练像玩游戏一样停不下来。</p>
+        <button class="btn gho" onclick="document.getElementById('funSec').scrollIntoView({behavior:'smooth'})">轻松一下 ↓</button>
+      </div>
+    </div>
+    <button class="arrow prev" id="hPrev">‹</button>
+    <button class="arrow next" id="hNext">›</button>
+    <div class="dots" id="hDots"></div>
+  </div>
+
+  <!-- 统计条 -->
+  <div class="stats rise d1" id="stats"></div>
+
+  <!-- 签到 + 成就预览（并排） -->
+  <div class="side rise d2">
+    <div class="card checkin-card">
+      <h4>📅 每日签到 <span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:auto">连签越多奖励越多</span></h4>
+      <div id="chMini"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn pri sm" id="chBig" style="flex:1">✨ 签到领成就</button>
+        <button class="btn gho sm" onclick="showCheckinPanel()">查看签到详情 →</button>
+      </div>
+    </div>
+    <div class="card ach-card">
+      <h4>🏅 成就墙 <span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:auto" id="achProg"></span></h4>
+      <div class="ach-list" id="achMini"></div>
+      <button class="btn gho sm" style="width:100%;margin-top:12px" onclick="openAchievements()">查看全部成就 →</button>
+    </div>
+  </div>
+
+  <!-- 场景卡 -->
+  <div class="sec-t rise d3">选择面试场景<span class="sub">点卡片直接进入对应场景的训练</span></div>
+  <div class="scenes rise d3" id="scenes"></div>
+
+  <!-- 趣味区 -->
+  <div class="sec-t rise d4" id="funSec">轻松一下 · 面试相关的趣味小功能</div>
+  <div class="fun-grid rise d4">
+    <!-- 今日面试运势 -->
+    <div class="card fun-card">
+      <div class="fc-t">🔮 今日面试运势</div>
+      <div class="fc-d">每天一签求个好彩头，低成本练胆量</div>
+      <div class="fortune-box" id="fortuneBox"><span class="f-ic">🎴</span><div><div class="f-t">还没有抽今天的签</div><div class="f-d">点击下方按钮，抽取今日运势</div></div></div>
+      <button class="btn pri sm" id="drawBtn">✨ 抽一签</button>
+    </div>
+
+    <!-- 随机快答 -->
+    <div class="card fun-card">
+      <div class="fc-t">⚡ 随机快答一题</div>
+      <div class="fc-d">随机蹦题，60 秒口述思路再对答案（连答 10 次解锁成就）</div>
+      <div class="quick-q" id="quickQ">点"换一题"开始挑战</div>
+      <div class="quick-ans" id="quickAns"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn grn sm" id="quickBtn">🎲 换一题</button>
+        <button class="btn gho sm" id="quickShow" style="display:none">看参考要点</button>
+      </div>
+    </div>
+
+    <!-- 每日挑战 -->
+    <div class="card fun-card">
+      <div class="fc-t">🎯 每日挑战</div>
+      <div class="fc-d">每天一道固定面试题，坚持练 30 天进步肉眼可见</div>
+      <div class="dc-card" id="dcBox"></div>
+      <button class="btn pri sm" onclick="location.href='interview.html'">去练这道 →</button>
+    </div>
+
+    <!-- 知识翻卡 -->
+    <div class="card fun-card">
+      <div class="fc-t">🃏 知识翻卡</div>
+      <div class="fc-d">随机一个答题技巧点，翻转看答案，碎片时间也能练</div>
+      <div class="flip-wrap"><div class="flip-card" id="flipCard">
+        <div class="flip-face flip-f"><div class="fc-tag">点卡片翻面看技巧</div><div class="fc-ic">💡</div><div style="font-size:13px;color:#cdd8ff">随机一个面试答题技巧点</div></div>
+        <div class="flip-face flip-b"><div class="fc-tip" id="flipTip"></div><div class="fc-q" id="flipQ"></div></div>
+      </div></div>
+      <button class="btn grn sm" id="flipBtn">🔄 换一张</button>
+    </div>
+
+    <!-- 面试梗百科 -->
+    <div class="card fun-card">
+      <div class="fc-t">📖 面试梗百科</div>
+      <div class="fc-d">互联网黑话扫盲，下次面试听到就不会懵啦</div>
+      <div class="meme-card" id="memeBox"><div class="m-t" id="mTitle">“闭环”是啥意思？</div><div class="m-d" id="mDesc">产品/运营圈高频词…</div></div>
+      <button class="btn gho sm" id="memeBtn">🔄 换一个梗</button>
+    </div>
+
+    <!-- 面试人格测试 -->
+    <div class="card fun-card" id="persona">
+      <div class="fc-t">🎭 面试人格测试</div>
+      <div class="fc-d">5 道题测出你的面试人格类型，附个性化改进建议</div>
+      <div id="pqArea"></div>
+    </div>
+
+    <!-- 目标面试日倒计时 -->
+    <div class="card fun-card">
+      <div class="fc-t">📅 目标面试日倒计时</div>
+      <div class="fc-d">设置你的面试日，每天提醒自己还有几天</div>
+      <div id="goalBox" style="padding:14px 16px;border-radius:14px;background:rgba(183,166,249,.1);border:1px solid rgba(183,166,249,.3);margin-bottom:12px;text-align:center"></div>
+      <button class="btn pri sm" id="goalBtn">🎯 去设置目标面试日</button>
+    </div>
+
+    <!-- 收藏预览 -->
+    <div class="card fun-card">
+      <div class="fc-t">⭐ 我收藏的题目</div>
+      <div class="fc-d">收藏你觉得好的题，随时回来复盘</div>
+      <div id="favPreview" style="min-height:60px"></div>
+      <button class="btn gho sm" onclick="location.href='bank.html'">去题库管理收藏 →</button>
+    </div>
+  </div>
+
+<footer>模拟面试训练营 Pro · 数据仅保存在本地浏览器<br>有问题？点右下角 📮 反馈给官方（off）<br>v2.0 · 签到 × 成就 × 人格 × 趣味</footer>
+</div>
+
+<script src="shared.js?v=4"></script>
+<script>
+if(!initPage('home',true))throw new Error('login required');
+
+/* ---- 轮播 ---- */
+var idx=0,timer=null,slides=document.getElementById('slides'),N=3,dotsBox=document.getElementById('hDots');
+for(var i=0;i<N;i++){var b=document.createElement('button');(function(k){b.onclick=function(){go(k);restart()}})(i);dotsBox.appendChild(b)}
+function go(i){idx=(i+N)%N;slides.style.transform='translateX(-'+idx*100+'%)';
+  Array.prototype.forEach.call(dotsBox.children,function(d,k){d.className=k===idx?'on':''})}
+function restart(){clearInterval(timer);timer=setInterval(function(){go(idx+1)},4500)}
+document.getElementById('hPrev').onclick=function(){go(idx-1);restart()};
+document.getElementById('hNext').onclick=function(){go(idx+1);restart()};
+var hero=document.getElementById('hero');
+hero.addEventListener('mouseenter',function(){clearInterval(timer)});hero.addEventListener('mouseleave',restart);
+var tx=0;hero.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+hero.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)go(idx+(dx<0?1:-1));restart()},{passive:true});
+go(0);restart();
+
+/* ---- 统计 ---- */
+var stat=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0});
+var c=getCheckInfo();var avg=stat.questions?(stat.scoreSum/stat.questions).toFixed(1):'—';
+document.getElementById('stats').innerHTML=
+ '<div class="card stat"><div class="v">'+stat.times+'</div><div class="l">累计训练场次</div></div>'+
+ '<div class="card stat"><div class="v">'+stat.questions+'</div><div class="l">累计作答</div></div>'+
+ '<div class="card stat"><div class="v">'+avg+'</div><div class="l">平均自评</div></div>'+
+ '<div class="card stat"><div class="v">'+c.days+'</div><div class="l">连续签到</div><div class="sub">累计 '+c.total+' 天</div></div>';
+
+/* ---- 签到预览 ---- */
+function renderChMini(){
+  var c=getCheckInfo();var set7=buildWeek(c.history);
+  var html=set7.map(function(d){return '<div class="ch-day-mini'+(d.done?' done':'')+(d.today?' today':'')+'" title="'+d.label+'">'+d.num+'</div>'}).join('');
+  document.getElementById('chMini').innerHTML='<div style="display:flex;gap:7px">'+html+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink3);margin-top:10px">连续签到：<b style="color:#8ABDFF">'+c.days+'</b> 天 · 累计：<b style="color:#FBBF24">'+c.total+'</b> 天</div>';
+  var done=c.last===new Date().toDateString();
+  var btn=document.getElementById('chBig');
+  btn.textContent=done?'✅ 今日已签到 · 明天再来':'✨ 立即签到';
+  btn.onclick=function(){checkIn();renderChMini();renderAchMini()};
+}
+renderChMini();
+
+/* ---- 成就预览（前 9 个） ---- */
+function renderAchMini(){
+  var list=getAchievements();var got=list.filter(function(a){return a.unlocked}).length;
+  document.getElementById('achProg').textContent=got+' / '+list.length;
+  document.getElementById('achMini').innerHTML=list.slice(0,9).map(function(a){
+    return '<div class="ach-item'+(a.unlocked?' on':'')+'"><div class="ai-ic">'+a.ic+'</div><div class="ai-t">'+esc(a.t)+'</div></div>'}).join('')+
+    (list.length>9?'<div class="ach-item on" style="grid-column:span 3;font-size:11px;color:#cdd8ff">+ 更多成就…</div>':'');
+}
+renderAchMini();
+
+/* ---- 场景卡 ---- */
+document.getElementById('scenes').innerHTML=Object.keys(SCENES).map(function(k){
+  var s=SCENES[k],n=QUESTIONS.filter(function(q){return q.scene===k}).length;
+  return '<div class="card scene-card" data-s="'+k+'">'+
+    '<span class="sc-go">去练 →</span><div class="sc-ic">'+ICONS[s.icon]+'</div>'+
+    '<div class="sc-nm">'+s.name+'</div><div class="sc-ds">'+s.desc+' · '+n+' 题</div></div>';
+}).join('');
+$$('.scene-card').forEach(function(c){c.onclick=function(){location.href='interview.html?scene='+c.dataset.s}});
+
+/* ---- 运势 ---- */
+var FORTUNES=[
+ {ic:'🌟',t:'大吉 · 面霸附体',d:'今天状态绝佳，适合冲一场高难度模拟面试！'},
+ {ic:'✨',t:'中吉 · 稳中有进',d:'发挥稳定，把基础题再过一遍，细节决定成败。'},
+ {ic:'🍀',t:'小吉 · 贵人相助',d:'可能遇到意想不到的追问，别慌，结构化表达能帮你过关。'},
+ {ic:'🌙',t:'平 · 宜复盘',d:'今天适合慢一点：回顾之前的作答，把短板列出来。'},
+ {ic:'🔥',t:'吉 · 灵感迸发',d:'表达欲旺盛，适合练自我介绍和项目讲述。'},
+ {ic:'🌈',t:'末吉 · 否极泰来',d:'即使答得不顺也别气馁，每道错题都是进步的台阶。'}
+];
+var fKey='ivsim_fortune',today=new Date().toDateString();
+var saved=storeGet(fKey,null);
+function renderFortune(f){document.getElementById('fortuneBox').innerHTML='<span class="f-ic">'+f.ic+'</span><div><div class="f-t">'+f.t+'</div><div class="f-d">'+f.d+'</div></div>'}
+if(saved&&saved.day===today){renderFortune(saved.f);document.getElementById('drawBtn').textContent='✅ 今日已抽'}
+document.getElementById('drawBtn').onclick=function(){
+  var cur=storeGet(fKey,null);if(cur&&cur.day===today){miniPop('今天已经抽过啦','明天再来试试手气吧');return}
+  var f=FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
+  storeSet(fKey,{day:today,f:f});renderFortune(f);this.textContent='✅ 今日已抽';toast('抽签成功！','ok');
+  setTimeout(tryUnlockAll,200);renderAchMini();
+};
+
+/* ---- 随机快答 ---- */
+var curQ=null,quickCnt=storeGet('ivsim_quick_cnt',0);
+document.getElementById('quickBtn').onclick=function(){
+  curQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+  document.getElementById('quickQ').innerHTML='<b style="color:'+SCENE_COLOR[curQ.scene]+'">['+SCENES[curQ.scene].name+'·'+LV_NAME[curQ.lv]+']</b> '+esc(curQ.q)+'<div style="font-size:11.5px;color:var(--ink3);margin-top:6px">⏱️ 建议 60 秒内口述完思路（已练 '+quickCnt+' 次）</div>';
+  document.getElementById('quickAns').className='quick-ans';
+  document.getElementById('quickShow').style.display='';
+  quickCnt++;storeSet('ivsim_quick_cnt',quickCnt);
+  if(quickCnt>=10)setTimeout(function(){tryUnlockAll();renderAchMini()},100);
+};
+document.getElementById('quickShow').onclick=function(){
+  if(!curQ)return;
+  var a=document.getElementById('quickAns');
+  a.innerHTML='<b style="color:var(--acc2)">考察点：</b>'+esc(curQ.point)+'<br><b style="color:var(--acc2)">参考要点：</b><br>'+curQ.ans.slice(0,2).map(function(x){return '· '+esc(x)}).join('<br>');
+  a.className='quick-ans show';
+};
+
+/* ---- 每日挑战 ---- */
+(function(){var d=dailyChallenge();
+  document.getElementById('dcBox').innerHTML='<div class="dc-date">📅 '+d.date+' · 今日固定题</div><div class="dc-q">'+esc(d.q.q)+'</div>';
+})();
+
+/* ---- 知识翻卡 ---- */
+function doFlip(){
+  var card=document.getElementById('flipCard');
+  if(card.classList.contains('flipped')){card.classList.remove('flipped');return}
+  var fc=flipCard();
+  document.getElementById('flipTip').textContent=fc.tip;
+  document.getElementById('flipQ').textContent='来自：'+SCENES[fc.q.scene].name+' · '+fc.q.q;
+  card.classList.add('flipped');
+}
+document.getElementById('flipCard').onclick=doFlip;
+document.getElementById('flipBtn').onclick=function(){var card=document.getElementById('flipCard');card.classList.remove('flipped');setTimeout(doFlip,280)};
+
+/* ---- 面试梗 ---- */
+function renderMeme(){
+  var m=MEME_POOL[Math.floor(Math.random()*MEME_POOL.length)];
+  document.getElementById('mTitle').textContent=m[0];
+  document.getElementById('mDesc').textContent=m[1];
+}
+renderMeme();document.getElementById('memeBtn').onclick=renderMeme;
+
+/* ---- 面试人格测试 ---- */
+(function(){
+  var area=document.getElementById('pqArea');
+  var pers=storeGet('ivsim_persona',null);
+  if(pers){area.innerHTML=
+    '<div class="persona-result"><div class="pr-ic">'+esc(pers.ic)+'</div><div class="pr-t">'+esc(pers.t)+'</div><div class="pr-rate">'+esc(pers.rate)+' · 得分 '+pers.score+' / '+PERSONA_QS.length*5+'</div><div class="pr-d">'+esc(pers.d)+'</div></div>'+
+    '<div style="text-align:center"><button class="btn gho sm" id="pqReset">🔄 重新测一次</button></div>';
+    document.getElementById('pqReset').onclick=function(){runPQ()};
+    return;
+  }
+  runPQ();
+})();
+function runPQ(){
+  var area=document.getElementById('pqArea'),vals=[],idx=0;
+  function render(){
+    if(idx>=PERSONA_QS.length){
+      var r=calcPersona(vals);storeSet('ivsim_persona',r);setTimeout(tryUnlockAll,100);renderAchMini();
+      area.innerHTML='<div class="persona-result"><div class="pr-ic">'+esc(r.ic)+'</div><div class="pr-t">'+esc(r.t)+'</div><div class="pr-rate">'+esc(r.rate)+' · 得分 '+r.score+' / '+PERSONA_QS.length*5+'</div><div class="pr-d">'+esc(r.d)+'</div></div>'+
+        '<div style="text-align:center"><button class="btn gho sm" id="pqReset">🔄 再测一次</button></div>';
+      document.getElementById('pqReset').onclick=function(){localStorage.removeItem('ivsim_persona');runPQ()};return;
+    }
+    var q=PERSONA_QS[idx];
+    var optsHtml=q.opts.map(function(o,i){return '<button class="popt" data-v="'+o.v+'" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>'}).join('');
+    area.innerHTML=
+      '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">第 '+(idx+1)+' / '+PERSONA_QS.length+' 题</div>'+
+      '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+optsHtml+'</div></div>'+
+      '<button class="btn gho sm" style="margin-top:8px" id="pqSkip">跳过</button>';
+    $$('.popt',area).forEach(function(b){b.onclick=function(){
+      vals[idx]=+b.dataset.v;idx++;render();
+    }});
+    document.getElementById('pqSkip').onclick=function(){vals[idx]=3;idx++;render()};
+  }
+  render();
+}
+
+/* ---- 目标面试日 ---- */
+function renderGoal(){
+  var g=getGoal();
+  var box=document.getElementById('goalBox');
+  var btn=document.getElementById('goalBtn');
+  if(!g){
+    box.innerHTML='<div style="font-size:13px;color:var(--ink2)">还没有设置目标面试日</div><div style="font-size:24px;font-weight:900;color:#b7a6f9;margin-top:4px">🎯 设置起来吧！</div>';
+    btn.textContent='🎯 设置目标面试日';btn.onclick=askGoal;
+  }else{
+    var d=daysToGoal();
+    var gDate=(typeof g==='object'&&g)?g.date:g;
+    var gLabel=gDate+(g&&g.name?'（'+g.name+'）':'');
+    if(d>0){
+      box.innerHTML='<div style="font-size:13px;color:var(--ink2)">距离 '+esc(gLabel)+' 还有</div>'+
+        '<div style="font-size:40px;font-weight:900;color:#b7a6f9;letter-spacing:1px">'+d+' <span style="font-size:16px">天</span></div>'+
+        '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">加油！每天至少练 3 题</div>';
+      btn.textContent='🔄 改一个日子';
+    }else if(d===0){
+      box.innerHTML='<div style="font-size:13px;color:#FBBF24">今天就是你的目标面试日！</div>'+
+        '<div style="font-size:28px;font-weight:900;color:#FBBF24">💪 冲鸭！！</div>';
+      btn.textContent='🎉 面试日已过';
+    }else{
+      box.innerHTML='<div style="font-size:13px;color:var(--ink2)">目标面试日 '+esc(gLabel)+' 已经过去 ' + (-d) + ' 天了</div>'+
+        '<div style="font-size:20px;font-weight:800;color:#80EEB7">你已经很棒啦 ✨</div>';
+      btn.textContent='🔄 再设一个新目标';
+    }
+    btn.onclick=askGoal;
+  }
+}
+function askGoal(){
+  var m=openMask(
+    '<div class="m-head"><div><h3>🎯 设置目标面试日</h3><div class="m-sub">输入你的目标日期，或点清除取消</div></div><button class="m-x" id="agX">✕</button></div>'+
+    '<div class="f-lab">目标面试日</div>'+
+    '<input class="f-in" id="agDate" type="date" placeholder="YYYY-MM-DD">'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<button class="btn gho" id="agClear" style="flex:1">清除</button>'+
+      '<button class="btn pri" id="agOk" style="flex:2">确认设置</button>'+
+    '</div>'
+  );
+  $('#agX').onclick=closeMask;
+  $('#agClear').onclick=function(){storeSet('ivsim_goal','');closeMask();renderGoal();toast('已清除目标面试日','ok')};
+  $('#agOk').onclick=function(){
+    var d=$('#agDate').value.trim();
+    if(!d){toast('请选择日期','warn');return}
+    setGoal(d);closeMask();renderGoal();toast('目标面试日已设置！','ok');
+  };
+}
+renderGoal();
+
+/* ---- 收藏预览 ---- */
+function renderFavPreview(){
+  var favs=favQues(3);
+  var box=document.getElementById('favPreview');
+  if(!favs.length){
+    box.innerHTML='<div style="text-align:center;padding:18px;color:var(--ink3);font-size:13px">还没有收藏任何题目<br>去题库 ⭐ 收藏喜欢的题吧</div>';return;
+  }
+  box.innerHTML=favs.map(function(q){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:6px;font-size:12.5px">'+
+      '<span style="color:'+SCENE_COLOR[q.scene]+';flex:none">'+SCENES[q.scene].name+'</span>'+
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">'+esc(q.q)+'</span>'+
+      '<span style="color:#FBBF24;flex:none">⭐</span></div>';
+  }).join('');
+}
+renderFavPreview();
+</script>
+</body>
+</html>

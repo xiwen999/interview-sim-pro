@@ -1,448 +1,367 @@
-﻿<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<!DOCTYPE html>
+<html lang="zh-CN" style="--bgA: #1b2a6b; --bgB: #0e4d5c; --bgC: #3b1d5d; --ink: #eef2ff; --ink2: #aab4d8; --ink3: #7c86ad;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>首页 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=4">
+<link rel="stylesheet" href="shared.css?v=202610261">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Noto+Serif+SC:wght@700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <style>
-.hero{position:relative;border-radius:24px;overflow:hidden;height:300px;border:1px solid var(--line)}
-.slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.25,.9,.3,1)}
-.slide{min-width:100%;height:100%;position:relative;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(24px,5vw,64px);overflow:hidden}
-.slide::before{content:"";position:absolute;inset:0;z-index:0}
-.slide.s1::before{background:linear-gradient(115deg,rgba(59,76,192,.85),rgba(23,162,184,.55)),radial-gradient(600px 300px at 85% 20%,rgba(65,224,200,.4),transparent)}
-.slide.s2::before{background:linear-gradient(115deg,rgba(124,58,180,.8),rgba(219,74,140,.5)),radial-gradient(600px 300px at 80% 80%,rgba(244,114,182,.35),transparent)}
-.slide.s3::before{background:linear-gradient(115deg,rgba(180,120,20,.75),rgba(190,60,60,.5)),radial-gradient(600px 300px at 85% 25%,rgba(251,191,36,.35),transparent)}
-.slide>*{position:relative;z-index:1}
-.slide .s-tag{display:inline-flex;width:max-content;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);margin-bottom:14px}
-.slide h2{font-size:clamp(22px,3.4vw,34px);font-weight:900;letter-spacing:1px;text-shadow:0 3px 16px rgba(0,0,0,.3)}
-.slide p{margin:10px 0 20px;font-size:14px;color:rgba(255,255,255,.82);max-width:480px;line-height:1.7}
-.slide .btn{width:max-content}
-.hero .arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;background:rgba(10,15,32,.5);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:19px;color:#fff;transition:.2s;backdrop-filter:blur(6px)}
-.hero .arrow:hover{background:rgba(10,15,32,.8);transform:translateY(-50%) scale(1.08)}
-.hero .prev{left:16px}.hero .next{right:16px}
-.hero .dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
-.hero .dots button{width:9px;height:9px;border-radius:99px;background:rgba(255,255,255,.35);transition:.3s}
-.hero .dots button.on{width:26px;background:#fff}
+:root{
+  --grad:linear-gradient(135deg,var(--acc),var(--acc2));
+  --hair:var(--line);
+  --r:16px;
+  --sans:'Manrope','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+  --mono:'JetBrains Mono','PingFang SC',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(108,140,255,.4)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:var(--acc);text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 clamp(20px,4vw,48px) 96px}
 
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
-@media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
-.stat{padding:18px 20px;text-align:center}
-.stat .v{font-size:27px;font-weight:900;background:linear-gradient(90deg,#8ABDFF,#41E0C8);-webkit-background-clip:text;background-clip:text;color:transparent}
-.stat .l{font-size:12px;color:var(--ink3);margin-top:5px}
-.stat .sub{font-size:10.5px;color:var(--ink3);margin-top:3px;opacity:.7}
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:16px;
+  font-weight:800;font-size:14px;padding:12px 24px;transition:transform .16s ease,box-shadow .25s,background .2s,border-color .2s}
+.btn:active{transform:scale(.96)}
+.btn.lg{padding:15px 32px;font-size:15px}
+.btn.sm{padding:9px 16px;font-size:12.5px;border-radius:12px}
+.btn.pri{background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(108,140,255,.32)}
+.btn.pri:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(108,140,255,.5),0 0 22px rgba(65,224,200,.28)}
+.btn.gho{background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--ink)}
+.btn.gho:hover{background:rgba(255,255,255,.09);border-color:rgba(108,140,255,.55)}
+.btn.link{padding:12px 4px;color:var(--ink2);border-bottom:1px solid rgba(255,255,255,.28);border-radius:0}
+.btn.link:hover{color:var(--ink);border-bottom-color:var(--acc2)}
 
-.side{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:22px}
-@media (max-width:820px){.side{grid-template-columns:1fr}}
-.checkin-card{padding:22px}
-.checkin-card h4,.ach-card h4{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:12px}
-.ch-day-mini{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--ink3);transition:.15s}
-.ch-day-mini.done{background:linear-gradient(135deg,rgba(108,140,255,.35),rgba(65,224,200,.25));border-color:rgba(108,140,255,.55);color:#fff}
+/* Hero — 居中排版 */
+.hero{position:relative;text-align:center;padding:clamp(48px,8vw,110px) 0 clamp(40px,6vw,72px);
+  max-width:920px;margin:0 auto}
+.hero-vnums{position:absolute;left:-38px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:10px;line-height:2;letter-spacing:2px;color:rgba(170,180,216,.28);
+  text-align:center;display:none}
+@media (min-width:1240px){.hero-vnums{display:block}}
+.hero-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:16px;margin-bottom:38px}
+.ht-left{text-align:left}
+.ht-bar{display:block;width:32px;height:2px;background:var(--acc2);margin-bottom:10px;opacity:.7}
+.ht-label{font-family:var(--mono);font-size:10.5px;letter-spacing:2.5px;color:var(--ink3);text-transform:uppercase}
+.ht-center{justify-self:center}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ink2);
+  background:rgba(255,255,255,.04);border:1px solid var(--hair);text-transform:uppercase}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--acc2);box-shadow:0 0 8px var(--acc2);animation:blink 2.2s infinite}
+@keyframes blink{50%{opacity:.35}}
+.ht-right{text-align:right}
+.ht-stats{display:inline-flex;flex-direction:column;gap:5px;margin-top:8px;text-align:left}
+.ht-stat{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
+.ht-stat .hsk{color:var(--ink3);letter-spacing:1px}
+.ht-stat .hsv{color:var(--ink);font-weight:600;min-width:36px;text-align:right}
+.hero h1{font-family:var(--sans);font-weight:800;font-size:clamp(40px,7vw,84px);
+  line-height:1.08;letter-spacing:1px;color:var(--ink)}
+.hero h1 .hl{display:block}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--acc2),#5eead4);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:26px auto 0;font-size:14px;line-height:2;color:var(--ink2);max-width:640px}
+.feature-tags{display:flex;justify-content:center;gap:12px;margin-top:28px;flex-wrap:wrap}
+.ftag{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:99px;
+  font-size:12.5px;color:var(--ink2);background:rgba(255,255,255,.03);border:1px solid var(--hair)}
+.ftag::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--acc2);box-shadow:0 0 6px var(--acc2)}
+.hero-actions{display:flex;justify-content:center;gap:18px;align-items:center;margin-top:30px;flex-wrap:wrap}
+.btn.hero-cta{background:#fff;color:#0b1220;border:none;box-shadow:0 14px 34px rgba(255,255,255,.18)}
+.btn.hero-cta:hover{transform:translateY(-2px);box-shadow:0 20px 40px rgba(255,255,255,.28)}
+.cta-ic{font-size:16px}
+.cta-badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;
+  border-radius:11px;background:var(--grad);color:#fff;font-size:10.5px;font-weight:700;margin-left:2px}
+.hero-foot{margin-top:30px;font-family:var(--mono);font-size:10.5px;letter-spacing:2px;
+  color:rgba(170,180,216,.4);text-transform:uppercase}
+
+/* 面试倒计时胶囊 */
+.cd-pill{display:inline-flex;align-items:center;gap:12px;margin-top:28px;padding:13px 26px;border-radius:99px;
+  background:radial-gradient(120% 160% at 0% 0%,rgba(108,140,255,.2),rgba(65,224,200,.07));
+  border:1px solid rgba(108,140,255,.38);backdrop-filter:blur(8px);
+  transition:transform .18s,border-color .25s,box-shadow .3s;max-width:100%;flex-wrap:wrap;justify-content:center}
+.cd-pill:hover{border-color:rgba(108,140,255,.72);transform:translateY(-2px);box-shadow:0 16px 36px rgba(108,140,255,.22)}
+.cd-pill .hcd-ic{font-size:22px;line-height:1}
+.cd-pill .hcd-k{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--ink3);text-transform:uppercase}
+.cd-pill .hcd-num{font-size:clamp(30px,4.6vw,46px);font-weight:800;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums;
+  background:linear-gradient(120deg,#8ABDFF,#5EEAD4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd-pill .hcd-u{font-size:14px;color:var(--ink2);margin-left:-5px}
+.cd-pill .hcd-clock{font-family:var(--mono);font-size:clamp(18px,2.3vw,24px);font-weight:600;color:var(--ink);
+  letter-spacing:1px;padding-left:14px;border-left:1px solid rgba(255,255,255,.16);font-variant-numeric:tabular-nums}
+.cd-pill .hcd-set{font-size:13.5px;color:var(--acc2);font-weight:700}
+.cd-pill.past{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.08)}
+.cd-pill.past .hcd-num{background:linear-gradient(120deg,#FBBF24,#F472B6);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+@media (max-width:640px){
+  .hero-top{grid-template-columns:1fr;gap:14px;text-align:center}
+  .ht-left,.ht-right{text-align:center}
+  .ht-bar{margin:0 auto 8px}
+  .ht-stats{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:14px}
+}
+
+/* 章节标题 */
+.sec-head{display:flex;align-items:baseline;gap:16px;margin:clamp(48px,6vw,78px) 0 6px;
+  padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--acc2);letter-spacing:2px}
+.sec-head h2{font-family:var(--serif);font-size:clamp(19px,2.2vw,24px);font-weight:700;letter-spacing:1px;color:var(--ink)}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--hair),transparent);margin:0 4px}
+.sec-note{font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:1.5px}
+
+/* 01 功能档案（手风琴） */
+.fa-row{border-bottom:1px solid var(--hair);transition:background .3s}
+.fa-row:hover{background:rgba(108,140,255,.035)}
+.fa-head{display:grid;grid-template-columns:56px 1fr 40px;gap:18px;align-items:center;padding:24px 6px;cursor:pointer}
+.fa-num{font-family:var(--mono);font-size:12px;color:var(--ink3);letter-spacing:1px;transition:color .3s}
+.fa-row:hover .fa-num,.fa-row.open .fa-num{color:var(--acc2)}
+.fa-t{font-size:clamp(16px,1.8vw,20px);font-weight:800;color:var(--ink);letter-spacing:.5px}
+.fa-d{font-size:12.5px;color:var(--ink3);margin-top:5px;line-height:1.6}
+.fa-plus{width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);display:grid;
+  place-items:center;font-family:var(--mono);font-size:16px;color:var(--ink2);transition:.3s;justify-self:end}
+.fa-row:hover .fa-plus{color:var(--ink);border-color:var(--acc)}
+.fa-row.open .fa-plus{transform:rotate(135deg);box-shadow:0 0 16px rgba(108,140,255,.35)}
+.fa-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .42s cubic-bezier(.2,.8,.3,1),opacity .3s}
+.fa-row.open .fa-body{max-height:210px;opacity:1}
+.fa-inner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:0 6px 24px 80px}
+.fa-tags{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.fa-tags span{font-size:11.5px;color:#bfdbfe;padding:6px 12px;border-radius:99px;
+  background:rgba(108,140,255,.08);border:1px solid rgba(108,140,255,.25);font-family:var(--mono)}
+@media (max-width:640px){.fa-inner{padding-left:6px}.fa-head{grid-template-columns:34px 1fr 34px;gap:12px}}
+
+/* 02 场景条 */
+.scene-strip{display:flex;gap:10px;margin-top:26px}
+.sc-panel{position:relative;flex:1 1 0;min-width:0;padding:22px 18px 24px;cursor:pointer;
+  border:1px solid var(--hair);border-radius:var(--r);background:rgba(255,255,255,.015);
+  transition:flex .45s cubic-bezier(.2,.8,.3,1),border-color .3s,background .3s,transform .3s,box-shadow .3s;
+  overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.sc-panel:hover{flex:1.7 1 0;border-color:rgba(108,140,255,.55);
+  background:rgba(108,140,255,.07);transform:translateY(-4px);
+  box-shadow:0 16px 36px rgba(0,0,0,.35),0 0 26px rgba(108,140,255,.16)}
+.sc-ic{font-size:26px;line-height:1}
+.sc-n{font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-c{font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:1px}
+.sc-d{font-size:11.5px;color:var(--ink3);line-height:1.6;max-height:0;opacity:0;
+  transition:max-height .4s,opacity .35s;overflow:hidden}
+.sc-panel:hover .sc-d{max-height:60px;opacity:1}
+.sc-go{font-family:var(--mono);font-size:11px;color:var(--acc2);opacity:0;transition:.3s;margin-top:auto;letter-spacing:1px}
+.sc-panel:hover .sc-go{opacity:1}
+@media (max-width:940px){.scene-strip{display:grid;grid-template-columns:repeat(2,1fr)}
+  .sc-panel:hover{flex:auto;transform:translateY(-3px)}.sc-d{max-height:60px;opacity:1}.sc-go{opacity:1}}
+@media (max-width:520px){.scene-strip{grid-template-columns:1fr}}
+
+/* 03 训练节奏 */
+.pace{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,44px);margin-top:30px}
+@media (max-width:900px){.pace{grid-template-columns:1fr}}
+.pace-item{padding:0 0 26px;margin-bottom:26px;border-bottom:1px solid var(--hair)}
+.pace-item:last-child{margin-bottom:0;border-bottom:none;padding-bottom:0}
+.pi-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.pi-t{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:.5px}
+.pi-s{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:1px}
+
+.ch-day-mini{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.04);
+  border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;
+  color:var(--ink3);transition:.15s}
+.ch-day-mini.done{background:linear-gradient(135deg,rgba(108,140,255,.42),rgba(65,224,200,.32));
+  border-color:rgba(108,140,255,.55);color:#fff;box-shadow:0 4px 14px rgba(108,140,255,.25)}
 .ch-day-mini.today{outline:2px solid var(--acc);outline-offset:1px}
-.ach-card{padding:22px}
-.ach-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ach-item{padding:9px 4px;text-align:center;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
-.ach-item .ai-ic{font-size:18px;filter:grayscale(1) opacity(.4)}
-.ach-item.on .ai-ic{filter:none}
-.ach-item .ai-t{font-size:10px;color:var(--ink3);margin-top:2px;line-height:1.4}
-.ach-item.on{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.35)}
-.ach-item.on .ai-t{color:#cdd8ff}
+.streak-line{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:12px;letter-spacing:.5px}
+.streak-line b{color:var(--acc);font-weight:500}
+.streak-line .amb{color:var(--warn)}
+.pi-act{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
 
-.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.scene-card{padding:20px;cursor:pointer;transition:.25s;position:relative}
-.scene-card:hover{transform:translateY(-4px);border-color:var(--line2)}
-.scene-card .sc-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:13px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
-.scene-card .sc-nm{font-weight:800;font-size:15.5px;margin-bottom:6px}
-.scene-card .sc-ds{font-size:12px;color:var(--ink3);line-height:1.6}
-.scene-card .sc-go{position:absolute;right:16px;top:18px;font-size:12px;color:var(--ink3);opacity:0;transition:.25s}
-.scene-card:hover .sc-go{opacity:1;transform:translateX(3px)}
+.dc-card{padding:14px 16px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(108,140,255,.13),rgba(65,224,200,.06));
+  border:1px solid rgba(108,140,255,.28)}
+.dc-card .dc-date{font-family:var(--mono);font-size:10px;color:var(--acc2);letter-spacing:1.5px;margin-bottom:7px}
+.dc-card .dc-q{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.65}
 
-.fun-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
-@media (max-width:520px){.fun-grid{grid-template-columns:1fr}}
-.fun-card{padding:22px;position:relative;overflow:hidden}
-.fun-card .fc-t{font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:5px}
-.fun-card .fc-d{font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px}
-.fortune-box{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.4);margin-bottom:12px}
-.fortune-box .f-ic{font-size:30px}.fortune-box .f-t{font-weight:800;font-size:15px}.fortune-box .f-d{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.6}
-.quick-q{font-size:14px;line-height:1.7;padding:14px 16px;border-radius:14px;background:rgba(108,140,255,.09);border:1px dashed rgba(108,140,255,.45);margin-bottom:12px;min-height:64px}
-.quick-ans{display:none;font-size:12.5px;color:var(--ink2);line-height:1.8;padding:12px 16px;border-radius:14px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.3);margin-bottom:12px}
+/* 成就环 */
+.ring-row{display:flex;align-items:center;gap:20px}
+.ring-wrap{position:relative;width:96px;height:96px;flex:none}
+.ring-wrap svg{width:100%;height:100%;display:block}
+.ring-num{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1.15}
+.ring-num b{font-size:20px;font-weight:800;background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.ring-num span{font-family:var(--mono);font-size:9.5px;color:var(--ink3);letter-spacing:1px}
+.ring-txt{min-width:0}
+.ring-txt .rt-t{font-size:13px;font-weight:800;color:var(--ink)}
+.ring-txt .rt-d{font-size:11.5px;color:var(--ink3);line-height:1.65;margin-top:4px}
+
+/* 目标 */
+.goal-box{padding:16px;border-radius:14px;background:rgba(65,224,200,.055);border:1px solid rgba(65,224,200,.28)}
+.goal-top{display:flex;align-items:flex-end;gap:8px}
+.goal-num{font-size:38px;font-weight:800;line-height:1;letter-spacing:1px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.goal-num .u{font-size:14px;font-weight:600}
+.goal-lab{font-size:11.5px;color:var(--ink2);margin-bottom:8px}
+.goal-sub{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-top:8px;letter-spacing:.5px}
+.goal-hot{font-size:13px;color:var(--warn)}
+.goal-big{font-size:24px;font-weight:800;color:var(--warn);margin-top:4px}
+.goal-done{font-size:18px;font-weight:800;color:#6ee7b7;margin-top:4px}
+
+/* 04 工具箱（细线网格） */
+.deck{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);
+  border:1px solid var(--hair);border-radius:20px;overflow:hidden;margin-top:26px}
+@media (max-width:940px){.deck{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.deck{grid-template-columns:1fr}}
+.cell{background:rgba(255,255,255,.02);padding:22px;display:flex;flex-direction:column;gap:12px;
+  transition:background .3s;position:relative;min-width:0}
+.cell:hover{background:rgba(108,140,255,.05)}
+.cell-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:800;color:var(--ink)}
+.cell-t .ci{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:1px;font-weight:400}
+.cell-d{font-size:11.5px;color:var(--ink3);line-height:1.6;margin-top:-6px}
+.cell-act{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+
+/* 运势 */
+.fortune-box{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+  background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.28)}
+.fortune-box .f-ic{font-size:26px}
+.fortune-box .f-t{font-weight:800;font-size:13.5px;color:var(--ink)}
+.fortune-box .f-d{font-size:11px;color:var(--ink2);margin-top:2px;line-height:1.55}
+
+/* 快答 */
+.quick-q{font-size:12.5px;line-height:1.7;color:#dbeafe;padding:12px 14px;border-radius:14px;
+  background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.38);min-height:70px}
+.quick-ans{display:none;font-size:11.5px;color:var(--ink2);line-height:1.75;padding:11px 14px;
+  border-radius:14px;background:rgba(65,224,200,.07);border:1px solid rgba(65,224,200,.32)}
 .quick-ans.show{display:block;animation:rise .4s both}
 
-/* 每日挑战 */
-.dc-card{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.08));border:1px solid rgba(108,140,255,.3);margin-bottom:12px}
-.dc-card .dc-date{font-size:11px;color:#9ee5d8;margin-bottom:6px}
-.dc-card .dc-q{font-size:14px;font-weight:700;line-height:1.6}
-
-/* 知识翻卡 */
-.flip-wrap{perspective:1000px;height:150px;margin-bottom:12px}
+/* 翻卡 */
+.flip-wrap{perspective:1000px;height:146px}
 .flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer}
 .flip-card.flipped{transform:rotateY(180deg)}
-.flip-face{position:absolute;inset:0;border-radius:14px;padding:14px 16px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
-.flip-f{background:rgba(255,255,255,.05);border:1px solid var(--line)}
-.flip-f .fc-tag{font-size:10.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px}
-.flip-f .fc-ic{font-size:20px;margin-bottom:6px}
-.flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));border:1px solid rgba(65,224,200,.3);transform:rotateY(180deg)}
-.flip-b .fc-tip{font-size:13px;line-height:1.8;color:#cdd8ff}
-.flip-b .fc-q{font-size:10.5px;color:var(--ink3);margin-top:8px}
+.flip-face{position:absolute;inset:0;border-radius:14px;padding:14px 15px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.flip-f{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.flip-f .fc-tag{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1.5px}
+.flip-f .fc-ic{font-size:19px;margin-bottom:6px}
+.flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));
+  border:1px solid rgba(65,224,200,.34);transform:rotateY(180deg)}
+.flip-b .fc-tip{font-size:12px;line-height:1.7;color:#bfdbfe}
+.flip-b .fc-q{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-top:7px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* 面试梗 */
-.meme-card{padding:14px;border-radius:14px;background:rgba(183,166,249,.08);border:1px dashed rgba(183,166,249,.4);margin-bottom:12px}
-.meme-card .m-t{font-size:14.5px;font-weight:800;color:#c4b9ff;margin-bottom:6px}
-.meme-card .m-d{font-size:12px;color:var(--ink2);line-height:1.8}
-
-/* 人格测试 */
-.pq{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:10px}
-.pq .pq-q{font-size:13px;font-weight:700;margin-bottom:8px;line-height:1.6}
+/* 人格 */
+.pq{padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.pq .pq-q{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.55}
 .pq .pq-opts{display:flex;flex-direction:column;gap:6px}
-.pq button.popt{text-align:left;padding:9px 12px;border-radius:10px;font-size:12.5px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);transition:.15s;cursor:pointer}
-.pq button.popt:hover{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.4)}
-.pq button.popt.on{background:rgba(108,140,255,.2);border-color:var(--acc);color:#fff}
-.persona-result{padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(183,166,249,.1));border:1px solid rgba(108,140,255,.3);margin-bottom:12px;text-align:center}
-.persona-result .pr-ic{font-size:42px}
-.persona-result .pr-t{font-size:16px;font-weight:900;margin-top:4px}
-.persona-result .pr-rate{font-size:12px;color:var(--acc2);margin-top:3px}
-.persona-result .pr-d{font-size:12px;color:var(--ink2);line-height:1.8;margin-top:10px;text-align:left}
+.pq button.popt{text-align:left;padding:8px 11px;border-radius:10px;font-size:11.5px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);transition:.15s}
+.pq button.popt:hover{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.4);color:var(--ink)}
+.pq button.popt:active{transform:scale(.98)}
+.persona-result{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.1));
+  border:1px solid rgba(108,140,255,.32);text-align:center}
+.persona-result .pr-ic{font-size:32px}
+.persona-result .pr-t{font-size:14px;font-weight:800;color:var(--ink);margin-top:2px}
+.persona-result .pr-rate{font-family:var(--mono);font-size:10.5px;color:var(--acc2);margin-top:3px}
+.persona-result .pr-d{font-size:11.5px;color:var(--ink2);line-height:1.7;margin-top:8px;text-align:left}
 
-footer{margin-top:60px;text-align:center;font-size:12px;color:var(--ink3);line-height:2}
+/* 梗 / 收藏 */
+.meme-card{padding:13px 14px;border-radius:14px;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.35)}
+.meme-card .m-t{font-size:13.5px;font-weight:800;color:#a5b4fc;margin-bottom:5px}
+.meme-card .m-d{font-size:11.5px;color:var(--ink2);line-height:1.75}
+.fav-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:11.5px}
+.fav-row+.fav-row{margin-top:6px}
+.fav-row .fv-scene{flex:none;font-size:11px}
+.fav-row .fv-q{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.fav-empty{text-align:center;padding:18px 0;color:var(--ink3);font-size:12px;font-family:var(--mono);
+  letter-spacing:.5px;line-height:1.9}
+
+/* 收尾 */
+.closing{margin-top:clamp(56px,7vw,92px);padding-top:clamp(36px,5vw,56px);
+  border-top:1px solid var(--hair);display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
+.closing h2{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3.4vw,40px);line-height:1.35;letter-spacing:1px;color:var(--ink)}
+.closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.closing .hero-actions{margin-left:auto}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--hair);
+  display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;
+  color:var(--ink3);letter-spacing:1px;line-height:1.9}
+footer .fr{margin-left:auto;text-align:right}
+
+/* 弹层同主题 */
+.mask{background:rgba(6,10,20,.7)}
+.modal{background:rgba(16,24,42,.97);border-color:rgba(255,255,255,.14);border-radius:16px}
+.f-in:focus,.f-ta:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.2)}
+.toast{background:rgba(16,24,42,.96);border-color:rgba(255,255,255,.14)}
+.toast.ok{border-color:rgba(65,224,200,.5)}
+.toast.warn{border-color:rgba(251,191,36,.5)}
+
+/* 入场动效 */
+.rise{animation:rise .6s cubic-bezier(.2,.8,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
-<div class="wrap" id="app">
-  <!-- 轮播 -->
-  <div class="hero rise" id="hero">
-    <div class="slides" id="slides">
-      <div class="slide s1">
-        <span class="s-tag">🎤 全真模拟</span>
-        <h2>开始一场限时模拟面试</h2>
-        <p>随机抽题 · 倒计时作答 · 语音输入 · 自评复盘，把每一次练习当成真正的面试现场。</p>
-        <button class="btn pri" onclick="location.href='interview.html'">开始模拟面试 →</button>
-      </div>
-      <div class="slide s2">
-        <span class="s-tag">📚 50 道高频题</span>
-        <h2>覆盖 5 大面试场景</h2>
-        <p>求职实习、技术开发、数据分析、产品运营、通用行为，每题附考察点、技巧和参考要点。</p>
-        <button class="btn grn" onclick="location.href='bank.html'">浏览题库 →</button>
-      </div>
-      <div class="slide s3">
-        <span class="s-tag">� 趣味训练</span>
-        <h2>签到、成就、每日挑战、人格测试</h2>
-        <p>低成本练胆量，解锁 13 个面试成就，让训练像玩游戏一样停不下来。</p>
-        <button class="btn gho" onclick="document.getElementById('funSec').scrollIntoView({behavior:'smooth'})">轻松一下 ↓</button>
-      </div>
-    </div>
-    <button class="arrow prev" id="hPrev">‹</button>
-    <button class="arrow next" id="hNext">›</button>
-    <div class="dots" id="hDots"></div>
-  </div>
+<body><div class="nav"><a class="logo" href="index.html"><span class="lg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"></path></svg></span>模拟面试训练营 Pro</a><div class="links"><a href="index.html" class="on">首页</a><a href="interview.html" class="">模拟面试</a><a href="bank.html" class="">题库</a><a href="videos.html" class="">视频</a><a href="square.html" class="">广场</a><a href="product.html" class="">产品蓝图</a><a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a></div><button class="icbtn" id="navFeedback" title="反馈给官方"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="icbtn" id="navSettings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87c.26.63.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.03z"></path></svg></button><button class="login-btn" id="navLogin">👤 登录</button></div><div class="bg-fx"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div><div id="stars" class="starlayer" style="height: 1px; width: 1px; box-shadow: rgba(255, 255, 255, 0.45) 1021px 1371px, rgba(255, 255, 255, 0.8) 1145px 408px, rgba(255, 255, 255, 0.89) 114px 1398px, rgba(255, 255, 255, 0.41) 1834px 1732px, rgba(255, 255, 255, 0.74) 353px 467px, rgba(255, 255, 255, 0.42) 494px 393px, rgba(255, 255, 255, 0.6) 1084px 374px, rgba(255, 255, 255, 0.9) 112px 1497px, rgba(255, 255, 255, 0.66) 625px 770px, rgba(255, 255, 255, 0.88) 1877px 558px, rgba(255, 255, 255, 0.49) 1481px 588px, rgba(255, 255, 255, 0.44) 1865px 792px, rgba(255, 255, 255, 0.4) 1221px 1841px, rgba(255, 255, 255, 0.68) 977px 1376px, rgba(255, 255, 255, 0.58) 1072px 53px, rgba(255, 255, 255, 0.72) 1363px 339px, rgba(255, 255, 255, 0.66) 1266px 1483px, rgba(255, 255, 255, 0.41) 1031px 138px, rgba(255, 255, 255, 0.54) 375px 1997px, rgba(255, 255, 255, 0.81) 866px 296px, rgba(255, 255, 255, 0.67) 159px 330px, rgba(255, 255, 255, 0.52) 1909px 1637px, rgba(255, 255, 255, 0.44) 1692px 223px, rgba(255, 255, 255, 0.56) 1906px 1816px, rgba(255, 255, 255, 0.4) 1305px 1286px, rgba(255, 255, 255, 0.68) 1484px 1090px, rgba(255, 255, 255, 0.46) 1955px 165px, rgba(255, 255, 255, 0.61) 928px 1081px, rgba(255, 255, 255, 0.46) 338px 585px, rgba(255, 255, 255, 0.56) 1875px 983px, rgba(255, 255, 255, 0.83) 1773px 719px, rgba(255, 255, 255, 0.43) 1157px 1912px, rgba(255, 255, 255, 0.46) 1139px 801px, rgba(255, 255, 255, 0.45) 960px 1635px, rgba(255, 255, 255, 0.8) 867px 1018px, rgba(255, 255, 255, 0.75) 1814px 202px, rgba(255, 255, 255, 0.8) 1471px 1893px, rgba(255, 255, 255, 0.82) 1198px 1232px, rgba(255, 255, 255, 0.68) 1071px 1426px, rgba(255, 255, 255, 0.87) 134px 737px, rgba(255, 255, 255, 0.4) 1290px 689px, rgba(255, 255, 255, 0.76) 554px 801px, rgba(255, 255, 255, 0.59) 1246px 488px, rgba(255, 255, 255, 0.85) 401px 1832px, rgba(255, 255, 255, 0.89) 940px 1892px, rgba(255, 255, 255, 0.84) 392px 1854px, rgba(255, 255, 255, 0.45) 194px 1703px, rgba(255, 255, 255, 0.64) 939px 944px, rgba(255, 255, 255, 0.76) 1818px 990px, rgba(255, 255, 255, 0.8) 498px 7px, rgba(255, 255, 255, 0.61) 1877px 1587px, rgba(255, 255, 255, 0.55) 152px 452px, rgba(255, 255, 255, 0.73) 1869px 797px, rgba(255, 255, 255, 0.64) 1551px 892px, rgba(255, 255, 255, 0.82) 1799px 346px, rgba(255, 255, 255, 0.75) 142px 1763px, rgba(255, 255, 255, 0.87) 1345px 1859px, rgba(255, 255, 255, 0.79) 1512px 1960px, rgba(255, 255, 255, 0.4) 166px 1774px, rgba(255, 255, 255, 0.6) 475px 954px, rgba(255, 255, 255, 0.56) 274px 873px, rgba(255, 255, 255, 0.43) 799px 74px, rgba(255, 255, 255, 0.68) 501px 292px, rgba(255, 255, 255, 0.65) 1174px 924px, rgba(255, 255, 255, 0.61) 567px 1369px, rgba(255, 255, 255, 0.63) 869px 329px, rgba(255, 255, 255, 0.68) 716px 1570px, rgba(255, 255, 255, 0.64) 1774px 810px, rgba(255, 255, 255, 0.88) 1567px 1712px, rgba(255, 255, 255, 0.8) 1940px 402px, rgba(255, 255, 255, 0.79) 1066px 447px, rgba(255, 255, 255, 0.42) 1479px 1009px, rgba(255, 255, 255, 0.42) 112px 1756px, rgba(255, 255, 255, 0.38) 728px 808px, rgba(255, 255, 255, 0.37) 1153px 293px, rgba(255, 255, 255, 0.88) 1089px 1022px, rgba(255, 255, 255, 0.75) 759px 862px, rgba(255, 255, 255, 0.43) 1830px 1607px, rgba(255, 255, 255, 0.78) 233px 530px, rgba(255, 255, 255, 0.72) 372px 1544px, rgba(255, 255, 255, 0.58) 674px 1090px, rgba(255, 255, 255, 0.5) 595px 835px, rgba(255, 255, 255, 0.52) 130px 1073px, rgba(255, 255, 255, 0.39) 1391px 1164px, rgba(255, 255, 255, 0.65) 1838px 1993px, rgba(255, 255, 255, 0.47) 1417px 1035px, rgba(255, 255, 255, 0.53) 728px 1353px, rgba(255, 255, 255, 0.89) 1129px 875px, rgba(255, 255, 255, 0.77) 265px 89px, rgba(255, 255, 255, 0.6) 1014px 1481px, rgba(255, 255, 255, 0.87) 1786px 113px, rgba(255, 255, 255, 0.56) 37px 675px, rgba(255, 255, 255, 0.6) 658px 1377px, rgba(255, 255, 255, 0.85) 467px 523px, rgba(255, 255, 255, 0.47) 1029px 1671px, rgba(255, 255, 255, 0.45) 1311px 1622px, rgba(255, 255, 255, 0.86) 566px 1673px, rgba(255, 255, 255, 0.66) 1028px 348px, rgba(255, 255, 255, 0.78) 1086px 1662px, rgba(255, 255, 255, 0.78) 1376px 1071px, rgba(255, 255, 255, 0.82) 911px 1705px, rgba(255, 255, 255, 0.41) 1409px 823px, rgba(255, 255, 255, 0.58) 1613px 1992px, rgba(255, 255, 255, 0.82) 203px 188px, rgba(255, 255, 255, 0.42) 229px 590px, rgba(255, 255, 255, 0.58) 1782px 69px, rgba(255, 255, 255, 0.58) 1159px 1771px, rgba(255, 255, 255, 0.67) 778px 341px, rgba(255, 255, 255, 0.7) 273px 1779px, rgba(255, 255, 255, 0.82) 1942px 823px, rgba(255, 255, 255, 0.63) 878px 1848px, rgba(255, 255, 255, 0.55) 812px 5px, rgba(255, 255, 255, 0.52) 1044px 725px, rgba(255, 255, 255, 0.54) 1250px 10px, rgba(255, 255, 255, 0.57) 865px 484px, rgba(255, 255, 255, 0.79) 1387px 1463px, rgba(255, 255, 255, 0.57) 622px 485px, rgba(255, 255, 255, 0.9) 118px 427px, rgba(255, 255, 255, 0.67) 691px 513px, rgba(255, 255, 255, 0.64) 1260px 434px, rgba(255, 255, 255, 0.4) 812px 1097px, rgba(255, 255, 255, 0.9) 1747px 1924px, rgba(255, 255, 255, 0.37) 878px 454px, rgba(255, 255, 255, 0.75) 433px 1168px, rgba(255, 255, 255, 0.64) 1955px 263px, rgba(255, 255, 255, 0.52) 1114px 292px, rgba(255, 255, 255, 0.46) 973px 766px, rgba(255, 255, 255, 0.72) 14px 418px, rgba(255, 255, 255, 0.53) 1625px 1257px, rgba(255, 255, 255, 0.71) 870px 1191px, rgba(255, 255, 255, 0.39) 576px 246px, rgba(255, 255, 255, 0.41) 1428px 1103px, rgba(255, 255, 255, 0.83) 1605px 1531px, rgba(255, 255, 255, 0.53) 1308px 184px, rgba(255, 255, 255, 0.75) 92px 1353px, rgba(255, 255, 255, 0.88) 1544px 599px, rgba(255, 255, 255, 0.81) 1945px 914px, rgba(255, 255, 255, 0.36) 1075px 317px, rgba(255, 255, 255, 0.82) 541px 1459px, rgba(255, 255, 255, 0.85) 917px 1421px, rgba(255, 255, 255, 0.41) 204px 1146px, rgba(255, 255, 255, 0.68) 1773px 1097px, rgba(255, 255, 255, 0.37) 1122px 875px, rgba(255, 255, 255, 0.74) 60px 1599px, rgba(255, 255, 255, 0.66) 1092px 1829px, rgba(255, 255, 255, 0.37) 29px 0px, rgba(255, 255, 255, 0.75) 1258px 932px, rgba(255, 255, 255, 0.73) 1664px 1014px, rgba(255, 255, 255, 0.49) 1827px 303px, rgba(255, 255, 255, 0.82) 1662px 522px, rgba(255, 255, 255, 0.47) 1495px 630px, rgba(255, 255, 255, 0.7) 560px 1711px, rgba(255, 255, 255, 0.47) 1188px 1158px, rgba(255, 255, 255, 0.51) 873px 916px, rgba(255, 255, 255, 0.84) 942px 853px, rgba(255, 255, 255, 0.43) 544px 1986px, rgba(255, 255, 255, 0.44) 1063px 1841px, rgba(255, 255, 255, 0.4) 1156px 1178px, rgba(255, 255, 255, 0.87) 1787px 242px, rgba(255, 255, 255, 0.48) 319px 1675px, rgba(255, 255, 255, 0.75) 1253px 689px, rgba(255, 255, 255, 0.7) 1235px 1431px, rgba(255, 255, 255, 0.57) 1438px 55px, rgba(255, 255, 255, 0.83) 30px 135px, rgba(255, 255, 255, 0.82) 1446px 798px, rgba(255, 255, 255, 0.71) 629px 529px, rgba(255, 255, 255, 0.72) 936px 1836px, rgba(255, 255, 255, 0.71) 1083px 1664px, rgba(255, 255, 255, 0.49) 783px 1023px, rgba(255, 255, 255, 0.5) 1541px 1411px, rgba(255, 255, 255, 0.51) 775px 1035px, rgba(255, 255, 255, 0.79) 1540px 1347px, rgba(255, 255, 255, 0.37) 103px 1214px, rgba(255, 255, 255, 0.55) 343px 1374px, rgba(255, 255, 255, 0.77) 446px 1283px, rgba(255, 255, 255, 0.4) 1853px 1760px, rgba(255, 255, 255, 0.44) 1576px 108px, rgba(255, 255, 255, 0.6) 1837px 1120px, rgba(255, 255, 255, 0.39) 463px 1964px, rgba(255, 255, 255, 0.48) 677px 396px, rgba(255, 255, 255, 0.75) 390px 701px, rgba(255, 255, 255, 0.43) 181px 1884px, rgba(255, 255, 255, 0.68) 1311px 1399px, rgba(255, 255, 255, 0.41) 1690px 97px, rgba(255, 255, 255, 0.87) 1070px 149px, rgba(255, 255, 255, 0.41) 962px 354px, rgba(255, 255, 255, 0.83) 575px 1204px, rgba(255, 255, 255, 0.7) 466px 1670px, rgba(255, 255, 255, 0.76) 966px 45px, rgba(255, 255, 255, 0.47) 1569px 209px, rgba(255, 255, 255, 0.66) 1450px 1607px, rgba(255, 255, 255, 0.53) 1300px 435px, rgba(255, 255, 255, 0.72) 1124px 309px, rgba(255, 255, 255, 0.49) 900px 813px, rgba(255, 255, 255, 0.73) 1598px 676px, rgba(255, 255, 255, 0.51) 414px 1943px, rgba(255, 255, 255, 0.41) 1246px 1471px, rgba(255, 255, 255, 0.48) 52px 797px, rgba(255, 255, 255, 0.79) 1851px 1192px, rgba(255, 255, 255, 0.36) 1650px 111px, rgba(255, 255, 255, 0.42) 369px 1028px, rgba(255, 255, 255, 0.51) 632px 929px, rgba(255, 255, 255, 0.43) 816px 1905px, rgba(255, 255, 255, 0.89) 854px 534px, rgba(255, 255, 255, 0.42) 1742px 67px, rgba(255, 255, 255, 0.71) 404px 443px, rgba(255, 255, 255, 0.8) 727px 641px, rgba(255, 255, 255, 0.45) 1692px 287px, rgba(255, 255, 255, 0.64) 1801px 1903px, rgba(255, 255, 255, 0.78) 316px 729px, rgba(255, 255, 255, 0.88) 752px 877px, rgba(255, 255, 255, 0.41) 1112px 781px, rgba(255, 255, 255, 0.85) 1051px 647px, rgba(255, 255, 255, 0.36) 1749px 696px, rgba(255, 255, 255, 0.5) 289px 1120px, rgba(255, 255, 255, 0.75) 1595px 926px, rgba(255, 255, 255, 0.45) 1645px 1361px, rgba(255, 255, 255, 0.68) 1714px 1012px, rgba(255, 255, 255, 0.62) 993px 1641px, rgba(255, 255, 255, 0.4) 1316px 870px, rgba(255, 255, 255, 0.41) 1477px 374px, rgba(255, 255, 255, 0.75) 479px 1036px, rgba(255, 255, 255, 0.59) 1500px 1269px, rgba(255, 255, 255, 0.6) 1090px 1134px, rgba(255, 255, 255, 0.7) 357px 1260px, rgba(255, 255, 255, 0.85) 453px 1582px, rgba(255, 255, 255, 0.66) 1161px 760px, rgba(255, 255, 255, 0.82) 203px 1753px, rgba(255, 255, 255, 0.59) 92px 817px, rgba(255, 255, 255, 0.39) 1299px 210px, rgba(255, 255, 255, 0.47) 791px 1212px, rgba(255, 255, 255, 0.83) 1696px 426px, rgba(255, 255, 255, 0.75) 177px 976px, rgba(255, 255, 255, 0.54) 903px 853px, rgba(255, 255, 255, 0.57) 1998px 164px, rgba(255, 255, 255, 0.76) 222px 539px, rgba(255, 255, 255, 0.76) 632px 1946px, rgba(255, 255, 255, 0.61) 382px 771px, rgba(255, 255, 255, 0.45) 921px 1246px, rgba(255, 255, 255, 0.76) 882px 1604px, rgba(255, 255, 255, 0.44) 1275px 851px, rgba(255, 255, 255, 0.71) 291px 882px, rgba(255, 255, 255, 0.44) 139px 1369px, rgba(255, 255, 255, 0.64) 1765px 383px, rgba(255, 255, 255, 0.46) 979px 552px, rgba(255, 255, 255, 0.75) 1857px 659px, rgba(255, 255, 255, 0.4) 1784px 434px, rgba(255, 255, 255, 0.76) 796px 1060px, rgba(255, 255, 255, 0.6) 1508px 1166px, rgba(255, 255, 255, 0.74) 986px 67px, rgba(255, 255, 255, 0.6) 987px 171px, rgba(255, 255, 255, 0.67) 1062px 1298px, rgba(255, 255, 255, 0.4) 851px 624px, rgba(255, 255, 255, 0.46) 1911px 255px, rgba(255, 255, 255, 0.78) 671px 1549px, rgba(255, 255, 255, 0.35) 1908px 1066px, rgba(255, 255, 255, 0.7) 710px 1003px, rgba(255, 255, 255, 0.72) 808px 179px, rgba(255, 255, 255, 0.68) 567px 452px, rgba(255, 255, 255, 0.88) 1290px 499px, rgba(255, 255, 255, 0.5) 743px 1946px, rgba(255, 255, 255, 0.75) 1113px 275px, rgba(255, 255, 255, 0.71) 518px 1437px, rgba(255, 255, 255, 0.85) 1069px 1836px, rgba(255, 255, 255, 0.71) 1601px 458px, rgba(255, 255, 255, 0.51) 779px 723px, rgba(255, 255, 255, 0.84) 690px 1614px, rgba(255, 255, 255, 0.69) 96px 1387px, rgba(255, 255, 255, 0.85) 780px 1012px, rgba(255, 255, 255, 0.88) 66px 1948px, rgba(255, 255, 255, 0.6) 28px 196px, rgba(255, 255, 255, 0.66) 1165px 544px, rgba(255, 255, 255, 0.78) 894px 1394px, rgba(255, 255, 255, 0.59) 824px 1573px, rgba(255, 255, 255, 0.51) 209px 1986px, rgba(255, 255, 255, 0.82) 1673px 1881px, rgba(255, 255, 255, 0.44) 1722px 981px, rgba(255, 255, 255, 0.64) 78px 306px, rgba(255, 255, 255, 0.53) 9px 1071px, rgba(255, 255, 255, 0.57) 496px 609px, rgba(255, 255, 255, 0.76) 1618px 774px, rgba(255, 255, 255, 0.66) 530px 907px, rgba(255, 255, 255, 0.47) 1736px 29px, rgba(255, 255, 255, 0.61) 334px 1952px, rgba(255, 255, 255, 0.72) 1057px 1302px, rgba(255, 255, 255, 0.44) 1412px 895px, rgba(255, 255, 255, 0.53) 1978px 285px, rgba(255, 255, 255, 0.63) 553px 1280px, rgba(255, 255, 255, 0.46) 673px 769px, rgba(255, 255, 255, 0.43) 1515px 394px, rgba(255, 255, 255, 0.39) 944px 348px, rgba(255, 255, 255, 0.7) 1975px 628px, rgba(255, 255, 255, 0.55) 1196px 573px, rgba(255, 255, 255, 0.73) 736px 1142px, rgba(255, 255, 255, 0.4) 1615px 607px, rgba(255, 255, 255, 0.56) 1503px 1461px, rgba(255, 255, 255, 0.66) 305px 1067px, rgba(255, 255, 255, 0.82) 325px 1287px, rgba(255, 255, 255, 0.68) 1609px 446px, rgba(255, 255, 255, 0.5) 1895px 304px, rgba(255, 255, 255, 0.57) 1834px 1073px, rgba(255, 255, 255, 0.73) 1947px 653px, rgba(255, 255, 255, 0.65) 346px 229px, rgba(255, 255, 255, 0.72) 1792px 1502px, rgba(255, 255, 255, 0.89) 787px 750px, rgba(255, 255, 255, 0.55) 919px 184px, rgba(255, 255, 255, 0.42) 733px 995px, rgba(255, 255, 255, 0.53) 123px 1118px, rgba(255, 255, 255, 0.8) 1251px 239px, rgba(255, 255, 255, 0.68) 1945px 908px, rgba(255, 255, 255, 0.64) 767px 338px, rgba(255, 255, 255, 0.64) 1567px 1425px, rgba(255, 255, 255, 0.39) 1561px 34px, rgba(255, 255, 255, 0.35) 1568px 1842px, rgba(255, 255, 255, 0.49) 489px 601px, rgba(255, 255, 255, 0.43) 1656px 77px, rgba(255, 255, 255, 0.76) 407px 1170px, rgba(255, 255, 255, 0.75) 1607px 1862px, rgba(255, 255, 255, 0.81) 1316px 806px, rgba(255, 255, 255, 0.81) 1467px 375px, rgba(255, 255, 255, 0.7) 871px 297px, rgba(255, 255, 255, 0.88) 1882px 800px, rgba(255, 255, 255, 0.36) 998px 639px, rgba(255, 255, 255, 0.89) 348px 851px, rgba(255, 255, 255, 0.74) 1723px 1244px, rgba(255, 255, 255, 0.56) 466px 1324px, rgba(255, 255, 255, 0.7) 150px 1957px, rgba(255, 255, 255, 0.53) 763px 1204px, rgba(255, 255, 255, 0.56) 1583px 270px, rgba(255, 255, 255, 0.65) 78px 448px, rgba(255, 255, 255, 0.54) 820px 889px, rgba(255, 255, 255, 0.76) 346px 467px, rgba(255, 255, 255, 0.71) 1436px 1607px, rgba(255, 255, 255, 0.45) 1292px 714px, rgba(255, 255, 255, 0.9) 854px 1189px, rgba(255, 255, 255, 0.73) 794px 69px, rgba(255, 255, 255, 0.74) 1206px 194px, rgba(255, 255, 255, 0.38) 1655px 1835px, rgba(255, 255, 255, 0.87) 874px 1312px, rgba(255, 255, 255, 0.81) 644px 737px, rgba(255, 255, 255, 0.52) 839px 1224px, rgba(255, 255, 255, 0.4) 1031px 1825px, rgba(255, 255, 255, 0.87) 645px 56px, rgba(255, 255, 255, 0.55) 960px 1596px, rgba(255, 255, 255, 0.65) 1694px 711px, rgba(255, 255, 255, 0.41) 249px 1311px, rgba(255, 255, 255, 0.65) 837px 1817px, rgba(255, 255, 255, 0.37) 799px 1072px, rgba(255, 255, 255, 0.75) 1780px 296px, rgba(255, 255, 255, 0.78) 1169px 523px, rgba(255, 255, 255, 0.52) 894px 791px, rgba(255, 255, 255, 0.87) 472px 279px, rgba(255, 255, 255, 0.49) 40px 915px, rgba(255, 255, 255, 0.8) 1677px 926px, rgba(255, 255, 255, 0.38) 57px 489px, rgba(255, 255, 255, 0.4) 1706px 534px, rgba(255, 255, 255, 0.58) 234px 502px, rgba(255, 255, 255, 0.64) 1024px 753px, rgba(255, 255, 255, 0.85) 1114px 863px, rgba(255, 255, 255, 0.48) 1127px 758px, rgba(255, 255, 255, 0.57) 570px 369px, rgba(255, 255, 255, 0.83) 85px 1882px, rgba(255, 255, 255, 0.4) 323px 1118px, rgba(255, 255, 255, 0.78) 1233px 270px, rgba(255, 255, 255, 0.85) 1832px 633px, rgba(255, 255, 255, 0.53) 1700px 930px, rgba(255, 255, 255, 0.5) 1503px 1879px, rgba(255, 255, 255, 0.65) 1222px 245px, rgba(255, 255, 255, 0.84) 751px 1635px, rgba(255, 255, 255, 0.82) 1916px 556px, rgba(255, 255, 255, 0.36) 908px 1923px, rgba(255, 255, 255, 0.72) 740px 1714px, rgba(255, 255, 255, 0.46) 1640px 1261px, rgba(255, 255, 255, 0.41) 882px 296px, rgba(255, 255, 255, 0.54) 219px 64px, rgba(255, 255, 255, 0.55) 1915px 434px, rgba(255, 255, 255, 0.88) 1096px 1337px, rgba(255, 255, 255, 0.37) 97px 1837px, rgba(255, 255, 255, 0.48) 1661px 1116px, rgba(255, 255, 255, 0.48) 312px 628px, rgba(255, 255, 255, 0.65) 1303px 843px, rgba(255, 255, 255, 0.88) 1621px 14px, rgba(255, 255, 255, 0.54) 1063px 1909px, rgba(255, 255, 255, 0.77) 1642px 410px, rgba(255, 255, 255, 0.59) 241px 1747px, rgba(255, 255, 255, 0.52) 1543px 1741px, rgba(255, 255, 255, 0.82) 171px 1145px, rgba(255, 255, 255, 0.59) 1788px 482px, rgba(255, 255, 255, 0.49) 700px 1513px, rgba(255, 255, 255, 0.79) 598px 1604px, rgba(255, 255, 255, 0.4) 1609px 1869px, rgba(255, 255, 255, 0.66) 1813px 560px, rgba(255, 255, 255, 0.49) 1443px 1805px, rgba(255, 255, 255, 0.62) 1795px 1195px, rgba(255, 255, 255, 0.56) 1411px 1443px, rgba(255, 255, 255, 0.52) 1731px 36px, rgba(255, 255, 255, 0.49) 1648px 1859px, rgba(255, 255, 255, 0.43) 755px 907px, rgba(255, 255, 255, 0.57) 1641px 1888px, rgba(255, 255, 255, 0.86) 1931px 697px, rgba(255, 255, 255, 0.85) 885px 1248px, rgba(255, 255, 255, 0.6) 1675px 143px, rgba(255, 255, 255, 0.63) 918px 1388px, rgba(255, 255, 255, 0.4) 119px 1957px, rgba(255, 255, 255, 0.36) 1477px 1558px, rgba(255, 255, 255, 0.77) 436px 1334px, rgba(255, 255, 255, 0.6) 172px 1815px, rgba(255, 255, 255, 0.36) 300px 1720px, rgba(255, 255, 255, 0.54) 708px 1187px, rgba(255, 255, 255, 0.45) 987px 489px, rgba(255, 255, 255, 0.83) 1416px 615px, rgba(255, 255, 255, 0.67) 407px 1000px, rgba(255, 255, 255, 0.39) 903px 1946px, rgba(255, 255, 255, 0.78) 1494px 724px, rgba(255, 255, 255, 0.57) 753px 967px, rgba(255, 255, 255, 0.66) 584px 1904px, rgba(255, 255, 255, 0.63) 1958px 1539px, rgba(255, 255, 255, 0.82) 448px 1536px, rgba(255, 255, 255, 0.57) 163px 496px, rgba(255, 255, 255, 0.88) 368px 1559px, rgba(255, 255, 255, 0.75) 654px 1672px, rgba(255, 255, 255, 0.55) 632px 425px, rgba(255, 255, 255, 0.82) 301px 664px, rgba(255, 255, 255, 0.68) 1958px 1257px, rgba(255, 255, 255, 0.77) 1036px 345px, rgba(255, 255, 255, 0.51) 975px 1482px, rgba(255, 255, 255, 0.59) 1219px 734px, rgba(255, 255, 255, 0.76) 1267px 703px, rgba(255, 255, 255, 0.88) 95px 1670px, rgba(255, 255, 255, 0.6) 488px 684px, rgba(255, 255, 255, 0.63) 1800px 1985px, rgba(255, 255, 255, 0.79) 1380px 1551px, rgba(255, 255, 255, 0.63) 751px 1231px, rgba(255, 255, 255, 0.4) 119px 190px, rgba(255, 255, 255, 0.56) 476px 276px, rgba(255, 255, 255, 0.53) 867px 1377px, rgba(255, 255, 255, 0.53) 1038px 834px, rgba(255, 255, 255, 0.66) 1829px 1878px, rgba(255, 255, 255, 0.84) 405px 396px, rgba(255, 255, 255, 0.73) 607px 356px, rgba(255, 255, 255, 0.49) 735px 1039px, rgba(255, 255, 255, 0.39) 732px 430px, rgba(255, 255, 255, 0.72) 1194px 518px, rgba(255, 255, 255, 0.83) 1940px 1234px, rgba(255, 255, 255, 0.52) 1210px 436px, rgba(255, 255, 255, 0.51) 339px 421px, rgba(255, 255, 255, 0.47) 489px 900px, rgba(255, 255, 255, 0.68) 1950px 1242px, rgba(255, 255, 255, 0.65) 1688px 481px, rgba(255, 255, 255, 0.69) 1892px 1611px, rgba(255, 255, 255, 0.88) 1378px 734px, rgba(255, 255, 255, 0.67) 904px 1239px, rgba(255, 255, 255, 0.53) 916px 1459px, rgba(255, 255, 255, 0.51) 1599px 89px, rgba(255, 255, 255, 0.37) 1010px 1318px, rgba(255, 255, 255, 0.41) 679px 778px, rgba(255, 255, 255, 0.66) 34px 479px, rgba(255, 255, 255, 0.41) 941px 1396px, rgba(255, 255, 255, 0.79) 604px 1588px, rgba(255, 255, 255, 0.72) 1802px 433px, rgba(255, 255, 255, 0.73) 664px 244px, rgba(255, 255, 255, 0.44) 55px 152px, rgba(255, 255, 255, 0.89) 1409px 732px, rgba(255, 255, 255, 0.79) 783px 1448px, rgba(255, 255, 255, 0.83) 1446px 1499px, rgba(255, 255, 255, 0.61) 389px 1737px, rgba(255, 255, 255, 0.4) 1702px 1999px, rgba(255, 255, 255, 0.81) 1296px 1146px, rgba(255, 255, 255, 0.79) 1371px 835px, rgba(255, 255, 255, 0.55) 395px 1593px, rgba(255, 255, 255, 0.42) 1415px 1758px, rgba(255, 255, 255, 0.41) 1020px 1025px, rgba(255, 255, 255, 0.67) 1031px 218px, rgba(255, 255, 255, 0.38) 1435px 1297px, rgba(255, 255, 255, 0.7) 1771px 111px, rgba(255, 255, 255, 0.56) 1284px 138px, rgba(255, 255, 255, 0.73) 314px 1430px, rgba(255, 255, 255, 0.84) 1213px 1269px, rgba(255, 255, 255, 0.59) 1905px 1879px, rgba(255, 255, 255, 0.68) 890px 1015px, rgba(255, 255, 255, 0.68) 1606px 1470px, rgba(255, 255, 255, 0.42) 1103px 1207px, rgba(255, 255, 255, 0.39) 1272px 999px, rgba(255, 255, 255, 0.84) 1240px 900px, rgba(255, 255, 255, 0.83) 359px 1191px, rgba(255, 255, 255, 0.42) 1326px 1407px, rgba(255, 255, 255, 0.83) 1395px 119px, rgba(255, 255, 255, 0.37) 683px 1276px, rgba(255, 255, 255, 0.79) 1409px 1747px, rgba(255, 255, 255, 0.78) 1591px 824px, rgba(255, 255, 255, 0.62) 1502px 496px, rgba(255, 255, 255, 0.6) 381px 567px, rgba(255, 255, 255, 0.67) 1352px 929px, rgba(255, 255, 255, 0.44) 1852px 255px, rgba(255, 255, 255, 0.75) 624px 853px, rgba(255, 255, 255, 0.66) 1981px 1338px, rgba(255, 255, 255, 0.43) 1386px 277px, rgba(255, 255, 255, 0.83) 1819px 1659px, rgba(255, 255, 255, 0.68) 1624px 1433px, rgba(255, 255, 255, 0.64) 1681px 185px, rgba(255, 255, 255, 0.4) 1491px 1669px, rgba(255, 255, 255, 0.36) 1552px 888px, rgba(255, 255, 255, 0.81) 15px 1795px, rgba(255, 255, 255, 0.82) 743px 1782px, rgba(255, 255, 255, 0.66) 800px 204px, rgba(255, 255, 255, 0.54) 474px 1362px, rgba(255, 255, 255, 0.62) 989px 1271px, rgba(255, 255, 255, 0.73) 921px 555px, rgba(255, 255, 255, 0.75) 1597px 1588px, rgba(255, 255, 255, 0.45) 1629px 1664px, rgba(255, 255, 255, 0.53) 1398px 1613px, rgba(255, 255, 255, 0.68) 543px 1791px, rgba(255, 255, 255, 0.63) 609px 159px, rgba(255, 255, 255, 0.62) 1146px 869px, rgba(255, 255, 255, 0.48) 91px 1752px, rgba(255, 255, 255, 0.44) 1338px 307px, rgba(255, 255, 255, 0.67) 1285px 794px, rgba(255, 255, 255, 0.51) 416px 397px, rgba(255, 255, 255, 0.76) 327px 1021px, rgba(255, 255, 255, 0.61) 849px 698px, rgba(255, 255, 255, 0.87) 573px 1107px, rgba(255, 255, 255, 0.78) 1173px 1823px, rgba(255, 255, 255, 0.65) 134px 605px, rgba(255, 255, 255, 0.63) 1427px 1450px, rgba(255, 255, 255, 0.83) 1111px 938px, rgba(255, 255, 255, 0.85) 1564px 609px, rgba(255, 255, 255, 0.58) 405px 105px, rgba(255, 255, 255, 0.61) 1961px 1381px, rgba(255, 255, 255, 0.49) 839px 1616px, rgba(255, 255, 255, 0.52) 611px 1166px, rgba(255, 255, 255, 0.55) 1544px 122px, rgba(255, 255, 255, 0.48) 343px 120px, rgba(255, 255, 255, 0.72) 715px 301px, rgba(255, 255, 255, 0.57) 1540px 1138px, rgba(255, 255, 255, 0.42) 1601px 1296px, rgba(255, 255, 255, 0.59) 1769px 816px, rgba(255, 255, 255, 0.39) 867px 1572px, rgba(255, 255, 255, 0.59) 262px 1859px, rgba(255, 255, 255, 0.79) 476px 1109px, rgba(255, 255, 255, 0.38) 1104px 1963px, rgba(255, 255, 255, 0.44) 1094px 483px, rgba(255, 255, 255, 0.88) 1048px 1758px, rgba(255, 255, 255, 0.87) 960px 290px, rgba(255, 255, 255, 0.9) 1749px 1767px, rgba(255, 255, 255, 0.58) 672px 1818px, rgba(255, 255, 255, 0.73) 1881px 1131px, rgba(255, 255, 255, 0.41) 1688px 417px, rgba(255, 255, 255, 0.81) 800px 889px, rgba(255, 255, 255, 0.79) 422px 235px, rgba(255, 255, 255, 0.84) 631px 581px, rgba(255, 255, 255, 0.65) 1564px 1795px, rgba(255, 255, 255, 0.51) 1056px 885px, rgba(255, 255, 255, 0.67) 1594px 1510px, rgba(255, 255, 255, 0.72) 1502px 1734px, rgba(255, 255, 255, 0.74) 949px 1979px, rgba(255, 255, 255, 0.51) 1470px 1732px, rgba(255, 255, 255, 0.63) 1346px 523px, rgba(255, 255, 255, 0.87) 1877px 1127px, rgba(255, 255, 255, 0.79) 1164px 389px, rgba(255, 255, 255, 0.52) 486px 306px, rgba(255, 255, 255, 0.64) 950px 1018px, rgba(255, 255, 255, 0.42) 1051px 572px, rgba(255, 255, 255, 0.4) 630px 922px, rgba(255, 255, 255, 0.82) 1996px 725px, rgba(255, 255, 255, 0.81) 837px 1927px, rgba(255, 255, 255, 0.88) 957px 266px, rgba(255, 255, 255, 0.58) 1303px 182px, rgba(255, 255, 255, 0.77) 638px 20px, rgba(255, 255, 255, 0.68) 1799px 827px, rgba(255, 255, 255, 0.45) 1004px 770px, rgba(255, 255, 255, 0.6) 1967px 183px, rgba(255, 255, 255, 0.43) 1319px 1564px, rgba(255, 255, 255, 0.58) 1003px 131px, rgba(255, 255, 255, 0.61) 1191px 264px, rgba(255, 255, 255, 0.88) 225px 382px, rgba(255, 255, 255, 0.41) 383px 863px, rgba(255, 255, 255, 0.69) 1927px 152px, rgba(255, 255, 255, 0.7) 1381px 1310px, rgba(255, 255, 255, 0.83) 448px 293px, rgba(255, 255, 255, 0.79) 1574px 1174px, rgba(255, 255, 255, 0.7) 106px 1129px, rgba(255, 255, 255, 0.43) 688px 859px, rgba(255, 255, 255, 0.54) 1472px 1854px, rgba(255, 255, 255, 0.86) 1086px 1024px, rgba(255, 255, 255, 0.8) 551px 1996px, rgba(255, 255, 255, 0.37) 1105px 1102px, rgba(255, 255, 255, 0.62) 865px 469px, rgba(255, 255, 255, 0.77) 453px 299px, rgba(255, 255, 255, 0.77) 1748px 1536px, rgba(255, 255, 255, 0.86) 1529px 1207px, rgba(255, 255, 255, 0.38) 1001px 1973px, rgba(255, 255, 255, 0.85) 1914px 1903px, rgba(255, 255, 255, 0.75) 439px 1311px, rgba(255, 255, 255, 0.72) 226px 1318px, rgba(255, 255, 255, 0.56) 821px 901px, rgba(255, 255, 255, 0.44) 114px 1759px, rgba(255, 255, 255, 0.58) 235px 1357px, rgba(255, 255, 255, 0.63) 713px 1945px, rgba(255, 255, 255, 0.78) 1312px 1602px, rgba(255, 255, 255, 0.76) 1549px 1436px, rgba(255, 255, 255, 0.88) 35px 696px, rgba(255, 255, 255, 0.78) 479px 1386px, rgba(255, 255, 255, 0.62) 1990px 1660px, rgba(255, 255, 255, 0.5) 1140px 1579px, rgba(255, 255, 255, 0.72) 707px 1596px, rgba(255, 255, 255, 0.68) 800px 636px, rgba(255, 255, 255, 0.36) 550px 359px, rgba(255, 255, 255, 0.68) 1740px 324px, rgba(255, 255, 255, 0.57) 1865px 535px, rgba(255, 255, 255, 0.75) 1807px 763px, rgba(255, 255, 255, 0.66) 565px 1380px, rgba(255, 255, 255, 0.38) 141px 717px, rgba(255, 255, 255, 0.44) 1191px 615px, rgba(255, 255, 255, 0.88) 1050px 1316px, rgba(255, 255, 255, 0.88) 1262px 507px, rgba(255, 255, 255, 0.75) 226px 979px, rgba(255, 255, 255, 0.64) 589px 649px, rgba(255, 255, 255, 0.71) 932px 1504px, rgba(255, 255, 255, 0.48) 483px 764px, rgba(255, 255, 255, 0.86) 509px 1656px, rgba(255, 255, 255, 0.71) 1573px 1161px, rgba(255, 255, 255, 0.72) 1619px 1577px, rgba(255, 255, 255, 0.84) 1559px 853px, rgba(255, 255, 255, 0.83) 956px 1821px, rgba(255, 255, 255, 0.48) 1017px 1291px, rgba(255, 255, 255, 0.86) 433px 1796px, rgba(255, 255, 255, 0.72) 9px 1339px, rgba(255, 255, 255, 0.8) 122px 1046px, rgba(255, 255, 255, 0.81) 1636px 687px, rgba(255, 255, 255, 0.45) 830px 1841px, rgba(255, 255, 255, 0.63) 1746px 1154px, rgba(255, 255, 255, 0.35) 1611px 1332px, rgba(255, 255, 255, 0.64) 362px 1199px, rgba(255, 255, 255, 0.43) 1639px 891px, rgba(255, 255, 255, 0.75) 1907px 1225px, rgba(255, 255, 255, 0.79) 1204px 1843px, rgba(255, 255, 255, 0.66) 522px 1699px, rgba(255, 255, 255, 0.58) 1087px 742px, rgba(255, 255, 255, 0.86) 1387px 1949px, rgba(255, 255, 255, 0.69) 192px 43px, rgba(255, 255, 255, 0.5) 648px 402px, rgba(255, 255, 255, 0.66) 602px 630px, rgba(255, 255, 255, 0.89) 1779px 220px, rgba(255, 255, 255, 0.8) 894px 1512px, rgba(255, 255, 255, 0.8) 916px 456px, rgba(255, 255, 255, 0.88) 1263px 311px, rgba(255, 255, 255, 0.89) 9px 1000px, rgba(255, 255, 255, 0.44) 1826px 1930px, rgba(255, 255, 255, 0.5) 1843px 1803px, rgba(255, 255, 255, 0.61) 68px 1064px, rgba(255, 255, 255, 0.37) 314px 220px, rgba(255, 255, 255, 0.64) 1955px 1109px, rgba(255, 255, 255, 0.42) 1943px 1659px, rgba(255, 255, 255, 0.59) 203px 1809px, rgba(255, 255, 255, 0.69) 1545px 1528px, rgba(255, 255, 255, 0.79) 758px 1721px, rgba(255, 255, 255, 0.86) 1628px 1310px, rgba(255, 255, 255, 0.84) 398px 109px, rgba(255, 255, 255, 0.56) 1525px 138px, rgba(255, 255, 255, 0.52) 390px 1162px, rgba(255, 255, 255, 0.7) 408px 387px, rgba(255, 255, 255, 0.54) 1797px 747px, rgba(255, 255, 255, 0.65) 992px 1643px, rgba(255, 255, 255, 0.63) 1760px 613px, rgba(255, 255, 255, 0.78) 957px 54px, rgba(255, 255, 255, 0.47) 864px 427px, rgba(255, 255, 255, 0.55) 94px 1329px, rgba(255, 255, 255, 0.62) 1128px 816px, rgba(255, 255, 255, 0.43) 1266px 1711px, rgba(255, 255, 255, 0.47) 1438px 559px, rgba(255, 255, 255, 0.42) 378px 1304px, rgba(255, 255, 255, 0.46) 1643px 1754px, rgba(255, 255, 255, 0.72) 612px 328px, rgba(255, 255, 255, 0.49) 1587px 758px, rgba(255, 255, 255, 0.63) 1093px 1253px, rgba(255, 255, 255, 0.8) 1626px 563px, rgba(255, 255, 255, 0.54) 425px 1450px, rgba(255, 255, 255, 0.86) 1602px 1747px, rgba(255, 255, 255, 0.48) 1825px 1140px, rgba(255, 255, 255, 0.48) 1443px 431px, rgba(255, 255, 255, 0.7) 898px 1640px, rgba(255, 255, 255, 0.77) 151px 146px, rgba(255, 255, 255, 0.89) 205px 1739px, rgba(255, 255, 255, 0.48) 1233px 1691px, rgba(255, 255, 255, 0.46) 264px 1629px, rgba(255, 255, 255, 0.47) 1015px 552px, rgba(255, 255, 255, 0.79) 1356px 707px, rgba(255, 255, 255, 0.61) 159px 1420px, rgba(255, 255, 255, 0.37) 330px 1346px, rgba(255, 255, 255, 0.52) 480px 1094px, rgba(255, 255, 255, 0.46) 557px 1772px, rgba(255, 255, 255, 0.53) 1572px 166px, rgba(255, 255, 255, 0.37) 1088px 1200px, rgba(255, 255, 255, 0.46) 1712px 578px, rgba(255, 255, 255, 0.59) 1442px 1609px, rgba(255, 255, 255, 0.84) 390px 1224px, rgba(255, 255, 255, 0.83) 142px 1514px, rgba(255, 255, 255, 0.5) 1483px 709px, rgba(255, 255, 255, 0.86) 936px 375px, rgba(255, 255, 255, 0.77) 756px 649px; animation-duration: 60s;"></div><div id="stars2" class="starlayer" style="height: 2px; width: 2px; box-shadow: rgba(255, 255, 255, 0.61) 689px 110px, rgba(255, 255, 255, 0.51) 837px 363px, rgba(255, 255, 255, 0.86) 1511px 1857px, rgba(255, 255, 255, 0.87) 1994px 1670px, rgba(255, 255, 255, 0.53) 809px 552px, rgba(255, 255, 255, 0.82) 1756px 1442px, rgba(255, 255, 255, 0.59) 1751px 1235px, rgba(255, 255, 255, 0.49) 256px 344px, rgba(255, 255, 255, 0.7) 1765px 1785px, rgba(255, 255, 255, 0.4) 1239px 474px, rgba(255, 255, 255, 0.68) 383px 24px, rgba(255, 255, 255, 0.44) 1081px 1878px, rgba(255, 255, 255, 0.83) 326px 1860px, rgba(255, 255, 255, 0.36) 1572px 679px, rgba(255, 255, 255, 0.65) 217px 170px, rgba(255, 255, 255, 0.58) 1849px 1438px, rgba(255, 255, 255, 0.57) 1704px 500px, rgba(255, 255, 255, 0.85) 1109px 1303px, rgba(255, 255, 255, 0.78) 723px 540px, rgba(255, 255, 255, 0.63) 1812px 1591px, rgba(255, 255, 255, 0.48) 492px 1333px, rgba(255, 255, 255, 0.71) 587px 1402px, rgba(255, 255, 255, 0.71) 883px 1627px, rgba(255, 255, 255, 0.66) 1861px 73px, rgba(255, 255, 255, 0.49) 1039px 1013px, rgba(255, 255, 255, 0.66) 1675px 1178px, rgba(255, 255, 255, 0.86) 986px 847px, rgba(255, 255, 255, 0.59) 998px 821px, rgba(255, 255, 255, 0.48) 1833px 1556px, rgba(255, 255, 255, 0.51) 146px 451px, rgba(255, 255, 255, 0.84) 1101px 1862px, rgba(255, 255, 255, 0.63) 947px 1938px, rgba(255, 255, 255, 0.62) 600px 928px, rgba(255, 255, 255, 0.64) 372px 950px, rgba(255, 255, 255, 0.84) 237px 1784px, rgba(255, 255, 255, 0.65) 383px 882px, rgba(255, 255, 255, 0.61) 1616px 992px, rgba(255, 255, 255, 0.66) 596px 706px, rgba(255, 255, 255, 0.76) 1917px 230px, rgba(255, 255, 255, 0.56) 1710px 105px, rgba(255, 255, 255, 0.49) 396px 821px, rgba(255, 255, 255, 0.42) 989px 874px, rgba(255, 255, 255, 0.62) 1319px 784px, rgba(255, 255, 255, 0.71) 1627px 1368px, rgba(255, 255, 255, 0.52) 1210px 518px, rgba(255, 255, 255, 0.73) 548px 1536px, rgba(255, 255, 255, 0.43) 373px 855px, rgba(255, 255, 255, 0.59) 62px 1986px, rgba(255, 255, 255, 0.49) 1987px 1576px, rgba(255, 255, 255, 0.79) 837px 1336px, rgba(255, 255, 255, 0.6) 207px 881px, rgba(255, 255, 255, 0.69) 1515px 1598px, rgba(255, 255, 255, 0.84) 1840px 524px, rgba(255, 255, 255, 0.67) 30px 1373px, rgba(255, 255, 255, 0.58) 196px 154px, rgba(255, 255, 255, 0.49) 171px 1030px, rgba(255, 255, 255, 0.44) 676px 1876px, rgba(255, 255, 255, 0.69) 124px 1452px, rgba(255, 255, 255, 0.45) 821px 498px, rgba(255, 255, 255, 0.61) 646px 1115px, rgba(255, 255, 255, 0.59) 1421px 778px, rgba(255, 255, 255, 0.61) 201px 38px, rgba(255, 255, 255, 0.47) 488px 1299px, rgba(255, 255, 255, 0.49) 1164px 522px, rgba(255, 255, 255, 0.65) 1201px 1428px, rgba(255, 255, 255, 0.74) 1676px 1107px, rgba(255, 255, 255, 0.54) 756px 25px, rgba(255, 255, 255, 0.76) 1806px 91px, rgba(255, 255, 255, 0.39) 1876px 1442px, rgba(255, 255, 255, 0.87) 1418px 1370px, rgba(255, 255, 255, 0.67) 472px 862px, rgba(255, 255, 255, 0.62) 1046px 1422px, rgba(255, 255, 255, 0.77) 1693px 850px, rgba(255, 255, 255, 0.68) 688px 1619px, rgba(255, 255, 255, 0.38) 1559px 766px, rgba(255, 255, 255, 0.87) 1953px 430px, rgba(255, 255, 255, 0.78) 348px 471px, rgba(255, 255, 255, 0.41) 420px 1137px, rgba(255, 255, 255, 0.88) 234px 1519px, rgba(255, 255, 255, 0.85) 482px 83px, rgba(255, 255, 255, 0.65) 543px 846px, rgba(255, 255, 255, 0.47) 354px 1307px, rgba(255, 255, 255, 0.65) 1159px 808px, rgba(255, 255, 255, 0.61) 909px 547px, rgba(255, 255, 255, 0.39) 1210px 574px, rgba(255, 255, 255, 0.51) 148px 292px, rgba(255, 255, 255, 0.49) 630px 110px, rgba(255, 255, 255, 0.41) 496px 1316px, rgba(255, 255, 255, 0.88) 661px 239px, rgba(255, 255, 255, 0.82) 1156px 1694px, rgba(255, 255, 255, 0.88) 1363px 1382px, rgba(255, 255, 255, 0.78) 585px 507px, rgba(255, 255, 255, 0.85) 1514px 1729px, rgba(255, 255, 255, 0.53) 1341px 1456px, rgba(255, 255, 255, 0.35) 414px 1288px, rgba(255, 255, 255, 0.89) 746px 894px, rgba(255, 255, 255, 0.79) 892px 1404px, rgba(255, 255, 255, 0.89) 1965px 1383px, rgba(255, 255, 255, 0.36) 1076px 1516px, rgba(255, 255, 255, 0.38) 1431px 522px, rgba(255, 255, 255, 0.74) 1088px 1993px, rgba(255, 255, 255, 0.87) 44px 1647px, rgba(255, 255, 255, 0.62) 800px 486px, rgba(255, 255, 255, 0.77) 1933px 1599px, rgba(255, 255, 255, 0.84) 1218px 1305px, rgba(255, 255, 255, 0.55) 1631px 1880px, rgba(255, 255, 255, 0.36) 1520px 1117px, rgba(255, 255, 255, 0.49) 955px 1602px, rgba(255, 255, 255, 0.84) 847px 1142px, rgba(255, 255, 255, 0.7) 747px 224px, rgba(255, 255, 255, 0.9) 412px 714px, rgba(255, 255, 255, 0.59) 242px 653px, rgba(255, 255, 255, 0.83) 485px 163px, rgba(255, 255, 255, 0.61) 896px 1291px, rgba(255, 255, 255, 0.79) 1752px 629px, rgba(255, 255, 255, 0.4) 555px 252px, rgba(255, 255, 255, 0.41) 1284px 1422px, rgba(255, 255, 255, 0.62) 209px 475px, rgba(255, 255, 255, 0.51) 764px 255px, rgba(255, 255, 255, 0.87) 1612px 1698px, rgba(255, 255, 255, 0.58) 1094px 781px, rgba(255, 255, 255, 0.71) 850px 949px, rgba(255, 255, 255, 0.58) 753px 1074px, rgba(255, 255, 255, 0.89) 763px 1084px, rgba(255, 255, 255, 0.68) 987px 60px, rgba(255, 255, 255, 0.77) 1583px 1046px, rgba(255, 255, 255, 0.68) 1254px 120px, rgba(255, 255, 255, 0.7) 1364px 1452px, rgba(255, 255, 255, 0.42) 723px 1209px, rgba(255, 255, 255, 0.77) 176px 1851px, rgba(255, 255, 255, 0.5) 1640px 728px, rgba(255, 255, 255, 0.57) 498px 1857px, rgba(255, 255, 255, 0.5) 1547px 1429px, rgba(255, 255, 255, 0.88) 115px 429px, rgba(255, 255, 255, 0.6) 574px 54px, rgba(255, 255, 255, 0.76) 862px 1544px, rgba(255, 255, 255, 0.43) 293px 1398px, rgba(255, 255, 255, 0.58) 292px 403px, rgba(255, 255, 255, 0.7) 1122px 1069px, rgba(255, 255, 255, 0.44) 125px 1299px, rgba(255, 255, 255, 0.76) 610px 481px, rgba(255, 255, 255, 0.6) 1312px 1746px, rgba(255, 255, 255, 0.88) 1344px 1601px, rgba(255, 255, 255, 0.69) 1840px 1325px, rgba(255, 255, 255, 0.43) 136px 1506px, rgba(255, 255, 255, 0.7) 1245px 684px, rgba(255, 255, 255, 0.56) 1713px 963px, rgba(255, 255, 255, 0.9) 906px 391px, rgba(255, 255, 255, 0.49) 137px 1907px, rgba(255, 255, 255, 0.65) 44px 759px, rgba(255, 255, 255, 0.65) 820px 1128px, rgba(255, 255, 255, 0.49) 1456px 1939px, rgba(255, 255, 255, 0.45) 1181px 734px, rgba(255, 255, 255, 0.8) 1600px 519px, rgba(255, 255, 255, 0.83) 760px 1357px, rgba(255, 255, 255, 0.72) 1687px 1757px, rgba(255, 255, 255, 0.83) 162px 968px, rgba(255, 255, 255, 0.51) 531px 1263px, rgba(255, 255, 255, 0.66) 64px 1492px, rgba(255, 255, 255, 0.79) 100px 173px, rgba(255, 255, 255, 0.64) 1545px 915px, rgba(255, 255, 255, 0.35) 858px 1467px, rgba(255, 255, 255, 0.46) 820px 1677px, rgba(255, 255, 255, 0.78) 604px 1559px, rgba(255, 255, 255, 0.53) 361px 1719px, rgba(255, 255, 255, 0.69) 1822px 1869px, rgba(255, 255, 255, 0.47) 1155px 460px, rgba(255, 255, 255, 0.66) 1199px 92px, rgba(255, 255, 255, 0.78) 1729px 1641px, rgba(255, 255, 255, 0.39) 1192px 1117px, rgba(255, 255, 255, 0.81) 989px 1205px, rgba(255, 255, 255, 0.66) 155px 1762px, rgba(255, 255, 255, 0.63) 456px 957px, rgba(255, 255, 255, 0.89) 1064px 426px, rgba(255, 255, 255, 0.75) 1095px 1561px, rgba(255, 255, 255, 0.51) 1124px 1902px, rgba(255, 255, 255, 0.58) 291px 1547px, rgba(255, 255, 255, 0.59) 1px 1842px, rgba(255, 255, 255, 0.43) 1929px 915px, rgba(255, 255, 255, 0.43) 835px 483px, rgba(255, 255, 255, 0.89) 1648px 1543px, rgba(255, 255, 255, 0.59) 1614px 1050px, rgba(255, 255, 255, 0.82) 911px 269px, rgba(255, 255, 255, 0.62) 31px 1548px, rgba(255, 255, 255, 0.69) 898px 1357px, rgba(255, 255, 255, 0.69) 530px 828px, rgba(255, 255, 255, 0.36) 42px 280px, rgba(255, 255, 255, 0.66) 979px 1720px, rgba(255, 255, 255, 0.36) 1108px 70px, rgba(255, 255, 255, 0.85) 1211px 1146px, rgba(255, 255, 255, 0.36) 1892px 1653px, rgba(255, 255, 255, 0.87) 575px 645px, rgba(255, 255, 255, 0.7) 744px 768px, rgba(255, 255, 255, 0.37) 1567px 1624px, rgba(255, 255, 255, 0.77) 484px 1932px, rgba(255, 255, 255, 0.68) 1848px 226px, rgba(255, 255, 255, 0.39) 123px 805px, rgba(255, 255, 255, 0.8) 1329px 1707px, rgba(255, 255, 255, 0.7) 1703px 415px, rgba(255, 255, 255, 0.71) 1627px 660px; animation-duration: 120s;"></div><div id="stars3" class="starlayer" style="height: 3px; width: 3px; box-shadow: rgba(255, 255, 255, 0.57) 601px 1032px, rgba(255, 255, 255, 0.56) 1902px 389px, rgba(255, 255, 255, 0.78) 246px 890px, rgba(255, 255, 255, 0.6) 1538px 157px, rgba(255, 255, 255, 0.85) 812px 1084px, rgba(255, 255, 255, 0.36) 1054px 929px, rgba(255, 255, 255, 0.64) 320px 266px, rgba(255, 255, 255, 0.84) 445px 1641px, rgba(255, 255, 255, 0.79) 1007px 935px, rgba(255, 255, 255, 0.84) 1490px 546px, rgba(255, 255, 255, 0.73) 1812px 451px, rgba(255, 255, 255, 0.62) 1121px 1441px, rgba(255, 255, 255, 0.74) 100px 812px, rgba(255, 255, 255, 0.38) 162px 621px, rgba(255, 255, 255, 0.5) 643px 554px, rgba(255, 255, 255, 0.53) 1499px 1645px, rgba(255, 255, 255, 0.82) 440px 136px, rgba(255, 255, 255, 0.83) 1101px 1527px, rgba(255, 255, 255, 0.83) 1482px 540px, rgba(255, 255, 255, 0.38) 1531px 343px, rgba(255, 255, 255, 0.48) 1919px 1021px, rgba(255, 255, 255, 0.8) 1320px 314px, rgba(255, 255, 255, 0.76) 636px 693px, rgba(255, 255, 255, 0.64) 131px 1674px, rgba(255, 255, 255, 0.38) 933px 38px, rgba(255, 255, 255, 0.61) 300px 1810px, rgba(255, 255, 255, 0.38) 298px 530px, rgba(255, 255, 255, 0.48) 1023px 1312px, rgba(255, 255, 255, 0.67) 724px 1240px, rgba(255, 255, 255, 0.43) 867px 1348px, rgba(255, 255, 255, 0.53) 1773px 556px, rgba(255, 255, 255, 0.82) 1541px 1562px, rgba(255, 255, 255, 0.71) 1278px 1523px, rgba(255, 255, 255, 0.7) 1213px 782px, rgba(255, 255, 255, 0.58) 504px 1171px, rgba(255, 255, 255, 0.5) 914px 1387px, rgba(255, 255, 255, 0.42) 506px 1462px, rgba(255, 255, 255, 0.39) 792px 1892px, rgba(255, 255, 255, 0.63) 814px 996px, rgba(255, 255, 255, 0.81) 290px 1146px, rgba(255, 255, 255, 0.59) 1569px 1291px, rgba(255, 255, 255, 0.66) 1775px 1412px, rgba(255, 255, 255, 0.71) 1956px 1315px, rgba(255, 255, 255, 0.67) 759px 1761px, rgba(255, 255, 255, 0.86) 1264px 7px, rgba(255, 255, 255, 0.46) 1016px 1462px, rgba(255, 255, 255, 0.74) 156px 791px, rgba(255, 255, 255, 0.81) 516px 996px, rgba(255, 255, 255, 0.83) 390px 95px, rgba(255, 255, 255, 0.65) 1715px 945px, rgba(255, 255, 255, 0.5) 1218px 454px, rgba(255, 255, 255, 0.61) 235px 1164px, rgba(255, 255, 255, 0.84) 1606px 1841px, rgba(255, 255, 255, 0.39) 876px 1803px, rgba(255, 255, 255, 0.47) 926px 1584px, rgba(255, 255, 255, 0.52) 156px 240px, rgba(255, 255, 255, 0.84) 850px 734px, rgba(255, 255, 255, 0.49) 1883px 858px, rgba(255, 255, 255, 0.75) 985px 434px, rgba(255, 255, 255, 0.7) 1187px 1743px, rgba(255, 255, 255, 0.4) 580px 1305px, rgba(255, 255, 255, 0.36) 1582px 1250px, rgba(255, 255, 255, 0.86) 972px 1335px, rgba(255, 255, 255, 0.84) 1773px 248px, rgba(255, 255, 255, 0.39) 58px 1058px, rgba(255, 255, 255, 0.68) 1978px 1450px, rgba(255, 255, 255, 0.39) 577px 718px, rgba(255, 255, 255, 0.77) 1957px 705px, rgba(255, 255, 255, 0.54) 276px 838px, rgba(255, 255, 255, 0.82) 461px 490px, rgba(255, 255, 255, 0.62) 347px 431px, rgba(255, 255, 255, 0.78) 1756px 200px, rgba(255, 255, 255, 0.52) 596px 1151px, rgba(255, 255, 255, 0.85) 1619px 337px, rgba(255, 255, 255, 0.61) 1599px 721px, rgba(255, 255, 255, 0.51) 549px 883px, rgba(255, 255, 255, 0.83) 1081px 1897px, rgba(255, 255, 255, 0.63) 1032px 1972px, rgba(255, 255, 255, 0.69) 1778px 1652px, rgba(255, 255, 255, 0.55) 482px 758px, rgba(255, 255, 255, 0.76) 363px 850px, rgba(255, 255, 255, 0.7) 379px 962px, rgba(255, 255, 255, 0.76) 1499px 1464px, rgba(255, 255, 255, 0.54) 1435px 440px, rgba(255, 255, 255, 0.84) 940px 215px, rgba(255, 255, 255, 0.85) 96px 921px, rgba(255, 255, 255, 0.87) 642px 558px, rgba(255, 255, 255, 0.85) 1219px 1079px, rgba(255, 255, 255, 0.72) 1872px 362px, rgba(255, 255, 255, 0.89) 856px 258px, rgba(255, 255, 255, 0.7) 287px 1187px, rgba(255, 255, 255, 0.6) 438px 1823px, rgba(255, 255, 255, 0.53) 208px 402px, rgba(255, 255, 255, 0.67) 929px 261px, rgba(255, 255, 255, 0.52) 1149px 686px, rgba(255, 255, 255, 0.77) 181px 1256px, rgba(255, 255, 255, 0.57) 1165px 342px, rgba(255, 255, 255, 0.67) 1356px 932px, rgba(255, 255, 255, 0.53) 426px 484px, rgba(255, 255, 255, 0.4) 1129px 616px; animation-duration: 180s;"></div><div class="starlayer" style="height: 1px; width: 1px; box-shadow: rgba(255, 255, 255, 0.45) 1021px 1371px, rgba(255, 255, 255, 0.8) 1145px 408px, rgba(255, 255, 255, 0.89) 114px 1398px, rgba(255, 255, 255, 0.41) 1834px 1732px, rgba(255, 255, 255, 0.74) 353px 467px, rgba(255, 255, 255, 0.42) 494px 393px, rgba(255, 255, 255, 0.6) 1084px 374px, rgba(255, 255, 255, 0.9) 112px 1497px, rgba(255, 255, 255, 0.66) 625px 770px, rgba(255, 255, 255, 0.88) 1877px 558px, rgba(255, 255, 255, 0.49) 1481px 588px, rgba(255, 255, 255, 0.44) 1865px 792px, rgba(255, 255, 255, 0.4) 1221px 1841px, rgba(255, 255, 255, 0.68) 977px 1376px, rgba(255, 255, 255, 0.58) 1072px 53px, rgba(255, 255, 255, 0.72) 1363px 339px, rgba(255, 255, 255, 0.66) 1266px 1483px, rgba(255, 255, 255, 0.41) 1031px 138px, rgba(255, 255, 255, 0.54) 375px 1997px, rgba(255, 255, 255, 0.81) 866px 296px, rgba(255, 255, 255, 0.67) 159px 330px, rgba(255, 255, 255, 0.52) 1909px 1637px, rgba(255, 255, 255, 0.44) 1692px 223px, rgba(255, 255, 255, 0.56) 1906px 1816px, rgba(255, 255, 255, 0.4) 1305px 1286px, rgba(255, 255, 255, 0.68) 1484px 1090px, rgba(255, 255, 255, 0.46) 1955px 165px, rgba(255, 255, 255, 0.61) 928px 1081px, rgba(255, 255, 255, 0.46) 338px 585px, rgba(255, 255, 255, 0.56) 1875px 983px, rgba(255, 255, 255, 0.83) 1773px 719px, rgba(255, 255, 255, 0.43) 1157px 1912px, rgba(255, 255, 255, 0.46) 1139px 801px, rgba(255, 255, 255, 0.45) 960px 1635px, rgba(255, 255, 255, 0.8) 867px 1018px, rgba(255, 255, 255, 0.75) 1814px 202px, rgba(255, 255, 255, 0.8) 1471px 1893px, rgba(255, 255, 255, 0.82) 1198px 1232px, rgba(255, 255, 255, 0.68) 1071px 1426px, rgba(255, 255, 255, 0.87) 134px 737px, rgba(255, 255, 255, 0.4) 1290px 689px, rgba(255, 255, 255, 0.76) 554px 801px, rgba(255, 255, 255, 0.59) 1246px 488px, rgba(255, 255, 255, 0.85) 401px 1832px, rgba(255, 255, 255, 0.89) 940px 1892px, rgba(255, 255, 255, 0.84) 392px 1854px, rgba(255, 255, 255, 0.45) 194px 1703px, rgba(255, 255, 255, 0.64) 939px 944px, rgba(255, 255, 255, 0.76) 1818px 990px, rgba(255, 255, 255, 0.8) 498px 7px, rgba(255, 255, 255, 0.61) 1877px 1587px, rgba(255, 255, 255, 0.55) 152px 452px, rgba(255, 255, 255, 0.73) 1869px 797px, rgba(255, 255, 255, 0.64) 1551px 892px, rgba(255, 255, 255, 0.82) 1799px 346px, rgba(255, 255, 255, 0.75) 142px 1763px, rgba(255, 255, 255, 0.87) 1345px 1859px, rgba(255, 255, 255, 0.79) 1512px 1960px, rgba(255, 255, 255, 0.4) 166px 1774px, rgba(255, 255, 255, 0.6) 475px 954px, rgba(255, 255, 255, 0.56) 274px 873px, rgba(255, 255, 255, 0.43) 799px 74px, rgba(255, 255, 255, 0.68) 501px 292px, rgba(255, 255, 255, 0.65) 1174px 924px, rgba(255, 255, 255, 0.61) 567px 1369px, rgba(255, 255, 255, 0.63) 869px 329px, rgba(255, 255, 255, 0.68) 716px 1570px, rgba(255, 255, 255, 0.64) 1774px 810px, rgba(255, 255, 255, 0.88) 1567px 1712px, rgba(255, 255, 255, 0.8) 1940px 402px, rgba(255, 255, 255, 0.79) 1066px 447px, rgba(255, 255, 255, 0.42) 1479px 1009px, rgba(255, 255, 255, 0.42) 112px 1756px, rgba(255, 255, 255, 0.38) 728px 808px, rgba(255, 255, 255, 0.37) 1153px 293px, rgba(255, 255, 255, 0.88) 1089px 1022px, rgba(255, 255, 255, 0.75) 759px 862px, rgba(255, 255, 255, 0.43) 1830px 1607px, rgba(255, 255, 255, 0.78) 233px 530px, rgba(255, 255, 255, 0.72) 372px 1544px, rgba(255, 255, 255, 0.58) 674px 1090px, rgba(255, 255, 255, 0.5) 595px 835px, rgba(255, 255, 255, 0.52) 130px 1073px, rgba(255, 255, 255, 0.39) 1391px 1164px, rgba(255, 255, 255, 0.65) 1838px 1993px, rgba(255, 255, 255, 0.47) 1417px 1035px, rgba(255, 255, 255, 0.53) 728px 1353px, rgba(255, 255, 255, 0.89) 1129px 875px, rgba(255, 255, 255, 0.77) 265px 89px, rgba(255, 255, 255, 0.6) 1014px 1481px, rgba(255, 255, 255, 0.87) 1786px 113px, rgba(255, 255, 255, 0.56) 37px 675px, rgba(255, 255, 255, 0.6) 658px 1377px, rgba(255, 255, 255, 0.85) 467px 523px, rgba(255, 255, 255, 0.47) 1029px 1671px, rgba(255, 255, 255, 0.45) 1311px 1622px, rgba(255, 255, 255, 0.86) 566px 1673px, rgba(255, 255, 255, 0.66) 1028px 348px, rgba(255, 255, 255, 0.78) 1086px 1662px, rgba(255, 255, 255, 0.78) 1376px 1071px, rgba(255, 255, 255, 0.82) 911px 1705px, rgba(255, 255, 255, 0.41) 1409px 823px, rgba(255, 255, 255, 0.58) 1613px 1992px, rgba(255, 255, 255, 0.82) 203px 188px, rgba(255, 255, 255, 0.42) 229px 590px, rgba(255, 255, 255, 0.58) 1782px 69px, rgba(255, 255, 255, 0.58) 1159px 1771px, rgba(255, 255, 255, 0.67) 778px 341px, rgba(255, 255, 255, 0.7) 273px 1779px, rgba(255, 255, 255, 0.82) 1942px 823px, rgba(255, 255, 255, 0.63) 878px 1848px, rgba(255, 255, 255, 0.55) 812px 5px, rgba(255, 255, 255, 0.52) 1044px 725px, rgba(255, 255, 255, 0.54) 1250px 10px, rgba(255, 255, 255, 0.57) 865px 484px, rgba(255, 255, 255, 0.79) 1387px 1463px, rgba(255, 255, 255, 0.57) 622px 485px, rgba(255, 255, 255, 0.9) 118px 427px, rgba(255, 255, 255, 0.67) 691px 513px, rgba(255, 255, 255, 0.64) 1260px 434px, rgba(255, 255, 255, 0.4) 812px 1097px, rgba(255, 255, 255, 0.9) 1747px 1924px, rgba(255, 255, 255, 0.37) 878px 454px, rgba(255, 255, 255, 0.75) 433px 1168px, rgba(255, 255, 255, 0.64) 1955px 263px, rgba(255, 255, 255, 0.52) 1114px 292px, rgba(255, 255, 255, 0.46) 973px 766px, rgba(255, 255, 255, 0.72) 14px 418px, rgba(255, 255, 255, 0.53) 1625px 1257px, rgba(255, 255, 255, 0.71) 870px 1191px, rgba(255, 255, 255, 0.39) 576px 246px, rgba(255, 255, 255, 0.41) 1428px 1103px, rgba(255, 255, 255, 0.83) 1605px 1531px, rgba(255, 255, 255, 0.53) 1308px 184px, rgba(255, 255, 255, 0.75) 92px 1353px, rgba(255, 255, 255, 0.88) 1544px 599px, rgba(255, 255, 255, 0.81) 1945px 914px, rgba(255, 255, 255, 0.36) 1075px 317px, rgba(255, 255, 255, 0.82) 541px 1459px, rgba(255, 255, 255, 0.85) 917px 1421px, rgba(255, 255, 255, 0.41) 204px 1146px, rgba(255, 255, 255, 0.68) 1773px 1097px, rgba(255, 255, 255, 0.37) 1122px 875px, rgba(255, 255, 255, 0.74) 60px 1599px, rgba(255, 255, 255, 0.66) 1092px 1829px, rgba(255, 255, 255, 0.37) 29px 0px, rgba(255, 255, 255, 0.75) 1258px 932px, rgba(255, 255, 255, 0.73) 1664px 1014px, rgba(255, 255, 255, 0.49) 1827px 303px, rgba(255, 255, 255, 0.82) 1662px 522px, rgba(255, 255, 255, 0.47) 1495px 630px, rgba(255, 255, 255, 0.7) 560px 1711px, rgba(255, 255, 255, 0.47) 1188px 1158px, rgba(255, 255, 255, 0.51) 873px 916px, rgba(255, 255, 255, 0.84) 942px 853px, rgba(255, 255, 255, 0.43) 544px 1986px, rgba(255, 255, 255, 0.44) 1063px 1841px, rgba(255, 255, 255, 0.4) 1156px 1178px, rgba(255, 255, 255, 0.87) 1787px 242px, rgba(255, 255, 255, 0.48) 319px 1675px, rgba(255, 255, 255, 0.75) 1253px 689px, rgba(255, 255, 255, 0.7) 1235px 1431px, rgba(255, 255, 255, 0.57) 1438px 55px, rgba(255, 255, 255, 0.83) 30px 135px, rgba(255, 255, 255, 0.82) 1446px 798px, rgba(255, 255, 255, 0.71) 629px 529px, rgba(255, 255, 255, 0.72) 936px 1836px, rgba(255, 255, 255, 0.71) 1083px 1664px, rgba(255, 255, 255, 0.49) 783px 1023px, rgba(255, 255, 255, 0.5) 1541px 1411px, rgba(255, 255, 255, 0.51) 775px 1035px, rgba(255, 255, 255, 0.79) 1540px 1347px, rgba(255, 255, 255, 0.37) 103px 1214px, rgba(255, 255, 255, 0.55) 343px 1374px, rgba(255, 255, 255, 0.77) 446px 1283px, rgba(255, 255, 255, 0.4) 1853px 1760px, rgba(255, 255, 255, 0.44) 1576px 108px, rgba(255, 255, 255, 0.6) 1837px 1120px, rgba(255, 255, 255, 0.39) 463px 1964px, rgba(255, 255, 255, 0.48) 677px 396px, rgba(255, 255, 255, 0.75) 390px 701px, rgba(255, 255, 255, 0.43) 181px 1884px, rgba(255, 255, 255, 0.68) 1311px 1399px, rgba(255, 255, 255, 0.41) 1690px 97px, rgba(255, 255, 255, 0.87) 1070px 149px, rgba(255, 255, 255, 0.41) 962px 354px, rgba(255, 255, 255, 0.83) 575px 1204px, rgba(255, 255, 255, 0.7) 466px 1670px, rgba(255, 255, 255, 0.76) 966px 45px, rgba(255, 255, 255, 0.47) 1569px 209px, rgba(255, 255, 255, 0.66) 1450px 1607px, rgba(255, 255, 255, 0.53) 1300px 435px, rgba(255, 255, 255, 0.72) 1124px 309px, rgba(255, 255, 255, 0.49) 900px 813px, rgba(255, 255, 255, 0.73) 1598px 676px, rgba(255, 255, 255, 0.51) 414px 1943px, rgba(255, 255, 255, 0.41) 1246px 1471px, rgba(255, 255, 255, 0.48) 52px 797px, rgba(255, 255, 255, 0.79) 1851px 1192px, rgba(255, 255, 255, 0.36) 1650px 111px, rgba(255, 255, 255, 0.42) 369px 1028px, rgba(255, 255, 255, 0.51) 632px 929px, rgba(255, 255, 255, 0.43) 816px 1905px, rgba(255, 255, 255, 0.89) 854px 534px, rgba(255, 255, 255, 0.42) 1742px 67px, rgba(255, 255, 255, 0.71) 404px 443px, rgba(255, 255, 255, 0.8) 727px 641px, rgba(255, 255, 255, 0.45) 1692px 287px, rgba(255, 255, 255, 0.64) 1801px 1903px, rgba(255, 255, 255, 0.78) 316px 729px, rgba(255, 255, 255, 0.88) 752px 877px, rgba(255, 255, 255, 0.41) 1112px 781px, rgba(255, 255, 255, 0.85) 1051px 647px, rgba(255, 255, 255, 0.36) 1749px 696px, rgba(255, 255, 255, 0.5) 289px 1120px, rgba(255, 255, 255, 0.75) 1595px 926px, rgba(255, 255, 255, 0.45) 1645px 1361px, rgba(255, 255, 255, 0.68) 1714px 1012px, rgba(255, 255, 255, 0.62) 993px 1641px, rgba(255, 255, 255, 0.4) 1316px 870px, rgba(255, 255, 255, 0.41) 1477px 374px, rgba(255, 255, 255, 0.75) 479px 1036px, rgba(255, 255, 255, 0.59) 1500px 1269px, rgba(255, 255, 255, 0.6) 1090px 1134px, rgba(255, 255, 255, 0.7) 357px 1260px, rgba(255, 255, 255, 0.85) 453px 1582px, rgba(255, 255, 255, 0.66) 1161px 760px, rgba(255, 255, 255, 0.82) 203px 1753px, rgba(255, 255, 255, 0.59) 92px 817px, rgba(255, 255, 255, 0.39) 1299px 210px, rgba(255, 255, 255, 0.47) 791px 1212px, rgba(255, 255, 255, 0.83) 1696px 426px, rgba(255, 255, 255, 0.75) 177px 976px, rgba(255, 255, 255, 0.54) 903px 853px, rgba(255, 255, 255, 0.57) 1998px 164px, rgba(255, 255, 255, 0.76) 222px 539px, rgba(255, 255, 255, 0.76) 632px 1946px, rgba(255, 255, 255, 0.61) 382px 771px, rgba(255, 255, 255, 0.45) 921px 1246px, rgba(255, 255, 255, 0.76) 882px 1604px, rgba(255, 255, 255, 0.44) 1275px 851px, rgba(255, 255, 255, 0.71) 291px 882px, rgba(255, 255, 255, 0.44) 139px 1369px, rgba(255, 255, 255, 0.64) 1765px 383px, rgba(255, 255, 255, 0.46) 979px 552px, rgba(255, 255, 255, 0.75) 1857px 659px, rgba(255, 255, 255, 0.4) 1784px 434px, rgba(255, 255, 255, 0.76) 796px 1060px, rgba(255, 255, 255, 0.6) 1508px 1166px, rgba(255, 255, 255, 0.74) 986px 67px, rgba(255, 255, 255, 0.6) 987px 171px, rgba(255, 255, 255, 0.67) 1062px 1298px, rgba(255, 255, 255, 0.4) 851px 624px, rgba(255, 255, 255, 0.46) 1911px 255px, rgba(255, 255, 255, 0.78) 671px 1549px, rgba(255, 255, 255, 0.35) 1908px 1066px, rgba(255, 255, 255, 0.7) 710px 1003px, rgba(255, 255, 255, 0.72) 808px 179px, rgba(255, 255, 255, 0.68) 567px 452px, rgba(255, 255, 255, 0.88) 1290px 499px, rgba(255, 255, 255, 0.5) 743px 1946px, rgba(255, 255, 255, 0.75) 1113px 275px, rgba(255, 255, 255, 0.71) 518px 1437px, rgba(255, 255, 255, 0.85) 1069px 1836px, rgba(255, 255, 255, 0.71) 1601px 458px, rgba(255, 255, 255, 0.51) 779px 723px, rgba(255, 255, 255, 0.84) 690px 1614px, rgba(255, 255, 255, 0.69) 96px 1387px, rgba(255, 255, 255, 0.85) 780px 1012px, rgba(255, 255, 255, 0.88) 66px 1948px, rgba(255, 255, 255, 0.6) 28px 196px, rgba(255, 255, 255, 0.66) 1165px 544px, rgba(255, 255, 255, 0.78) 894px 1394px, rgba(255, 255, 255, 0.59) 824px 1573px, rgba(255, 255, 255, 0.51) 209px 1986px, rgba(255, 255, 255, 0.82) 1673px 1881px, rgba(255, 255, 255, 0.44) 1722px 981px, rgba(255, 255, 255, 0.64) 78px 306px, rgba(255, 255, 255, 0.53) 9px 1071px, rgba(255, 255, 255, 0.57) 496px 609px, rgba(255, 255, 255, 0.76) 1618px 774px, rgba(255, 255, 255, 0.66) 530px 907px, rgba(255, 255, 255, 0.47) 1736px 29px, rgba(255, 255, 255, 0.61) 334px 1952px, rgba(255, 255, 255, 0.72) 1057px 1302px, rgba(255, 255, 255, 0.44) 1412px 895px, rgba(255, 255, 255, 0.53) 1978px 285px, rgba(255, 255, 255, 0.63) 553px 1280px, rgba(255, 255, 255, 0.46) 673px 769px, rgba(255, 255, 255, 0.43) 1515px 394px, rgba(255, 255, 255, 0.39) 944px 348px, rgba(255, 255, 255, 0.7) 1975px 628px, rgba(255, 255, 255, 0.55) 1196px 573px, rgba(255, 255, 255, 0.73) 736px 1142px, rgba(255, 255, 255, 0.4) 1615px 607px, rgba(255, 255, 255, 0.56) 1503px 1461px, rgba(255, 255, 255, 0.66) 305px 1067px, rgba(255, 255, 255, 0.82) 325px 1287px, rgba(255, 255, 255, 0.68) 1609px 446px, rgba(255, 255, 255, 0.5) 1895px 304px, rgba(255, 255, 255, 0.57) 1834px 1073px, rgba(255, 255, 255, 0.73) 1947px 653px, rgba(255, 255, 255, 0.65) 346px 229px, rgba(255, 255, 255, 0.72) 1792px 1502px, rgba(255, 255, 255, 0.89) 787px 750px, rgba(255, 255, 255, 0.55) 919px 184px, rgba(255, 255, 255, 0.42) 733px 995px, rgba(255, 255, 255, 0.53) 123px 1118px, rgba(255, 255, 255, 0.8) 1251px 239px, rgba(255, 255, 255, 0.68) 1945px 908px, rgba(255, 255, 255, 0.64) 767px 338px, rgba(255, 255, 255, 0.64) 1567px 1425px, rgba(255, 255, 255, 0.39) 1561px 34px, rgba(255, 255, 255, 0.35) 1568px 1842px, rgba(255, 255, 255, 0.49) 489px 601px, rgba(255, 255, 255, 0.43) 1656px 77px, rgba(255, 255, 255, 0.76) 407px 1170px, rgba(255, 255, 255, 0.75) 1607px 1862px, rgba(255, 255, 255, 0.81) 1316px 806px, rgba(255, 255, 255, 0.81) 1467px 375px, rgba(255, 255, 255, 0.7) 871px 297px, rgba(255, 255, 255, 0.88) 1882px 800px, rgba(255, 255, 255, 0.36) 998px 639px, rgba(255, 255, 255, 0.89) 348px 851px, rgba(255, 255, 255, 0.74) 1723px 1244px, rgba(255, 255, 255, 0.56) 466px 1324px, rgba(255, 255, 255, 0.7) 150px 1957px, rgba(255, 255, 255, 0.53) 763px 1204px, rgba(255, 255, 255, 0.56) 1583px 270px, rgba(255, 255, 255, 0.65) 78px 448px, rgba(255, 255, 255, 0.54) 820px 889px, rgba(255, 255, 255, 0.76) 346px 467px, rgba(255, 255, 255, 0.71) 1436px 1607px, rgba(255, 255, 255, 0.45) 1292px 714px, rgba(255, 255, 255, 0.9) 854px 1189px, rgba(255, 255, 255, 0.73) 794px 69px, rgba(255, 255, 255, 0.74) 1206px 194px, rgba(255, 255, 255, 0.38) 1655px 1835px, rgba(255, 255, 255, 0.87) 874px 1312px, rgba(255, 255, 255, 0.81) 644px 737px, rgba(255, 255, 255, 0.52) 839px 1224px, rgba(255, 255, 255, 0.4) 1031px 1825px, rgba(255, 255, 255, 0.87) 645px 56px, rgba(255, 255, 255, 0.55) 960px 1596px, rgba(255, 255, 255, 0.65) 1694px 711px, rgba(255, 255, 255, 0.41) 249px 1311px, rgba(255, 255, 255, 0.65) 837px 1817px, rgba(255, 255, 255, 0.37) 799px 1072px, rgba(255, 255, 255, 0.75) 1780px 296px, rgba(255, 255, 255, 0.78) 1169px 523px, rgba(255, 255, 255, 0.52) 894px 791px, rgba(255, 255, 255, 0.87) 472px 279px, rgba(255, 255, 255, 0.49) 40px 915px, rgba(255, 255, 255, 0.8) 1677px 926px, rgba(255, 255, 255, 0.38) 57px 489px, rgba(255, 255, 255, 0.4) 1706px 534px, rgba(255, 255, 255, 0.58) 234px 502px, rgba(255, 255, 255, 0.64) 1024px 753px, rgba(255, 255, 255, 0.85) 1114px 863px, rgba(255, 255, 255, 0.48) 1127px 758px, rgba(255, 255, 255, 0.57) 570px 369px, rgba(255, 255, 255, 0.83) 85px 1882px, rgba(255, 255, 255, 0.4) 323px 1118px, rgba(255, 255, 255, 0.78) 1233px 270px, rgba(255, 255, 255, 0.85) 1832px 633px, rgba(255, 255, 255, 0.53) 1700px 930px, rgba(255, 255, 255, 0.5) 1503px 1879px, rgba(255, 255, 255, 0.65) 1222px 245px, rgba(255, 255, 255, 0.84) 751px 1635px, rgba(255, 255, 255, 0.82) 1916px 556px, rgba(255, 255, 255, 0.36) 908px 1923px, rgba(255, 255, 255, 0.72) 740px 1714px, rgba(255, 255, 255, 0.46) 1640px 1261px, rgba(255, 255, 255, 0.41) 882px 296px, rgba(255, 255, 255, 0.54) 219px 64px, rgba(255, 255, 255, 0.55) 1915px 434px, rgba(255, 255, 255, 0.88) 1096px 1337px, rgba(255, 255, 255, 0.37) 97px 1837px, rgba(255, 255, 255, 0.48) 1661px 1116px, rgba(255, 255, 255, 0.48) 312px 628px, rgba(255, 255, 255, 0.65) 1303px 843px, rgba(255, 255, 255, 0.88) 1621px 14px, rgba(255, 255, 255, 0.54) 1063px 1909px, rgba(255, 255, 255, 0.77) 1642px 410px, rgba(255, 255, 255, 0.59) 241px 1747px, rgba(255, 255, 255, 0.52) 1543px 1741px, rgba(255, 255, 255, 0.82) 171px 1145px, rgba(255, 255, 255, 0.59) 1788px 482px, rgba(255, 255, 255, 0.49) 700px 1513px, rgba(255, 255, 255, 0.79) 598px 1604px, rgba(255, 255, 255, 0.4) 1609px 1869px, rgba(255, 255, 255, 0.66) 1813px 560px, rgba(255, 255, 255, 0.49) 1443px 1805px, rgba(255, 255, 255, 0.62) 1795px 1195px, rgba(255, 255, 255, 0.56) 1411px 1443px, rgba(255, 255, 255, 0.52) 1731px 36px, rgba(255, 255, 255, 0.49) 1648px 1859px, rgba(255, 255, 255, 0.43) 755px 907px, rgba(255, 255, 255, 0.57) 1641px 1888px, rgba(255, 255, 255, 0.86) 1931px 697px, rgba(255, 255, 255, 0.85) 885px 1248px, rgba(255, 255, 255, 0.6) 1675px 143px, rgba(255, 255, 255, 0.63) 918px 1388px, rgba(255, 255, 255, 0.4) 119px 1957px, rgba(255, 255, 255, 0.36) 1477px 1558px, rgba(255, 255, 255, 0.77) 436px 1334px, rgba(255, 255, 255, 0.6) 172px 1815px, rgba(255, 255, 255, 0.36) 300px 1720px, rgba(255, 255, 255, 0.54) 708px 1187px, rgba(255, 255, 255, 0.45) 987px 489px, rgba(255, 255, 255, 0.83) 1416px 615px, rgba(255, 255, 255, 0.67) 407px 1000px, rgba(255, 255, 255, 0.39) 903px 1946px, rgba(255, 255, 255, 0.78) 1494px 724px, rgba(255, 255, 255, 0.57) 753px 967px, rgba(255, 255, 255, 0.66) 584px 1904px, rgba(255, 255, 255, 0.63) 1958px 1539px, rgba(255, 255, 255, 0.82) 448px 1536px, rgba(255, 255, 255, 0.57) 163px 496px, rgba(255, 255, 255, 0.88) 368px 1559px, rgba(255, 255, 255, 0.75) 654px 1672px, rgba(255, 255, 255, 0.55) 632px 425px, rgba(255, 255, 255, 0.82) 301px 664px, rgba(255, 255, 255, 0.68) 1958px 1257px, rgba(255, 255, 255, 0.77) 1036px 345px, rgba(255, 255, 255, 0.51) 975px 1482px, rgba(255, 255, 255, 0.59) 1219px 734px, rgba(255, 255, 255, 0.76) 1267px 703px, rgba(255, 255, 255, 0.88) 95px 1670px, rgba(255, 255, 255, 0.6) 488px 684px, rgba(255, 255, 255, 0.63) 1800px 1985px, rgba(255, 255, 255, 0.79) 1380px 1551px, rgba(255, 255, 255, 0.63) 751px 1231px, rgba(255, 255, 255, 0.4) 119px 190px, rgba(255, 255, 255, 0.56) 476px 276px, rgba(255, 255, 255, 0.53) 867px 1377px, rgba(255, 255, 255, 0.53) 1038px 834px, rgba(255, 255, 255, 0.66) 1829px 1878px, rgba(255, 255, 255, 0.84) 405px 396px, rgba(255, 255, 255, 0.73) 607px 356px, rgba(255, 255, 255, 0.49) 735px 1039px, rgba(255, 255, 255, 0.39) 732px 430px, rgba(255, 255, 255, 0.72) 1194px 518px, rgba(255, 255, 255, 0.83) 1940px 1234px, rgba(255, 255, 255, 0.52) 1210px 436px, rgba(255, 255, 255, 0.51) 339px 421px, rgba(255, 255, 255, 0.47) 489px 900px, rgba(255, 255, 255, 0.68) 1950px 1242px, rgba(255, 255, 255, 0.65) 1688px 481px, rgba(255, 255, 255, 0.69) 1892px 1611px, rgba(255, 255, 255, 0.88) 1378px 734px, rgba(255, 255, 255, 0.67) 904px 1239px, rgba(255, 255, 255, 0.53) 916px 1459px, rgba(255, 255, 255, 0.51) 1599px 89px, rgba(255, 255, 255, 0.37) 1010px 1318px, rgba(255, 255, 255, 0.41) 679px 778px, rgba(255, 255, 255, 0.66) 34px 479px, rgba(255, 255, 255, 0.41) 941px 1396px, rgba(255, 255, 255, 0.79) 604px 1588px, rgba(255, 255, 255, 0.72) 1802px 433px, rgba(255, 255, 255, 0.73) 664px 244px, rgba(255, 255, 255, 0.44) 55px 152px, rgba(255, 255, 255, 0.89) 1409px 732px, rgba(255, 255, 255, 0.79) 783px 1448px, rgba(255, 255, 255, 0.83) 1446px 1499px, rgba(255, 255, 255, 0.61) 389px 1737px, rgba(255, 255, 255, 0.4) 1702px 1999px, rgba(255, 255, 255, 0.81) 1296px 1146px, rgba(255, 255, 255, 0.79) 1371px 835px, rgba(255, 255, 255, 0.55) 395px 1593px, rgba(255, 255, 255, 0.42) 1415px 1758px, rgba(255, 255, 255, 0.41) 1020px 1025px, rgba(255, 255, 255, 0.67) 1031px 218px, rgba(255, 255, 255, 0.38) 1435px 1297px, rgba(255, 255, 255, 0.7) 1771px 111px, rgba(255, 255, 255, 0.56) 1284px 138px, rgba(255, 255, 255, 0.73) 314px 1430px, rgba(255, 255, 255, 0.84) 1213px 1269px, rgba(255, 255, 255, 0.59) 1905px 1879px, rgba(255, 255, 255, 0.68) 890px 1015px, rgba(255, 255, 255, 0.68) 1606px 1470px, rgba(255, 255, 255, 0.42) 1103px 1207px, rgba(255, 255, 255, 0.39) 1272px 999px, rgba(255, 255, 255, 0.84) 1240px 900px, rgba(255, 255, 255, 0.83) 359px 1191px, rgba(255, 255, 255, 0.42) 1326px 1407px, rgba(255, 255, 255, 0.83) 1395px 119px, rgba(255, 255, 255, 0.37) 683px 1276px, rgba(255, 255, 255, 0.79) 1409px 1747px, rgba(255, 255, 255, 0.78) 1591px 824px, rgba(255, 255, 255, 0.62) 1502px 496px, rgba(255, 255, 255, 0.6) 381px 567px, rgba(255, 255, 255, 0.67) 1352px 929px, rgba(255, 255, 255, 0.44) 1852px 255px, rgba(255, 255, 255, 0.75) 624px 853px, rgba(255, 255, 255, 0.66) 1981px 1338px, rgba(255, 255, 255, 0.43) 1386px 277px, rgba(255, 255, 255, 0.83) 1819px 1659px, rgba(255, 255, 255, 0.68) 1624px 1433px, rgba(255, 255, 255, 0.64) 1681px 185px, rgba(255, 255, 255, 0.4) 1491px 1669px, rgba(255, 255, 255, 0.36) 1552px 888px, rgba(255, 255, 255, 0.81) 15px 1795px, rgba(255, 255, 255, 0.82) 743px 1782px, rgba(255, 255, 255, 0.66) 800px 204px, rgba(255, 255, 255, 0.54) 474px 1362px, rgba(255, 255, 255, 0.62) 989px 1271px, rgba(255, 255, 255, 0.73) 921px 555px, rgba(255, 255, 255, 0.75) 1597px 1588px, rgba(255, 255, 255, 0.45) 1629px 1664px, rgba(255, 255, 255, 0.53) 1398px 1613px, rgba(255, 255, 255, 0.68) 543px 1791px, rgba(255, 255, 255, 0.63) 609px 159px, rgba(255, 255, 255, 0.62) 1146px 869px, rgba(255, 255, 255, 0.48) 91px 1752px, rgba(255, 255, 255, 0.44) 1338px 307px, rgba(255, 255, 255, 0.67) 1285px 794px, rgba(255, 255, 255, 0.51) 416px 397px, rgba(255, 255, 255, 0.76) 327px 1021px, rgba(255, 255, 255, 0.61) 849px 698px, rgba(255, 255, 255, 0.87) 573px 1107px, rgba(255, 255, 255, 0.78) 1173px 1823px, rgba(255, 255, 255, 0.65) 134px 605px, rgba(255, 255, 255, 0.63) 1427px 1450px, rgba(255, 255, 255, 0.83) 1111px 938px, rgba(255, 255, 255, 0.85) 1564px 609px, rgba(255, 255, 255, 0.58) 405px 105px, rgba(255, 255, 255, 0.61) 1961px 1381px, rgba(255, 255, 255, 0.49) 839px 1616px, rgba(255, 255, 255, 0.52) 611px 1166px, rgba(255, 255, 255, 0.55) 1544px 122px, rgba(255, 255, 255, 0.48) 343px 120px, rgba(255, 255, 255, 0.72) 715px 301px, rgba(255, 255, 255, 0.57) 1540px 1138px, rgba(255, 255, 255, 0.42) 1601px 1296px, rgba(255, 255, 255, 0.59) 1769px 816px, rgba(255, 255, 255, 0.39) 867px 1572px, rgba(255, 255, 255, 0.59) 262px 1859px, rgba(255, 255, 255, 0.79) 476px 1109px, rgba(255, 255, 255, 0.38) 1104px 1963px, rgba(255, 255, 255, 0.44) 1094px 483px, rgba(255, 255, 255, 0.88) 1048px 1758px, rgba(255, 255, 255, 0.87) 960px 290px, rgba(255, 255, 255, 0.9) 1749px 1767px, rgba(255, 255, 255, 0.58) 672px 1818px, rgba(255, 255, 255, 0.73) 1881px 1131px, rgba(255, 255, 255, 0.41) 1688px 417px, rgba(255, 255, 255, 0.81) 800px 889px, rgba(255, 255, 255, 0.79) 422px 235px, rgba(255, 255, 255, 0.84) 631px 581px, rgba(255, 255, 255, 0.65) 1564px 1795px, rgba(255, 255, 255, 0.51) 1056px 885px, rgba(255, 255, 255, 0.67) 1594px 1510px, rgba(255, 255, 255, 0.72) 1502px 1734px, rgba(255, 255, 255, 0.74) 949px 1979px, rgba(255, 255, 255, 0.51) 1470px 1732px, rgba(255, 255, 255, 0.63) 1346px 523px, rgba(255, 255, 255, 0.87) 1877px 1127px, rgba(255, 255, 255, 0.79) 1164px 389px, rgba(255, 255, 255, 0.52) 486px 306px, rgba(255, 255, 255, 0.64) 950px 1018px, rgba(255, 255, 255, 0.42) 1051px 572px, rgba(255, 255, 255, 0.4) 630px 922px, rgba(255, 255, 255, 0.82) 1996px 725px, rgba(255, 255, 255, 0.81) 837px 1927px, rgba(255, 255, 255, 0.88) 957px 266px, rgba(255, 255, 255, 0.58) 1303px 182px, rgba(255, 255, 255, 0.77) 638px 20px, rgba(255, 255, 255, 0.68) 1799px 827px, rgba(255, 255, 255, 0.45) 1004px 770px, rgba(255, 255, 255, 0.6) 1967px 183px, rgba(255, 255, 255, 0.43) 1319px 1564px, rgba(255, 255, 255, 0.58) 1003px 131px, rgba(255, 255, 255, 0.61) 1191px 264px, rgba(255, 255, 255, 0.88) 225px 382px, rgba(255, 255, 255, 0.41) 383px 863px, rgba(255, 255, 255, 0.69) 1927px 152px, rgba(255, 255, 255, 0.7) 1381px 1310px, rgba(255, 255, 255, 0.83) 448px 293px, rgba(255, 255, 255, 0.79) 1574px 1174px, rgba(255, 255, 255, 0.7) 106px 1129px, rgba(255, 255, 255, 0.43) 688px 859px, rgba(255, 255, 255, 0.54) 1472px 1854px, rgba(255, 255, 255, 0.86) 1086px 1024px, rgba(255, 255, 255, 0.8) 551px 1996px, rgba(255, 255, 255, 0.37) 1105px 1102px, rgba(255, 255, 255, 0.62) 865px 469px, rgba(255, 255, 255, 0.77) 453px 299px, rgba(255, 255, 255, 0.77) 1748px 1536px, rgba(255, 255, 255, 0.86) 1529px 1207px, rgba(255, 255, 255, 0.38) 1001px 1973px, rgba(255, 255, 255, 0.85) 1914px 1903px, rgba(255, 255, 255, 0.75) 439px 1311px, rgba(255, 255, 255, 0.72) 226px 1318px, rgba(255, 255, 255, 0.56) 821px 901px, rgba(255, 255, 255, 0.44) 114px 1759px, rgba(255, 255, 255, 0.58) 235px 1357px, rgba(255, 255, 255, 0.63) 713px 1945px, rgba(255, 255, 255, 0.78) 1312px 1602px, rgba(255, 255, 255, 0.76) 1549px 1436px, rgba(255, 255, 255, 0.88) 35px 696px, rgba(255, 255, 255, 0.78) 479px 1386px, rgba(255, 255, 255, 0.62) 1990px 1660px, rgba(255, 255, 255, 0.5) 1140px 1579px, rgba(255, 255, 255, 0.72) 707px 1596px, rgba(255, 255, 255, 0.68) 800px 636px, rgba(255, 255, 255, 0.36) 550px 359px, rgba(255, 255, 255, 0.68) 1740px 324px, rgba(255, 255, 255, 0.57) 1865px 535px, rgba(255, 255, 255, 0.75) 1807px 763px, rgba(255, 255, 255, 0.66) 565px 1380px, rgba(255, 255, 255, 0.38) 141px 717px, rgba(255, 255, 255, 0.44) 1191px 615px, rgba(255, 255, 255, 0.88) 1050px 1316px, rgba(255, 255, 255, 0.88) 1262px 507px, rgba(255, 255, 255, 0.75) 226px 979px, rgba(255, 255, 255, 0.64) 589px 649px, rgba(255, 255, 255, 0.71) 932px 1504px, rgba(255, 255, 255, 0.48) 483px 764px, rgba(255, 255, 255, 0.86) 509px 1656px, rgba(255, 255, 255, 0.71) 1573px 1161px, rgba(255, 255, 255, 0.72) 1619px 1577px, rgba(255, 255, 255, 0.84) 1559px 853px, rgba(255, 255, 255, 0.83) 956px 1821px, rgba(255, 255, 255, 0.48) 1017px 1291px, rgba(255, 255, 255, 0.86) 433px 1796px, rgba(255, 255, 255, 0.72) 9px 1339px, rgba(255, 255, 255, 0.8) 122px 1046px, rgba(255, 255, 255, 0.81) 1636px 687px, rgba(255, 255, 255, 0.45) 830px 1841px, rgba(255, 255, 255, 0.63) 1746px 1154px, rgba(255, 255, 255, 0.35) 1611px 1332px, rgba(255, 255, 255, 0.64) 362px 1199px, rgba(255, 255, 255, 0.43) 1639px 891px, rgba(255, 255, 255, 0.75) 1907px 1225px, rgba(255, 255, 255, 0.79) 1204px 1843px, rgba(255, 255, 255, 0.66) 522px 1699px, rgba(255, 255, 255, 0.58) 1087px 742px, rgba(255, 255, 255, 0.86) 1387px 1949px, rgba(255, 255, 255, 0.69) 192px 43px, rgba(255, 255, 255, 0.5) 648px 402px, rgba(255, 255, 255, 0.66) 602px 630px, rgba(255, 255, 255, 0.89) 1779px 220px, rgba(255, 255, 255, 0.8) 894px 1512px, rgba(255, 255, 255, 0.8) 916px 456px, rgba(255, 255, 255, 0.88) 1263px 311px, rgba(255, 255, 255, 0.89) 9px 1000px, rgba(255, 255, 255, 0.44) 1826px 1930px, rgba(255, 255, 255, 0.5) 1843px 1803px, rgba(255, 255, 255, 0.61) 68px 1064px, rgba(255, 255, 255, 0.37) 314px 220px, rgba(255, 255, 255, 0.64) 1955px 1109px, rgba(255, 255, 255, 0.42) 1943px 1659px, rgba(255, 255, 255, 0.59) 203px 1809px, rgba(255, 255, 255, 0.69) 1545px 1528px, rgba(255, 255, 255, 0.79) 758px 1721px, rgba(255, 255, 255, 0.86) 1628px 1310px, rgba(255, 255, 255, 0.84) 398px 109px, rgba(255, 255, 255, 0.56) 1525px 138px, rgba(255, 255, 255, 0.52) 390px 1162px, rgba(255, 255, 255, 0.7) 408px 387px, rgba(255, 255, 255, 0.54) 1797px 747px, rgba(255, 255, 255, 0.65) 992px 1643px, rgba(255, 255, 255, 0.63) 1760px 613px, rgba(255, 255, 255, 0.78) 957px 54px, rgba(255, 255, 255, 0.47) 864px 427px, rgba(255, 255, 255, 0.55) 94px 1329px, rgba(255, 255, 255, 0.62) 1128px 816px, rgba(255, 255, 255, 0.43) 1266px 1711px, rgba(255, 255, 255, 0.47) 1438px 559px, rgba(255, 255, 255, 0.42) 378px 1304px, rgba(255, 255, 255, 0.46) 1643px 1754px, rgba(255, 255, 255, 0.72) 612px 328px, rgba(255, 255, 255, 0.49) 1587px 758px, rgba(255, 255, 255, 0.63) 1093px 1253px, rgba(255, 255, 255, 0.8) 1626px 563px, rgba(255, 255, 255, 0.54) 425px 1450px, rgba(255, 255, 255, 0.86) 1602px 1747px, rgba(255, 255, 255, 0.48) 1825px 1140px, rgba(255, 255, 255, 0.48) 1443px 431px, rgba(255, 255, 255, 0.7) 898px 1640px, rgba(255, 255, 255, 0.77) 151px 146px, rgba(255, 255, 255, 0.89) 205px 1739px, rgba(255, 255, 255, 0.48) 1233px 1691px, rgba(255, 255, 255, 0.46) 264px 1629px, rgba(255, 255, 255, 0.47) 1015px 552px, rgba(255, 255, 255, 0.79) 1356px 707px, rgba(255, 255, 255, 0.61) 159px 1420px, rgba(255, 255, 255, 0.37) 330px 1346px, rgba(255, 255, 255, 0.52) 480px 1094px, rgba(255, 255, 255, 0.46) 557px 1772px, rgba(255, 255, 255, 0.53) 1572px 166px, rgba(255, 255, 255, 0.37) 1088px 1200px, rgba(255, 255, 255, 0.46) 1712px 578px, rgba(255, 255, 255, 0.59) 1442px 1609px, rgba(255, 255, 255, 0.84) 390px 1224px, rgba(255, 255, 255, 0.83) 142px 1514px, rgba(255, 255, 255, 0.5) 1483px 709px, rgba(255, 255, 255, 0.86) 936px 375px, rgba(255, 255, 255, 0.77) 756px 649px; animation-duration: 60s; top: 2000px;"></div><div class="starlayer" style="height: 2px; width: 2px; box-shadow: rgba(255, 255, 255, 0.61) 689px 110px, rgba(255, 255, 255, 0.51) 837px 363px, rgba(255, 255, 255, 0.86) 1511px 1857px, rgba(255, 255, 255, 0.87) 1994px 1670px, rgba(255, 255, 255, 0.53) 809px 552px, rgba(255, 255, 255, 0.82) 1756px 1442px, rgba(255, 255, 255, 0.59) 1751px 1235px, rgba(255, 255, 255, 0.49) 256px 344px, rgba(255, 255, 255, 0.7) 1765px 1785px, rgba(255, 255, 255, 0.4) 1239px 474px, rgba(255, 255, 255, 0.68) 383px 24px, rgba(255, 255, 255, 0.44) 1081px 1878px, rgba(255, 255, 255, 0.83) 326px 1860px, rgba(255, 255, 255, 0.36) 1572px 679px, rgba(255, 255, 255, 0.65) 217px 170px, rgba(255, 255, 255, 0.58) 1849px 1438px, rgba(255, 255, 255, 0.57) 1704px 500px, rgba(255, 255, 255, 0.85) 1109px 1303px, rgba(255, 255, 255, 0.78) 723px 540px, rgba(255, 255, 255, 0.63) 1812px 1591px, rgba(255, 255, 255, 0.48) 492px 1333px, rgba(255, 255, 255, 0.71) 587px 1402px, rgba(255, 255, 255, 0.71) 883px 1627px, rgba(255, 255, 255, 0.66) 1861px 73px, rgba(255, 255, 255, 0.49) 1039px 1013px, rgba(255, 255, 255, 0.66) 1675px 1178px, rgba(255, 255, 255, 0.86) 986px 847px, rgba(255, 255, 255, 0.59) 998px 821px, rgba(255, 255, 255, 0.48) 1833px 1556px, rgba(255, 255, 255, 0.51) 146px 451px, rgba(255, 255, 255, 0.84) 1101px 1862px, rgba(255, 255, 255, 0.63) 947px 1938px, rgba(255, 255, 255, 0.62) 600px 928px, rgba(255, 255, 255, 0.64) 372px 950px, rgba(255, 255, 255, 0.84) 237px 1784px, rgba(255, 255, 255, 0.65) 383px 882px, rgba(255, 255, 255, 0.61) 1616px 992px, rgba(255, 255, 255, 0.66) 596px 706px, rgba(255, 255, 255, 0.76) 1917px 230px, rgba(255, 255, 255, 0.56) 1710px 105px, rgba(255, 255, 255, 0.49) 396px 821px, rgba(255, 255, 255, 0.42) 989px 874px, rgba(255, 255, 255, 0.62) 1319px 784px, rgba(255, 255, 255, 0.71) 1627px 1368px, rgba(255, 255, 255, 0.52) 1210px 518px, rgba(255, 255, 255, 0.73) 548px 1536px, rgba(255, 255, 255, 0.43) 373px 855px, rgba(255, 255, 255, 0.59) 62px 1986px, rgba(255, 255, 255, 0.49) 1987px 1576px, rgba(255, 255, 255, 0.79) 837px 1336px, rgba(255, 255, 255, 0.6) 207px 881px, rgba(255, 255, 255, 0.69) 1515px 1598px, rgba(255, 255, 255, 0.84) 1840px 524px, rgba(255, 255, 255, 0.67) 30px 1373px, rgba(255, 255, 255, 0.58) 196px 154px, rgba(255, 255, 255, 0.49) 171px 1030px, rgba(255, 255, 255, 0.44) 676px 1876px, rgba(255, 255, 255, 0.69) 124px 1452px, rgba(255, 255, 255, 0.45) 821px 498px, rgba(255, 255, 255, 0.61) 646px 1115px, rgba(255, 255, 255, 0.59) 1421px 778px, rgba(255, 255, 255, 0.61) 201px 38px, rgba(255, 255, 255, 0.47) 488px 1299px, rgba(255, 255, 255, 0.49) 1164px 522px, rgba(255, 255, 255, 0.65) 1201px 1428px, rgba(255, 255, 255, 0.74) 1676px 1107px, rgba(255, 255, 255, 0.54) 756px 25px, rgba(255, 255, 255, 0.76) 1806px 91px, rgba(255, 255, 255, 0.39) 1876px 1442px, rgba(255, 255, 255, 0.87) 1418px 1370px, rgba(255, 255, 255, 0.67) 472px 862px, rgba(255, 255, 255, 0.62) 1046px 1422px, rgba(255, 255, 255, 0.77) 1693px 850px, rgba(255, 255, 255, 0.68) 688px 1619px, rgba(255, 255, 255, 0.38) 1559px 766px, rgba(255, 255, 255, 0.87) 1953px 430px, rgba(255, 255, 255, 0.78) 348px 471px, rgba(255, 255, 255, 0.41) 420px 1137px, rgba(255, 255, 255, 0.88) 234px 1519px, rgba(255, 255, 255, 0.85) 482px 83px, rgba(255, 255, 255, 0.65) 543px 846px, rgba(255, 255, 255, 0.47) 354px 1307px, rgba(255, 255, 255, 0.65) 1159px 808px, rgba(255, 255, 255, 0.61) 909px 547px, rgba(255, 255, 255, 0.39) 1210px 574px, rgba(255, 255, 255, 0.51) 148px 292px, rgba(255, 255, 255, 0.49) 630px 110px, rgba(255, 255, 255, 0.41) 496px 1316px, rgba(255, 255, 255, 0.88) 661px 239px, rgba(255, 255, 255, 0.82) 1156px 1694px, rgba(255, 255, 255, 0.88) 1363px 1382px, rgba(255, 255, 255, 0.78) 585px 507px, rgba(255, 255, 255, 0.85) 1514px 1729px, rgba(255, 255, 255, 0.53) 1341px 1456px, rgba(255, 255, 255, 0.35) 414px 1288px, rgba(255, 255, 255, 0.89) 746px 894px, rgba(255, 255, 255, 0.79) 892px 1404px, rgba(255, 255, 255, 0.89) 1965px 1383px, rgba(255, 255, 255, 0.36) 1076px 1516px, rgba(255, 255, 255, 0.38) 1431px 522px, rgba(255, 255, 255, 0.74) 1088px 1993px, rgba(255, 255, 255, 0.87) 44px 1647px, rgba(255, 255, 255, 0.62) 800px 486px, rgba(255, 255, 255, 0.77) 1933px 1599px, rgba(255, 255, 255, 0.84) 1218px 1305px, rgba(255, 255, 255, 0.55) 1631px 1880px, rgba(255, 255, 255, 0.36) 1520px 1117px, rgba(255, 255, 255, 0.49) 955px 1602px, rgba(255, 255, 255, 0.84) 847px 1142px, rgba(255, 255, 255, 0.7) 747px 224px, rgba(255, 255, 255, 0.9) 412px 714px, rgba(255, 255, 255, 0.59) 242px 653px, rgba(255, 255, 255, 0.83) 485px 163px, rgba(255, 255, 255, 0.61) 896px 1291px, rgba(255, 255, 255, 0.79) 1752px 629px, rgba(255, 255, 255, 0.4) 555px 252px, rgba(255, 255, 255, 0.41) 1284px 1422px, rgba(255, 255, 255, 0.62) 209px 475px, rgba(255, 255, 255, 0.51) 764px 255px, rgba(255, 255, 255, 0.87) 1612px 1698px, rgba(255, 255, 255, 0.58) 1094px 781px, rgba(255, 255, 255, 0.71) 850px 949px, rgba(255, 255, 255, 0.58) 753px 1074px, rgba(255, 255, 255, 0.89) 763px 1084px, rgba(255, 255, 255, 0.68) 987px 60px, rgba(255, 255, 255, 0.77) 1583px 1046px, rgba(255, 255, 255, 0.68) 1254px 120px, rgba(255, 255, 255, 0.7) 1364px 1452px, rgba(255, 255, 255, 0.42) 723px 1209px, rgba(255, 255, 255, 0.77) 176px 1851px, rgba(255, 255, 255, 0.5) 1640px 728px, rgba(255, 255, 255, 0.57) 498px 1857px, rgba(255, 255, 255, 0.5) 1547px 1429px, rgba(255, 255, 255, 0.88) 115px 429px, rgba(255, 255, 255, 0.6) 574px 54px, rgba(255, 255, 255, 0.76) 862px 1544px, rgba(255, 255, 255, 0.43) 293px 1398px, rgba(255, 255, 255, 0.58) 292px 403px, rgba(255, 255, 255, 0.7) 1122px 1069px, rgba(255, 255, 255, 0.44) 125px 1299px, rgba(255, 255, 255, 0.76) 610px 481px, rgba(255, 255, 255, 0.6) 1312px 1746px, rgba(255, 255, 255, 0.88) 1344px 1601px, rgba(255, 255, 255, 0.69) 1840px 1325px, rgba(255, 255, 255, 0.43) 136px 1506px, rgba(255, 255, 255, 0.7) 1245px 684px, rgba(255, 255, 255, 0.56) 1713px 963px, rgba(255, 255, 255, 0.9) 906px 391px, rgba(255, 255, 255, 0.49) 137px 1907px, rgba(255, 255, 255, 0.65) 44px 759px, rgba(255, 255, 255, 0.65) 820px 1128px, rgba(255, 255, 255, 0.49) 1456px 1939px, rgba(255, 255, 255, 0.45) 1181px 734px, rgba(255, 255, 255, 0.8) 1600px 519px, rgba(255, 255, 255, 0.83) 760px 1357px, rgba(255, 255, 255, 0.72) 1687px 1757px, rgba(255, 255, 255, 0.83) 162px 968px, rgba(255, 255, 255, 0.51) 531px 1263px, rgba(255, 255, 255, 0.66) 64px 1492px, rgba(255, 255, 255, 0.79) 100px 173px, rgba(255, 255, 255, 0.64) 1545px 915px, rgba(255, 255, 255, 0.35) 858px 1467px, rgba(255, 255, 255, 0.46) 820px 1677px, rgba(255, 255, 255, 0.78) 604px 1559px, rgba(255, 255, 255, 0.53) 361px 1719px, rgba(255, 255, 255, 0.69) 1822px 1869px, rgba(255, 255, 255, 0.47) 1155px 460px, rgba(255, 255, 255, 0.66) 1199px 92px, rgba(255, 255, 255, 0.78) 1729px 1641px, rgba(255, 255, 255, 0.39) 1192px 1117px, rgba(255, 255, 255, 0.81) 989px 1205px, rgba(255, 255, 255, 0.66) 155px 1762px, rgba(255, 255, 255, 0.63) 456px 957px, rgba(255, 255, 255, 0.89) 1064px 426px, rgba(255, 255, 255, 0.75) 1095px 1561px, rgba(255, 255, 255, 0.51) 1124px 1902px, rgba(255, 255, 255, 0.58) 291px 1547px, rgba(255, 255, 255, 0.59) 1px 1842px, rgba(255, 255, 255, 0.43) 1929px 915px, rgba(255, 255, 255, 0.43) 835px 483px, rgba(255, 255, 255, 0.89) 1648px 1543px, rgba(255, 255, 255, 0.59) 1614px 1050px, rgba(255, 255, 255, 0.82) 911px 269px, rgba(255, 255, 255, 0.62) 31px 1548px, rgba(255, 255, 255, 0.69) 898px 1357px, rgba(255, 255, 255, 0.69) 530px 828px, rgba(255, 255, 255, 0.36) 42px 280px, rgba(255, 255, 255, 0.66) 979px 1720px, rgba(255, 255, 255, 0.36) 1108px 70px, rgba(255, 255, 255, 0.85) 1211px 1146px, rgba(255, 255, 255, 0.36) 1892px 1653px, rgba(255, 255, 255, 0.87) 575px 645px, rgba(255, 255, 255, 0.7) 744px 768px, rgba(255, 255, 255, 0.37) 1567px 1624px, rgba(255, 255, 255, 0.77) 484px 1932px, rgba(255, 255, 255, 0.68) 1848px 226px, rgba(255, 255, 255, 0.39) 123px 805px, rgba(255, 255, 255, 0.8) 1329px 1707px, rgba(255, 255, 255, 0.7) 1703px 415px, rgba(255, 255, 255, 0.71) 1627px 660px; animation-duration: 120s; top: 2000px;"></div><div class="starlayer" style="height: 3px; width: 3px; box-shadow: rgba(255, 255, 255, 0.57) 601px 1032px, rgba(255, 255, 255, 0.56) 1902px 389px, rgba(255, 255, 255, 0.78) 246px 890px, rgba(255, 255, 255, 0.6) 1538px 157px, rgba(255, 255, 255, 0.85) 812px 1084px, rgba(255, 255, 255, 0.36) 1054px 929px, rgba(255, 255, 255, 0.64) 320px 266px, rgba(255, 255, 255, 0.84) 445px 1641px, rgba(255, 255, 255, 0.79) 1007px 935px, rgba(255, 255, 255, 0.84) 1490px 546px, rgba(255, 255, 255, 0.73) 1812px 451px, rgba(255, 255, 255, 0.62) 1121px 1441px, rgba(255, 255, 255, 0.74) 100px 812px, rgba(255, 255, 255, 0.38) 162px 621px, rgba(255, 255, 255, 0.5) 643px 554px, rgba(255, 255, 255, 0.53) 1499px 1645px, rgba(255, 255, 255, 0.82) 440px 136px, rgba(255, 255, 255, 0.83) 1101px 1527px, rgba(255, 255, 255, 0.83) 1482px 540px, rgba(255, 255, 255, 0.38) 1531px 343px, rgba(255, 255, 255, 0.48) 1919px 1021px, rgba(255, 255, 255, 0.8) 1320px 314px, rgba(255, 255, 255, 0.76) 636px 693px, rgba(255, 255, 255, 0.64) 131px 1674px, rgba(255, 255, 255, 0.38) 933px 38px, rgba(255, 255, 255, 0.61) 300px 1810px, rgba(255, 255, 255, 0.38) 298px 530px, rgba(255, 255, 255, 0.48) 1023px 1312px, rgba(255, 255, 255, 0.67) 724px 1240px, rgba(255, 255, 255, 0.43) 867px 1348px, rgba(255, 255, 255, 0.53) 1773px 556px, rgba(255, 255, 255, 0.82) 1541px 1562px, rgba(255, 255, 255, 0.71) 1278px 1523px, rgba(255, 255, 255, 0.7) 1213px 782px, rgba(255, 255, 255, 0.58) 504px 1171px, rgba(255, 255, 255, 0.5) 914px 1387px, rgba(255, 255, 255, 0.42) 506px 1462px, rgba(255, 255, 255, 0.39) 792px 1892px, rgba(255, 255, 255, 0.63) 814px 996px, rgba(255, 255, 255, 0.81) 290px 1146px, rgba(255, 255, 255, 0.59) 1569px 1291px, rgba(255, 255, 255, 0.66) 1775px 1412px, rgba(255, 255, 255, 0.71) 1956px 1315px, rgba(255, 255, 255, 0.67) 759px 1761px, rgba(255, 255, 255, 0.86) 1264px 7px, rgba(255, 255, 255, 0.46) 1016px 1462px, rgba(255, 255, 255, 0.74) 156px 791px, rgba(255, 255, 255, 0.81) 516px 996px, rgba(255, 255, 255, 0.83) 390px 95px, rgba(255, 255, 255, 0.65) 1715px 945px, rgba(255, 255, 255, 0.5) 1218px 454px, rgba(255, 255, 255, 0.61) 235px 1164px, rgba(255, 255, 255, 0.84) 1606px 1841px, rgba(255, 255, 255, 0.39) 876px 1803px, rgba(255, 255, 255, 0.47) 926px 1584px, rgba(255, 255, 255, 0.52) 156px 240px, rgba(255, 255, 255, 0.84) 850px 734px, rgba(255, 255, 255, 0.49) 1883px 858px, rgba(255, 255, 255, 0.75) 985px 434px, rgba(255, 255, 255, 0.7) 1187px 1743px, rgba(255, 255, 255, 0.4) 580px 1305px, rgba(255, 255, 255, 0.36) 1582px 1250px, rgba(255, 255, 255, 0.86) 972px 1335px, rgba(255, 255, 255, 0.84) 1773px 248px, rgba(255, 255, 255, 0.39) 58px 1058px, rgba(255, 255, 255, 0.68) 1978px 1450px, rgba(255, 255, 255, 0.39) 577px 718px, rgba(255, 255, 255, 0.77) 1957px 705px, rgba(255, 255, 255, 0.54) 276px 838px, rgba(255, 255, 255, 0.82) 461px 490px, rgba(255, 255, 255, 0.62) 347px 431px, rgba(255, 255, 255, 0.78) 1756px 200px, rgba(255, 255, 255, 0.52) 596px 1151px, rgba(255, 255, 255, 0.85) 1619px 337px, rgba(255, 255, 255, 0.61) 1599px 721px, rgba(255, 255, 255, 0.51) 549px 883px, rgba(255, 255, 255, 0.83) 1081px 1897px, rgba(255, 255, 255, 0.63) 1032px 1972px, rgba(255, 255, 255, 0.69) 1778px 1652px, rgba(255, 255, 255, 0.55) 482px 758px, rgba(255, 255, 255, 0.76) 363px 850px, rgba(255, 255, 255, 0.7) 379px 962px, rgba(255, 255, 255, 0.76) 1499px 1464px, rgba(255, 255, 255, 0.54) 1435px 440px, rgba(255, 255, 255, 0.84) 940px 215px, rgba(255, 255, 255, 0.85) 96px 921px, rgba(255, 255, 255, 0.87) 642px 558px, rgba(255, 255, 255, 0.85) 1219px 1079px, rgba(255, 255, 255, 0.72) 1872px 362px, rgba(255, 255, 255, 0.89) 856px 258px, rgba(255, 255, 255, 0.7) 287px 1187px, rgba(255, 255, 255, 0.6) 438px 1823px, rgba(255, 255, 255, 0.53) 208px 402px, rgba(255, 255, 255, 0.67) 929px 261px, rgba(255, 255, 255, 0.52) 1149px 686px, rgba(255, 255, 255, 0.77) 181px 1256px, rgba(255, 255, 255, 0.57) 1165px 342px, rgba(255, 255, 255, 0.67) 1356px 932px, rgba(255, 255, 255, 0.53) 426px 484px, rgba(255, 255, 255, 0.4) 1129px 616px; animation-duration: 180s; top: 2000px;"></div></div>
+<div class="wrap">
 
-  <!-- 统计条 -->
-  <div class="stats rise d1" id="stats"></div>
-
-  <!-- 签到 + 成就预览（并排） -->
-  <div class="side rise d2">
-    <div class="card checkin-card">
-      <h4>📅 每日签到 <span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:auto">连签越多奖励越多</span></h4>
-      <div id="chMini"></div>
-      <div style="display:flex;gap:10px;margin-top:14px">
-        <button class="btn pri sm" id="chBig" style="flex:1">✨ 签到领成就</button>
-        <button class="btn gho sm" onclick="showCheckinPanel()">查看签到详情 →</button>
+  <!-- ===== Hero ===== -->
+  <section class="hero rise">
+    <span class="hero-vnums">01.1<br>01.2<br>01.3</span>
+    <div class="hero-top">
+      <div class="ht-left">
+        <span class="ht-bar"></span>
+        <span class="ht-label">ENTRY / 01</span>
+      </div>
+      <div class="ht-center">
+        <span class="pill"><span class="dot"></span>ROCK · INTERVIEW · TRAINING · SYSTEM</span>
+      </div>
+      <div class="ht-right">
+        <span class="ht-label">DATA SET</span>
+        <div class="ht-stats">
+          <div class="ht-stat"><span class="hsk">题量</span><span class="hsv">50</span></div>
+          <div class="ht-stat"><span class="hsk">场景</span><span class="hsv">5</span></div>
+          <div class="ht-stat"><span class="hsk">存档</span><span class="hsv">LOCAL</span></div>
+        </div>
       </div>
     </div>
-    <div class="card ach-card">
-      <h4>🏅 成就墙 <span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:auto" id="achProg"></span></h4>
-      <div class="ach-list" id="achMini"></div>
-      <button class="btn gho sm" style="width:100%;margin-top:12px" onclick="openAchievements()">查看全部成就 →</button>
+    <h1>
+      <span class="hl">把每一次练习</span>
+      <span class="hl">做成<em>面试现场</em></span>
+    </h1>
+    <p class="lead">随机抽题、限时作答、语音转写、复盘报告，50 道高频真题覆盖 5 大面试场景；<br>练累了就去「轻松一下」抽支签、翻张卡，让每一次练习都算数 —— 上场之前，先把底气练足。</p>
+    <div class="feature-tags">
+      <span class="ftag">岗位定制</span>
+      <span class="ftag">超严标准</span>
+      <span class="ftag">报告诊断</span>
     </div>
-  </div>
-
-  <!-- 场景卡 -->
-  <div class="sec-t rise d3">选择面试场景<span class="sub">点卡片直接进入对应场景的训练</span></div>
-  <div class="scenes rise d3" id="scenes"></div>
-
-  <!-- 趣味区 -->
-  <div class="sec-t rise d4" id="funSec">轻松一下 · 面试相关的趣味小功能</div>
-  <div class="fun-grid rise d4">
-    <!-- 今日面试运势 -->
-    <div class="card fun-card">
-      <div class="fc-t">🔮 今日面试运势</div>
-      <div class="fc-d">每天一签求个好彩头，低成本练胆量</div>
-      <div class="fortune-box" id="fortuneBox"><span class="f-ic">🎴</span><div><div class="f-t">还没有抽今天的签</div><div class="f-d">点击下方按钮，抽取今日运势</div></div></div>
-      <button class="btn pri sm" id="drawBtn">✨ 抽一签</button>
+    <div class="hero-actions">
+      <button class="btn pri lg hero-cta" onclick="goInterview()">
+        <span class="cta-ic">🎙</span>开始模拟面试<span class="cta-badge">75</span>
+      </button>
     </div>
+    <button class="cd-pill" id="heroCd" title="点击设置面试日期"></button>
+    <div class="hero-foot">LOCAL DATA ONLY · EST. 18 MIN · 50 QUESTIONS</div>
+  </section>
 
-    <!-- 随机快答 -->
-    <div class="card fun-card">
-      <div class="fc-t">⚡ 随机快答一题</div>
-      <div class="fc-d">随机蹦题，60 秒口述思路再对答案（连答 10 次解锁成就）</div>
-      <div class="quick-q" id="quickQ">点"换一题"开始挑战</div>
-      <div class="quick-ans" id="quickAns"></div>
-      <div style="display:flex;gap:10px">
-        <button class="btn grn sm" id="quickBtn">🎲 换一题</button>
-        <button class="btn gho sm" id="quickShow" style="display:none">看参考要点</button>
-      </div>
-    </div>
-
-    <!-- 每日挑战 -->
-    <div class="card fun-card">
-      <div class="fc-t">🎯 每日挑战</div>
-      <div class="fc-d">每天一道固定面试题，坚持练 30 天进步肉眼可见</div>
-      <div class="dc-card" id="dcBox"></div>
-      <button class="btn pri sm" onclick="location.href='interview.html'">去练这道 →</button>
-    </div>
-
-    <!-- 知识翻卡 -->
-    <div class="card fun-card">
-      <div class="fc-t">🃏 知识翻卡</div>
-      <div class="fc-d">随机一个答题技巧点，翻转看答案，碎片时间也能练</div>
-      <div class="flip-wrap"><div class="flip-card" id="flipCard">
-        <div class="flip-face flip-f"><div class="fc-tag">点卡片翻面看技巧</div><div class="fc-ic">💡</div><div style="font-size:13px;color:#cdd8ff">随机一个面试答题技巧点</div></div>
-        <div class="flip-face flip-b"><div class="fc-tip" id="flipTip"></div><div class="fc-q" id="flipQ"></div></div>
-      </div></div>
-      <button class="btn grn sm" id="flipBtn">🔄 换一张</button>
-    </div>
-
-    <!-- 面试梗百科 -->
-    <div class="card fun-card">
-      <div class="fc-t">📖 面试梗百科</div>
-      <div class="fc-d">互联网黑话扫盲，下次面试听到就不会懵啦</div>
-      <div class="meme-card" id="memeBox"><div class="m-t" id="mTitle">“闭环”是啥意思？</div><div class="m-d" id="mDesc">产品/运营圈高频词…</div></div>
-      <button class="btn gho sm" id="memeBtn">🔄 换一个梗</button>
-    </div>
-
-    <!-- 面试人格测试 -->
-    <div class="card fun-card" id="persona">
-      <div class="fc-t">🎭 面试人格测试</div>
-      <div class="fc-d">5 道题测出你的面试人格类型，附个性化改进建议</div>
-      <div id="pqArea"></div>
-    </div>
-
-    <!-- 目标面试日倒计时 -->
-    <div class="card fun-card">
-      <div class="fc-t">📅 目标面试日倒计时</div>
-      <div class="fc-d">设置你的面试日，每天提醒自己还有几天</div>
-      <div id="goalBox" style="padding:14px 16px;border-radius:14px;background:rgba(183,166,249,.1);border:1px solid rgba(183,166,249,.3);margin-bottom:12px;text-align:center"></div>
-      <button class="btn pri sm" id="goalBtn">🎯 去设置目标面试日</button>
-    </div>
-
-    <!-- 收藏预览 -->
-    <div class="card fun-card">
-      <div class="fc-t">⭐ 我收藏的题目</div>
-      <div class="fc-d">收藏你觉得好的题，随时回来复盘</div>
-      <div id="favPreview" style="min-height:60px"></div>
-      <button class="btn gho sm" onclick="location.href='bank.html'">去题库管理收藏 →</button>
+  <!-- ===== 收尾 ===== -->
+  <div class="closing rise d3">
+    <h2>上场之前，<br><em>把底气练足。</em></h2>
+    <div class="hero-actions">
+      <button class="btn pri lg" onclick="location.href='bank.html'">浏览题库 →</button>
+      <button class="btn link" onclick="location.href='product.html'">了解产品蓝图 →</button>
     </div>
   </div>
 
-<footer>模拟面试训练营 Pro · 数据仅保存在本地浏览器<br>有问题？点右下角 📮 反馈给官方（off）<br>v2.0 · 签到 × 成就 × 人格 × 趣味</footer>
+  <footer>
+    <span>模拟面试训练营 PRO · v5.0</span>
+    <span>数据仅保存在本地浏览器</span>
+    <span class="fr">FEEDBACK → 右下角 📮</span>
+  </footer>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="shared.js?v=202610261"></script>
 <script>
 if(!initPage('home',true))throw new Error('login required');
 
-var idx=0,timer=null,slides=document.getElementById('slides'),N=3,dotsBox=document.getElementById('hDots');
-for(var i=0;i<N;i++){var b=document.createElement('button');(function(k){b.onclick=function(){go(k);restart()}})(i);dotsBox.appendChild(b)}
-function go(i){idx=(i+N)%N;slides.style.transform='translateX(-'+idx*100+'%)';
-  Array.prototype.forEach.call(dotsBox.children,function(d,k){d.className=k===idx?'on':''})}
-function restart(){clearInterval(timer);timer=setInterval(function(){go(idx+1)},4500)}
-document.getElementById('hPrev').onclick=function(){go(idx-1);restart()};
-document.getElementById('hNext').onclick=function(){go(idx+1);restart()};
-var hero=document.getElementById('hero');
-hero.addEventListener('mouseenter',function(){clearInterval(timer)});hero.addEventListener('mouseleave',restart);
-var tx=0;hero.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
-hero.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>40)go(idx+(dx<0?1:-1));restart()},{passive:true});
-go(0);restart();
-
-var stat=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0});
-var c=getCheckInfo();var avg=stat.questions?(stat.scoreSum/stat.questions).toFixed(1):'—';
-document.getElementById('stats').innerHTML=
- '<div class="card stat"><div class="v">'+stat.times+'</div><div class="l">累计训练场次</div></div>'+
- '<div class="card stat"><div class="v">'+stat.questions+'</div><div class="l">累计作答</div></div>'+
- '<div class="card stat"><div class="v">'+avg+'</div><div class="l">平均自评</div></div>'+
- '<div class="card stat"><div class="v">'+c.days+'</div><div class="l">连续签到</div><div class="sub">累计 '+c.total+' 天</div></div>';
-
-function renderChMini(){
-  var c=getCheckInfo();var set7=buildWeek(c.history);
-  var html=set7.map(function(d){return '<div class="ch-day-mini'+(d.done?' done':'')+(d.today?' today':'')+'" title="'+d.label+'">'+d.num+'</div>'}).join('');
-  document.getElementById('chMini').innerHTML='<div style="display:flex;gap:7px">'+html+'</div>'+
-    '<div style="font-size:11.5px;color:var(--ink3);margin-top:10px">连续签到：<b style="color:#8ABDFF">'+c.days+'</b> 天 · 累计：<b style="color:#FBBF24">'+c.total+'</b> 天</div>';
-  var done=c.last===new Date().toDateString();
-  var btn=document.getElementById('chBig');
-  btn.textContent=done?'✅ 今日已签到 · 明天再来':'✨ 立即签到';
-  btn.onclick=function(){checkIn();renderChMini();renderAchMini()};
+/* 开始模拟面试属于功能，游客需先登录 */
+function goInterview(){
+  if(!canUseFeature())return;
+  location.href='interview.html';
 }
-renderChMini();
-
-function renderAchMini(){
-  var list=getAchievements();var got=list.filter(function(a){return a.unlocked}).length;
-  document.getElementById('achProg').textContent=got+' / '+list.length;
-  document.getElementById('achMini').innerHTML=list.slice(0,9).map(function(a){
-    return '<div class="ach-item'+(a.unlocked?' on':'')+'"><div class="ai-ic">'+a.ic+'</div><div class="ai-t">'+esc(a.t)+'</div></div>'}).join('')+
-    (list.length>9?'<div class="ach-item on" style="grid-column:span 3;font-size:11px;color:#cdd8ff">+ 更多成就…</div>':'');
-}
-renderAchMini();
-
-document.getElementById('scenes').innerHTML=Object.keys(SCENES).map(function(k){
-  var s=SCENES[k],n=QUESTIONS.filter(function(q){return q.scene===k}).length;
-  return '<div class="card scene-card" data-s="'+k+'">'+
-    '<span class="sc-go">去练 →</span><div class="sc-ic">'+ICONS[s.icon]+'</div>'+
-    '<div class="sc-nm">'+s.name+'</div><div class="sc-ds">'+s.desc+' · '+n+' 题</div></div>';
-}).join('');
-$$('.scene-card').forEach(function(c){c.onclick=function(){location.href='interview.html?scene='+c.dataset.s}});
-
-var FORTUNES=[
- {ic:'🌟',t:'大吉 · 面霸附体',d:'今天状态绝佳，适合冲一场高难度模拟面试！'},
- {ic:'✨',t:'中吉 · 稳中有进',d:'发挥稳定，把基础题再过一遍，细节决定成败。'},
- {ic:'🍀',t:'小吉 · 贵人相助',d:'可能遇到意想不到的追问，别慌，结构化表达能帮你过关。'},
- {ic:'🌙',t:'平 · 宜复盘',d:'今天适合慢一点：回顾之前的作答，把短板列出来。'},
- {ic:'🔥',t:'吉 · 灵感迸发',d:'表达欲旺盛，适合练自我介绍和项目讲述。'},
- {ic:'🌈',t:'末吉 · 否极泰来',d:'即使答得不顺也别气馁，每道错题都是进步的台阶。'}
-];
-var fKey='ivsim_fortune',today=new Date().toDateString();
-var saved=storeGet(fKey,null);
-function renderFortune(f){document.getElementById('fortuneBox').innerHTML='<span class="f-ic">'+f.ic+'</span><div><div class="f-t">'+f.t+'</div><div class="f-d">'+f.d+'</div></div>'}
-if(saved&&saved.day===today){renderFortune(saved.f);document.getElementById('drawBtn').textContent='✅ 今日已抽'}
-document.getElementById('drawBtn').onclick=function(){
-  var cur=storeGet(fKey,null);if(cur&&cur.day===today){miniPop('今天已经抽过啦','明天再来试试手气吧');return}
-  var f=FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
-  storeSet(fKey,{day:today,f:f});renderFortune(f);this.textContent='✅ 今日已抽';toast('抽签成功！','ok');
-  setTimeout(tryUnlockAll,200);renderAchMini();
-};
-
-var curQ=null,quickCnt=storeGet('ivsim_quick_cnt',0);
-document.getElementById('quickBtn').onclick=function(){
-  curQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
-  document.getElementById('quickQ').innerHTML='<b style="color:'+SCENE_COLOR[curQ.scene]+'">['+SCENES[curQ.scene].name+'·'+LV_NAME[curQ.lv]+']</b> '+esc(curQ.q)+'<div style="font-size:11.5px;color:var(--ink3);margin-top:6px">⏱️ 建议 60 秒内口述完思路（已练 '+quickCnt+' 次）</div>';
-  document.getElementById('quickAns').className='quick-ans';
-  document.getElementById('quickShow').style.display='';
-  quickCnt++;storeSet('ivsim_quick_cnt',quickCnt);
-  if(quickCnt>=10)setTimeout(function(){tryUnlockAll();renderAchMini()},100);
-};
-document.getElementById('quickShow').onclick=function(){
-  if(!curQ)return;
-  var a=document.getElementById('quickAns');
-  a.innerHTML='<b style="color:var(--acc2)">考察点：</b>'+esc(curQ.point)+'<br><b style="color:var(--acc2)">参考要点：</b><br>'+curQ.ans.slice(0,2).map(function(x){return '· '+esc(x)}).join('<br>');
-  a.className='quick-ans show';
-};
-
-(function(){var d=dailyChallenge();
-  document.getElementById('dcBox').innerHTML='<div class="dc-date">📅 '+d.date+' · 今日固定题</div><div class="dc-q">'+esc(d.q.q)+'</div>';
-})();
-
-function doFlip(){
-  var card=document.getElementById('flipCard');
-  if(card.classList.contains('flipped')){card.classList.remove('flipped');return}
-  var fc=flipCard();
-  document.getElementById('flipTip').textContent=fc.tip;
-  document.getElementById('flipQ').textContent='来自：'+SCENES[fc.q.scene].name+' · '+fc.q.q;
-  card.classList.add('flipped');
-}
-document.getElementById('flipCard').onclick=doFlip;
-document.getElementById('flipBtn').onclick=function(){var card=document.getElementById('flipCard');card.classList.remove('flipped');setTimeout(doFlip,280)};
-
-function renderMeme(){
-  var m=MEME_POOL[Math.floor(Math.random()*MEME_POOL.length)];
-  document.getElementById('mTitle').textContent=m[0];
-  document.getElementById('mDesc').textContent=m[1];
-}
-renderMeme();document.getElementById('memeBtn').onclick=renderMeme;
-
-(function(){
-  var area=document.getElementById('pqArea');
-  var pers=storeGet('ivsim_persona',null);
-  if(pers){area.innerHTML=
-    '<div class="persona-result"><div class="pr-ic">'+esc(pers.ic)+'</div><div class="pr-t">'+esc(pers.t)+'</div><div class="pr-rate">'+esc(pers.rate)+' · 得分 '+pers.score+' / '+PERSONA_QS.length*5+'</div><div class="pr-d">'+esc(pers.d)+'</div></div>'+
-    '<div style="text-align:center"><button class="btn gho sm" id="pqReset">🔄 重新测一次</button></div>';
-    document.getElementById('pqReset').onclick=function(){runPQ()};
-    return;
-  }
-  runPQ();
-})();
-function runPQ(){
-  var area=document.getElementById('pqArea'),vals=[],idx=0;
-  function render(){
-    if(idx>=PERSONA_QS.length){
-      var r=calcPersona(vals);storeSet('ivsim_persona',r);setTimeout(tryUnlockAll,100);renderAchMini();
-      area.innerHTML='<div class="persona-result"><div class="pr-ic">'+esc(r.ic)+'</div><div class="pr-t">'+esc(r.t)+'</div><div class="pr-rate">'+esc(r.rate)+' · 得分 '+r.score+' / '+PERSONA_QS.length*5+'</div><div class="pr-d">'+esc(r.d)+'</div></div>'+
-        '<div style="text-align:center"><button class="btn gho sm" id="pqReset">🔄 再测一次</button></div>';
-      document.getElementById('pqReset').onclick=function(){localStorage.removeItem('ivsim_persona');runPQ()};return;
-    }
-    var q=PERSONA_QS[idx];
-    var optsHtml=q.opts.map(function(o,i){return '<button class="popt" data-v="'+o.v+'" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>'}).join('');
-    area.innerHTML=
-      '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">第 '+(idx+1)+' / '+PERSONA_QS.length+' 题</div>'+
-      '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+optsHtml+'</div></div>'+
-      '<button class="btn gho sm" style="margin-top:8px" id="pqSkip">跳过</button>';
-    $$('.popt',area).forEach(function(b){b.onclick=function(){
-      vals[idx]=+b.dataset.v;idx++;render();
-    }});
-    document.getElementById('pqSkip').onclick=function(){vals[idx]=3;idx++;render()};
-  }
-  render();
-}
-
-function renderGoal(){
-  var g=getGoal();
-  var box=document.getElementById('goalBox');
-  var btn=document.getElementById('goalBtn');
-  if(!g){
-    box.innerHTML='<div style="font-size:13px;color:var(--ink2)">还没有设置目标面试日</div><div style="font-size:24px;font-weight:900;color:#b7a6f9;margin-top:4px">🎯 设置起来吧！</div>';
-    btn.textContent='🎯 设置目标面试日';btn.onclick=askGoal;
-  }else{
-    var d=daysToGoal();
-    var gDate=(typeof g==='object'&&g)?g.date:g;
-    var gLabel=gDate+(g&&g.name?'（'+g.name+'）':'');
-    if(d>0){
-      box.innerHTML='<div style="font-size:13px;color:var(--ink2)">距离 '+esc(gLabel)+' 还有</div>'+
-        '<div style="font-size:40px;font-weight:900;color:#b7a6f9;letter-spacing:1px">'+d+' <span style="font-size:16px">天</span></div>'+
-        '<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">加油！每天至少练 3 题</div>';
-      btn.textContent='🔄 改一个日子';
-    }else if(d===0){
-      box.innerHTML='<div style="font-size:13px;color:#FBBF24">今天就是你的目标面试日！</div>'+
-        '<div style="font-size:28px;font-weight:900;color:#FBBF24">💪 冲鸭！！</div>';
-      btn.textContent='🎉 面试日已过';
-    }else{
-      box.innerHTML='<div style="font-size:13px;color:var(--ink2)">目标面试日 '+esc(gLabel)+' 已经过去 ' + (-d) + ' 天了</div>'+
-        '<div style="font-size:20px;font-weight:800;color:#80EEB7">你已经很棒啦 ✨</div>';
-      btn.textContent='🔄 再设一个新目标';
-    }
-    btn.onclick=askGoal;
-  }
-}
-function askGoal(){
-  var m=openMask(
-    '<div class="m-head"><div><h3>🎯 设置目标面试日</h3><div class="m-sub">输入你的目标日期，或点清除取消</div></div><button class="m-x" id="agX">✕</button></div>'+
-    '<div class="f-lab">目标面试日</div>'+
-    '<input class="f-in" id="agDate" type="date" placeholder="YYYY-MM-DD">'+
-    '<div style="display:flex;gap:8px;margin-top:14px">'+
-      '<button class="btn gho" id="agClear" style="flex:1">清除</button>'+
-      '<button class="btn pri" id="agOk" style="flex:2">确认设置</button>'+
-    '</div>'
-  );
-  $('#agX').onclick=closeMask;
-  $('#agClear').onclick=function(){storeSet('ivsim_goal','');closeMask();renderGoal();toast('已清除目标面试日','ok')};
-  $('#agOk').onclick=function(){
-    var d=$('#agDate').value.trim();
-    if(!d){toast('请选择日期','warn');return}
-    setGoal(d);closeMask();renderGoal();toast('目标面试日已设置！','ok');
-  };
-}
-renderGoal();
-
-function renderFavPreview(){
-  var favs=favQues(3);
-  var box=document.getElementById('favPreview');
-  if(!favs.length){
-    box.innerHTML='<div style="text-align:center;padding:18px;color:var(--ink3);font-size:13px">还没有收藏任何题目<br>去题库 ⭐ 收藏喜欢的题吧</div>';return;
-  }
-  box.innerHTML=favs.map(function(q){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:6px;font-size:12.5px">'+
-      '<span style="color:'+SCENE_COLOR[q.scene]+';flex:none">'+SCENES[q.scene].name+'</span>'+
-      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">'+esc(q.q)+'</span>'+
-      '<span style="color:#FBBF24;flex:none">⭐</span></div>';
-  }).join('');
-}
-renderFavPreview();
 </script>
-</body>
-</html>
+
+<div class="toast-box"></div><button class="agent-fab" title="面试小助手"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"></rect><path d="M12 8V4M8 4h8"></path><circle cx="9" cy="13" r="1.2" fill="currentColor"></circle><circle cx="15" cy="13" r="1.2" fill="currentColor"></circle><path d="M9.5 16.5h5"></path></svg><span class="dot"></span></button><div class="agent-panel"><div class="agent-head"><div class="a-av">🤖</div><div style="flex:1"><div class="a-nm">AI 面试助手</div><div class="a-st" id="agStatus">在线 · 模拟模式</div></div><button class="m-x" id="agX">✕</button></div><div class="agent-body" id="agBody"><div class="msg bot">嗨～我是 AI 面试助手 🤖 模拟模式下回答训练营相关问题，填入 API Key 后能调用真实大模型提供更个性化的面试技巧指导。</div></div><div class="agent-quick"><button data-q="怎么开始模拟面试？">怎么开始</button><button data-q="题库在哪里？">题库</button><button data-q="怎么用语音作答？">语音作答</button><button data-q="面试紧张怎么办？">缓解紧张</button></div><div class="agent-input"><input id="agIn" placeholder="输入你的问题…（可问大模型）" maxlength="200"><button id="agSend" title="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button></div><div class="agent-foot"><span id="agCtx" style="font-size:10.5px;color:var(--ink3)">对话记录: 0</span><button id="agReset" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">🔄 重置对话</button><button id="agSet" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">⚙️ API 配置</button></div></div><div class="qbar"><div class="qbar-wrap"><button class="qbar-btn" data-k="me" title="个人中心（登录后可用）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-7 8-7s8 3 8 7"></path></svg><span class="qbar-lock">🔒</span></button><button class="qbar-btn" data-k="mail" title="反馈给官方（off）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="qbar-btn" data-k="checkin" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></button><button class="qbar-btn" data-k="ach" title="成就墙"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"></path></svg></button></div></div><div class="mask show"><div class="modal"><div class="login-card"><div class="lg-top"><button class="m-x" id="lgX">✕</button></div><div class="lg-logo"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"></path></svg></span></div><h3>模拟面试训练营 Pro</h3><div class="lg-sub">让每一次开口，都成为你的主场</div><div class="lg-tabs"><button type="button" class="on" data-mode="login">🔑 登录</button><button type="button" data-mode="reg">✨ 注册</button></div><input class="f-in" id="lgAcc" maxlength="20" placeholder="账号（3-20 位字母 / 数字 / 下划线）" autocomplete="username"><div class="lg-pass"><input class="f-in" id="lgPass" type="password" maxlength="32" placeholder="密码（至少 6 位）" autocomplete="current-password"><button type="button" class="lg-eye" id="lgEye" title="显示密码">👁</button></div><input class="f-in" id="lgPass2" type="password" maxlength="32" placeholder="再次输入密码" style="display:none" autocomplete="new-password"><div class="lg-cap"><canvas id="lgCap" width="104" height="40" title="点击换一张"></canvas><input class="f-in" id="lgCapIn" maxlength="4" placeholder="验证码" autocomplete="off"><button type="button" class="lg-cap-r" id="lgCapR" title="换一张验证码">↻</button></div><div class="lg-err" id="lgErr"></div><button class="btn pri lg-go" id="lgGo" style="width:100%">🔑 登录</button><div class="lg-alt"><button class="btn gho" id="lgQuick" style="width: 100%; font-size: 16px; margin-left: auto; margin-right: auto;">游客快速登录</button></div><div class="lg-note">账号仅保存在本地浏览器 · 无需真实手机号<br>仅用于训练，不会上传任何信息</div></div></div></div></body></html>

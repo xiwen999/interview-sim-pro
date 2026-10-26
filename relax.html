@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>轻松一下 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=202610261">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Noto+Serif+SC:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grad:linear-gradient(135deg,var(--acc),var(--acc2));
+  --hair:var(--line);
+  --r:16px;
+  --sans:'Manrope','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+  --mono:'JetBrains Mono','PingFang SC',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(108,140,255,.4)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:var(--acc);text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 clamp(20px,4vw,48px) 96px}
+
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:16px;
+  font-weight:800;font-size:14px;padding:12px 24px;transition:transform .16s ease,box-shadow .25s,background .2s,border-color .2s}
+.btn:active{transform:scale(.96)}
+.btn.sm{padding:9px 16px;font-size:12.5px;border-radius:12px}
+.btn.pri{background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(108,140,255,.32)}
+.btn.pri:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(108,140,255,.5),0 0 22px rgba(65,224,200,.28)}
+.btn.gho{background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--ink)}
+.btn.gho:hover{background:rgba(255,255,255,.09);border-color:rgba(108,140,255,.55)}
+
+/* 页头 */
+.rh{padding:clamp(44px,6vw,84px) 0 clamp(24px,3vw,34px);border-bottom:1px solid var(--hair)}
+.rh-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--acc2);text-transform:uppercase;
+  display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.rh-label::before{content:"";width:28px;height:2px;background:var(--acc2);opacity:.75}
+.rh h1{font-size:clamp(28px,4.4vw,44px);font-weight:800;line-height:1.24;letter-spacing:1px}
+.rh h1 em{font-style:normal;background:linear-gradient(120deg,var(--acc2),#5eead4);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.rh p{margin-top:16px;font-size:13.5px;line-height:2;color:var(--ink2);max-width:640px}
+.rh-foot{margin-top:22px;font-family:var(--mono);font-size:10.5px;letter-spacing:2px;color:rgba(170,180,216,.45);text-transform:uppercase}
+
+/* 卡片网格 */
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:28px}
+@media (max-width:620px){.tools{grid-template-columns:1fr}}
+.cell{background:rgba(255,255,255,.02);border:1px solid var(--hair);border-radius:18px;padding:22px;
+  display:flex;flex-direction:column;gap:12px;min-width:0;transition:border-color .25s,background .3s,transform .25s,box-shadow .3s}
+.cell:hover{border-color:rgba(108,140,255,.4);background:rgba(108,140,255,.05);
+  transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.28)}
+.cell-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:800;color:var(--ink)}
+.cell-t .ci{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:1px;font-weight:400}
+.cell-d{font-size:11.5px;color:var(--ink3);line-height:1.6;margin-top:-6px}
+.cell-act{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+
+/* 运势 */
+.fortune-box{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+  background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.28)}
+.fortune-box .f-ic{font-size:26px}
+.fortune-box .f-t{font-weight:800;font-size:13.5px;color:var(--ink)}
+.fortune-box .f-d{font-size:11px;color:var(--ink2);margin-top:2px;line-height:1.55}
+
+/* 快答 */
+.quick-q{font-size:12.5px;line-height:1.7;color:#dbeafe;padding:12px 14px;border-radius:14px;
+  background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.38);min-height:70px}
+.quick-ans{display:none;font-size:11.5px;color:var(--ink2);line-height:1.75;padding:11px 14px;
+  border-radius:14px;background:rgba(65,224,200,.07);border:1px solid rgba(65,224,200,.32)}
+.quick-ans.show{display:block;animation:rise .4s both}
+
+/* 翻卡 */
+.flip-wrap{perspective:1000px;height:146px}
+.flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer}
+.flip-card.flipped{transform:rotateY(180deg)}
+.flip-face{position:absolute;inset:0;border-radius:14px;padding:14px 15px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.flip-f{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.flip-f .fc-tag{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1.5px}
+.flip-f .fc-ic{font-size:19px;margin-bottom:6px}
+.flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));
+  border:1px solid rgba(65,224,200,.34);transform:rotateY(180deg)}
+.flip-b .fc-tip{font-size:12px;line-height:1.7;color:#bfdbfe}
+.flip-b .fc-q{font-family:var(--mono);font-size:9.5px;color:var(--ink3);margin-top:7px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 人格 */
+.pq{padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.pq .pq-q{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.55}
+.pq .pq-opts{display:flex;flex-direction:column;gap:6px}
+.pq button.popt{text-align:left;padding:8px 11px;border-radius:10px;font-size:11.5px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);transition:.15s}
+.pq button.popt:hover{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.4);color:var(--ink)}
+.pq button.popt:active{transform:scale(.98)}
+.persona-result{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.1));
+  border:1px solid rgba(108,140,255,.32);text-align:center}
+.persona-result .pr-ic{font-size:32px}
+.persona-result .pr-t{font-size:14px;font-weight:800;color:var(--ink);margin-top:2px}
+.persona-result .pr-rate{font-family:var(--mono);font-size:10.5px;color:var(--acc2);margin-top:3px}
+.persona-result .pr-d{font-size:11.5px;color:var(--ink2);line-height:1.7;margin-top:8px;text-align:left}
+
+/* 梗 */
+.meme-card{padding:13px 14px;border-radius:14px;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.35)}
+.meme-card .m-t{font-size:13.5px;font-weight:800;color:#a5b4fc;margin-bottom:5px}
+.meme-card .m-d{font-size:11.5px;color:var(--ink2);line-height:1.75}
+
+/* 收尾 */
+.closing{margin-top:clamp(48px,6vw,80px);padding-top:clamp(30px,4vw,48px);
+  border-top:1px solid var(--hair);display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
+.closing h2{font-family:var(--serif);font-weight:900;font-size:clamp(22px,3vw,34px);line-height:1.35;letter-spacing:1px;color:var(--ink)}
+.closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.closing .hero-actions{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+footer{margin-top:48px;padding-top:22px;border-top:1px solid var(--hair);
+  display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;
+  color:var(--ink3);letter-spacing:1px;line-height:1.9}
+footer .fr{margin-left:auto;text-align:right}
+
+/* 弹层同主题 */
+.mask{background:rgba(6,10,20,.7)}
+.modal{background:rgba(16,24,42,.97);border-color:rgba(255,255,255,.14);border-radius:16px}
+.f-in:focus,.f-ta:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.2)}
+.toast{background:rgba(16,24,42,.96);border-color:rgba(255,255,255,.14)}
+.toast.ok{border-color:rgba(65,224,200,.5)}
+.toast.warn{border-color:rgba(251,191,36,.5)}
+
+/* 入场动效 */
+.rise{animation:rise .6s cubic-bezier(.2,.8,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- 页头 -->
+  <section class="rh rise">
+    <div class="rh-label">Relax · 轻松一下</div>
+    <h1>练累了？<em>来点轻松的。</em></h1>
+    <p>抽一签看看今天的面试运势，随手翻一张知识卡，或者测测自己是哪种面试人格。不用正襟危坐，碎片时间也能攒点底气。</p>
+    <div class="rh-foot">FORTUNE · QUICK · FLIP · PERSONA · MEME</div>
+  </section>
+
+  <!-- 卡片 -->
+  <div class="tools rise d2">
+    <div class="cell">
+      <div class="cell-t">🔮 今日面试运势<span class="ci">FORTUNE</span></div>
+      <div class="cell-d">每天一签，求个好彩头。</div>
+      <div class="fortune-box" id="fortuneBox"><span class="f-ic">🔮</span><div><div class="f-t">今天的运势还没抽</div><div class="f-d">点下面的按钮，抽一支属于你的面试签。</div></div></div>
+      <div class="cell-act"><button class="btn pri sm" id="drawBtn">✨ 今日一抽</button></div>
+    </div>
+
+    <div class="cell">
+      <div class="cell-t">⚡ 随机快答<span class="ci">QUICK</span></div>
+      <div class="cell-d">60 秒口述思路，再看参考要点（连答 10 次解锁成就）。</div>
+      <div class="quick-q" id="quickQ">点「换一题」随机抽一道真题，先自己口述 60 秒，再看要点对照。</div>
+      <div class="quick-ans" id="quickAns"></div>
+      <div class="cell-act">
+        <button class="btn gho sm" id="quickBtn">🎲 换一题</button>
+        <button class="btn gho sm" id="quickShow">看要点</button>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="cell-t">🃏 知识翻卡<span class="ci">FLIP</span></div>
+      <div class="cell-d">随机一条答题技巧，翻面看完整解析。</div>
+      <div class="flip-wrap"><div class="flip-card" id="flipCard">
+        <div class="flip-face flip-f"><div class="fc-tag">TAP TO FLIP / 点卡片翻面</div><div class="fc-ic">💡</div><div style="font-size:12px;color:#bfdbfe">随机一个面试答题技巧</div></div>
+        <div class="flip-face flip-b"><div class="fc-tip" id="flipTip">点卡片翻面，随机抽一条答题技巧</div><div class="fc-q" id="flipQ">FROM / —</div></div>
+      </div></div>
+      <div class="cell-act"><button class="btn gho sm" id="flipBtn">🔄 换一张</button></div>
+    </div>
+
+    <div class="cell">
+      <div class="cell-t">🎭 面试人格测试<span class="ci">PERSONA</span></div>
+      <div class="cell-d">5 道题测出你的面试人格，附改进建议。</div>
+      <div id="pqArea">
+        <div class="pq"><div class="pq-q">准备开始 5 道小测题…</div></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="cell-t">📖 面试梗百科<span class="ci">MEME</span></div>
+      <div class="cell-d">互联网黑话扫盲，面试听到不懵。</div>
+      <div class="meme-card"><div class="m-t" id="mTitle">“抓手”</div><div class="m-d" id="mDesc">“找个抓手”= 找个切入点/着力点。互联网圈高频。</div></div>
+      <div class="cell-act"><button class="btn gho sm" id="memeBtn">🔄 换一个梗</button></div>
+    </div>
+  </div>
+
+  <!-- 收尾 -->
+  <div class="closing rise d3">
+    <h2>放松完了，<br><em>回来真练一场。</em></h2>
+    <div class="hero-actions">
+      <button class="btn pri" onclick="location.href='interview.html'">🎤 开始模拟面试</button>
+      <button class="btn gho" onclick="location.href='bank.html'">去题库逛逛 →</button>
+    </div>
+  </div>
+
+  <footer>
+    <span>模拟面试训练营 PRO · v5.0</span>
+    <span>数据仅保存在本地浏览器</span>
+    <span class="fr">FEELING LUCKY? → 每天都来抽一签</span>
+  </footer>
+</div>
+
+<script src="shared.js?v=202610261"></script>
+<script>
+if(!initPage('relax',true))throw new Error('login required');
+
+var FORTUNES=[
+  {ic:'🌟',t:'大吉 · 面霸附体',d:'今天状态绝佳，适合冲一场高难度模拟面试！'},
+  {ic:'✨',t:'中吉 · 稳中有进',d:'发挥稳定，把基础题再过一遍，细节决定成败。'},
+  {ic:'🍀',t:'小吉 · 贵人相助',d:'可能遇到意想不到的追问，结构化表达能帮你过关。'},
+  {ic:'🌙',t:'平 · 宜复盘',d:'今天适合慢一点：回顾之前的作答，把短板列出来。'},
+  {ic:'🔥',t:'吉 · 灵感迸发',d:'表达欲旺盛，适合练自我介绍和项目讲述。'},
+  {ic:'🌈',t:'末吉 · 否极泰来',d:'即使答得不顺也别气馁，每道错题都是进步的台阶。'}
+];
+var fKey='ivsim_fortune',today=new Date().toDateString();
+function renderFortune(f){
+  document.getElementById('fortuneBox').innerHTML=
+    '<span class="f-ic">'+f.ic+'</span><div><div class="f-t">'+f.t+'</div><div class="f-d">'+f.d+'</div></div>';
+}
+var savedF=storeGet(fKey,null);
+if(savedF&&savedF.day===today){renderFortune(savedF.f);document.getElementById('drawBtn').textContent='✅ 今日已抽'}
+document.getElementById('drawBtn').onclick=function(){
+  if(!canUseFeature())return;
+  var cur=storeGet(fKey,null);
+  if(cur&&cur.day===today){miniPop('今天已经抽过啦','明天再来试试手气吧');return}
+  var f=FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
+  storeSet(fKey,{day:today,f:f});renderFortune(f);
+  this.textContent='✅ 今日已抽';toast('抽签成功！','ok');
+  setTimeout(function(){tryUnlockAll()},200);
+};
+
+var curQ=null,quickCnt=storeGet('ivsim_quick_cnt',0);
+document.getElementById('quickBtn').onclick=function(){
+  if(!canUseFeature())return;
+  curQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+  document.getElementById('quickQ').innerHTML=
+    '<b style="color:'+SCENE_COLOR[curQ.scene]+'">['+SCENES[curQ.scene].name+' · '+LV_NAME[curQ.lv]+']</b> '+esc(curQ.q)+
+    '<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:6px">60s 口述 · 已练 '+quickCnt+' 次</div>';
+  document.getElementById('quickAns').className='quick-ans';
+  document.getElementById('quickShow').style.display='';
+  quickCnt++;storeSet('ivsim_quick_cnt',quickCnt);
+  if(quickCnt>=10)setTimeout(function(){tryUnlockAll()},100);
+};
+document.getElementById('quickShow').onclick=function(){
+  if(!canUseFeature())return;
+  if(!curQ)return;
+  var a=document.getElementById('quickAns');
+  a.innerHTML='<b style="color:var(--acc2)">考察点：</b>'+esc(curQ.point)+
+    '<br><b style="color:var(--acc2)">参考要点：</b><br>'+
+    curQ.ans.slice(0,2).map(function(x){return '· '+esc(x)}).join('<br>');
+  a.className='quick-ans show';
+};
+
+function doFlip(){
+  var card=document.getElementById('flipCard');
+  if(card.classList.contains('flipped')){card.classList.remove('flipped');return}
+  var fc=flipCard();
+  document.getElementById('flipTip').textContent=fc.tip;
+  document.getElementById('flipQ').textContent='FROM / '+SCENES[fc.q.scene].name+' · '+fc.q.q;
+  card.classList.add('flipped');
+}
+document.getElementById('flipCard').onclick=gateLogin(doFlip);
+document.getElementById('flipBtn').onclick=function(){
+  if(!canUseFeature())return;
+  var card=document.getElementById('flipCard');card.classList.remove('flipped');
+  setTimeout(doFlip,280);
+};
+
+function renderMeme(){
+  var m=MEME_POOL[Math.floor(Math.random()*MEME_POOL.length)];
+  document.getElementById('mTitle').textContent=m[0];
+  document.getElementById('mDesc').textContent=m[1];
+}
+renderMeme();
+document.getElementById('memeBtn').onclick=gateLogin(renderMeme);
+
+(function(){
+  var area=document.getElementById('pqArea'),pers=storeGet('ivsim_persona',null);
+  if(pers){showPersona(pers);return}
+  runPQ();
+  function showPersona(r){
+    area.innerHTML=
+      '<div class="persona-result"><div class="pr-ic">'+esc(r.ic)+'</div>'+
+      '<div class="pr-t">'+esc(r.t)+'</div>'+
+      '<div class="pr-rate">'+esc(r.rate)+' · SCORE '+r.score+' / '+PERSONA_QS.length*5+'</div>'+
+      '<div class="pr-d">'+esc(r.d)+'</div></div>'+
+      '<div class="cell-act"><button class="btn gho sm" id="pqReset">🔄 重新测一次</button></div>';
+    document.getElementById('pqReset').onclick=function(){localStorage.removeItem('ivsim_persona');runPQ()};
+      if(!canUseFeature())return;
+  }
+  function runPQ(){
+    var vals=[],idx=0;
+    function render(){
+      if(idx>=PERSONA_QS.length){
+        var r=calcPersona(vals);
+        storeSet('ivsim_persona',r);
+        setTimeout(function(){tryUnlockAll()},100);
+        showPersona(r);return;
+      }
+      var q=PERSONA_QS[idx];
+      var opts=q.opts.map(function(o,i){
+        return '<button class="popt" data-v="'+o.v+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>';
+      }).join('');
+      area.innerHTML=
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px">Q'+(idx+1)+' / '+PERSONA_QS.length+'</div>'+
+        '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+opts+'</div></div>'+
+        '<div class="cell-act"><button class="btn gho sm" id="pqSkip">跳过</button></div>';
+      $$('.popt',area).forEach(function(b){b.onclick=function(){if(!canUseFeature())return;vals[idx]=+b.dataset.v;idx++;render()}});
+      document.getElementById('pqSkip').onclick=function(){vals[idx]=3;idx++;render()};
+        if(!canUseFeature())return;
+    }
+    render();
+  }
+})();
+</script>
+</body>
+</html>

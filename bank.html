@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>浏览题库 · 模拟面试训练</title>
-<link rel="stylesheet" href="shared.css?v=4">
+<link rel="stylesheet" href="shared.css?v=202610261">
 <style>
 .toolbar{position:sticky;top:66px;z-index:40;padding:14px 0;background:linear-gradient(rgba(8,13,29,.92),rgba(8,13,29,.75));backdrop-filter:blur(10px)}
 .search-box{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
@@ -45,7 +45,7 @@
   <div id="list" class="rise d1"></div>
 </div>
 
-<script src="shared.js?v=4"></script>
+<script src="shared.js?v=202610261"></script>
 <script>
 if(!initPage('bank',true))throw new Error('login required');
 document.getElementById('srchIc').innerHTML=ICONS.search;
@@ -104,8 +104,9 @@ function render(){
   $$('#list .qi-h').forEach(function(h){h.addEventListener('click',function(e){
     if(e.target.classList.contains('qi-practice')||e.target.classList.contains('qi-fav'))return;
     h.parentNode.classList.toggle('open')})});
-  $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){e.stopPropagation();location.href='interview.html?scene='+b.dataset.s}});
-  $$('#list .qi-fav').forEach(function(b){b.onclick=function(e){e.stopPropagation();toggleFav(b.dataset.id);render()}});
+  /* 练题 / 收藏属于功能，游客需先登录（看题、搜题、展开要点照常开放） */
+  $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){e.stopPropagation();if(!canUseFeature())return;location.href='interview.html?scene='+b.dataset.s}});
+  $$('#list .qi-fav').forEach(function(b){b.onclick=function(e){e.stopPropagation();if(!canUseFeature())return;toggleFav(b.dataset.id);render()}});
 }
 render();
 </script>

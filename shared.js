@@ -113,10 +113,168 @@ function applyBg(){
   document.body.classList.toggle('no-motion',!!st.motionOff);
 }
 function requireLogin(){
-  if(!getUser()){location.href='login.html';return false}
+  /* 无独立登录页：首次访问自动创建本地访客身份，可随时在导航栏登录 */
+  if(!getUser()){
+    storeSet('ivsim_user',{
+      name:'游客',
+      avatar:'🦊',
+      bg:(typeof BG_PRESETS!=='undefined'&&BG_PRESETS[0])||{a:'#2a3560',b:'#1c3a55',c:'#362d58'},
+      guest:true
+    });
+  }
   return true;
 }
-function logout(){localStorage.removeItem('ivsim_user');location.href='login.html'}
+function logout(){localStorage.removeItem('ivsim_user');location.href='index.html'}
+
+/* 是否访客身份（含旧数据的“游客/访客”默认名） */
+function isGuestUser(u){
+  u=u||getUser();
+  if(!u)return true;
+  if(u.guest)return true;
+  return /^(游客|访客)/.test(u.name||'');
+}
+
+/* 本地账号：账号 / 密码（加盐哈希）/ 图形验证码，仅保存在浏览器 */
+function getAccounts(){return storeGet('ivsim_accounts',[])}
+function saveAccounts(list){storeSet('ivsim_accounts',list)}
+function randSalt(){
+  var c='abcdefghijklmnopqrstuvwxyz0123456789',s='';
+  for(var i=0;i<12;i++)s+=c.charAt(Math.floor(Math.random()*c.length));
+  return s;
+}
+function hashPass(pw,salt){
+  /* 本地演示用哈希（FNV-1a + 盐），非服务端安全存储 */
+  var h=2166136261>>>0,str=(salt||'')+'|ivsim_v1|'+pw;
+  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}
+  return (h>>>0).toString(36);
+}
+
+/* 登录小窗：全站共用，点导航栏「登录」后弹出 */
+function openLoginModal(){
+  var u=getUser()||{};
+  var m=openMask(
+    '<div class="login-card">'+
+      '<div class="lg-top"><button class="m-x" id="lgX">✕</button></div>'+
+      '<div class="lg-logo"><span>'+ICONS.micNav+'</span></div>'+
+      '<h3>模拟面试训练营 Pro</h3>'+
+      '<div class="lg-sub">让每一次开口，都成为你的主场</div>'+
+      '<div class="lg-tabs"><button type="button" class="on" data-mode="login">🔑 登录</button><button type="button" data-mode="reg">✨ 注册</button></div>'+
+      '<input class="f-in" id="lgAcc" maxlength="20" placeholder="账号（3-20 位字母 / 数字 / 下划线）" autocomplete="username">'+
+      '<div class="lg-pass"><input class="f-in" id="lgPass" type="password" maxlength="32" placeholder="密码（至少 6 位）" autocomplete="current-password">'+
+        '<button type="button" class="lg-eye" id="lgEye" title="显示密码">👁</button></div>'+
+      '<input class="f-in" id="lgPass2" type="password" maxlength="32" placeholder="再次输入密码" style="display:none" autocomplete="new-password">'+
+      '<div class="lg-cap"><canvas id="lgCap" width="104" height="40" title="点击换一张"></canvas>'+
+        '<input class="f-in" id="lgCapIn" maxlength="4" placeholder="验证码" autocomplete="off">'+
+        '<button type="button" class="lg-cap-r" id="lgCapR" title="换一张验证码">↻</button></div>'+
+      '<div class="lg-err" id="lgErr"></div>'+
+      '<button class="btn pri lg-go" id="lgGo" style="width:100%">🔑 登录</button>'+
+      '<div class="lg-alt"><button class="btn gho" id="lgQuick" style="width:100%">游客快速登录</button></div>'+
+      '<div class="lg-note">账号仅保存在本地浏览器 · 无需真实手机号<br>仅用于训练，不会上传任何信息</div>'+
+    '</div>'
+  );
+  var accIn=$('#lgAcc'),passIn=$('#lgPass'),pass2In=$('#lgPass2'),
+      capIn=$('#lgCapIn'),errEl=$('#lgErr'),goBtn=$('#lgGo');
+  var mode='login',capCode='';
+
+  function drawCap(){
+    var cv=$('#lgCap');if(!cv)return;
+    var w=cv.width,h=cv.height,ctx=cv.getContext('2d');
+    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    capCode='';
+    for(var i=0;i<4;i++)capCode+=chars.charAt(Math.floor(Math.random()*chars.length));
+    var g=ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0,'rgba(108,140,255,.22)');g.addColorStop(1,'rgba(65,224,200,.16)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    for(var l=0;l<4;l++){
+      ctx.strokeStyle='rgba(255,255,255,'+(0.12+Math.random()*0.18)+')';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(Math.random()*w,Math.random()*h);ctx.lineTo(Math.random()*w,Math.random()*h);ctx.stroke();
+    }
+    for(var d=0;d<26;d++){
+      ctx.fillStyle='rgba(255,255,255,'+(0.08+Math.random()*0.14)+')';
+      ctx.fillRect(Math.random()*w,Math.random()*h,2,2);
+    }
+    var colors=['#cdd8ff','#8ABDFF','#7EE7A7','#FBBF24','#F9A8D4'];
+    for(var j=0;j<4;j++){
+      ctx.save();
+      ctx.translate(16+j*22,h/2+2);
+      ctx.rotate((Math.random()-.5)*0.5);
+      ctx.font='bold 21px "JetBrains Mono",monospace';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=colors[j%colors.length];
+      ctx.fillText(capCode.charAt(j),0,0);
+      ctx.restore();
+    }
+  }
+  function showErr(msg){errEl.textContent=msg;errEl.classList.add('show')}
+  function clearErr(){errEl.textContent='';errEl.classList.remove('show')}
+  function setMode(nm){
+    mode=nm;
+    $$('.lg-tabs button',m).forEach(function(b){b.classList.toggle('on',b.dataset.mode===nm)});
+    pass2In.style.display=nm==='reg'?'':'none';
+    goBtn.textContent=nm==='reg'?'✨ 注册并登录':'🔑 登录';
+    passIn.setAttribute('autocomplete',nm==='reg'?'new-password':'current-password');
+    pass2In.value='';clearErr();drawCap();capIn.value='';
+  }
+  function signIn(rec){
+    storeSet('ivsim_user',{name:rec.name||rec.account,avatar:rec.avatar||'🦊',
+      bg:(u.bg||BG_PRESETS[0]),account:rec.account});
+    closeMask();
+  }
+  function submit(){
+    var acc=(accIn.value||'').trim();
+    var pw=passIn.value||'';
+    if(!/^[A-Za-z0-9_]{3,20}$/.test(acc)){showErr('账号需为 3-20 位字母、数字或下划线');accIn.focus();return}
+    if(pw.length<6){showErr('密码至少 6 位');passIn.focus();return}
+    if(mode==='reg'&&pw!==pass2In.value){showErr('两次输入的密码不一致');pass2In.focus();return}
+    if((capIn.value||'').trim().toUpperCase()!==capCode){showErr('验证码不正确，请重新输入');capIn.value='';capIn.focus();drawCap();return}
+    var list=getAccounts(),found=null;
+    for(var i=0;i<list.length;i++){
+      if(String(list[i].account).toLowerCase()===acc.toLowerCase()){found=list[i];break}
+    }
+    if(mode==='reg'){
+      if(found){showErr('该账号已注册，请直接登录');drawCap();capIn.value='';return}
+      var rec={account:acc,salt:randSalt(),name:acc,
+        avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)],t:Date.now()};
+      rec.pass=hashPass(pw,rec.salt);
+      list.push(rec);saveAccounts(list);
+      signIn(rec);toast('注册成功，欢迎 '+acc,'ok');
+    }else{
+      if(!found||found.pass!==hashPass(pw,found.salt)){showErr('账号或密码不正确');drawCap();capIn.value='';return}
+      signIn(found);toast('登录成功，欢迎 '+(found.name||found.account),'ok');
+    }
+    setTimeout(function(){location.reload()},520);
+  }
+
+  /* 关掉登录窗就把待跳转目标作废，避免之后误跳 */
+  $('#lgX').onclick=function(){window.__navAfterLogin=null;closeMask()};
+  $$('.lg-tabs button',m).forEach(function(b){b.onclick=function(){setMode(b.dataset.mode)}});
+  $('#lgEye').onclick=function(){
+    var isPw=passIn.type==='password';
+    passIn.type=isPw?'text':'password';
+    this.textContent=isPw?'🙈':'👁';
+  };
+  $('#lgCap').onclick=drawCap;
+  $('#lgCapR').onclick=drawCap;
+  goBtn.onclick=submit;
+  [accIn,passIn,pass2In,capIn].forEach(function(el){
+    el.addEventListener('keydown',function(e){if(e.key==='Enter')submit()});
+  });
+  $('#lgQuick').onclick=function(){
+    /* 随机生成一个本地账号并直接登录（非游客，可以使用个人中心） */
+    var list=getAccounts(),account;
+    do{account='u_'+Math.random().toString(36).slice(2,8)}while(list.some(function(x){return String(x.account).toLowerCase()===account}));
+    var nickPool=['面试小将','表达新星','逻辑高手','复盘达人','自信选手','口才王者'];
+    var rec={account:account,salt:randSalt(),
+      name:nickPool[Math.floor(Math.random()*nickPool.length)]+Math.floor(Math.random()*90+10),
+      avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)],t:Date.now()};
+    rec.pass=hashPass(Math.random().toString(36).slice(2,10),rec.salt);
+    list.push(rec);saveAccounts(list);
+    signIn(rec);toast('已以游客身份登录','ok');
+    setTimeout(function(){location.reload()},520);
+  };
+  drawCap();
+  setTimeout(function(){accIn.focus()},160);
+}
 
 /* 渲染头像：支持 emoji 文本 和 data URL 图片 */
 function renderAvatar(el, avatar){
@@ -157,13 +315,123 @@ function compressImage(file,maxSize,quality,cb){
 }
 
 function mountBg(){
+  /* 保存页面时会把整片星空写进 HTML，先清掉再重建 */
+  $$('.bg-fx').forEach(function(n){n.remove()});
   var d=document.createElement('div');d.className='bg-fx';
-  d.innerHTML='<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div>';
+  d.innerHTML='<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div>'+
+    '<div id="stars"></div><div id="stars2"></div><div id="stars3"></div>';
   document.body.prepend(d);
+  seedStars('stars',700,1,60);
+  seedStars('stars2',200,2,120);
+  seedStars('stars3',100,3,180);
+}
+/* 星空：随机星点 box-shadow + 顶部副本实现无缝上飘 */
+function seedStars(id,count,size,dur){
+  var el=document.getElementById(id);if(!el)return;
+  var pts=[];
+  for(var i=0;i<count;i++){
+    var a=(Math.random()*.55+.35).toFixed(2);
+    pts.push((Math.random()*2000|0)+'px '+(Math.random()*2000|0)+'px rgba(255,255,255,'+a+')');
+  }
+  el.classList.add('starlayer');
+  el.style.width=el.style.height=size+'px';
+  el.style.boxShadow=pts.join(',');
+  el.style.animationDuration=dur+'s';
+  var dup=el.cloneNode(false);
+  dup.removeAttribute('id');
+  dup.style.top='2000px';
+  el.parentNode.appendChild(dup);
+}
+
+function cdTargetDate(){
+  var g=getGoal();
+  if(!g||!g.date)return null;
+  var d=new Date(g.date);
+  if(isNaN(d.getTime()))return null;
+  d.setHours(0,0,0,0);
+  return d;
+}
+function cdParts(){
+  var t=cdTargetDate();
+  if(!t)return null;
+  var ms=t.getTime()-Date.now(),past=ms<0,a=Math.abs(ms);
+  return {past:past,day:Math.floor(a/864e5),h:Math.floor(a%864e5/36e5),
+    mi:Math.floor(a%36e5/6e4),s:Math.floor(a%6e4/1000)};
+}
+function cd2(n){return (n<10?'0':'')+n}
+function renderCountdowns(){
+  var p=cdParts();
+  var nav=document.getElementById('navCd');
+  if(nav){
+    if(!p)nav.innerHTML='<span class="cd-ni">⏳</span><span>设倒计时</span>';
+    else nav.innerHTML='<span class="cd-ni">'+(p.past?'🎯':'⏳')+'</span><span>'+(p.past?'已过 ':'距面试 ')+p.day+' 天</span>';
+    nav.classList.toggle('unset',!p);
+    nav.classList.toggle('past',!!p&&p.past);
+  }
+  var hero=document.getElementById('heroCd');
+  if(hero){
+    if(!p){
+      hero.innerHTML='<span class="hcd-ic">⏳</span><span class="hcd-k">面试倒计时</span>'+
+        '<span class="hcd-set">点击设置面试日期 →</span>';
+    }else{
+      hero.innerHTML='<span class="hcd-ic">'+(p.past?'🎯':'⏳')+'</span>'+
+        '<span class="hcd-k">'+(p.past?'目标面试日已过':'距目标面试日')+'</span>'+
+        '<span class="hcd-num">'+p.day+'</span><span class="hcd-u">天</span>'+
+        '<span class="hcd-clock">'+cd2(p.h)+':'+cd2(p.mi)+':'+cd2(p.s)+'</span>';
+    }
+    hero.classList.toggle('past',!!p&&p.past);
+  }
+}
+var _cdTimer=null;
+function startCdTimer(){
+  if(_cdTimer)return;
+  _cdTimer=setInterval(renderCountdowns,1000);
+}
+function openCountdownModal(){
+  var g=getGoal()||{};
+  var m=openMask(
+    '<div class="m-head"><div><h3>⏳ 面试倒计时</h3><div class="m-sub">选一个面试日期，导航栏和首页会实时显示还剩多少天</div></div><button class="m-x" id="cdX">✕</button></div>'+
+    '<div class="f-lab">面试日期</div>'+
+    '<input class="f-in" id="cdDate" type="date" value="'+(g.date||'')+'">'+
+    '<div class="lg-note" style="text-align:left;margin-top:12px">倒计时到面试当天 0 点为止，日期过后显示「已过 N 天」。</div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+      '<button class="btn gho" id="cdClear" style="flex:1">清除</button>'+
+      '<button class="btn pri" id="cdOk" style="flex:2">保存倒计时</button>'+
+    '</div>'
+  );
+  function q(sel){return m.querySelector(sel)}
+  q('#cdX').onclick=closeMask;
+  q('#cdClear').onclick=function(){
+    storeSet('ivsim_goal','');closeMask();renderCountdowns();toast('已清除面试倒计时','ok');
+  };
+  q('#cdOk').onclick=function(){
+    var v=q('#cdDate').value;
+    if(!v){toast('请先选择面试日期','warn');return}
+    storeSet('ivsim_goal',{date:v});
+    closeMask();renderCountdowns();toast('面试倒计时已更新','ok');
+  };
+}
+
+var FEATURE_LOCK_TIP='登录后才能使用这个功能哦';
+/* 放行返回 true；游客则提示并弹登录窗 */
+function canUseFeature(silent){
+  if(!isGuestUser())return true;
+  if(!silent){toast(FEATURE_LOCK_TIP,'warn');openLoginModal()}
+  return false;
+}
+/* 包装事件处理函数：登录后才执行真正的动作 */
+function gateLogin(fn){
+  return function(){
+    if(!canUseFeature())return;
+    return fn.apply(this,arguments);
+  };
 }
 
 function mountNav(active){
+  /* 清掉“另存网页”时被写进 HTML 的旧导航，避免出现两个 */
+  $$('.nav').forEach(function(n){n.remove()});
   var u=getUser()||{name:'访客',avatar:'🦊'};
+  var guest=isGuestUser(u);
   var nav=document.createElement('div');nav.className='nav';
   nav.innerHTML=
     '<a class="logo" href="index.html"><span class="lg-ic">'+ICONS.micNav+'</span>模拟面试训练营 Pro</a>'+
@@ -173,16 +441,26 @@ function mountNav(active){
       '<a href="bank.html" class="'+(active==='bank'?'on':'')+'">题库</a>'+
       '<a href="videos.html" class="'+(active==='videos'?'on':'')+'">视频</a>'+
       '<a href="square.html" class="'+(active==='square'?'on':'')+'">广场</a>'+
+      '<a href="relax.html" class="'+(active==='relax'?'on':'')+'">轻松一下</a>'+
       '<a href="product.html" class="'+(active==='product'?'on':'')+'">产品蓝图</a>'+
       '<a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a>'+
     '</div>'+
+    '<button class="cd-chip" id="navCd" title="面试倒计时 · 点击设置面试日期"></button>'+
     '<button class="icbtn" id="navFeedback" title="反馈给官方">'+ICONS.mail+'</button>'+
     '<button class="icbtn" id="navSettings" title="设置">'+ICONS.gear+'</button>'+
-    '<button class="me" id="navMe" title="个人中心"><span class="avatar" id="navMeAvatar"></span><span class="nm">'+esc(u.name)+'</span></button>';
+    (guest
+      ? '<button class="login-btn" id="navLogin">👤 登录</button>'
+      : '<button class="me" id="navMe" title="个人中心"><span class="avatar" id="navMeAvatar"></span><span class="nm">'+esc(u.name)+'</span></button>');
   document.body.prepend(nav);
   $('#navFeedback').onclick=function(){openFeedback()};
   $('#navSettings').onclick=function(){openSettings()};
-  $('#navMe').onclick=function(){openProfile()};
+  /* 导航可以自由跳转；倒计时属于功能，游客点它先登录 */
+  var cdEl=$('#navCd');
+  if(cdEl)cdEl.onclick=function(){if(canUseFeature())openCountdownModal()};
+  renderCountdowns();startCdTimer();
+  var me=$('#navMe');if(me)me.onclick=function(){openProfile()};
+  var lb=$('#navLogin');
+  if(lb)lb.onclick=function(){openLoginModal()};
   /* AI 助手：打开浮动面板（懒创建） */
   var aiLink=nav.querySelector('.ai-nav-link');
   aiLink.onclick=function(){
@@ -241,15 +519,20 @@ function removeVideo(id){
 }
 
 function openMask(html){
-  closeMask();
+  /* 旧弹层必须立刻摘掉：closeMask 有 220ms 淡出延迟，残留节点里如果
+     有同名 id（如新手引导的 #tnNext），getElementById 会先命中旧节点，
+     新弹层的按钮就绑不上事件 —— 表现为「下一个」点不动 */
+  $$('.mask').forEach(function(x){x.remove()});
   var m=document.createElement('div');m.className='mask';
   m.innerHTML='<div class="modal">'+html+'</div>';
   document.body.appendChild(m);
   requestAnimationFrame(function(){m.classList.add('show')});
+  /* 兜底：后台标签页/不支持 rAF 时也保证弹层可见可点 */
+  setTimeout(function(){if(m.isConnected)m.classList.add('show')},50);
   m.addEventListener('click',function(e){if(e.target===m)closeMask()});
   return m;
 }
-function closeMask(){var m=$('.mask');if(m){m.classList.remove('show');setTimeout(function(){m.remove()},220)}}
+function closeMask(){$$('.mask').forEach(function(m){m.classList.remove('show');setTimeout(function(){m.remove()},220)})}
 function miniPop(title,desc){
   var old=$('.mini-mask');if(old)old.remove();
   var m=document.createElement('div');m.className='mini-mask';
@@ -285,6 +568,11 @@ function openFeedback(){
 }
 
 function openProfile(){
+  if(isGuestUser()){
+    toast('登录后才能打开个人中心','warn');
+    openLoginModal();
+    return;
+  }
   var u=getUser()||{name:'',avatar:'🦊'};
   var favs=favQues();
   var favHtml=favs.length?favs.map(function(q){
@@ -306,24 +594,9 @@ function openProfile(){
     ? '<div id="curAvBox" class="pf-cur-av img"></div>'
     : '<div id="curAvBox" class="pf-cur-av emoji">'+esc(u.avatar||'🦊')+'</div>';
 
-  /* 背景预设 */
-  var isCustomBg=u.bg&&u.bg.isCustom;
-  var bgHtml=BG_PRESETS.map(function(b,i){
-    var on=u.bg&&u.bg.name===b.name&&!isCustomBg;
-    return '<button class="bg-pick'+(on?' on':'')+'" data-i="'+i+'">'+
-      '<span style="background:linear-gradient(135deg,'+b.a+','+b.b+','+b.c+')"></span>'+
-      '<span>'+b.name+'</span></button>';
-  }).join('');
-  var initA=(isCustomBg&&u.bg.a)||BG_PRESETS[0].a;
-  var initB=(isCustomBg&&u.bg.b)||BG_PRESETS[0].b;
-  var initC=(isCustomBg&&u.bg.c)||BG_PRESETS[0].c;
-  bgHtml+='<button class="bg-pick'+(isCustomBg?' on':'')+'" data-custom="1">'+
-    '<span id="customGrad" style="background:linear-gradient(135deg,'+initA+','+initB+','+initC+')"></span>'+
-    '<span>🎨 自定义</span></button>';
-
   var achList=getAchievements();
   var achGot=achList.filter(function(a){return a.unlocked}).length;
-  var recentAch=achList.filter(function(a){return a.unlocked}).sort(function(a,b){return (b.unlockAt||0)-(a.unlockAt||0)}).slice(0,6);
+  var recentAch=achList.filter(function(a){return a.unlocked}).sort(function(a,b){return (b.t||0)-(a.t||0)}).slice(0,6);
   var lockedAch=achList.filter(function(a){return !a.unlocked}).slice(0,Math.max(0,6-recentAch.length));
 
   var ci=getCheckInfo();
@@ -338,8 +611,16 @@ function openProfile(){
   var btnLabel=todayDone?'✅ 今日已签到，明天继续':'✨ 立即签到';
 
   var m=openMask(
-    '<div class="m-head"><div><h3>👤 个人中心</h3><div class="m-sub">昵称、头像、背景色 + 收藏的题目</div></div><button class="m-x" id="pfX">✕</button></div>'+
-    '<div class="f-lab">昵称</div><input class="f-in" id="pfName" maxlength="12" value="'+esc(u.name)+'" placeholder="给自己起个名字">'+
+    /* 账号区：与登录小窗共用同一套卡片结构与样式 */
+    '<div class="login-card">'+
+      '<div class="lg-top"><button class="m-x" id="pfX">✕</button></div>'+
+      '<div class="lg-logo"><span>'+ICONS.micNav+'</span></div>'+
+      '<h3>个人中心</h3>'+
+      '<div class="lg-sub">让每一次开口，都成为你的主场</div>'+
+      '<div class="lg-chips"><span>🎙 语音作答</span><span>⏱ 限时训练</span>'+
+        '<span>📊 复盘报告</span><span>🏅 成就系统</span></div>'+
+      '<input class="f-in" id="pfName" maxlength="12" placeholder="输入昵称，开始训练" value="'+esc(u.name)+'" style="margin-bottom:18px">'+
+    '</div>'+
 
     /* 区块一：头像 */
     '<div class="pf-block">'+
@@ -354,21 +635,7 @@ function openProfile(){
       '<input type="file" id="pfFile" accept="image/*" style="display:none">'+
     '</div>'+
 
-    /* 区块二：背景颜色 */
-    '<div class="pf-block">'+
-      '<div class="pf-b-lab">背景颜色 <span style="font-weight:400;color:var(--ink3);font-size:11px">（全站生效）</span></div>'+
-      '<div class="pf-bg-grid">'+bgHtml+'</div>'+
-      '<div id="customColors" class="pf-custom-colors'+(isCustomBg?' show':'')+'">'+
-        '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:8px">自选三段渐变色 · 实时预览</div>'+
-        '<div style="display:flex;gap:14px;align-items:center">'+
-          '<label>起始<input type="color" id="ccA" value="'+initA+'"></label>'+
-          '<label>中间<input type="color" id="ccB" value="'+initB+'"></label>'+
-          '<label>结尾<input type="color" id="ccC" value="'+initC+'"></label>'+
-        '</div>'+
-      '</div>'+
-    '</div>'+
-
-    /* 区块三：📈 成长进度（成就+打卡合并，紧凑不冗余） */
+    /* 区块二：📈 成长进度（成就+打卡合并，紧凑不冗余） */
     '<div class="pf-block">'+
       '<div class="pf-b-lab">📈 成长进度 <span style="font-weight:400;color:var(--ink3);font-size:11px">成就 '+achGot+'/'+achList.length+' · 连签 '+ci.days+' 天</span></div>'+
 
@@ -426,9 +693,9 @@ function openProfile(){
     '</div>'+
 
     /* 粘性保存栏 */
-    '<div class="pf-save-bar">'+
-      '<button class="btn gho" id="pfLogout" style="flex:1">退出登录</button>'+
-      '<button class="btn pri" id="pfSave" style="flex:2">保存设置</button>'+
+    '<div class="pf-save-bar" style="flex-direction:column;gap:8px">'+
+      '<button class="btn pri" id="pfSave" style="width:100%">✨ 保存设置</button>'+
+      '<button class="btn gho" id="pfLogout" style="width:100%">🚪 退出登录</button>'+
     '</div>');
 
   /* 状态变量 */
@@ -446,29 +713,6 @@ function openProfile(){
     var box=$('#curAvBox');box.innerHTML='';box.className='pf-cur-av emoji';box.textContent=av;
     var d=$('#pfDelAv');if(d)d.remove();
   }});
-
-  /* 背景预设选择 */
-  $$('.bg-pick',m).forEach(function(b){b.onclick=function(){
-    $$('.pf-bg-grid .bg-pick',m).forEach(function(x){x.classList.remove('on')});
-    b.classList.add('on');
-    if(b.dataset.custom){
-      bg={isCustom:true,name:'自定义',a:$('#ccA').value,b:$('#ccB').value,c:$('#ccC').value};
-      $('#customColors').classList.add('show');
-    }else{
-      bg=BG_PRESETS[+b.dataset.i];
-      $('#customColors').classList.remove('show');
-    }
-  }});
-
-  /* 自定义颜色实时联动 */
-  function refreshCustomBg(){
-    var a=$('#ccA').value,bv=$('#ccB').value,c=$('#ccC').value;
-    $('#customGrad').style.background='linear-gradient(135deg,'+a+','+bv+','+c+')';
-    bg={isCustom:true,name:'自定义',a:a,b:bv,c:c};
-  }
-  $('#ccA').addEventListener('input',refreshCustomBg);
-  $('#ccB').addEventListener('input',refreshCustomBg);
-  $('#ccC').addEventListener('input',refreshCustomBg);
 
   /* 上传头像 */
   $('#pfUploadBtn').onclick=function(){$('#pfFile').click()};
@@ -516,6 +760,7 @@ function openProfile(){
     var name=$('#pfName').value.trim();
     if(!name){miniPop('昵称还没填哦','个人中心需要一个昵称，填一个喜欢的名字吧。');$('#pfName').classList.add('err');return}
     var nu={name:name,avatar:av,bg:bg};
+    if(u.account)nu.account=u.account;
     storeSet('ivsim_user',nu);applyBg();refreshNavAvatar();closeMask();toast('个人资料已保存','ok');
   };
   $('#favList').addEventListener('click',function(e){
@@ -579,20 +824,8 @@ function openSettings(){
     $('#stKeyHint').style.color='var(--ink3)';toast('API Key 已清除','ok');
   };
   $('#stClear').onclick=function(){
-    /* 清空全部 localStorage（按前缀清理，避免漏 key） */
-    var keys=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ivsim_')===0)keys.push(k)}
-    keys.forEach(function(k){localStorage.removeItem(k)});
-    /* 清空视频 blob（IndexedDB）与管理员会话标记 */
-    try{sessionStorage.removeItem('ivsim_admin')}catch(e){}
-    var finish=function(){toast('本地数据已清空','ok');setTimeout(function(){location.reload()},600)};
-    try{
-      videoDB().then(function(db){
-        return new Promise(function(res){
-          var tx=db.transaction('videos','readwrite');tx.objectStore('videos').clear();
-          tx.oncomplete=res;tx.onerror=res;
-        });
-      }).then(finish,finish);
-    }catch(e){finish()}
+    ['ivsim_stat','ivsim_feedback','ivsim_fortune','ivsim_favs','ivsim_quick_cnt','ivsim_ach','ivsim_goal','ivsim_persona','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
+    closeMask();toast('本地数据已清空','ok');
   };
 }
 function settingRow(title,desc,btnClass,btnId,btnText){
@@ -645,6 +878,7 @@ function chatWithRealAI(userMsg){
 }
 function resetAIContext(){_aiMsgs=[]}
 function mountAgent(){
+  $$('.agent-fab,.agent-panel').forEach(function(n){n.remove()});
   var fab=document.createElement('button');fab.className='agent-fab';fab.title='面试小助手';
   fab.innerHTML=ICONS.robot+'<span class="dot"></span>';
   var stNow=storeGet('ivsim_settings',{});
@@ -677,8 +911,8 @@ function mountAgent(){
       /* 有 API Key：走真实大模型；失败回退本地 */
       chatWithRealAI(q).then(function(res){
         loading.remove();
-        if(res&&res.text){push(esc(res.text).replace(/\n/g,'<br>'))}
-        else if(res&&res.error){push('⚠️ AI 调用失败：'+esc(res.error)+'<br>已切换到本地模拟回答：<br><br>'+agentReply(q).r)}
+        if(res&&res.text){push(res.text)}
+        else if(res&&res.error){push('⚠️ AI 调用失败：'+res.error+'<br>已切换到本地模拟回答：<br><br>'+agentReply(q).r)}
         else{var r=agentReply(q);push(r.r)}
         updateStatus();
       });
@@ -809,7 +1043,7 @@ function pulseBadges(ids){
     if(el){el.classList.add('unlocked-anim');setTimeout(function(){el.classList.remove('unlocked-anim')},900)}
   });
 }
-function getAchievements(){var set=storeGet('ivsim_ach',{});return ACH_DEFS.map(function(a){return Object.assign({},a,{unlocked:!!set[a.id],unlockAt:set[a.id]||null})})}
+function getAchievements(){var set=storeGet('ivsim_ach',{});return ACH_DEFS.map(function(a){return Object.assign({},a,{unlocked:!!set[a.id],t:set[a.id]})})}
 
 /* 智能体规则（放在所有依赖 var 定义之后，避免初始化时引用 undefined） */
 var AGENT_RULES=[
@@ -822,10 +1056,10 @@ var AGENT_RULES=[
   {k:['计时','时间','限时','倒计时'],r:'开始训练前可以选每题限时：60 / 90 / 120 秒。超时会自动提交当前答案。建议先求完整再求速度。'},
   {k:['自我介绍'],r:'自我介绍万能三段式：我是谁（专业+标签）→ 我有什么（成绩/竞赛/项目）→ 为什么适合（岗位匹配）。控制在 1-2 分钟，结尾落到岗位价值。题库里有 5 个不同方向的自我介绍示范，可以去看看。',acts:[{t:'看示范',go:'bank.html'}]},
   {k:['紧张','害怕','怯场'],r:'紧张很正常！三个小技巧：1）把面试当聊天而不是考试；2）提前把自我介绍练到脱口而出；3）每天来这里抽签看运势 + 随机快答一题，低成本练胆量 💪'},
-  {k:['头像','昵称','改名','个人中心'],r:'点右上角你的头像，就能打开个人中心：改昵称、换头像、还能自定义全站背景颜色 🎨'},
-  {k:['背景','颜色','主题','皮肤'],r:'点右上角头像 → 个人中心 → 背景颜色，有 6 套渐变背景可选，保存后全站生效。'},
+  {k:['头像','昵称','改名','个人中心'],r:'点右上角你的头像，就能打开个人中心：改昵称、换头像、签到打卡、看成就进度。'},
+  {k:['主题','深浅色','夜间模式','白底'],r:'点右上角设置 ⚙ 可以切换深色 / 浅色主题，切换后全站生效。'},
   {k:['反馈','官方','off','建议','bug','问题反馈'],r:'可以点右上角 ✉️ 图标或下方按钮，把问题直接发给官方（off）。称呼、联系方式、问题描述三项必填，方便官方回复你。',acts:[{t:'立即反馈',fb:1}]},
-  {k:['登录','账号','注册'],r:'登录很简单：在登录页输入昵称一键登录即可，不需要密码。数据保存在本地浏览器。'},
+  {k:['登录','账号','注册'],r:'点击右上角「登录」可以注册本地账号：账号 3-20 位字母/数字/下划线，密码至少 6 位，再输入图形验证码即可。账号和密码只保存在本地浏览器。不想填表可以点「游客快速登录」，系统会直接为你生成一个游客身份并进入。'},
   {k:['数据','隐私','安全'],r:'放心，所有数据（训练记录、反馈、个人设置）都只保存在你自己的浏览器本地，不会上传到服务器。'},
   {k:['签到','打卡','每日签到'],r:'右下角有 ✔️ 签到按钮，或者浮动快捷菜单里也能一键签到。连续签到 3 天、累计签到 15 天都能解锁成就哦！',acts:[{t:'去签到',act:'checkin'}]},
   {k:['成就','勋章','徽章','解锁'],r:'目前有 '+ACH_DEFS.length+' 个成就可以解锁，包括初次面试、全场景王者、连续签到、面试人格测试等。右下角 🏅 按钮可以查看已解锁的成就墙。',acts:[{t:'查看成就墙',act:'ach'}]},
@@ -909,17 +1143,21 @@ var QBAR_ICONS={
   ach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>'
 };
 function mountQuickBar(){
-  if($('.qbar'))return;
+  /* 旧版本保存的快捷栏没有事件绑定，重建一份 */
+  $$('.qbar').forEach(function(n){n.remove()});
   var bar=document.createElement('div');bar.className='qbar';
   var items=[
-    {k:'me',title:'个人中心',act:function(){openProfile()}},
+    {k:'me',title:(isGuestUser()?'个人中心（登录后可用）':'个人中心'),act:function(){openProfile()}},
     {k:'mail',title:'反馈给官方（off）',act:function(){openFeedback()}},
-    {k:'checkin',title:'每日签到',act:function(){checkIn();showCheckinPanel()}},
+    {k:'checkin',title:(isGuestUser()?'每日签到（登录后可用）':'每日签到'),
+     act:function(){if(!canUseFeature())return;checkIn();showCheckinPanel()}},
     {k:'ach',title:'成就墙',act:function(){openAchievements()}}
   ];
   var html=items.map(function(i){
     var dot=(i.k==='checkin'&&getCheckInfo().last!==new Date().toDateString())?'<span class="qbar-dot"></span>':'';
-    return '<button class="qbar-btn" data-k="'+i.k+'" title="'+i.title+'">'+QBAR_ICONS[i.k]+dot+'</button>';
+    var needLock=(i.k==='me'||i.k==='checkin');
+    var lock=(needLock&&isGuestUser())?'<span class="qbar-lock">🔒</span>':'';
+    return '<button class="qbar-btn" data-k="'+i.k+'" title="'+i.title+'">'+QBAR_ICONS[i.k]+dot+lock+'</button>';
   }).join('');
   bar.innerHTML='<div class="qbar-wrap">'+html+'</div>';
   document.body.appendChild(bar);
@@ -1000,7 +1238,7 @@ function refreshPfBadges(m){
   /* 1. 成就徽章条：重新筛选最近解锁 + 锁定预览 */
   var achList=getAchievements();
   var achGot=achList.filter(function(a){return a.unlocked}).length;
-  var recentAch=achList.filter(function(a){return a.unlocked}).sort(function(a,b){return (b.unlockAt||0)-(a.unlockAt||0)}).slice(0,6);
+  var recentAch=achList.filter(function(a){return a.unlocked}).sort(function(a,b){return (b.t||0)-(a.t||0)}).slice(0,6);
   var lockedAch=achList.filter(function(a){return !a.unlocked}).slice(0,Math.max(0,6-recentAch.length));
   var seenIds={};
   var newOrder=recentAch.concat(lockedAch);
@@ -1123,7 +1361,9 @@ function drawRadar(canvas,labels,values,opt){
 function applyTheme(){
   var st=storeGet('ivsim_settings',{});var isDark=st.theme!=='light';
   document.body.classList.toggle('light',!isDark);
-  /* --bgA/--bgB/--bgC 由 applyBg() 根据用户选择的背景预设统一管理，此处不再覆盖 */
+  document.documentElement.style.setProperty('--bgA',isDark?'#1b2a6b':'#e6ecff');
+  document.documentElement.style.setProperty('--bgB',isDark?'#0e4d5c':'#ffffff');
+  document.documentElement.style.setProperty('--bgC',isDark?'#3b1d5d':'#f5f7ff');
   document.documentElement.style.setProperty('--ink',isDark?'#eef2ff':'#1a2340');
   document.documentElement.style.setProperty('--ink2',isDark?'#aab4d8':'#4b5882');
   document.documentElement.style.setProperty('--ink3',isDark?'#7c86ad':'#7a86a8');
@@ -1131,38 +1371,47 @@ function applyTheme(){
 
 function getGoal(){return storeGet('ivsim_goal',null)}
 function setGoal(dateStr,name){storeSet('ivsim_goal',{date:dateStr,name:name});toast('已设置目标面试日','ok')}
-function daysToGoal(){var g=getGoal();if(!g)return -1;var d=new Date(String(g.date).replace(/-/g,'/'));d.setHours(0,0,0,0);var now=new Date();now.setHours(0,0,0,0);return Math.ceil((d-now)/86400000)}
+function daysToGoal(){var g=getGoal();if(!g)return -1;var d=new Date(g.date);d.setHours(0,0,0,0);var now=new Date();now.setHours(0,0,0,0);return Math.ceil((d-now)/86400000)}
 
 function mountOnboarding(){
   if(getUser()&&storeGet('ivsim_seen_tour',false))return;
   if(!getUser())return;
   var STEPS=[
     {t:'👋 欢迎来到模拟面试训练营 Pro',d:'我们帮你把每一次练习都当成真正的面试。先花 30 秒快速熟悉一下核心功能。',btn:'开始了解'},
-    {t:'📍 首页 · 选择场景直接开练',d:'5 大场景卡片 + 6 张趣味卡。顶部导航随时切换页面，右下角有快捷菜单（个人中心 / 反馈官方 / 签到 / 成就）。',btn:'下一个 →'},
-    {t:'🎤 模拟面试 · 限时作答',d:'设置场景题量时长 → 作答（支持语音转写）→ 对照参考要点 → 1-5 星自评 → 生成复盘报告。热身模式可以不计时先找找状态。',btn:'下一个 →'},
-    {t:'🏅 成就 / 签到 / 每日挑战',d:'每天签到解锁成就，面试人格测试帮你找到自己的答题风格，面试梗百科让下次听到"闭环"不懵。右下角快捷菜单可以随时点。',btn:'去练一场 →'}
+    {t:'🎤 模拟面试 · 限时作答',d:'设置场景、题量、时长 → 作答（支持语音转写）→ 对照参考要点 → 1-5 星自评 → 生成复盘报告。热身模式可以不计时，先找找状态。',btn:'下一个 →'},
+    {t:'📚 题库 / 视频 / 广场',d:'题库按场景和难度筛选，支持收藏与展开看要点；视频区看示范作答；广场里可以围观别人的练习、互相点评。',btn:'下一个 →'},
+    {t:'🎲 轻松一下 · 碎片时间练手',d:'今日运势、随机快答、知识翻卡、面试人格测试、面试梗百科都搬到「轻松一下」了；右下角快捷菜单还能随时签到、看成就。',btn:'去练一场 →'}
   ];
   var i=0;
   function show(){
     var s=STEPS[i];
-    openMask('<div class="m-head"><div style="flex:1"><h3>'+s.t+'</h3><div class="m-sub" style="max-width:360px">'+s.d+'</div></div><button class="m-x" id="tnX">✕</button></div>'+
+    var box=openMask('<div class="m-head"><div style="flex:1"><h3>'+s.t+'</h3><div class="m-sub" style="max-width:360px">'+s.d+'</div></div><button class="m-x" id="tnX">✕</button></div>'+
       '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">'+
         (i>0?'<button class="btn gho sm" id="tnBack">← 上一个</button>':'')+
         '<button class="btn gho sm" id="tnSkip">跳过</button>'+
         '<button class="btn pri sm" id="tnNext">'+s.btn+'</button></div>');
-    $('#tnX').onclick=closeMask;$('#tnSkip').onclick=done;
-    if(i>0)$('#tnBack').onclick=function(){i--;show()};
-    $('#tnNext').onclick=function(){i++;if(i>=STEPS.length){closeMask();done();location.href='interview.html'}else{closeMask();show()}};
+    /* 事件只绑在本层弹层内部，避免命中残留的同名节点 */
+    function q(sel){return box.querySelector(sel)}
+    q('#tnX').onclick=closeMask;q('#tnSkip').onclick=done;
+    if(i>0)q('#tnBack').onclick=function(){i--;show()};
+    q('#tnNext').onclick=function(){i++;if(i>=STEPS.length){closeMask();done();location.href='interview.html'}else{closeMask();show()}};
   }
   function done(){storeSet('ivsim_seen_tour',true)}
   setTimeout(show,600);
 }
 
 function initPage(active,needLogin){
-  mountBg();applyBg();applyTheme();
-  if(needLogin&&!requireLogin())return false;
-  mountNav(active);mountAgent();mountQuickBar();
-  setTimeout(function(){tryUnlockAll()},800);
-  setTimeout(mountOnboarding,1200);
+  function boot(){
+    /* 必须等整页解析完再清理：保存的静态 DOM 可能写在脚本之后，
+       早清理会漏掉它们，导致旧弹窗关不掉、按钮点不动 */
+    $$('.mask').forEach(function(m){m.remove()});
+    mountBg();applyBg();applyTheme();
+    if(needLogin&&!requireLogin())return;
+    mountNav(active);mountAgent();mountQuickBar();
+    setTimeout(function(){tryUnlockAll()},800);
+    setTimeout(mountOnboarding,1200);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
   return true;
 }
