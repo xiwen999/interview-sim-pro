@@ -3,21 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>面试视频 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=202610261">
+<title>个人中心 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=20261039">
 <style>
-.wrap{max-width:960px;margin:0 auto;padding:26px clamp(14px,4vw,40px) 90px}
-.vtabs{display:flex;gap:8px;margin:16px 0 18px;flex-wrap:wrap}
-.vtab{padding:9px 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:.18s}
-.vtab:hover{border-color:var(--acc);color:var(--ink)}
-.vtab.on{background:linear-gradient(135deg,#4f6ef0,#6C8CFF);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(79,110,240,.35)}
+.vtabs{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
+.vtab{padding:10px 16px;border-radius:13px;background:var(--card);border:1.5px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:.18s;
+  box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+.vtab:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
+.vtab.on{border-color:var(--acc);color:var(--ink);background:rgba(108,140,255,.14);
+  box-shadow:0 0 0 3px rgba(108,140,255,.14),0 10px 24px rgba(108,140,255,.22)}
+.vtabs.sub{margin:0 0 14px}
+.vtabs.sub .vtab{padding:8px 14px;font-size:12.5px}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.vcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;cursor:pointer}
-.vcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 12px 30px rgba(0,0,0,.25)}
-.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(79,110,240,.18),rgba(65,224,200,.1));position:relative}
+.vcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;cursor:pointer}
+.vcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative}
 .vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
 .vcard:hover .vplay{opacity:1}
-.vthumb .vplay span{width:52px;height:52px;border-radius:50%;background:rgba(108,140,255,.9);display:grid;place-items:center;font-size:20px;color:#fff}
+.vthumb .vplay span{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4f6ef0,#6C8CFF);display:grid;place-items:center;font-size:20px;color:#fff;box-shadow:0 8px 24px rgba(79,110,240,.5)}
 .vbody{padding:12px 14px}
 .vtitle{font-size:13.5px;font-weight:700;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .vmeta{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--ink3);flex-wrap:wrap}
@@ -34,37 +37,257 @@
 .up-drop:hover,.up-drop.has{border-color:var(--acc);color:var(--ink2);background:rgba(108,140,255,.06)}
 .up-drop .big{font-size:36px;display:block;margin-bottom:8px}
 .up-note{margin-top:12px;font-size:11.5px;color:var(--ink3);line-height:1.8;padding:10px 14px;border-radius:12px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3)}
-.review-tip{margin-bottom:14px;padding:10px 14px;border-radius:12px;background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.35);font-size:12px;color:var(--ink2);line-height:1.7}
+/* 右侧快捷栏是 fixed 的，给内容让出空间，避免遮住表格最后一行按钮 */
+@media (min-width:1100px){.fp-wrap{padding-right:104px}}
+.mg-dot{display:inline-block;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#f59e0b;
+  color:#1b1200;font-size:10.5px;font-weight:800;line-height:17px;text-align:center;vertical-align:1px}
+.mg-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.mg-k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.mg-k .l{font-size:11px;color:var(--ink3)}
+.mg-k .v{font-size:19px;font-weight:800;margin-top:2px}
+.mg-list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.mg-hd,.mg-row{display:grid;grid-template-columns:52px minmax(0,1fr) 146px 110px 246px;gap:12px;align-items:center;padding:12px 16px}
+.mg-hd{font-size:11px;color:var(--ink3);background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);font-weight:700}
+.mg-row{border-bottom:1px solid var(--line);transition:.16s}
+.mg-row:last-child{border-bottom:0}
+.mg-row:hover{background:rgba(108,140,255,.05)}
+.mg-th{width:52px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:17px;
+  background:linear-gradient(135deg,rgba(60,80,160,.55),rgba(50,40,110,.5));cursor:pointer}
+.mg-ti{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.mg-mt{font-size:11px;color:var(--ink3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.mg-reason{margin-top:5px;font-size:11px;color:#fda4af;line-height:1.6;background:rgba(251,113,133,.08);
+  border:1px solid rgba(251,113,133,.22);border-radius:8px;padding:5px 8px}
+.mg-acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.mg-acts .btn{padding:6px 10px;font-size:11.5px;border-radius:9px}
+.mg-tip{margin-top:14px;font-size:11.5px;color:var(--ink3);line-height:1.9}
+@media (max-width:820px){
+  .mg-hd{display:none}
+  .mg-row{grid-template-columns:44px minmax(0,1fr);grid-template-areas:'th info' 'st st' 'ac ac';row-gap:9px}
+  .mg-row .mg-th{grid-area:th;width:44px;height:34px}
+  .mg-row .mg-info{grid-area:info}
+  .mg-row .mg-st{grid-area:st}
+  .mg-row .mg-acts{grid-area:ac;justify-content:flex-start}
+}
+
+.myc-hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);
+  border:1px solid var(--line);border-radius:20px;padding:16px 20px;margin-bottom:16px}
+.myc-av{width:62px;height:62px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:29px;
+  background:radial-gradient(circle at 35% 30%,rgba(108,140,255,.5),rgba(65,224,200,.2));
+  border:1px solid rgba(108,140,255,.45);overflow:hidden}
+.myc-av img{width:100%;height:100%;object-fit:cover}
+.myc-id{min-width:150px;flex:1}
+.myc-nm{font-size:19px;font-weight:800;line-height:1.3}
+.myc-ac{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.myc-hst{display:flex;gap:20px;flex-wrap:wrap;margin-left:auto}
+.myc-hst>div{text-align:center;min-width:52px}
+.myc-hst .v{font-size:17px;font-weight:800;line-height:1.2}
+.myc-hst .l{font-size:11px;color:var(--ink3);margin-top:2px}
+@media (max-width:700px){.myc-hst{margin-left:0;width:100%;justify-content:space-between}}
+
+.myc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.myc-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 16px 18px}
+.myc-card .ct{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.myc-rows{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.myc-row{display:grid;grid-template-columns:120px minmax(0,1fr) 92px 84px;gap:12px;align-items:center;
+  padding:11px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+.myc-row:last-child{border-bottom:0}
+.myc-row.head{font-size:11px;color:var(--ink3);background:rgba(255,255,255,.03);font-weight:700}
+.myc-row .ti{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.myc-row .ai{font-size:11px;color:var(--ink3);margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.myc-bar{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.myc-bar .bn{width:74px;flex:none;font-size:11.5px;color:var(--ink2)}
+.myc-bar .bt{flex:1;height:9px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.myc-bar .bf{height:100%;border-radius:999px}
+.myc-bar .bv{width:34px;flex:none;text-align:right;font-size:11.5px;font-weight:700}
+.myc-cd{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.myc-cd .n{font-size:34px;font-weight:900;line-height:1;background:linear-gradient(90deg,#8ABDFF,#41E0C8);
+  -webkit-background-text-stroke:0;-webkit-background-clip:text;background-clip:text;color:transparent}
+.myc-cd .u{font-size:13px;color:var(--ink3);margin-left:2px}
+.myc-cd .d{font-size:12px;color:var(--ink3);line-height:1.7}
+.myc-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
+.myc-abtn{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);
+  border:1px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer;transition:.18s;width:100%}
+.myc-abtn:hover{border-color:var(--acc);background:rgba(108,140,255,.08);transform:translateY(-2px)}
+.myc-abtn .ic{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:19px;
+  background:linear-gradient(135deg,rgba(108,140,255,.28),rgba(65,224,200,.18))}
+.myc-abtn .t{display:block;font-size:13px;font-weight:700}
+.myc-abtn .d{display:block;font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.myc-fav{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+.myc-fav .f{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 15px;cursor:pointer;transition:.18s}
+.myc-fav .f:hover{border-color:var(--acc);transform:translateY(-2px)}
+.myc-fav .ft{font-size:13px;font-weight:700;line-height:1.5}
+.myc-fav .fm{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink3);flex-wrap:wrap}
+.myc-gate{max-width:520px;margin:4px auto 0;background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:34px 30px 26px;text-align:center;
+  box-shadow:0 26px 64px -26px rgba(0,0,0,.7),0 5px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.07)}
+.myc-gate .gi{width:68px;height:68px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:32px;
+  background:linear-gradient(135deg,rgba(108,140,255,.22),rgba(65,224,200,.16));border:1px solid rgba(108,140,255,.3)}
+.myc-gate h3{font-size:19px;font-weight:800;margin-bottom:8px}
+.myc-gate .gp{font-size:13px;color:var(--ink2);line-height:1.9;margin-bottom:18px}
+.myc-gate .gb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.myc-gate .gb .btn{min-width:132px;text-decoration:none}
+.myc-gate .gn{margin-top:18px;font-size:11.5px;color:var(--ink3);line-height:1.85;
+  padding:11px 14px;border-radius:12px;background:rgba(108,140,255,.07);border:1px dashed rgba(108,140,255,.28)}
+.myc-gate .gback{margin-top:14px;font-size:12px}
+.myc-gate .gback a{color:var(--ink3);text-decoration:none;transition:.18s}
+.myc-gate .gback a:hover{color:var(--acc2)}
+@media (max-width:720px){
+  .myc-row{grid-template-columns:minmax(0,1fr) 84px;row-gap:4px}
+  .myc-row.head{display:none}
+  .myc-row .tm,.myc-row .sc{grid-column:1}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h2 style="font-size:22px;font-weight:900;margin-top:14px">🎬 面试视频</h2>
-  <p style="font-size:12.5px;color:var(--ink3);margin-top:6px">看你的模拟面试回放 · 上传满意作品 · 审核通过后展示到广场</p>
+<div class="fp-wrap">
+  <div class="fp-shell rise">
+    <div class="fp-head">
+      <div class="fp-ic" id="headAv">🧑</div>
+      <div>
+        <h1>个人中心</h1>
+        <p class="fp-sub">视频回放、练习数据、收藏与账号设置，都在这里。</p>
+      </div>
+      <div class="fp-acts"><a class="btn gho sm" href="square.html" style="text-decoration:none">🌐 去视频广场 →</a></div>
+    </div>
 
-  <div class="vtabs">
-    <button class="vtab on" data-t="mine">🎬 我的回放</button>
-    <button class="vtab" data-t="upload">⬆️ 上传视频</button>
-    <button class="vtab" data-t="review">🛡️ 审核中心 <span id="pendCnt"></span></button>
-    <a class="vtab" href="square.html" style="text-decoration:none;margin-left:auto">🌐 去视频广场 →</a>
+    <div id="gateBox"></div>
+    <div id="heroCard"></div>
+
+    <div class="vtabs" id="secTabs">
+      <button class="vtab on" data-s="videos">🎬 我的视频</button>
+      <button class="vtab" data-s="data">📊 我的数据</button>
+      <button class="vtab" data-s="fav">⭐ 我的收藏 <span class="mg-dot" id="favDot" style="display:none"></span></button>
+      <button class="vtab" data-s="set">⚙️ 账号设置</button>
+    </div>
+
+    <div id="pane"></div>
   </div>
-
-  <div id="pane"></div>
 </div>
 
-<script src="shared.js?v=202610261"></script>
+<script src="shared.js?v=20261039"></script>
 <script>
 if(!initPage('videos',true))throw new Error('login required');
 
+var SEC=(location.hash||'').replace('#','')||'videos';
 var TAB='mine';
-var pane=document.getElementById('pane');
+var pane=null;
+var guestMode=false;
+
 var SCENE_KEYS=Object.keys(SCENES);
 
-$$('.vtab').forEach(function(b){b.onclick=function(){
-  TAB=b.dataset.t;$$('.vtab').forEach(function(x){x.classList.toggle('on',x===b)});render();
-}});
+function bindSecTabs(){
+  $$('#secTabs .vtab').forEach(function(b){
+    b.onclick=function(){
+      var s=b.dataset.s;
+      if(s===SEC){renderSec();return}
+      SEC=s;
+      try{history.replaceState(null,'','#'+s)}catch(e){}
+      $$('#secTabs .vtab').forEach(function(x){x.classList.toggle('on',x===b)});
+      renderSec();
+    };
+  });
+}
+$$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
+
+function renderGate(){
+  var box=document.getElementById('gateBox');if(!box)return;
+  box.innerHTML='<div class="myc-gate rise">'+
+    '<div class="gi">🔐</div>'+
+    '<h3>登录后查看你的个人中心</h3>'+
+    '<div class="gp">个人中心里的<b>视频回放、练习数据、收藏题目和账号设置</b>都属于私人内容，<br>需要先登录才能查看和管理。</div>'+
+    '<div class="gb">'+
+      '<button class="btn pri" id="gLogin">🔑 登录 / 注册</button>'+
+      '<button class="btn gho" id="gQuick">🎭 游客快速登录</button>'+
+    '</div>'+
+    '<div class="gn">🔒 数据只保存在本机浏览器，登录不会上传任何信息。<br>游客身份只能浏览公开内容（首页、题库、视频广场），个人中心需要登录后才解锁。</div>'+
+    '<div class="gback"><a href="index.html">← 先随便逛逛</a></div>'+
+  '</div>';
+  document.getElementById('gLogin').onclick=function(){openLoginModal()};
+  document.getElementById('gQuick').onclick=function(){
+    openLoginModal();
+    setTimeout(function(){var b=document.getElementById('lgQuick');if(b)b.click()},240);
+  };
+}
+function applyGate(){
+  guestMode=isGuestUser();
+  var g=document.getElementById('gateBox');
+  var hero=document.getElementById('heroCard');
+  var tabs=document.getElementById('secTabs');
+  var pn=document.getElementById('pane');
+  if(guestMode){
+    var ha=document.getElementById('headAv');
+    if(ha){ha.innerHTML='';ha.textContent='🔐'}
+    if(hero)hero.style.display='none';
+    if(tabs)tabs.style.display='none';
+    if(pn)pn.style.display='none';
+    if(pn)pn.innerHTML='';
+    g.style.display='';renderGate();
+    return false;
+  }
+  if(hero)hero.style.display='';
+  if(tabs)tabs.style.display='';
+  if(pn)pn.style.display='';
+  g.style.display='none';g.innerHTML='';
+  return true;
+}
+
+function renderHero(){
+  if(guestMode)return;
+  var box=document.getElementById('heroCard');if(!box)return;
+  var u=getUser()||{};
+  var st=getStat(),ci=getCheckInfo();
+  var achs=[];try{achs=getAchievements()}catch(e){}
+  var got=achs.filter(function(a){return a.unlocked}).length;
+  var mine=myVideos();
+  var pend=mine.filter(function(v){return stOf(v)==='pending'}).length;
+  var avg=st.questions?st.scoreSum/st.questions:0;
+  box.innerHTML='<div class="myc-hero rise">'+
+    '<div class="myc-av" id="heroAv"></div>'+
+    '<div class="myc-id">'+
+      '<div class="myc-nm">'+esc(u.name||'访客')+'</div>'+
+      '<div class="myc-ac">@'+esc(u.account||'guest')+' · 加入第 '+Math.max(1,(ci.total||0))+' 天'+(u.guest?' · 游客身份':'')+'</div>'+
+    '</div>'+
+    '<div class="myc-hst">'+
+      '<div><div class="v">'+(st.times||0)+'</div><div class="l">面试场次</div></div>'+
+      '<div><div class="v">'+(st.questions||0)+'</div><div class="l">作答题目</div></div>'+
+      '<div><div class="v" style="color:#7dead6">'+(avg?avg.toFixed(1):'—')+'</div><div class="l">平均自评</div></div>'+
+      '<div><div class="v" style="color:#ffd68a">'+(ci.days||0)+'</div><div class="l">连续签到</div></div>'+
+      '<div><div class="v">'+got+'/'+achs.length+'</div><div class="l">已解锁成就</div></div>'+
+      '<div><div class="v">'+mine.length+(pend?' <span class="mg-dot">'+pend+'</span>':'')+'</div><div class="l">我的视频</div></div>'+
+    '</div>'+
+  '</div>';
+  var hAv=document.getElementById('heroAv');
+  renderAvatar(hAv,u.avatar||'🦊');
+  renderAvatar(document.getElementById('headAv'),u.avatar||'🦊');
+}
+
+function renderSec(){
+  var host=document.getElementById('pane');
+  if(SEC==='videos'){
+    host.innerHTML='<div class="vtabs sub">'+
+      '<button class="vtab'+(TAB==='mine'?' on':'')+'" data-t="mine">🎬 我的回放</button>'+
+      '<button class="vtab'+(TAB==='upload'?' on':'')+'" data-t="upload">⬆️ 上传视频</button>'+
+      '<button class="vtab'+(TAB==='manage'?' on':'')+'" data-t="manage">🗂 视频管理 <span class="mg-dot" id="mgDot" style="display:none"></span></button>'+
+    '</div><div id="vPane"></div>';
+    $$('#pane .vtabs.sub .vtab').forEach(function(b){
+      b.onclick=function(){
+        TAB=b.dataset.t;
+        $$('#pane .vtabs.sub .vtab').forEach(function(x){x.classList.toggle('on',x===b)});
+        renderSec();
+      };
+    });
+    pane=document.getElementById('vPane');
+    render();
+  }else{
+    pane=host;
+    if(SEC==='data')renderData();
+    else if(SEC==='fav')renderFav();
+    else renderSet();
+  }
+}
 
 function fmtTime(ts){var d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function fmtDate(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function badge(st){return st==='pending'?'<span class="vbadge pending">⏳ 审核中</span>':st==='rejected'?'<span class="vbadge rejected">✕ 未通过</span>':'<span class="vbadge approved">✓ 已通过</span>'}
 function sceneTag(sc){var s=SCENES[sc];return s?'<span class="tag" style="background:'+SCENE_COLOR[sc]+'22;color:'+SCENE_COLOR[sc]+'">'+s.name+'</span>':''}
 
@@ -73,18 +296,34 @@ function vCard(v,actions){
     '<div class="vthumb">'+(v.src==='interview'?'🎤':'📹')+'<div class="vplay"><span>▶</span></div></div>'+
     '<div class="vbody">'+
       '<div class="vtitle">'+esc(v.title)+'</div>'+
-      '<div class="vmeta">'+badge(v.status)+sceneTag(v.scene)+'<span>'+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
+      '<div class="vmeta">'+stBadge(stOf(v))+sceneTag(v.scene)+'<span>'+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
       (actions?'<div class="vactions">'+actions+'</div>':'')+
     '</div></div>';
 }
 function emptyHtml(ic,txt){return '<div class="vempty"><div class="big">'+ic+'</div>'+txt+'</div>'}
 
-function render(){
+function stOf(v){
+  if(!v.shared)return 'private';
+  return v.status||'pending';
+}
+function stBadge(s){
+  if(s==='pending')return '<span class="vbadge pending">⏳ 审核中</span>';
+  if(s==='approved')return '<span class="vbadge approved">✓ 已通过</span>';
+  if(s==='rejected')return '<span class="vbadge rejected">✕ 未通过</span>';
+  return '<span class="vbadge" style="background:rgba(255,255,255,.07);color:var(--ink3)">🔒 仅本机可见</span>';
+}
+function myVideos(){
   var me=(getUser()||{}).name||'访客';
+  return getVideos().filter(function(v){return v.owner===me});
+}
+
+function render(){
   var all=getVideos();
-  document.getElementById('pendCnt').textContent=all.filter(function(v){return v.status==='pending'}).length||'';
+  var mine=myVideos();
+  var pend=mine.filter(function(v){return stOf(v)==='pending'}).length;
+  var dot=document.getElementById('mgDot');
+  if(dot){dot.textContent=pend||'';dot.style.display=pend?'inline-block':'none'}
   if(TAB==='mine'){
-    var mine=all.filter(function(v){return v.owner===me});
     pane.innerHTML=mine.length?('<div class="vgrid">'+mine.map(function(v){
       var acts='<button class="btn gho sm act-del">🗑 删除</button>';
       if(!v.shared&&v.status!=='pending')acts='<button class="btn pri sm act-share">🌐 投稿到广场</button>'+acts;
@@ -94,53 +333,94 @@ function render(){
   }else if(TAB==='upload'){
     renderUpload();
   }else{
-    renderReview(all);
+    renderManage();
   }
   bindCards();
 }
 
-function getReviewLog(){return storeGet('ivsim_review_log',[])}
-function addReviewLog(action,v){
-  var l=getReviewLog();
-  l.unshift({ts:Date.now(),action:action,title:v.title,owner:v.owner});
-  storeSet('ivsim_review_log',l.slice(0,20));
-}
-
-var ADMIN_PWD='admin123';
-function isAdmin(){return sessionStorage.getItem('ivsim_admin')==='1'}
-function renderReview(all){
-  if(!isAdmin()){
-    pane.innerHTML='<div class="up-card rise" style="max-width:400px;text-align:center">'+
-      '<div style="font-size:44px;margin-bottom:10px">🔒</div>'+
-      '<div style="font-size:16px;font-weight:800;margin-bottom:6px">后台审核 · 需要管理员身份</div>'+
-      '<div style="font-size:12px;color:var(--ink3);margin-bottom:16px;line-height:1.8">视频审核属于后台运营功能，普通用户不可见。<br>真实产品中由管理员账号在后台系统完成，这里用密码模拟。<br>（演示密码：<b style="color:var(--acc)">admin123</b>）</div>'+
-      '<input class="f-in" id="admPwd" type="password" placeholder="输入管理员密码" style="text-align:center">'+
-      '<button class="btn pri" id="admOk" style="width:100%;margin-top:12px">进入审核后台</button>'+
-    '</div>';
-    document.getElementById('admOk').onclick=function(){
-      var p=document.getElementById('admPwd').value.trim();
-      if(p===ADMIN_PWD){sessionStorage.setItem('ivsim_admin','1');playSound('checkin');toast('管理员验证通过','ok');render()}
-      else{playSound('fail');toast('密码错误','warn')}
-    };
-    document.getElementById('admPwd').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('admOk').click()});
+function renderManage(){
+  var mine=myVideos().slice().sort(function(a,b){return (b.ts||0)-(a.ts||0)});
+  if(!mine.length){
+    pane.innerHTML=emptyHtml('🗂','还没有任何视频。<br>去「上传视频」投稿一段，或到「模拟面试」用视频模式录一场');
     return;
   }
-  var pend=all.filter(function(v){return v.status==='pending'});
-  var log=getReviewLog();
-  pane.innerHTML='<div class="review-tip">🛡️ <b>审核后台已解锁</b>（本次会话有效）。待审核 <b>'+pend.length+'</b> 条 · 通过后展示到「视频广场」，拒绝则作者可在「我的回放」重新投稿。<button class="btn gho sm" id="admOut" style="margin-left:10px;padding:4px 12px">退出后台</button></div>'+
-    (pend.length?('<div class="vgrid">'+pend.map(function(v){
-      return vCard(v,'<button class="btn pri sm act-ok">✓ 通过</button><button class="btn dan sm act-no">✕ 拒绝</button>');
-    }).join('')+'</div>'):emptyHtml('✅','太棒了，没有待审核的视频'))+
-    (log.length?('<div style="margin-top:26px"><div style="font-size:14px;font-weight:800;margin-bottom:10px">📜 最近审核记录</div>'+
-      '<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 16px">'+
-      log.map(function(r){
-        return '<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px">'+
-          '<span style="flex:none">'+(r.action==='approved'?'<span class="vbadge approved">✓ 通过</span>':'<span class="vbadge rejected">✕ 拒绝</span>')+'</span>'+
-          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">'+esc(r.title)+'</span>'+
-          '<span style="flex:none;color:var(--ink3)">'+esc(r.owner)+'</span>'+
-          '<span style="flex:none;color:var(--ink3)">'+fmtTime(r.ts)+'</span></div>';
-      }).join('')+'</div></div>'):'');
-  document.getElementById('admOut').onclick=function(){sessionStorage.removeItem('ivsim_admin');toast('已退出审核后台','ok');render()};
+  var c={private:0,pending:0,approved:0,rejected:0};
+  mine.forEach(function(v){c[stOf(v)]++});
+  var h='';
+  h+='<div class="mg-sum">'+
+    '<div class="mg-k"><div class="l">我的视频</div><div class="v">'+mine.length+'</div></div>'+
+    '<div class="mg-k"><div class="l">⏳ 审核中</div><div class="v" style="color:#ffd68a">'+c.pending+'</div></div>'+
+    '<div class="mg-k"><div class="l">✓ 已通过</div><div class="v" style="color:#7dead6">'+c.approved+'</div></div>'+
+    '<div class="mg-k"><div class="l">✕ 未通过</div><div class="v" style="color:#fda4af">'+c.rejected+'</div></div>'+
+    '<div class="mg-k"><div class="l">🔒 仅本机</div><div class="v" style="color:var(--ink3)">'+c.private+'</div></div>'+
+  '</div>';
+  h+='<div class="mg-list"><div class="mg-hd"><div>封面</div><div>视频</div><div>审核状态</div><div>提交时间</div><div style="text-align:right">操作</div></div>';
+  mine.forEach(function(v){
+    var s=stOf(v);
+    h+='<div class="mg-row" data-id="'+v.id+'">'+
+      '<div class="mg-th" data-act="play">'+(v.src==='interview'?'🎤':'📹')+'</div>'+
+      '<div class="mg-info"><div class="mg-ti" data-act="play">'+esc(v.title)+'</div>'+
+        '<div class="mg-mt">'+sceneTag(v.scene)+
+        '<span>'+(v.src==='interview'?'🎤 面试录制':'📹 上传投稿')+'</span>'+
+        (v.plays?'<span>▶ '+v.plays+' 次播放</span>':'')+'</div>'+
+        (s==='rejected'&&v.reason?'<div class="mg-reason">拒绝理由：'+esc(v.reason)+'</div>':'')+
+      '</div>'+
+      '<div class="mg-st">'+stBadge(s)+
+        (s==='pending'?'<div class="mg-mt" style="margin-top:4px">通常在 1 个工作日内处理</div>':'')+
+        (s==='approved'?'<div class="mg-mt" style="margin-top:4px">已展示在视频广场</div>':'')+
+      '</div>'+
+      '<div class="mg-mt" style="margin:0">'+fmtTime(v.ts||Date.now())+'</div>'+
+      '<div class="mg-acts">'+
+        '<button class="btn gho" data-act="play" title="播放视频">▶</button>'+
+        (s==='private'?'<button class="btn pri" data-act="share" title="投稿到视频广场">投稿</button>':'')+
+        (s==='pending'?'<button class="btn gho" data-act="undo" title="撤回投稿，恢复为仅本机可见">撤回</button>':'')+
+        (s==='approved'?'<button class="btn gho" data-act="down" title="从视频广场撤下">撤下</button>':'')+
+        (s==='rejected'?'<button class="btn pri" data-act="share" title="修改后重新投稿">重新投稿</button>':'')+
+        '<button class="btn" data-act="rename" title="修改标题">改名</button>'+
+        '<button class="btn dan" data-act="del" title="删除视频">删除</button>'+
+      '</div>'+
+    '</div>';
+  });
+  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「视频广场」；<b>未通过</b> 会给出理由，你可以修改后重新投稿。视频文件只保存在本机浏览器，删除后不可恢复。</div>';
+  pane.innerHTML=h;
+  bindManage();
+}
+function bindManage(){
+  $$('#pane .mg-row').forEach(function(row){
+    var id=row.dataset.id;
+    function find(){return getVideos().filter(function(x){return x.id===id})[0]||{}}
+    row.querySelectorAll('[data-act]').forEach(function(el){
+      el.onclick=function(e){
+        e.stopPropagation();
+        var a=el.dataset.act;
+        if(a==='play')return playVideo(id);
+        if(a==='share'){
+          updateVideoMeta(id,{shared:true,status:'pending',reason:''});
+          playSound('checkin');toast('已投稿，等待管理员审核','ok');render();return;
+        }
+        if(a==='undo'){
+          updateVideoMeta(id,{shared:false,status:'private'});
+          playSound('click');toast('已撤回，视频恢复为仅本机可见','ok');render();return;
+        }
+        if(a==='down'){
+          updateVideoMeta(id,{shared:false,status:'private'});
+          playSound('click');toast('已从广场撤下','ok');render();return;
+        }
+        if(a==='rename'){
+          var v=find();
+          var t=prompt('修改视频标题（最多 30 字）',v.title||'');
+          if(t==null)return;
+          t=String(t).trim().slice(0,30);
+          if(!t){toast('标题不能为空','warn');return}
+          updateVideoMeta(id,{title:t});toast('标题已更新','ok');render();return;
+        }
+        if(a==='del'){
+          if(!confirm('删除后视频文件将从本机移除，且不可恢复，确定删除？'))return;
+          removeVideo(id).then(function(){toast('已删除','ok');render();renderHero()});
+        }
+      };
+    });
+  });
 }
 
 function bindCards(){
@@ -149,23 +429,11 @@ function bindCards(){
     c.querySelector('.vthumb').onclick=function(){playVideo(id)};
     var share=c.querySelector('.act-share');
     if(share)share.onclick=function(e){e.stopPropagation();
-      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到广场','ok');render();
+      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到广场','ok');render();renderHero();
     };
     var del=c.querySelector('.act-del');
     if(del)del.onclick=function(e){e.stopPropagation();
-      removeVideo(id).then(function(){toast('已删除','ok');render()});
-    };
-    var ok=c.querySelector('.act-ok');
-    if(ok)ok.onclick=function(e){e.stopPropagation();
-      var v=getVideos().filter(function(x){return x.id===id})[0];
-      updateVideoMeta(id,{status:'approved'});if(v)addReviewLog('approved',v);
-      playSound('unlock');toast('已通过，视频展示到广场','ok');render();
-    };
-    var no=c.querySelector('.act-no');
-    if(no)no.onclick=function(e){e.stopPropagation();
-      var v2=getVideos().filter(function(x){return x.id===id})[0];
-      updateVideoMeta(id,{status:'rejected'});if(v2)addReviewLog('rejected',v2);
-      playSound('fail');toast('已拒绝','warn');render();
+      removeVideo(id).then(function(){toast('已删除','ok');render();renderHero()});
     };
   });
 }
@@ -210,13 +478,172 @@ function renderUpload(){
     var id='v_'+Date.now();
     saveVideoBlob(id,file).then(function(){
       addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',status:'pending',ts:Date.now(),src:'upload',shared:true});
+      /* 同步到管理后台数据集，管理员可在「视频审核」中处理 */
+      try{AdminDB.addVideo({id:id,title:title,scene:scene,status:'pending',ts:Date.now(),dur:0})}catch(e){}
       playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到广场','ok');
-      TAB='mine';$$('.vtab').forEach(function(x){x.classList.toggle('on',x.dataset.t==='mine')});render();
+      TAB='mine';renderSec();renderHero();
     }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
   };
 }
 
-render();
+function mySessions(){
+  try{return AdminDB.sessions().filter(function(x){return x.u&&x.u.me}).slice(0,8)}
+  catch(e){return []}
+}
+function renderData(){
+  var st=getStat(),ci=getCheckInfo();
+  var mine=myVideos(),sessions=mySessions();
+  var avg=st.questions?st.scoreSum/st.questions:0;
+  var achs=[];try{achs=getAchievements()}catch(e){}
+  var got=achs.filter(function(a){return a.unlocked}).length;
+  var h='';
+
+  h+='<div class="myc-grid">'+
+    '<div class="mg-k"><div class="l">累计面试场次</div><div class="v">'+(st.times||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">累计作答题目</div><div class="v">'+(st.questions||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">平均自评</div><div class="v" style="color:#7dead6">'+(avg?avg.toFixed(1):'—')+'</div></div>'+
+    '<div class="mg-k"><div class="l">累计签到</div><div class="v" style="color:#ffd68a">'+(ci.total||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">连续签到</div><div class="v" style="color:#ffd68a">'+(ci.days||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">我的视频</div><div class="v">'+mine.length+'</div></div>'+
+  '</div>';
+
+  /* 面试倒计时 */
+  var p=null;try{p=cdParts()}catch(e){}
+  h+='<div class="myc-card" style="margin-bottom:14px">'+
+    '<div class="ct">⏳ 面试倒计时 <button class="btn gho sm" id="cdSet" style="margin-left:auto">设置 / 清除</button></div>'+
+    (p?'<div class="myc-cd">'+
+        '<div><span class="n">'+p.day+'</span><span class="u">天</span></div>'+
+        '<div class="d">'+(p.past?'目标面试日已过去，可以复盘这一轮准备了':'距目标面试日')+'<br>'+
+        '剩余 '+cd2(p.h)+' 小时 '+cd2(p.mi)+' 分 '+cd2(p.s)+' 秒</div>'+
+      '</div>'
+      :'<div class="d" style="font-size:12.5px;color:var(--ink3);line-height:1.8">还没有设置目标面试日期，设置后导航栏和首页会同步显示倒计时。</div>')+
+  '</div>';
+
+  /* 场景分布 */
+  var scCount=st.scenes||{};
+  var max=0;SCENE_KEYS.forEach(function(k){if((scCount[k]||0)>max)max=scCount[k]});
+  var bars='';
+  SCENE_KEYS.forEach(function(k){
+    var n=scCount[k]||0;
+    bars+='<div class="myc-bar">'+
+      '<div class="bn">'+SCENES[k].name+'</div>'+
+      '<div class="bt"><div class="bf" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+SCENE_COLOR[k]+'"></div></div>'+
+      '<div class="bv">'+n+'</div>'+
+    '</div>';
+  });
+  h+='<div class="myc-card" style="margin-bottom:14px">'+
+    '<div class="ct">🗺️ 场景练习分布 <span style="font-weight:400;color:var(--ink3);font-size:11px">每个场景的完成场次</span></div>'+
+    (max?bars:'<div style="font-size:12.5px;color:var(--ink3);line-height:1.8">还没有练习记录，去「模拟面试」跑一场，这里会自动统计。</div>')+
+  '</div>';
+
+  /* 最近练习 */
+  h+='<div class="ct" style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px">📝 最近练习记录</div>';
+  if(sessions.length){
+    h+='<div class="myc-rows"><div class="myc-row head"><div>时间</div><div>题型 / AI 评价摘要</div><div>题数</div><div>平均自评</div></div>';
+    sessions.forEach(function(x){
+      var s=x.s||{};
+      h+='<div class="myc-row">'+
+        '<div class="tm">'+fmtTime(s.ts||Date.now())+'</div>'+
+        '<div><div class="ti">'+esc(s.type||'综合')+' · '+esc((SCENES[s.scene]||{}).name||'综合')+'</div>'+
+          (s.ai?'<div class="ai">🤖 '+esc(s.ai)+'</div>':'')+'</div>'+
+        '<div class="sc">'+(s.count||0)+' 题</div>'+
+        '<div class="sc" style="color:#7dead6">'+(s.avg?s.avg.toFixed(1):'—')+' 星</div>'+
+      '</div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="myc-card" style="margin-bottom:14px"><div style="font-size:12.5px;color:var(--ink3);line-height:1.8">还没有练习记录。完成一场完整的模拟面试（走到最后的 AI 评价）后，这里会显示场次、自评和 AI 摘要。</div></div>';
+  }
+
+  h+='<div class="myc-card"><div class="ct">🏅 成就进度</div>'+
+    '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">已解锁 <b style="color:var(--acc2)">'+got+'</b> / '+achs.length+' 个成就'+
+    '<button class="btn gho sm" id="achBtn" style="margin-left:10px">查看成就墙</button></div></div>';
+
+  pane.innerHTML=h;
+  var cs=document.getElementById('cdSet');
+  if(cs)cs.onclick=function(){openCountdownModal();setTimeout(function(){renderData()},400)};
+  var ab=document.getElementById('achBtn');
+  if(ab)ab.onclick=function(){openAchievements()};
+}
+
+function renderFav(){
+  var ids=getFavs();
+  var dot=document.getElementById('favDot');
+  if(dot){dot.textContent=ids.length||'';dot.style.display=ids.length?'inline-block':'none'}
+  if(!ids.length){
+    pane.innerHTML=emptyHtml('⭐','还没有收藏的题目。<br>在「题库」里点击题目右上角的 ⭐ 就能收藏到这里');
+    return;
+  }
+  var h='<div class="myc-fav">';
+  ids.forEach(function(id){
+    var q=null;
+    for(var i=0;i<QUESTIONS.length;i++){if(QUESTIONS[i].id===id){q=QUESTIONS[i];break}}
+    if(!q)q={id:id,q:'（题目已下架，可取消收藏）',scene:'general',lv:0};
+    h+='<div class="f" data-qid="'+esc(q.id)+'">'+
+      '<div class="ft">'+esc(q.q)+'</div>'+
+      '<div class="fm">'+sceneTag(q.scene)+(q.lv?'<span>难度 Lv.'+q.lv+'</span>':'')+
+        '<button class="btn gho sm" data-unfav="'+esc(q.id)+'" style="margin-left:auto;padding:3px 9px;font-size:11px">取消收藏</button></div>'+
+    '</div>';
+  });
+  h+='</div><div class="mg-tip">💡 点击题目卡片跳转到「题库」继续练习；收藏保存在本机浏览器。</div>';
+  pane.innerHTML=h;
+  $$('#pane .myc-fav .f').forEach(function(el){
+    el.onclick=function(e){
+      if(e.target&&e.target.dataset&&e.target.dataset.unfav){
+        e.stopPropagation();
+        var list=getFavs().filter(function(x){return x!==e.target.dataset.unfav});
+        storeSet('ivsim_favs',list);toast('已取消收藏','warn');renderFav();return;
+      }
+      location.href='bank.html';
+    };
+  });
+}
+
+function renderSet(){
+  var u=getUser()||{};
+  pane.innerHTML='<div class="myc-grid" style="margin-bottom:14px">'+
+      '<div class="mg-k"><div class="l">当前身份</div><div class="v" style="font-size:15px">'+esc(u.name||'访客')+'</div></div>'+
+      '<div class="mg-k"><div class="l">账号</div><div class="v" style="font-size:15px">@'+esc(u.account||'guest')+'</div></div>'+
+      '<div class="mg-k"><div class="l">登录方式</div><div class="v" style="font-size:15px">'+(u.guest?'游客':(u.oauth?'第三方':'本机账号'))+'</div></div>'+
+    '</div>'+
+    '<div class="myc-acts">'+
+      '<button class="myc-abtn" id="setProfile"><span class="ic">🧑</span><span><span class="t">编辑资料</span><span class="d">头像、昵称、个人背景主题</span></span></button>'+
+      '<button class="myc-abtn" id="setPref"><span class="ic">⚙️</span><span><span class="t">偏好设置</span><span class="d">深色 / 浅色、背景、音效、AI Key</span></span></button>'+
+      '<button class="myc-abtn" id="setCd"><span class="ic">⏳</span><span><span class="t">面试倒计时</span><span class="d">设置目标面试日期</span></span></button>'+
+      '<button class="myc-abtn" id="setAch"><span class="ic">🏅</span><span><span class="t">成就墙</span><span class="d">查看全部勋章与解锁条件</span></span></button>'+
+      '<button class="myc-abtn" id="setCi"><span class="ic">📅</span><span><span class="t">每日签到</span><span class="d">连签拿阶梯奖励</span></span></button>'+
+      '<button class="myc-abtn" id="setOut"><span class="ic">🚪</span><span><span class="t">退出登录</span><span class="d">清除本机登录状态</span></span></button>'+
+    '</div>'+
+    '<div class="mg-tip">🔒 所有数据都保存在本机浏览器（localStorage / IndexedDB），不会上传到任何服务器；清除浏览数据会一并清空。</div>';
+  document.getElementById('setProfile').onclick=function(){openProfile();setTimeout(function(){renderHero();renderSet()},700)};
+  document.getElementById('setPref').onclick=function(){openSettings()};
+  document.getElementById('setCd').onclick=function(){openCountdownModal()};
+  document.getElementById('setAch').onclick=function(){openAchievements()};
+  document.getElementById('setCi').onclick=function(){checkIn();showCheckinPanel()};
+  document.getElementById('setOut').onclick=function(){
+    if(!confirm('确定退出登录吗？本机数据与视频会保留。'))return;
+    logout();
+  };
+}
+
+bindSecTabs();
+function boot(){
+  if(!applyGate())return;
+  $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
+  renderHero();
+  renderSec();
+}
+boot();
+/* 登录成功后（登录弹窗里登录 / 注册 / 游客快速登录）自动解锁个人中心 */
+window.addEventListener('ivsim:login',function(){
+  if(!isGuestUser()){
+    boot();
+    toast('登录成功，个人中心已解锁','ok');
+  }
+});
+/* 资料卡片在别的弹层里改过之后自动刷新 */
+setInterval(function(){if(!guestMode)renderHero()},3000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&!guestMode)renderHero()});
 </script>
 </body>
 </html>

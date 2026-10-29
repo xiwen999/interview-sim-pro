@@ -4,10 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>浏览题库 · 模拟面试训练</title>
-<link rel="stylesheet" href="shared.css?v=202610261">
+<link rel="stylesheet" href="shared.css?v=20261039">
 <style>
-.toolbar{position:sticky;top:66px;z-index:40;padding:14px 0;background:linear-gradient(rgba(8,13,29,.92),rgba(8,13,29,.75));backdrop-filter:blur(10px)}
-.search-box{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
+/* 筛选按钮：对齐 interview 设置页选项风格（JS 仍用 .chip/.on，仅改视觉） */
+.filters .chip{padding:10px 16px;border-radius:13px;font-size:13px;font-weight:600;color:var(--ink2);
+  background:var(--card);border:1.5px solid var(--line);
+  box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+.filters .chip:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
+.filters .chip.on{border-color:var(--acc);color:var(--ink);background:rgba(108,140,255,.14);
+  box-shadow:0 0 0 3px rgba(108,140,255,.14),0 10px 24px rgba(108,140,255,.22)}
+.toolbar{padding:4px 0 14px}
+.search-box{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid var(--line);
   border-radius:13px;padding:11px 16px;margin-bottom:12px;transition:.2s}
 .search-box:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.14)}
 .search-box svg{color:var(--ink3);flex:none}
@@ -35,17 +42,34 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="toolbar rise">
-    <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…"></div>
-    <div class="filters" id="scFilter"></div>
-    <div class="filters" style="margin-top:8px" id="lvFilter"></div>
+<div class="fp-wrap">
+  <div class="fp-shell rise">
+    <div class="fp-head">
+      <div class="fp-ic">📚</div>
+      <div>
+        <h1>浏览题库</h1>
+        <p class="fp-sub">按场景与难度筛选高频真题，展开查看考察点、作答技巧与参考要点；遇到好题点 ⭐ 收藏。</p>
+      </div>
+      <div class="fp-acts"><button class="btn pri sm" onclick="location.href='interview.html'">🎤 去练一场</button></div>
+    </div>
+    <div class="fp-tip">
+      <span class="fp-tip-ic">💡</span>
+      <div style="flex:1">
+        <div class="fp-tip-t">怎么用题库最高效？</div>
+        <div class="fp-tip-d">先按目标场景筛选 → 看题先自己口述思路 → 再展开对照考察点与参考要点，差距就是提升点。</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…"></div>
+      <div class="filters" id="scFilter"></div>
+      <div class="filters" style="margin-top:8px" id="lvFilter"></div>
+    </div>
+    <div class="count-line" id="cntLine"></div>
+    <div id="list" class="d1"></div>
   </div>
-  <div class="count-line" id="cntLine"></div>
-  <div id="list" class="rise d1"></div>
 </div>
 
-<script src="shared.js?v=202610261"></script>
+<script src="shared.js?v=20261039"></script>
 <script>
 if(!initPage('bank',true))throw new Error('login required');
 document.getElementById('srchIc').innerHTML=ICONS.search;

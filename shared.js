@@ -124,7 +124,261 @@ function requireLogin(){
   }
   return true;
 }
-function logout(){localStorage.removeItem('ivsim_user');location.href='index.html'}
+function logout(){localStorage.removeItem('ivsim_user');adminLogout();location.href='index.html'}
+
+var ADMIN_ACCOUNT={account:'admin',pwd:'admin123',name:'管理员',avatar:'👑'};
+function adminSession(){
+  try{return JSON.parse(sessionStorage.getItem('ivsim_admin_sess')||'null')}catch(e){return null}
+}
+function isAdmin(){
+  var s=adminSession();
+  return !!(s&&s.ok&&s.account===ADMIN_ACCOUNT.account);
+}
+function adminLogin(acc,pwd){
+  acc=String(acc==null?'':acc).trim();
+  if(!acc)return {ok:false,msg:'请输入管理员账号'};
+  if(acc!==ADMIN_ACCOUNT.account)return {ok:false,msg:'管理员账号不存在'};
+  if(String(pwd==null?'':pwd)!==ADMIN_ACCOUNT.pwd)return {ok:false,msg:'管理员密码错误'};
+  try{sessionStorage.setItem('ivsim_admin_sess',JSON.stringify({ok:1,account:acc,ts:Date.now()}))}catch(e){}
+  return {ok:true};
+}
+function adminLogout(){
+  try{sessionStorage.removeItem('ivsim_admin_sess');sessionStorage.removeItem('ivsim_admin')}catch(e){}
+}
+
+var AdminDB=(function(){
+  var K='ivsim_admin_db', KL='ivsim_admin_log', SV=3;
+  var _s=20261029;
+  function rnd(){_s=(_s*1103515245+12345)&0x7fffffff;return _s/0x7fffffff}
+  function pick(a){return a[Math.floor(rnd()*a.length)]}
+  function ri(a,b){return a+Math.floor(rnd()*(b-a+1))}
+  var NAMES=['林小满','陈知远','苏叶','周牧','何一诺','赵珩','钱思睿','孙澈','吴桐','郑迪'];
+  var AVAS=['🦊','🐼','🐯','🦁','🐨','🐵','🦄','🐧','🐙','🦉'];
+  var TYPES=['综合','技术','HR','压力'];
+  var SCENEIDS=['job','tech','data','product','general'];
+  var VTITLES=['产品经理自我介绍实录','Java 后端八股作答','HR 行为面试：冲突处理','压力面试：被追问复盘',
+    '数据分析 SQL 实战讲解','项目深挖：从背景到结果','运营岗方案设计演示','通用行为面试 3 题连答',
+    '技术面：数据倾斜排查','自我介绍 90 秒精简版','群面 leader 发言片段','终面：职业规划作答'];
+  function sceneName(id){
+    var m={job:'求职 / 实习',tech:'技术开发岗',data:'数据分析岗',product:'产品 / 运营岗',general:'通用行为面试'};
+    return m[id]||id||'—';
+  }
+  function mkSessions(u,n){
+    var a=[];
+    for(var i=0;i<n;i++){
+      var cnt=ri(3,8),avg=Math.round((2.5+rnd()*2.5)*10)/10;
+      a.push({
+        id:'s_'+u.id+'_'+i,
+        ts:Date.now()-ri(1,26)*86400000-ri(0,23)*3600000,
+        type:pick(TYPES),
+        scene:pick(SCENEIDS),
+        count:cnt,
+        avg:avg,
+        used:cnt*ri(40,110),
+        ansLen:ri(30,140),
+        ai:avg>=4?'表达流畅、要点覆盖较全，建议补充量化结果。':'框架基本成型，建议用"总-分-总"结构并增加案例。'
+      });
+    }
+    return a.sort(function(x,y){return y.ts-x.ts});
+  }
+  function mkVideos(u,n){
+    var a=[];
+    for(var i=0;i<n;i++){
+      var r=rnd();
+      a.push({
+        id:'v_'+u.id+'_'+i,
+        ts:Date.now()-ri(0,20)*86400000-ri(0,23)*3600000,
+        title:pick(VTITLES),
+        scene:pick(SCENEIDS),
+        dur:ri(45,320),
+        status:r<0.45?'pending':(r<0.85?'approved':'rejected'),
+        plays:ri(0,860),
+        reports:r>0.9?ri(1,3):0,
+        reason:''
+      });
+    }
+    return a.sort(function(x,y){return y.ts-x.ts});
+  }
+  function seed(){
+    var users=[];
+    for(var i=0;i<10;i++){
+      var acc='user'+(1001+i);
+      var u={id:'u'+i,account:acc,name:NAMES[i],avatar:AVAS[i],
+        joined:Date.now()-ri(3,90)*86400000,last:Date.now()-ri(0,6)*86400000,
+        status:i===9?'banned':'active',sessions:[],videos:[],demo:true,
+        goal:ri(1,5),checkin:ri(0,30)};
+      u.sessions=mkSessions(u,ri(2,9));
+      u.videos=mkVideos(u,ri(1,4));
+      users.push(u);
+    }
+    return {v:SV,users:users,created:Date.now(),updated:Date.now()};
+  }
+  function db(){
+    var d=null;
+    try{d=storeGet(K,null)}catch(e){}
+    if(!d||!d.users||d.v!==SV){d=seed();save(d)}
+    return d;
+  }
+  function save(d){d.updated=Date.now();storeSet(K,d);return d}
+  function findUser(d,acc){acc=acc||'';var r=null;d.users.forEach(function(u){if(String(u.account).toLowerCase()===String(acc).toLowerCase())r=u});return r}
+  function me(d){
+    var u=null;try{u=getUser()}catch(e){}
+    u=u||{};
+    var acc=u.account||u.name||'me';
+    var mu=findUser(d,acc);
+    if(!mu){
+      mu={id:'u_me_'+Date.now().toString(36),account:acc,name:u.name||'本机用户',avatar:u.avatar||'🦊',
+        joined:Date.now()-86400000*7,last:Date.now(),status:'active',sessions:[],videos:[],me:true,
+        goal:0,checkin:0};
+      d.users.push(mu);
+    }
+    return mu;
+  }
+  function log(action,target,extra){
+    var l=[];try{l=storeGet(KL,[])}catch(e){}
+    l.unshift({ts:Date.now(),action:action,target:target||'',extra:extra||'',
+      by:(ADMIN_ACCOUNT&&ADMIN_ACCOUNT.name)||'管理员'});
+    try{storeSet(KL,l.slice(0,60))}catch(e){}
+  }
+  return {
+    db:db, save:save, sceneName:sceneName, log:log,
+    logs:function(){try{return storeGet(KL,[])}catch(e){return []}},
+    clearLogs:function(){try{storeSet(KL,[])}catch(e){}},
+    users:function(){return db().users},
+    /* 拉平：所有面试记录 / 所有视频，带所属用户 */
+    sessions:function(){
+      var a=[];db().users.forEach(function(u){(u.sessions||[]).forEach(function(s){a.push({u:u,s:s})})});
+      return a.sort(function(x,y){return y.s.ts-x.s.ts});
+    },
+    videos:function(){
+      var a=[];db().users.forEach(function(u){(u.videos||[]).forEach(function(v){a.push({u:u,v:v})})});
+      return a.sort(function(x,y){return y.v.ts-x.v.ts});
+    },
+    stats:function(){
+      var d=db(),s=this.sessions(),v=this.videos(),now=Date.now();
+      var today=0,week=0,avg=0,avgUsed=0,q=0;
+      s.forEach(function(x){q+=x.s.count||0;avg+=x.s.avg||0;avgUsed+=x.s.used||0;
+        if(now-x.s.ts<86400000)today++;
+        if(now-x.s.ts<7*86400000)week++;
+      });
+      var pend=0,appr=0,rej=0,rep=0,plays=0;
+      v.forEach(function(x){plays+=x.v.plays||0;rep+=x.v.reports||0;
+        if(x.v.status==='pending')pend++;else if(x.v.status==='approved')appr++;else rej++;});
+      return {users:d.users.length,banned:d.users.filter(function(u){return u.status==='banned'}).length,
+        sessions:s.length,questions:q,videos:v.length,
+        today:today,week:week,
+        avgScore:s.length?Math.round(avg/s.length*10)/10:0,
+        avgUsed:s.length?Math.round(avgUsed/s.length):0,
+        pend:pend,approved:appr,rejected:rej,reports:rep,plays:plays};
+    },
+    /* 7 日场次（用于概览柱状图） */
+    day7:function(){
+      var a=[],now=new Date();now.setHours(0,0,0,0);
+      for(var i=6;i>=0;i--){
+        var t0=now.getTime()-i*86400000,t1=t0+86400000,c=0;
+        this.sessions().forEach(function(x){if(x.s.ts>=t0&&x.s.ts<t1)c++});
+        a.push({ts:t0,n:c});
+      }
+      return a;
+    },
+    setVideoStatus:function(uid,vid,status,reason){
+      var d=db(),u=null;d.users.forEach(function(x){if(x.id===uid)u=x});
+      if(!u)return false;
+      var v=null;(u.videos||[]).forEach(function(x){if(x.id===vid)v=x});
+      if(!v)return false;
+      v.status=status;v.reason=reason||'';v.at=Date.now();
+      /* 本机真实视频同步回 ivsim_videos，让前台「视频管理」看到状态与拒绝理由 */
+      try{updateVideoMeta(vid,{status:status,reason:reason||''})}catch(e){}
+      save(d);
+      log(status==='approved'?'通过视频':(status==='rejected'?'拒绝视频':'重置视频状态'),
+        v.title+'（'+u.name+'）',reason||'');
+      return true;
+    },
+    delVideo:function(uid,vid){
+      var d=db(),u=null;d.users.forEach(function(x){if(x.id===uid)u=x});
+      if(!u)return false;
+      var v=null;(u.videos||[]).forEach(function(x){if(x.id===vid)v=x});
+      if(!v)return false;
+      u.videos=u.videos.filter(function(x){return x.id!==vid});
+      save(d);log('删除视频',v.title+'（'+u.name+'）','');
+      return true;
+    },
+    setUserStatus:function(uid,status){
+      var d=db(),u=null;d.users.forEach(function(x){if(x.id===uid)u=x});
+      if(!u)return false;
+      u.status=status;save(d);
+      log(status==='banned'?'封禁用户':'解除封禁',u.name+'（'+u.account+'）','');
+      return true;
+    },
+    delUser:function(uid){
+      var d=db();var u=null;d.users.forEach(function(x){if(x.id===uid)u=x});
+      if(!u)return false;
+      d.users=d.users.filter(function(x){return x.id!==uid});
+      save(d);log('删除用户',u.name+'（'+u.account+'）','');
+      return true;
+    },
+    /* 前台埋点：一场面试结束 */
+    addSession:function(rec){
+      try{
+        var d=db(),mu=me(d);
+        (mu.sessions=mu.sessions||[]).unshift({
+          id:'s_'+(rec.ts||Date.now()),ts:rec.ts||Date.now(),
+          type:rec.type||'综合',scene:rec.scene||'general',
+          count:rec.count||0,avg:rec.avg||0,used:rec.used||0,
+          ansLen:rec.ansLen||0,ai:rec.ai||'',me:true
+        });
+        mu.sessions=mu.sessions.slice(0,60);
+        mu.last=Date.now();save(d);
+      }catch(e){}
+    },
+    /* 前台埋点：上传一个视频 */
+    addVideo:function(rec){
+      try{
+        var d=db(),mu=me(d);
+        var ex=null;(mu.videos||[]).forEach(function(x){if(x.id===rec.id)ex=x});
+        if(ex){ex.status=rec.status||'pending';ex.title=rec.title||ex.title}
+        else (mu.videos=mu.videos||[]).unshift({
+          id:rec.id,ts:rec.ts||Date.now(),title:rec.title||'未命名回放',
+          scene:rec.scene||'general',dur:rec.dur||0,status:rec.status||'pending',
+          plays:0,reports:0,reason:'',me:true
+        });
+        mu.last=Date.now();save(d);
+      }catch(e){}
+    },
+    /* 打开后台时，把本机真实数据（用户 / 视频 / 统计）合并进来 */
+    syncLocal:function(){
+      try{
+        var d=db(),mu=me(d);
+        var vs=[];try{vs=getVideos()||[]}catch(e){}
+        vs.forEach(function(v){
+          if(!v)return;
+          var ex=null;(mu.videos||[]).forEach(function(x){if(x.id===v.id)ex=x});
+          if(ex){ex.status=v.status||ex.status}
+          else (mu.videos=mu.videos||[]).unshift({id:v.id,ts:v.ts||Date.now(),
+            title:v.title||'未命名回放',scene:v.scene||'general',dur:0,
+            status:v.status||(v.shared?'pending':'private'),plays:0,reports:0,reason:'',me:true});
+        });
+        var st={};try{st=getStat()}catch(e){}
+        mu.stat={times:st.times||0,questions:st.questions||0};
+        var accs=[];try{accs=getAccounts()||[]}catch(e){}
+        accs.forEach(function(a){
+          if(!findUser(d,a.account)){
+            d.users.push({id:'u_acc_'+a.account,account:a.account,name:a.name||a.account,
+              avatar:a.avatar||'🙂',joined:a.t||Date.now(),last:a.t||Date.now(),
+              status:'active',sessions:[],videos:[],registered:true,goal:0,checkin:0});
+          }
+        });
+        mu.last=Date.now();save(d);
+      }catch(e){}
+      return db();
+    },
+    reset:function(){
+      var d=seed();save(d);try{storeSet(KL,[])}catch(e){}
+      log('重置后台数据','已恢复内置示例数据集','');
+      return d;
+    }
+  };
+})();
 
 /* 是否访客身份（含旧数据的“游客/访客”默认名） */
 function isGuestUser(u){
@@ -169,7 +423,10 @@ function openLoginModal(){
       '<div class="lg-err" id="lgErr"></div>'+
       '<button class="btn pri lg-go" id="lgGo" style="width:100%">🔑 登录</button>'+
       '<div class="lg-alt"><button class="btn gho" id="lgQuick" style="width:100%">游客快速登录</button></div>'+
+      '<div class="lg-adm-tip" id="lgAdmTip" style="display:none">👑 这是管理员专用账号，不能在用户账号里登录。<br>'+
+        '管理后台是独立空间，请前往：<a href="admin.html" style="color:#fcd34d;text-decoration:underline">打开管理后台 →</a></div>'+
       '<div class="lg-note">账号仅保存在本地浏览器 · 无需真实手机号<br>仅用于训练，不会上传任何信息</div>'+
+      '<div class="lg-foot"><a class="lg-adm" href="admin.html" title="管理员请在独立后台登录">👑 管理员登录</a></div>'+
     '</div>'
   );
   var accIn=$('#lgAcc'),passIn=$('#lgPass'),pass2In=$('#lgPass2'),
@@ -178,7 +435,18 @@ function openLoginModal(){
 
   function drawCap(){
     var cv=$('#lgCap');if(!cv)return;
-    var w=cv.width,h=cv.height,ctx=cv.getContext('2d');
+    var ctx=cv.getContext('2d');
+    var w=104,h=40;
+    /* 高分屏按 devicePixelRatio 放大后备缓冲，文字才不糊；CSS 尺寸保持 104×40 */
+    var dpr=Math.max(1,Math.min(window.devicePixelRatio||1,2));
+    if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
+      cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+      cv.style.width=w+'px';cv.style.height=h+'px';
+    }
+    /* 必须先清空：否则每次重绘都叠在旧像素上，点几次就糊成一团 */
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.globalAlpha=1;
+    ctx.clearRect(0,0,w,h);
     var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     capCode='';
     for(var i=0;i<4;i++)capCode+=chars.charAt(Math.floor(Math.random()*chars.length));
@@ -219,6 +487,8 @@ function openLoginModal(){
     storeSet('ivsim_user',{name:rec.name||rec.account,avatar:rec.avatar||'🦊',
       bg:(u.bg||BG_PRESETS[0]),account:rec.account});
     closeMask();
+    /* 广播登录成功：个人中心等页面据此解锁 */
+    try{window.dispatchEvent(new CustomEvent('ivsim:login'))}catch(e){}
   }
   function submit(){
     var acc=(accIn.value||'').trim();
@@ -228,8 +498,14 @@ function openLoginModal(){
     if(mode==='reg'&&pw!==pass2In.value){showErr('两次输入的密码不一致');pass2In.focus();return}
     if((capIn.value||'').trim().toUpperCase()!==capCode){showErr('验证码不正确，请重新输入');capIn.value='';capIn.focus();drawCap();return}
     var list=getAccounts(),found=null;
+    var isAdmAcc=acc.toLowerCase()===ADMIN_ACCOUNT.account;
     for(var i=0;i<list.length;i++){
       if(String(list[i].account).toLowerCase()===acc.toLowerCase()){found=list[i];break}
+    }
+    /* 管理员账号是独立身份，永远不进入用户账号体系（不叠加、不共享数据） */
+    if(isAdmAcc){
+      showErr('这是管理员专用账号，请在独立的管理后台登录（admin.html）');
+      drawCap();capIn.value='';return;
     }
     if(mode==='reg'){
       if(found){showErr('该账号已注册，请直接登录');drawCap();capIn.value='';return}
@@ -255,6 +531,12 @@ function openLoginModal(){
   };
   $('#lgCap').onclick=drawCap;
   $('#lgCapR').onclick=drawCap;
+  /* 输入 admin 时提示这是管理员账号 */
+  var admTip=$('#lgAdmTip');
+  accIn.addEventListener('input',function(){
+    if(admTip)admTip.style.display=(accIn.value||'').trim().toLowerCase()===ADMIN_ACCOUNT.account?'':'none';
+    if(errEl.classList.contains('show'))clearErr();
+  });
   goBtn.onclick=submit;
   [accIn,passIn,pass2In,capIn].forEach(function(el){
     el.addEventListener('keydown',function(e){if(e.key==='Enter')submit()});
@@ -439,7 +721,7 @@ function mountNav(active){
       '<a href="index.html" class="'+(active==='home'?'on':'')+'">首页</a>'+
       '<a href="interview.html" class="'+(active==='interview'?'on':'')+'">模拟面试</a>'+
       '<a href="bank.html" class="'+(active==='bank'?'on':'')+'">题库</a>'+
-      '<a href="videos.html" class="'+(active==='videos'?'on':'')+'">视频</a>'+
+      '<a href="videos.html" class="'+(active==='videos'?'on':'')+'">个人中心</a>'+
       '<a href="square.html" class="'+(active==='square'?'on':'')+'">广场</a>'+
       '<a href="relax.html" class="'+(active==='relax'?'on':'')+'">轻松一下</a>'+
       '<a href="product.html" class="'+(active==='product'?'on':'')+'">产品蓝图</a>'+
@@ -566,6 +848,9 @@ function openFeedback(){
     toast('已发送给官方（off），感谢反馈！','ok');
   };
 }
+
+/* 管理后台是独立入口：用户端不提供任何管理员登录入口，仅做跳转 */
+function openAdminLogin(){location.href='admin.html'}
 
 function openProfile(){
   if(isGuestUser()){

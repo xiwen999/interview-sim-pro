@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>管理后台 · 模拟面试训练营 Pro</title>
+<style>
+:root{
+  --bg:#f3f5fa; --panel:#ffffff; --panel2:#f8fafc;
+  --ink:#16203a; --ink2:#5c6b87; --ink3:#93a1b8;
+  --line:#e6eaf2; --brand:#3b5bdb; --brand2:#5c7cfa;
+  --ok:#10b981; --warn:#f59e0b; --dan:#ef4444; --gold:#f59e0b;
+  --side:#131b30; --side2:#1b2540;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-size:13.5px;line-height:1.6;
+  font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+.ad-top{height:58px;background:var(--side);color:#fff;display:flex;align-items:center;gap:14px;
+  padding:0 18px;position:sticky;top:0;z-index:40;box-shadow:0 2px 12px rgba(19,27,48,.18)}
+.ad-top .lg{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;letter-spacing:.3px}
+.ad-top .lg .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+  background:linear-gradient(135deg,#3b5bdb,#22d3ee);box-shadow:0 4px 12px rgba(59,91,219,.4)}
+.ad-top .lg .ic svg{width:17px;height:17px}
+.ad-top .tag{font-size:10.5px;padding:2px 8px;border-radius:99px;background:rgba(245,158,11,.18);
+  color:#fcd34d;border:1px solid rgba(245,158,11,.35);font-weight:700;letter-spacing:.5px}
+.ad-top .sp{flex:1}
+.ad-top .who{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#c7d2fe}
+.ad-top .who b{color:#fff}
+.ad-tbtn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#dbe4ff;
+  padding:6px 12px;border-radius:9px;font-size:12.5px;transition:.18s}
+.ad-tbtn:hover{background:rgba(255,255,255,.18);color:#fff}
+
+.ad-body{display:flex;min-height:calc(100vh - 58px)}
+.ad-side{width:212px;flex:none;background:var(--side);padding:14px 10px;
+  position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.ad-side .grp{font-size:10.5px;color:#64748b;letter-spacing:1.2px;padding:12px 12px 6px;font-weight:700}
+.ad-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;
+  color:#a9b6d0;padding:10px 12px;border-radius:10px;font-size:13.5px;margin-bottom:3px;transition:.16s}
+.ad-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.ad-item.on{background:linear-gradient(135deg,rgba(59,91,219,.5),rgba(34,211,238,.24));color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.ad-item .cnt{margin-left:auto;font-size:10.5px;min-width:19px;height:19px;padding:0 6px;border-radius:99px;
+  background:#ef4444;color:#fff;display:grid;place-items:center;font-weight:700}
+.ad-main{flex:1;min-width:0;padding:22px 26px 60px}
+
+.hd{display:flex;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.hd h1{font-size:19px;font-weight:800;margin:0}
+.hd .sub{font-size:12px;color:var(--ink3)}
+.hd .sp{flex:1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
+  box-shadow:0 2px 10px rgba(19,27,48,.05)}
+.card+.card{margin-top:16px}
+.card .ct{font-size:13.5px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card .ct .sp{flex:1}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;
+  box-shadow:0 2px 10px rgba(19,27,48,.05);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;right:-18px;top:-18px;width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(59,91,219,.14),transparent 70%)}
+.kpi .l{font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:5px}
+.kpi .v{font-size:25px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.kpi .x{font-size:11px;color:var(--ink3);margin-top:2px}
+.kpi.a .v{color:var(--brand)} .kpi.b .v{color:var(--ok)} .kpi.c .v{color:var(--warn)}
+.kpi.d .v{color:var(--dan)} .kpi.e .v{color:#7c3aed}
+
+.ad-in{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 11px;
+  font-size:13px;color:var(--ink);outline:none;font-family:inherit;transition:.16s}
+.ad-in:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(92,124,250,.16)}
+select.ad-in{padding-right:8px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;
+  padding:8px 14px;font-size:12.5px;font-weight:700;transition:.16s}
+.btn:hover{border-color:var(--brand2);color:var(--brand)}
+.btn.pri{background:linear-gradient(135deg,var(--brand),var(--brand2));border-color:transparent;color:#fff;
+  box-shadow:0 4px 12px rgba(59,91,219,.25)}
+.btn.pri:hover{filter:brightness(1.08);color:#fff}
+.btn.ok{background:var(--ok);border-color:transparent;color:#fff}
+.btn.ok:hover{filter:brightness(1.06);color:#fff}
+.btn.dan{background:#fff;border-color:rgba(239,68,68,.4);color:var(--dan)}
+.btn.dan:hover{background:var(--dan);color:#fff}
+.btn.sm{padding:5px 10px;font-size:11.5px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.tb-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table.tb{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px}
+table.tb th{background:var(--panel2);color:var(--ink2);font-weight:700;text-align:left;
+  padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12px}
+table.tb td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.tb tr:last-child td{border-bottom:0}
+table.tb tbody tr:hover{background:#f8faff}
+.ucell{display:flex;align-items:center;gap:8px;min-width:120px}
+.ucell .av{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px;
+  background:linear-gradient(135deg,#eef2ff,#e0f2fe);flex:none}
+.ucell .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ucell .ac{font-size:11px;color:var(--ink3)}
+.bd{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.bd.ok{background:rgba(16,185,129,.13);color:#047857}
+.bd.pend{background:rgba(245,158,11,.15);color:#b45309}
+.bd.no{background:rgba(239,68,68,.12);color:#b91c1c}
+.bd.gray{background:#eef1f6;color:var(--ink2)}
+.bd.blue{background:rgba(59,91,219,.12);color:#3348a8}
+.stars{color:var(--gold);letter-spacing:1px;font-size:11.5px;white-space:nowrap}
+.empty{text-align:center;padding:44px 10px;color:var(--ink3);font-size:13px}
+.empty .big{font-size:34px;display:block;margin-bottom:8px;opacity:.75}
+
+.bars{display:flex;align-items:flex-end;gap:10px;height:132px;padding:6px 2px 0}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bars .b .bar{width:100%;max-width:38px;border-radius:6px 6px 3px 3px;min-height:3px;
+  background:linear-gradient(180deg,#5c7cfa,#3b5bdb);transition:.3s}
+.bars .b .n{font-size:11px;font-weight:800;color:var(--ink)}
+.bars .b .d{font-size:10.5px;color:var(--ink3)}
+
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+.vc{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(19,27,48,.05);display:flex;flex-direction:column}
+.vc .th{height:96px;display:grid;place-items:center;font-size:28px;position:relative;
+  background:linear-gradient(135deg,#dbeafe,#e0e7ff)}
+.vc .th .dur{position:absolute;right:8px;bottom:8px;background:rgba(15,23,42,.75);color:#fff;
+  font-size:10.5px;padding:2px 7px;border-radius:6px;font-weight:700}
+.vc .bd2{padding:11px 12px;flex:1;display:flex;flex-direction:column;gap:6px}
+.vc .ti{font-weight:800;font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden}
+.vc .mt{font-size:11.5px;color:var(--ink3);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vc .rs{font-size:11px;color:#b91c1c;background:rgba(239,68,68,.08);border-radius:7px;padding:4px 8px}
+.vc .ac{display:flex;gap:7px;padding:10px 12px;border-top:1px solid var(--line);background:var(--panel2)}
+.vc .ac .btn{flex:1 1 0;min-width:0;text-align:center;padding:5px 6px;font-size:11.5px}
+
+.ad-mask{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.5);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:22px}
+.ad-mask .box{background:var(--panel);border-radius:16px;width:min(560px,94vw);max-height:88vh;overflow-y:auto;
+  padding:20px 22px;box-shadow:0 24px 60px rgba(15,23,42,.28)}
+.ad-mask h3{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.ad-mask .ms{font-size:12px;color:var(--ink3);margin-bottom:14px}
+.ad-mask .ft{display:flex;gap:9px;justify-content:flex-end;margin-top:16px}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:7px 12px;font-size:12.5px;margin-bottom:14px}
+.kv .k{color:var(--ink3)}
+.kv .v{font-weight:600}
+.mini-tb{width:100%;border-collapse:collapse;font-size:12px}
+.mini-tb th{text-align:left;color:var(--ink3);font-size:11px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.mini-tb td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.mini-tb tr:last-child td{border-bottom:0}
+
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(1000px 520px at 50% -10%,#1e2a4d,#0f1628 60%)}
+.gate .box{width:min(400px,94vw);background:var(--panel);border-radius:18px;padding:28px 26px;
+  box-shadow:0 26px 60px rgba(2,6,23,.45)}
+.gate .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:25px;margin:0 auto 12px;
+  background:linear-gradient(135deg,#3b5bdb,#22d3ee);box-shadow:0 8px 22px rgba(59,91,219,.35)}
+.gate h2{margin:0 0 4px;font-size:17px;text-align:center;font-weight:800}
+.gate .ds{font-size:12px;color:var(--ink3);text-align:center;margin-bottom:18px}
+.gate .f{margin-bottom:11px}
+.gate .lab{font-size:11.5px;color:var(--ink2);margin-bottom:5px;font-weight:600}
+.gate .ad-in{width:100%}
+.gate .err{color:var(--dan);font-size:11.5px;min-height:16px;margin:2px 0 8px}
+.gate .back{display:block;text-align:center;margin-top:18px;font-size:12px;color:var(--brand)}
+
+/* toast：后台自己的浅色风格 */
+.toast-box{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:99;display:flex;
+  flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:rgba(19,27,48,.94);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:11px;
+  box-shadow:0 10px 26px rgba(15,23,42,.28);transition:.25s;max-width:80vw}
+.toast.ok{background:rgba(16,185,129,.96)}
+.toast.warn{background:rgba(245,158,11,.96)}
+.toast.err{background:rgba(239,68,68,.96)}
+
+.foot-note{font-size:11.5px;color:var(--ink3);margin-top:18px;line-height:1.9}
+@media (max-width:860px){
+  .ad-side{width:64px;padding:10px 6px}
+  .ad-side .grp{display:none}
+  .ad-item{justify-content:center;padding:10px 4px;font-size:0}
+  .ad-item .ic{font-size:16px}
+  .ad-item .cnt{position:absolute;margin-left:34px;margin-top:-14px}
+  .ad-main{padding:16px 14px 50px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 门禁：未登录管理员 ===== -->
+<div class="gate" id="gate" style="display:none">
+  <div class="box">
+    <div class="ic">🛡️</div>
+    <h2>管理后台</h2>
+    <div class="ds">模拟面试训练营 Pro · 运营管理控制台</div>
+    <div class="f"><div class="lab">管理员账号</div><input class="ad-in" id="gAcc" placeholder="admin" autocomplete="username"></div>
+    <div class="f"><div class="lab">管理员密码</div><input class="ad-in" id="gPwd" type="password" placeholder="请输入密码" autocomplete="current-password"></div>
+    <div class="err" id="gErr"></div>
+    <button class="btn pri" id="gOk" style="width:100%">登 录 后 台</button>
+    <a class="back" href="index.html">← 返回用户前台</a>
+  </div>
+</div>
+
+<!-- ===== 后台主体 ===== -->
+<div id="app" style="display:none">
+  <header class="ad-top">
+    <div class="lg">
+      <span class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>
+        </svg>
+      </span>
+      模拟面试训练营 Pro <span class="tag">管理后台</span>
+    </div>
+    <div class="sp"></div>
+    <div class="who">👑 <b id="topWho">管理员</b> · 数据源：本机浏览器</div>
+    <button class="ad-tbtn" id="topFront">← 返回前台</button>
+    <button class="ad-tbtn" id="topOut">退出管理员</button>
+  </header>
+  <div class="ad-body">
+    <aside class="ad-side">
+      <div class="grp">数 据</div>
+      <button class="ad-item" data-go="dash"><span class="ic">📊</span>概览</button>
+      <button class="ad-item" data-go="users"><span class="ic">👥</span>用户管理</button>
+      <button class="ad-item" data-go="sessions"><span class="ic">🎤</span>面试数据</button>
+      <div class="grp">运 营</div>
+      <button class="ad-item" data-go="videos"><span class="ic">🎬</span>视频审核<span class="cnt" id="sideCnt"></span></button>
+      <button class="ad-item" data-go="logs"><span class="ic">📜</span>操作日志</button>
+      <div class="grp">系 统</div>
+      <button class="ad-item" data-go="settings"><span class="ic">⚙️</span>系统设置</button>
+    </aside>
+    <main class="ad-main" id="main"></main>
+  </div>
+</div>
+
+<div class="ad-mask" id="mask" style="display:none"><div class="box" id="mbox"></div></div>
+
+<script src="shared.js?v=20261039"></script>
+<script>
+var TAB='dash', VF='pending', KW={u:'',s:'',v:''};
+var $m=document.getElementById('main');
+
+function pad(n){return n<10?'0'+n:''+n}
+function dt(ts){var d=new Date(ts);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function dts(ts){var d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()}
+function day(ts){var d=new Date(ts);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function dur(s){s=Math.round(s||0);var m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60)}
+function ago(ts){
+  var s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return '刚刚';
+  if(s<3600)return Math.floor(s/60)+' 分钟前';
+  if(s<86400)return Math.floor(s/3600)+' 小时前';
+  if(s<86400*30)return Math.floor(s/86400)+' 天前';
+  return day(ts);
+}
+function stars(n){
+  n=Math.round(n||0);var s='';
+  for(var i=0;i<5;i++)s+=i<n?'★':'☆';
+  return '<span class="stars">'+s+' '+(n||0)+'</span>';
+}
+function stBadge(st){
+  if(st==='approved')return '<span class="bd ok">已通过</span>';
+  if(st==='rejected')return '<span class="bd no">已拒绝</span>';
+  if(st==='pending')return '<span class="bd pend">待审核</span>';
+  if(st==='private')return '<span class="bd gray">仅自己可见</span>';
+  return '<span class="bd gray">'+(st||'—')+'</span>';
+}
+function uCell(u){
+  return '<div class="ucell"><span class="av">'+(u.avatar||'🙂')+'</span><span>'+
+    '<span class="nm">'+esc(u.name)+'</span><br><span class="ac">@'+esc(u.account)+'</span></span></div>';
+}
+function openM(html){
+  document.getElementById('mbox').innerHTML=html;
+  document.getElementById('mask').style.display='flex';
+}
+function closeM(){document.getElementById('mask').style.display='none'}
+
+function viewDash(){
+  var s=AdminDB.stats(),d7=AdminDB.day7(),max=Math.max.apply(null,d7.map(function(x){return x.n}).concat([1]));
+  var pend=AdminDB.videos().filter(function(x){return x.v.status==='pending'}).slice(0,5);
+  var logs=AdminDB.logs().slice(0,6);
+  var recent=AdminDB.sessions().slice(0,5);
+  var h='';
+  h+='<div class="hd"><h1>📊 数据概览</h1><div class="sub">全站用户训练与内容概况 · 每 60 秒自动刷新</div><div class="sp"></div>'+
+     '<button class="btn sm" id="rf">🔄 刷新</button></div>';
+  h+='<div class="kpis">'+
+    kpi('a','👥 注册用户',s.users,('封禁 '+s.banned+' 人'))+
+    kpi('b','🎤 累计面试场次',s.sessions,('今日 '+s.today+' · 近 7 天 '+s.week))+
+    kpi('e','❓ 累计作答题数',s.questions,('平均 '+s.avgUsed+' 秒 / 场'))+
+    kpi('c','🎬 视频投稿',s.videos,('播放 '+s.plays+' 次'))+
+    kpi('d','🛡️ 待审核视频',s.pend,('举报 '+s.reports+' 条'))+
+    kpi('a','⭐ 平均自评分',s.avgScore,'满分 5 星')+
+  '</div>';
+  h+='<div class="card"><div class="ct">📈 近 7 天面试场次</div><div class="bars">'+
+    d7.map(function(x){return '<div class="b"><div class="n">'+(x.n||'')+'</div><div class="bar" style="height:'+
+      Math.max(3,Math.round(x.n/max*96))+'px"></div><div class="d">'+dts(x.ts)+'</div></div>'}).join('')+
+    '</div></div>';
+  h+='<div class="card"><div class="ct">🛡️ 待审核视频<span class="sp"></span>'+
+      '<button class="btn sm" id="goV">全部处理 →</button></div>'+
+    (pend.length?('<div class="vgrid">'+pend.slice(0,3).map(function(x){return vcard(x)}).join('')+'</div>')
+      :'<div class="empty"><span class="big">✅</span>没有待审核的视频</div>')+'</div>';
+  h+='<div class="card"><div class="ct">🕒 最近面试记录</div>'+
+    (recent.length?('<div class="tb-wrap"><table class="tb"><thead><tr><th>时间</th><th>用户</th><th>题型</th><th>场景</th><th>题数</th><th>自评</th><th>用时</th></tr></thead><tbody>'+
+      recent.map(function(x){return '<tr><td>'+dt(x.s.ts)+'</td><td>'+uCell(x.u)+'</td><td>'+esc(x.s.type)+'</td><td>'+esc(AdminDB.sceneName(x.s.scene))+'</td><td>'+(x.s.count||0)+'</td><td>'+stars(x.s.avg)+'</td><td>'+dur(x.s.used)+'</td></tr>'}).join('')+
+      '</tbody></table></div>'):'<div class="empty">暂无记录</div>')+'</div>';
+  h+='<div class="card"><div class="ct">📜 最近操作</div>'+logHtml(logs)+'</div>';
+  return h;
+}
+function kpi(c,l,v,x){
+  return '<div class="kpi '+c+'"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="x">'+x+'</div></div>';
+}
+function logHtml(logs){
+  if(!logs||!logs.length)return '<div class="empty">暂无操作记录</div>';
+  return '<div class="tb-wrap"><table class="tb"><thead><tr><th>时间</th><th>操作</th><th>对象</th><th>备注</th><th>操作人</th></tr></thead><tbody>'+
+    logs.map(function(l){return '<tr><td>'+dt(l.ts)+'</td><td><span class="bd blue">'+esc(l.action)+'</span></td><td>'+esc(l.target)+'</td><td style="color:var(--ink3)">'+esc(l.extra||'—')+'</td><td>'+esc(l.by)+'</td></tr>'}).join('')+
+    '</tbody></table></div>';
+}
+
+function viewUsers(){
+  var us=AdminDB.users().slice();
+  var kw=(KW.u||'').toLowerCase();
+  if(kw)us=us.filter(function(u){return (u.name+' '+u.account).toLowerCase().indexOf(kw)>=0});
+  us.sort(function(a,b){return (b.last||0)-(a.last||0)});
+  var h='<div class="hd"><h1>👥 用户管理</h1><div class="sub">共 '+AdminDB.users().length+' 位用户</div><div class="sp"></div>'+
+    '<input class="ad-in" id="kwU" placeholder="搜索昵称 / 账号" value="'+esc(KW.u)+'" style="width:220px"></div>';
+  h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
+  if(!us.length)h+='<tr><td colspan="8"><div class="empty">没有匹配的用户</div></td></tr>';
+  us.forEach(function(u){
+    var ss=u.sessions||[],vs=u.videos||[];
+    var avg=ss.length?Math.round(ss.reduce(function(a,b){return a+(b.avg||0)},0)/ss.length*10)/10:0;
+    h+='<tr><td>'+uCell(u)+'</td><td>'+day(u.joined)+'</td><td>'+ago(u.last||u.joined)+'</td>'+
+      '<td><b>'+ss.length+'</b> 场 / '+(u.stat&&u.stat.questions?u.stat.questions+' 题':ss.reduce(function(a,b){return a+(b.count||0)},0)+' 题')+'</td>'+
+      '<td>'+stars(avg)+'</td><td>'+vs.length+' 个（待审 '+vs.filter(function(v){return v.status==='pending'}).length+'）</td>'+
+      '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':'<span class="bd ok">正常</span>')+'</td>'+
+      '<td style="text-align:right;white-space:nowrap">'+
+        '<button class="btn sm" data-ud="'+u.id+'">详情</button> '+
+        (u.status==='banned'?'<button class="btn sm" data-ub="'+u.id+'">解封</button>':'<button class="btn sm dan" data-ub="'+u.id+'">封禁</button>')+' '+
+        '<button class="btn sm" data-ux="'+u.id+'">删除</button></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='<div class="foot-note">💡 「本人」= 本机真实使用记录（含面试与上传的视频）；其余为内置示例数据，用于演示后台功能。<br>删除 / 封禁仅影响后台数据集，不会清空该用户本机浏览器里的个人数据。</div>';
+  return h;
+}
+function userDetail(id){
+  var u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
+  if(!u)return;
+  var ss=(u.sessions||[]).slice(0,8),vs=u.videos||[];
+  openM('<h3>'+(u.avatar||'🙂')+' '+esc(u.name)+'</h3><div class="ms">@'+esc(u.account)+' · '+
+      (u.me?'本机真实用户':(u.demo?'内置示例数据':'本机注册账号'))+'</div>'+
+    '<div class="kv">'+
+      '<div class="k">注册时间</div><div class="v">'+dt(u.joined)+'</div>'+
+      '<div class="k">最近活跃</div><div class="v">'+ago(u.last||u.joined)+'</div>'+
+      '<div class="k">面试场次</div><div class="v">'+(u.sessions||[]).length+' 场</div>'+
+      '<div class="k">上传视频</div><div class="v">'+vs.length+' 个</div>'+
+      '<div class="k">账号状态</div><div class="v">'+(u.status==='banned'?'已封禁':'正常')+'</div>'+
+      '<div class="k">连续签到</div><div class="v">'+(u.checkin||0)+' 天</div>'+
+    '</div>'+
+    '<div class="ct" style="font-weight:800;font-size:13px;margin-bottom:8px">🎤 最近面试记录</div>'+
+    (ss.length?('<table class="mini-tb"><thead><tr><th>时间</th><th>题型</th><th>场景</th><th>题数</th><th>自评</th><th>用时</th></tr></thead><tbody>'+
+      ss.map(function(s){return '<tr><td>'+dt(s.ts)+'</td><td>'+esc(s.type)+'</td><td>'+esc(AdminDB.sceneName(s.scene))+'</td><td>'+(s.count||0)+'</td><td>'+stars(s.avg)+'</td><td>'+dur(s.used)+'</td></tr>'}).join('')+'</tbody></table>')
+      :'<div class="empty" style="padding:18px">暂无面试记录</div>')+
+    '<div class="ct" style="font-weight:800;font-size:13px;margin:16px 0 8px">🎬 视频投稿</div>'+
+    (vs.length?('<table class="mini-tb"><thead><tr><th>标题</th><th>状态</th><th>播放</th><th>提交</th></tr></thead><tbody>'+
+      vs.map(function(v){return '<tr><td>'+esc(v.title)+'</td><td>'+stBadge(v.status)+'</td><td>'+(v.plays||0)+'</td><td>'+day(v.ts)+'</td></tr>'}).join('')+'</tbody></table>')
+      :'<div class="empty" style="padding:18px">暂无视频</div>')+
+    '<div class="ft"><button class="btn" id="mdClose">关闭</button></div>');
+  document.getElementById('mdClose').onclick=closeM;
+}
+
+function viewSessions(){
+  var all=AdminDB.sessions();
+  var kw=(KW.s||'').toLowerCase();
+  var list=all.filter(function(x){
+    if(kw&&(x.u.name+' '+x.u.account+' '+x.s.type+' '+AdminDB.sceneName(x.s.scene)).toLowerCase().indexOf(kw)<0)return false;
+    return true;
+  });
+  var q=list.reduce(function(a,b){return a+(b.s.count||0)},0);
+  var avg=list.length?Math.round(list.reduce(function(a,b){return a+(b.s.avg||0)},0)/list.length*10)/10:0;
+  var used=list.length?Math.round(list.reduce(function(a,b){return a+(b.s.used||0)},0)/list.length):0;
+  var h='<div class="hd"><h1>🎤 面试数据</h1><div class="sub">全部用户的模拟面试场次明细</div><div class="sp"></div>'+
+    '<input class="ad-in" id="kwS" placeholder="搜索用户 / 题型 / 场景" value="'+esc(KW.s)+'" style="width:230px"></div>';
+  h+='<div class="kpis">'+
+    kpi('b','场次',list.length,'共 '+all.length+' 场')+
+    kpi('e','作答题数',q,'筛选结果内')+
+    kpi('a','平均自评',avg,'满分 5 星')+
+    kpi('c','平均用时',dur(used),'每场')+
+  '</div>';
+  h+='<div class="card" style="padding:0;border:0;background:none;box-shadow:none">'+
+    '<div class="tb-wrap"><table class="tb"><thead><tr><th>时间</th><th>用户</th><th>题型</th><th>场景</th><th>题数</th><th>平均自评</th><th>用时</th><th>平均字数</th><th>AI 评价摘要</th></tr></thead><tbody>';
+  if(!list.length)h+='<tr><td colspan="9"><div class="empty">没有匹配的记录</div></td></tr>';
+  list.slice(0,80).forEach(function(x){
+    h+='<tr><td>'+dt(x.s.ts)+'</td><td>'+uCell(x.u)+'</td><td><span class="bd blue">'+esc(x.s.type)+'</span></td>'+
+      '<td>'+esc(AdminDB.sceneName(x.s.scene))+'</td><td>'+(x.s.count||0)+'</td><td>'+stars(x.s.avg)+'</td>'+
+      '<td>'+dur(x.s.used)+'</td><td>'+(x.s.ansLen||'—')+'</td>'+
+      '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink3)" title="'+esc(x.s.ai||'')+'">'+esc(x.s.ai||'—')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  if(list.length>80)h+='<div class="foot-note">仅显示最近 80 条，共 '+list.length+' 条。</div>';
+  return h;
+}
+
+function vcard(x){
+  var v=x.v,u=x.u;
+  var acts='';
+  if(v.status==='pending')
+    acts='<button class="btn ok sm" data-vok="'+u.id+'|'+v.id+'">✓ 通过</button><button class="btn dan sm" data-vno="'+u.id+'|'+v.id+'">✕ 拒绝</button>';
+  else
+    acts='<button class="btn sm" data-vrst="'+u.id+'|'+v.id+'">↩ 改为待审</button>';
+  acts+='<button class="btn sm" data-vdel="'+u.id+'|'+v.id+'">删除</button>';
+  var g={job:'linear-gradient(135deg,#dbeafe,#e0e7ff)',tech:'linear-gradient(135deg,#d1fae5,#ccfbf1)',
+    data:'linear-gradient(135deg,#fef3c7,#fde68a)',product:'linear-gradient(135deg,#ede9fe,#fae8ff)',
+    general:'linear-gradient(135deg,#e0f2fe,#dbeafe)'}[v.scene]||'linear-gradient(135deg,#dbeafe,#e0e7ff)';
+  return '<div class="vc">'+
+    '<div class="th" style="background:'+g+'">🎬<span class="dur">'+dur(v.dur)+'</span></div>'+
+    '<div class="bd2"><div class="ti">'+esc(v.title)+'</div>'+
+      '<div class="mt">'+uCell(u)+'</div>'+
+      '<div class="mt"><span class="bd blue">'+esc(AdminDB.sceneName(v.scene))+'</span>'+stBadge(v.status)+
+        '<span>▶ '+(v.plays||0)+'</span><span>'+ago(v.ts)+'</span></div>'+
+      (v.status==='rejected'&&v.reason?'<div class="rs">拒绝理由：'+esc(v.reason)+'</div>':'')+
+      (v.reports?'<div class="rs">⚠ 被举报 '+v.reports+' 次</div>':'')+
+    '</div><div class="ac">'+acts+'</div></div>';
+}
+function viewVideos(){
+  var all=AdminDB.videos();
+  var cnt={pending:0,approved:0,rejected:0,all:all.length};
+  all.forEach(function(x){if(cnt[x.v.status]!=null)cnt[x.v.status]++});
+  var kw=(KW.v||'').toLowerCase();
+  var list=all.filter(function(x){
+    if(VF!=='all'&&x.v.status!==VF)return false;
+    if(kw&&(x.v.title+' '+x.u.name).toLowerCase().indexOf(kw)<0)return false;
+    return true;
+  });
+  var h='<div class="hd"><h1>🎬 视频审核</h1><div class="sub">审核用户投稿的练习视频，通过后展示到「视频广场」</div><div class="sp"></div>'+
+    '<input class="ad-in" id="kwV" placeholder="搜索标题 / 作者" value="'+esc(KW.v)+'" style="width:200px"></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">'+
+    [['pending','待审核'],['approved','已通过'],['rejected','已拒绝'],['all','全部']].map(function(t){
+      return '<button class="btn'+(VF===t[0]?' pri':'')+'" data-vf="'+t[0]+'">'+t[1]+' '+(cnt[t[0]]||0)+'</button>'}).join('')+
+    '</div>';
+  h+=list.length?('<div class="vgrid">'+list.map(vcard).join('')+'</div>')
+    :'<div class="empty"><span class="big">'+(VF==='pending'?'✅':'📭')+'</span>'+(VF==='pending'?'没有待审核的视频':'这里还没有内容')+'</div>';
+  return h;
+}
+function rejectBox(uid,vid,title){
+  openM('<h3>✕ 拒绝视频</h3><div class="ms">'+esc(title)+'</div>'+
+    '<div class="lab" style="font-size:11.5px;color:var(--ink2);font-weight:600;margin-bottom:6px">拒绝理由（会展示给作者）</div>'+
+    '<textarea class="ad-in" id="rjTxt" rows="3" style="width:100%;resize:vertical" placeholder="例如：画面噪音过大 / 涉及隐私信息 / 内容与场景不符"></textarea>'+
+    '<div class="ft"><button class="btn" id="rjNo">取消</button><button class="btn dan" id="rjOk">确认拒绝</button></div>');
+  document.getElementById('rjNo').onclick=closeM;
+  document.getElementById('rjOk').onclick=function(){
+    var r=(document.getElementById('rjTxt').value||'').trim()||'未说明原因';
+    AdminDB.setVideoStatus(uid,vid,'rejected',r);
+    closeM();toast('已拒绝该视频','warn');render();
+  };
+}
+
+function viewLogs(){
+  var l=AdminDB.logs();
+  var h='<div class="hd"><h1>📜 操作日志</h1><div class="sub">记录后台所有审核与管理动作</div><div class="sp"></div>'+
+    '<button class="btn sm" id="clrLog">清空日志</button></div>'+logHtml(l);
+  return h;
+}
+
+function viewSettings(){
+  return '<div class="hd"><h1>⚙️ 系统设置</h1><div class="sub">后台数据源与维护</div></div>'+
+    '<div class="card"><div class="ct">🗄 数据源说明</div>'+
+      '<div style="font-size:12.5px;color:var(--ink2);line-height:1.95">'+
+      '· 当前为<b>纯本地演示环境</b>，后台数据保存在本机浏览器 localStorage（<code>ivsim_admin_db</code> / <code>ivsim_admin_log</code>），不会上传到任何服务器。<br>'+
+      '· <b>本人 / 本机真实用户</b>：你在前台实际完成的每一场模拟面试、上传的每一个视频，都会实时同步进后台。<br>'+
+      '· <b>其余示例用户</b>：首次进入后台时生成的内置演示数据，用于展示后台能力，可一键重置。'+
+      '</div></div>'+
+    '<div class="card"><div class="ct">👑 管理员账号（独立身份）</div>'+
+      '<div class="kv"><div class="k">账号</div><div class="v">admin</div>'+
+      '<div class="k">密码</div><div class="v">admin123</div>'+
+      '<div class="k">登录态</div><div class="v">会话级（关闭标签页失效）</div>'+
+      '<div class="k">入口</div><div class="v">仅本页 admin.html（用户端不显示任何入口）</div></div>'+
+      '<div style="font-size:12px;color:var(--ink3);line-height:1.9">'+
+        '· 管理员账号与用户账号是两套完全独立的体系：不共用身份、不共用数据、不互相叠加。<br>'+
+        '· 在用户端登录框输入 admin 会被拒绝，并提示到本后台登录。<br>'+
+        '· 正式部署时应改为服务端校验 + 角色权限表，不要把账号写在前端。</div></div>'+
+    '<div class="card"><div class="ct">🧰 维护操作</div>'+
+      '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+        '<button class="btn" id="expBtn">⬇ 导出后台数据 JSON</button>'+
+        '<button class="btn dan" id="rstBtn">♻ 重置为示例数据</button>'+
+        '<button class="btn" id="frontBtn">← 返回用户前台</button>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-top:10px">重置会清空后台已有的审核记录与示例用户，重新生成一份演示数据集。</div></div>';
+}
+
+function render(){
+  AdminDB.syncLocal();
+  var t=TAB;
+  $m.innerHTML = t==='dash'?viewDash() : t==='users'?viewUsers() :
+                 t==='sessions'?viewSessions() : t==='videos'?viewVideos() :
+                 t==='logs'?viewLogs() : viewSettings();
+  /* 侧栏高亮 + 待审数量 */
+  document.querySelectorAll('.ad-item').forEach(function(b){
+    b.classList.toggle('on',b.dataset.go===t);
+  });
+  var pc=AdminDB.stats().pend;
+  var sc=document.getElementById('sideCnt');
+  sc.textContent=pc||'';sc.style.display=pc?'grid':'none';
+  bind();
+  window.scrollTo(0,0);
+}
+function bind(){
+  var rf=document.getElementById('rf');if(rf)rf.onclick=function(){render();toast('已刷新','ok')};
+  var gv=document.getElementById('goV');if(gv)gv.onclick=function(){TAB='videos';VF='pending';render()};
+  var ku=document.getElementById('kwU');
+  if(ku){ku.oninput=function(){KW.u=ku.value;var p=ku.selectionStart;render();
+    var n=document.getElementById('kwU');if(n){n.focus();n.setSelectionRange(p,p)}}}
+  var ks=document.getElementById('kwS');
+  if(ks){ks.oninput=function(){KW.s=ks.value;var p=ks.selectionStart;render();
+    var n=document.getElementById('kwS');if(n){n.focus();n.setSelectionRange(p,p)}}}
+  var kv=document.getElementById('kwV');
+  if(kv){kv.oninput=function(){KW.v=kv.value;var p=kv.selectionStart;render();
+    var n=document.getElementById('kwV');if(n){n.focus();n.setSelectionRange(p,p)}}}
+  document.querySelectorAll('[data-vf]').forEach(function(b){
+    b.onclick=function(){VF=b.dataset.vf;render()}});
+  document.querySelectorAll('[data-ud]').forEach(function(b){
+    b.onclick=function(){userDetail(b.dataset.ud)}});
+  document.querySelectorAll('[data-ub]').forEach(function(b){
+    b.onclick=function(){
+      var id=b.dataset.ub,u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
+      if(!u)return;
+      var ban=u.status!=='banned';
+      AdminDB.setUserStatus(id,ban?'banned':'active');
+      toast(ban?'已封禁 '+u.name:'已解除封禁 '+u.name,ban?'warn':'ok');render();
+    }});
+  document.querySelectorAll('[data-ux]').forEach(function(b){
+    b.onclick=function(){
+      var id=b.dataset.ux,u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
+      if(!u)return;
+      if(!confirm('确定删除用户「'+u.name+'」？其面试与视频数据会一并移除。'))return;
+      AdminDB.delUser(id);toast('已删除 '+u.name,'warn');render();
+    }});
+  document.querySelectorAll('[data-vok]').forEach(function(b){
+    b.onclick=function(){
+      var p=b.dataset.vok.split('|');
+      AdminDB.setVideoStatus(p[0],p[1],'approved');
+      toast('已通过，视频已发布到广场','ok');render();
+    }});
+  document.querySelectorAll('[data-vno]').forEach(function(b){
+    b.onclick=function(){
+      var p=b.dataset.vno.split('|');
+      var v=null;AdminDB.videos().forEach(function(x){if(x.v.id===p[1])v=x});
+      rejectBox(p[0],p[1],v?v.v.title:'该视频');
+    }});
+  document.querySelectorAll('[data-vrst]').forEach(function(b){
+    b.onclick=function(){
+      var p=b.dataset.vrst.split('|');
+      AdminDB.setVideoStatus(p[0],p[1],'pending');
+      toast('已改为待审核','ok');render();
+    }});
+  document.querySelectorAll('[data-vdel]').forEach(function(b){
+    b.onclick=function(){
+      var p=b.dataset.vdel.split('|');
+      var v=null;AdminDB.videos().forEach(function(x){if(x.v.id===p[1])v=x});
+      if(!confirm('确定删除视频「'+(v?v.v.title:'')+'」？'))return;
+      AdminDB.delVideo(p[0],p[1]);toast('已删除','ok');render();
+    }});
+  var cl=document.getElementById('clrLog');
+  if(cl)cl.onclick=function(){AdminDB.clearLogs();toast('日志已清空','ok');render()};
+  var ex=document.getElementById('expBtn');
+  if(ex)ex.onclick=function(){
+    var blob=new Blob([JSON.stringify({users:AdminDB.users(),logs:AdminDB.logs()},null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='admin-data-'+day(Date.now())+'.json';a.click();
+    toast('已导出 JSON','ok');
+  };
+  var rs=document.getElementById('rstBtn');
+  if(rs)rs.onclick=function(){
+    if(!confirm('重置为内置示例数据？当前后台记录会被覆盖。'))return;
+    AdminDB.reset();toast('已重置为示例数据','ok');render();
+  };
+  var fb=document.getElementById('frontBtn');
+  if(fb)fb.onclick=function(){location.href='index.html'};
+}
+
+function boot(){
+  if(!isAdmin()){
+    document.getElementById('gate').style.display='flex';
+    var ga=document.getElementById('gAcc'),gp=document.getElementById('gPwd'),
+        ge=document.getElementById('gErr'),go=document.getElementById('gOk');
+    function sub(){
+      var r=adminLogin(ga.value,gp.value);
+      if(!r.ok){ge.textContent=r.msg||'登录失败';gp.value='';gp.focus();return}
+      ge.textContent='';location.reload();
+    }
+    go.onclick=sub;
+    [ga,gp].forEach(function(el){el.addEventListener('keydown',function(e){if(e.key==='Enter')sub()})});
+    setTimeout(function(){ga.focus()},150);
+    return;
+  }
+  document.getElementById('app').style.display='block';
+  /* 支持 #videos / #users 这类深链（前台「审核中心」可直接跳进来） */
+  var h=(location.hash||'').replace('#','');
+  if(['dash','users','sessions','videos','logs','settings'].indexOf(h)>=0)TAB=h;
+  if(h==='videos')VF='pending';
+  document.getElementById('topWho').textContent=(ADMIN_ACCOUNT&&ADMIN_ACCOUNT.name)||'管理员';
+  document.getElementById('topOut').onclick=function(){
+    adminLogout();toast('已退出管理员','ok');
+    setTimeout(function(){location.href='index.html'},420);
+  };
+  document.getElementById('topFront').onclick=function(){location.href='index.html'};
+  document.querySelectorAll('.ad-item').forEach(function(b){
+    b.onclick=function(){TAB=b.dataset.go;render()};
+  });
+  document.getElementById('mask').onclick=function(e){if(e.target===this)closeM()};
+  render();
+  /* 概览：每分钟自动刷新一次 */
+  setInterval(function(){if(TAB==='dash')render()},60000);
+}
+boot();
+</script>
+</body>
+</html>

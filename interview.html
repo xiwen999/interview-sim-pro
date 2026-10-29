@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>开始模拟面试 · 模拟面试训练</title>
-<link rel="stylesheet" href="shared.css?v=202610261">
+<link rel="stylesheet" href="shared.css?v=20261039">
 <style>
 /* 全屏：解除 shared.css 的 1120px 容器限制，内容铺满整个视口宽度 */
 .wrap{max-width:none}
@@ -433,23 +433,21 @@
         <h4>🎯 考察点</h4><div style="font-size:13.5px;color:var(--ink2);line-height:1.7" id="fbPoint"></div>
         <h4>✅ 参考要点</h4><ul class="ans-list" id="fbAns"></ul>
         <h4>💡 作答技巧</h4><ul class="tip-list" id="fbTips"></ul>
-        <h4>⭐ 给自己打个分</h4>
-        <div class="stars" id="starBox"></div>
-        <div class="rate-lab" id="rateLab">根据你覆盖了多少参考要点来评</div>
-        <button class="btn pri" id="nextBtn" style="width:100%;margin-top:20px" disabled>下一题 →</button>
+        <div id="starBox"></div>
+        <button class="btn pri" id="nextBtn" style="width:100%;margin-top:20px">下一题 →</button>
       </div>
     </div>
 
-    <!-- 统一评分 + AI 评价（全部题目答完后） -->
+    <!-- 统一 AI 评价（全部题目答完后） -->
     <div class="view" id="vRate">
       <div class="card rv rise">
-        <h2 style="font-size:clamp(21px,2.4vw,27px);font-weight:900">🎯 题目都答完了，给自己的表现打个分</h2>
-        <p class="rv-sub">下面是你本场每一道题的作答和参考要点，对照着逐题打分。全部评完后才能生成复盘报告；也可以随时让 AI 先给出评价。</p>
+        <h2 style="font-size:clamp(21px,2.4vw,27px);font-weight:900">🤖 题目都答完了，看看 AI 怎么说</h2>
+        <p class="rv-sub">下面是你本场每一道题的作答和参考要点。AI 正在基于你的回答给出整体评价与逐题点评，无需手动打分。</p>
         <div class="setup-tipbar" style="margin-top:20px">
           <span class="ti-ic">🤖</span>
           <div class="ti-body">
-            <div class="ti-t" id="rateProgress">开始评分吧 · 0 / 0 题已评</div>
-            <div class="ti-d">评分会影响平均自评、能力雷达图和教练点评。没把握的可以先展开参考要点看看再决定。</div>
+            <div class="ti-t" id="rateProgress">AI 正在分析你的作答…</div>
+            <div class="ti-d">评价由 AI 自动生成，涵盖总体表现、逐题亮点与不足、以及可立刻执行的改进建议。</div>
           </div>
         </div>
 
@@ -457,7 +455,7 @@
 
         <div class="rate-foot">
           <button class="btn pri" id="aiReviewBtn">🤖 获取 AI 评价</button>
-          <button class="btn gho" id="toReviewBtn" disabled>📊 生成复盘报告 →</button>
+          <button class="btn gho" id="toReviewBtn">📊 查看复盘报告 →</button>
         </div>
 
         <div class="ai-review" id="aiReviewBox" style="display:none"></div>
@@ -472,7 +470,7 @@
         <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px">
           <canvas id="rvRadar" width="240" height="240" style="max-width:100%"></canvas>
           <div>
-            <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（按自评 + 回答长度 + 要点覆盖估算）</div>
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（按回答长度 + 要点覆盖估算）</div>
             <div id="radarDesc" style="font-size:12px;color:var(--ink2);line-height:1.8"></div>
           </div>
         </div>
@@ -497,7 +495,7 @@
   <div class="tt-d" id="ttD"></div>
 </div>
 
-<script src="shared.js?v=202610261"></script>
+<script src="shared.js?v=20261039"></script>
 <script>
 if(!initPage('interview',true))throw new Error('login required');
 
@@ -846,11 +844,12 @@ function nextQ(){
   document.getElementById('qMeta').innerHTML=metaHtml(q);
   document.getElementById('qText').textContent='Q'+(S.idx+1)+' · '+q.q;
   document.getElementById('qPoint').textContent='考察点：'+q.point;
-  document.getElementById('ansTa').value='';
-  document.getElementById('animTa').value='';
   document.getElementById('progBar').style.width=(S.idx/S.qs.length*100)+'%';
   document.getElementById('progTxt').textContent='第 '+(S.idx+1)+' / '+S.qs.length+' 题';
   lastQ=q.q;ttsBtn.textContent='📢 朗读题目';document.getElementById('animTtsBtn').textContent='📢 重听题目';stopSpeak();
+  document.getElementById('ansTa').value='';
+  document.getElementById('animTa').value='';
+  if(S.mode==='cam'){document.getElementById('usText').textContent=''}
   updateWordCnt();updateAnimWord();
   show('vSession');
   applyModeUI();
@@ -894,7 +893,8 @@ function submit(){
   var ans=currentAns();
   stopMic();
   if(S.mode!=='text')aiState('thinking');
-  S.recs.push({q:q,ans:ans||'（未作答）',score:0,used:S.sec-Math.max(S.left,0)});
+  var used=Math.max(0,S.sec-Math.max(S.left,0));
+  S.recs.push({q:q,ans:ans||'（未作答）',used:used});
   stopVRec();
   if(S.mode==='cam'&&S.idx>=S.qs.length-1)stopCam(); /* 最后一题提交后释放摄像头 */
   /* 热身模式只有 1 题，仍然走单题反馈 */
@@ -912,7 +912,6 @@ function submit(){
   }
 }
 
-var RATE_WORDS=['','完全没思路，回去补一补','说了一点但不全','覆盖主要要点','要点全+表达顺','亮点突出，可迁移'];
 function renderFb(q,rec){
   document.getElementById('fbMeta').innerHTML=metaHtml(q);
   document.getElementById('fbQ').textContent=q.q;
@@ -920,27 +919,17 @@ function renderFb(q,rec){
   document.getElementById('fbPoint').textContent=q.point;
   document.getElementById('fbAns').innerHTML=q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('');
   document.getElementById('fbTips').innerHTML=q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('');
-  S.rated=0;
   var box=document.getElementById('starBox');
-  box.innerHTML='';
-  for(var i=1;i<=5;i++){(function(n){
-    var b=document.createElement('button');b.innerHTML=ICONS.star;
-    b.onclick=function(){S.rated=n;rec.score=n;
-      Array.prototype.forEach.call(box.children,function(x,k){x.classList.toggle('lit',k<n)});
-      document.getElementById('rateLab').textContent=RATE_WORDS[n];
-      document.getElementById('nextBtn').disabled=false;};
-    box.appendChild(b)})(i)}
-  document.getElementById('rateLab').textContent='根据你覆盖了多少参考要点来评';
   var nb=document.getElementById('nextBtn');
   if(S.warmup){
     S.warmup=false;nb.disabled=false;nb.textContent='热身结束，返回首页';
     nb.onclick=function(){location.href='index.html'};
-    // 评分区改成热身说明
-    var box=document.getElementById('starBox');box.innerHTML='<div style="font-size:12px;color:var(--ink3)">⭐ 热身模式 · 可不打分，看完要点直接返回</div>';
+    box.innerHTML='<div style="font-size:12px;color:var(--ink3)">⭐ 热身模式 · 看完要点直接返回，全部题目结束后由 AI 统一评价</div>';
   }else{
-    nb.disabled=true;
-    nb.textContent=S.idx+1>=S.qs.length?'查看复盘报告 →':'下一题 →';
+    nb.disabled=false;
+    nb.textContent=S.idx+1>=S.qs.length?'查看 AI 评价 →':'下一题 →';
     nb.onclick=function(){S.idx++;nextQ()};
+    box.innerHTML='';
   }show('vFb');
 }
 
@@ -957,42 +946,22 @@ function enterRate(){
         '<div class="rv-ref"><b>考察点：</b>'+esc(r.q.point)+'</div>'+
         '<ul class="ans-list">'+r.q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('')+'</ul>'+
       '</details>'+
-      '<div class="rate-row"><span>评分</span><div class="stars" data-i="'+i+'"></div>'+
-        '<span class="rate-txt" data-t="'+i+'">未评分</span></div>'+
     '</div>';
   }).join('');
-  S.recs.forEach(function(r,i){
-    var st=box.querySelector('.stars[data-i="'+i+'"]');
-    if(!st)return;
-    for(var n=1;n<=5;n++){(function(n){
-      var b=document.createElement('button');b.innerHTML=ICONS.star;b.title=n+' 星';
-      b.onclick=function(){
-        r.score=n;
-        Array.prototype.forEach.call(st.children,function(x,k){x.classList.toggle('lit',k<n)});
-        box.querySelector('.rate-txt[data-t="'+i+'"]').textContent=RATE_WORDS[n];
-        updRateProgress();
-      };
-      st.appendChild(b);
-    })(n)}
-  });
   var ab=document.getElementById('aiReviewBox');
   ab.style.display='none';ab.dataset.busy='';ab.innerHTML='';
   var aiBtn=document.getElementById('aiReviewBtn');
   aiBtn.disabled=false;aiBtn.innerHTML='🤖 获取 AI 评价';
-  updRateProgress();
+  document.getElementById('rateProgress').textContent='AI 正在分析你的 '+S.recs.length+' 道作答…';
   show('vRate');
+  /* 进入评分页自动触发 AI 评价，无需用户手动打分 */
+  setTimeout(function(){document.getElementById('aiReviewBtn').click()},300);
 }
-function updRateProgress(){
-  var done=S.recs.filter(function(r){return r.score>0}).length,total=S.recs.length;
-  document.getElementById('rateProgress').textContent=
-    (total&&done>=total)?('✅ 已全部评完 · '+total+' / '+total+' 题'):('评分进度 '+done+' / '+total+' 题');
-  document.getElementById('toReviewBtn').disabled=!(total&&done>=total);
-}
+/* updRateProgress 已移除：不再需要用户自评分 */
 
 function buildReviewPrompt(){
   var lines=S.recs.map(function(r,i){
-    var s=r.score?('\n自评：'+r.score+' 星'):'';
-    return '【第'+(i+1)+'题】'+r.q.q+'\n我的作答：'+r.ans+'\n参考要点：'+r.q.ans.join('；')+s;
+    return '【第'+(i+1)+'题】'+r.q.q+'\n我的作答：'+r.ans+'\n参考要点：'+r.q.ans.join('；');
   }).join('\n\n');
   return '这是一次'+SCENES[S.scene].name+'方向的'+typeName()+'模拟面试，共 '+S.qs.length+' 道题。\n\n'+lines+
     '\n\n请作为有 10 年经验的资深面试官给出评价：\n'+
@@ -1004,29 +973,27 @@ function buildReviewPrompt(){
 /* 没有可用大模型时的本地估算版评价 */
 function localReview(){
   var total=S.recs.length;
-  var sum=S.recs.reduce(function(s,r){return s+(r.score||0)},0);
-  var avg=total?(sum/total):0;
   var lens=S.recs.map(function(r){return String(r.ans||'').replace(/\s/g,'').length});
   var avgLen=Math.round(lens.reduce(function(a,b){return a+b},0)/Math.max(total,1));
-  var overall=avg>=4.5?'整体表现优秀：要点覆盖全面，表达也有说服力，继续保持这个节奏。'
-    :avg>=3.5?'整体表现良好：主要要点基本答到了，个别题目还差一个落地案例或量化数据。'
-    :avg>=2.5?'处在"有思路但不完整"的阶段：建议先搭好答题框架，再往里填细节。'
+  var overall=avgLen>=100?'整体表现优秀：回答内容充实，要点覆盖全面，表达也有说服力，继续保持这个节奏。'
+    :avgLen>=70?'整体表现良好：主要要点基本答到了，个别题目还差一个落地案例或量化数据。'
+    :avgLen>=45?'处在"有思路但不完整"的阶段：建议先搭好答题框架，再往里填细节。'
     :'目前还比较生疏：最重要的是先开口把结构讲出来，内容可以后面慢慢补。';
   var tips=[];
   if(avgLen<40)tips.push('回答偏短（平均 '+avgLen+' 字）。试着每题至少展开 3 个要点，按"结论 → 论据 → 结果"的顺序说。');
   else if(avgLen<80)tips.push('回答有了一定长度（平均 '+avgLen+' 字）。再加一个具体案例或数据，说服力会明显提升。');
   else tips.push('回答内容较充实（平均 '+avgLen+' 字）。注意别展开太散，每段都要拉回到题目本身。');
-  var weak=S.recs.map(function(r,i){return (r.score>0&&r.score<=2)?('第'+(i+1)+'题'):''}).filter(Boolean);
-  if(weak.length)tips.push(weak.join('、')+' 得分偏低，对照参考要点重新讲一遍并录音回听，进步会很快。');
+  var weak=S.recs.map(function(r,i){return lens[i]<30?('第'+(i+1)+'题'):''}).filter(Boolean);
+  if(weak.length)tips.push(weak.join('、')+' 作答偏短，对照参考要点重新讲一遍并录音回听，进步会很快。');
   tips.push('统一用 STAR / 总-分-总 结构表达，先给结论再补论据，面试官更容易抓住重点。');
-  return '【总体评价】\n'+overall+'\n本场平均自评 '+avg.toFixed(1)+' 星，平均回答 '+avgLen+' 字。\n\n'+
+  return '【总体评价】\n'+overall+'\n本场平均作答 '+avgLen+' 字。\n\n'+
     '【逐题点评】\n'+S.recs.map(function(r,i){
-      var s=r.score||0;
-      var c=s>=4?'答得不错，要点抓得准，表达也清楚。'
-        :s===3?'基本答到点上，但还缺一个能撑住说服力的例子或数据。'
-        :s===2?'框架有了但内容偏薄，建议对照参考要点把关键词补进去。'
-        :s===1?'这道基本没展开，先把答题框架背熟再回来练。':'尚未评分。';
-      return '第'+(i+1)+'题（'+s+' 星）：'+c;
+      var l=lens[i];
+      var c=l>=100?'答得不错，内容充实，要点抓得准，表达也清楚。'
+        :l>=60?'基本答到点上，但还缺一个能撑住说服力的例子或数据。'
+        :l>=30?'框架有了但内容偏薄，建议对照参考要点把关键词补进去。'
+        :l>=10?'这道基本没展开，先把答题框架背熟再回来练。':'这道题几乎没有作答，建议重新回答一遍。';
+      return '第'+(i+1)+'题（约 '+l+' 字）：'+c;
     }).join('\n')+'\n\n【三条建议】\n'+tips.slice(0,3).map(function(t,i){return (i+1)+'. '+t}).join('\n');
 }
 function requestAiReview(){
@@ -1062,6 +1029,7 @@ document.getElementById('aiReviewBtn').onclick=function(){
   box.innerHTML='<div class="ai-h">🤖 AI 评价</div>'+
     '<div class="ai-loading">正在分析你的 '+S.recs.length+' 道作答，请稍候…</div>';
   requestAiReview().then(function(res){
+    window.__lastAiReview=res.text||'';
     box.innerHTML='<div class="ai-h">🤖 AI 评价<span class="ai-badge">'+esc(res.badge)+'</span></div>'+
       '<div class="ai-body">'+esc(res.text)+'</div>';
     box.dataset.busy='';
@@ -1070,45 +1038,44 @@ document.getElementById('aiReviewBtn').onclick=function(){
   });
 };
 document.getElementById('toReviewBtn').onclick=function(){
-  if(S.recs.some(function(r){return !r.score})){toast('请先把每一题都打个分','warn');return}
   finish();
 };
 
 function finish(){
   var total=S.recs.length;
-  var sum=S.recs.reduce(function(s,r){return s+r.score},0);
-  var avg=(sum/total).toFixed(1);
   var used=Math.round((Date.now()-S.t0)/1000);
+  /* 无自评分：用平均作答字数作为能力估算的代理指标 */
+  var totalAnsLen=S.recs.reduce(function(s,r){return s+(r.ans?' '+r.ans:'').replace(/\s/g,'').length},0);
+  var avgAnsLen=Math.round(totalAnsLen/Math.max(total,1));
+  var level=avgAnsLen>=100?5:avgAnsLen>=70?4:avgAnsLen>=45?3:avgAnsLen>=20?2:1;
   var st=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0});
-  st.times++;st.questions+=total;st.scoreSum+=sum;storeSet('ivsim_stat',st);
+  st.times++;st.questions+=total;storeSet('ivsim_stat',st);
   document.getElementById('rvGrid').innerHTML=
     '<div class="card"><div class="v">'+total+'</div><div class="l">完成题数</div></div>'+
-    '<div class="card"><div class="v">'+avg+'</div><div class="l">平均自评</div></div>'+
+    '<div class="card"><div class="v">'+avgAnsLen+'</div><div class="l">平均作答字数</div></div>'+
     '<div class="card"><div class="v">'+fmtSec(used)+'</div><div class="l">本场用时</div></div>'+
     '<div class="card"><div class="v">'+st.times+'</div><div class="l">累计场次</div></div>';
   var cm;
-  if(avg>=4.5)cm='🏆 教练点评：表现非常出色！回答覆盖全面、表达清晰。接下来可以挑战更高难度题，并练习控制节奏。';
-  else if(avg>=3.5)cm='👍 教练点评：基础扎实，大部分要点都能答到。建议针对低分题，把参考要点里的关键词背熟，再练一遍。';
-  else if(avg>=2.5)cm='💪 教练点评：已经有思路了，但完整度还不够。建议对照参考要点逐题梳理框架，用"总-分-总"结构表达。';
+  if(level>=5)cm='🏆 教练点评：回答内容充实、覆盖全面，表达也清晰。接下来可以挑战更高难度题，并练习控制节奏。';
+  else if(level>=4)cm='👍 教练点评：基础扎实，大部分要点都能答到。建议再补一个具体案例或量化数据，说服力会更强。';
+  else if(level>=3)cm='💪 教练点评：已经有思路了，但完整度还不够。建议对照参考要点逐题梳理框架，用"总-分-总"结构表达。';
   else cm='🌱 教练点评：别灰心，起步阶段最重要是开口。先去题库把高频题的答题框架读熟，再来练一场，进步会非常明显。';
   document.getElementById('rvCoach').textContent=cm;
 
-  /* 雷达图：5 维度能力评估 */
-  var totalAnsLen=S.recs.reduce(function(s,r){return s+(r.ans?' '+r.ans:'').replace(/\s/g,'').length},0);
-  var avgAnsLen=Math.round(totalAnsLen/total);
+  /* 雷达图：5 维度能力评估（无自评分，用作答字数代理知识覆盖与思考结构） */
   var dims=['知识覆盖','表达流畅度','思考结构','时间管理','情绪抗压'];
   var dimsVals=[
-    Number(avg),                         // 知识覆盖 = 平均自评
+    level,                               // 知识覆盖 = 作答字数估算
     Math.min(5,2+(avgAnsLen/40)),        // 表达流畅度 = 回答长度
-    Math.min(5,Math.max(0,Number((avg*0.9+(totalAnsLen>total*200?0.3:0)).toFixed(1)))), // 思考结构
+    Math.min(5,Math.max(0,Number((level*0.9+(totalAnsLen>total*200?0.3:0)).toFixed(1)))), // 思考结构
     Math.min(5,2.5+(S.sec===60?1:S.sec===120?0:0.5)),       // 时间管理
-    Math.min(5,Math.max(0,Number((avg*0.8+(total>=5?0.5:0)).toFixed(1))))              // 情绪抗压
+    Math.min(5,Math.max(0,Number((level*0.8+(total>=5?0.5:0)).toFixed(1))))              // 情绪抗压
   ];
   drawRadar(document.getElementById('rvRadar'),dims,dimsVals,{w:240,h:240,max:5});
   var radarDescs=[
-    '知识覆盖：自评 '+avg+' 星 → 要点覆盖度 '+(avg>=4?'较强':'可提升')+';',
-    '表达流畅度：平均 '+avgAnsLen+' 字回答 → '+(avgAnsLen>=80?'内容充实':avgAnsLen>=40?'基本够':'偏短，建议多说关键点')+';',
-    '思考结构：自评 + 长度 → '+(avg>=3.5?'框架感不错':'建议用"总-分-总"结构明确表达')+';',
+    '知识覆盖：平均 '+avgAnsLen+' 字 → '+(level>=4?'覆盖较强':'可提升，建议多说关键点')+';',
+    '表达流畅度：平均 '+avgAnsLen+' 字回答 → '+(avgAnsLen>=80?'内容充实':avgAnsLen>=40?'基本够':'偏短，建议展开 3 个要点')+';',
+    '思考结构：字数估算 → '+(level>=4?'框架感不错':'建议用"总-分-总"结构明确表达')+';',
     '时间管理：限时 '+S.sec+'s/题 → '+(S.sec<=60?'快答模式':'标准模式')+';',
     '情绪抗压：'+(total>=5?'多题稳定发挥，心态 OK':'题目少，下次可以多练几道')+'。'
   ];
@@ -1119,11 +1086,19 @@ function finish(){
   stat.scenes=stat.scenes||{};
   stat.scenes[S.scene]=(stat.scenes[S.scene]||0)+1;
   storeSet('ivsim_stat',stat);tryUnlockAll();
+  /* 同步到管理后台数据集（管理员可在后台看到这场练习） */
+  try{
+    var sc=0,n=0;S.recs.forEach(function(r){if(r.score>0){sc+=r.score;n++}});
+    AdminDB.addSession({
+      ts:Date.now(),type:typeName(),scene:S.scene,count:total,
+      avg:n?Math.round(sc/n*10)/10:level,used:used,ansLen:avgAnsLen,
+      ai:(window.__lastAiReview||'').slice(0,120)
+    });
+  }catch(e){}
   document.getElementById('rvList').innerHTML=S.recs.map(function(r,i){
-    var stars='';for(var k=1;k<=5;k++)stars+='<svg viewBox="0 0 24 24" class="'+(k<=r.score?'':'dim')+'"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18l-5.8 3.1 1.1-6.5L2.6 9.6l6.5-.9z"/></svg>';
     return '<div class="rv-item"><div class="ri-h" data-i="'+i+'">'+
       '<span style="color:'+SCENE_COLOR[r.q.scene]+';flex:none">Q'+(i+1)+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.q.q)+'</span>'+
-      '<span class="ri-stars" style="flex:none">'+stars+'</span><span class="chev">'+ICONS.chev+'</span></div>'+
+      '<span class="chev">'+ICONS.chev+'</span></div>'+
       '<div class="ri-b"><b style="color:var(--acc2)">我的作答：</b>'+esc(r.ans)+'<br><b style="color:var(--acc2)">参考要点：</b>'+r.q.ans.map(function(a){return '· '+esc(a)}).join('<br>')+'</div></div>';
   }).join('');
   $$('#rvList .ri-h').forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open')}});
