@@ -4,79 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>轻松一下 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261039">
+<link rel="stylesheet" href="shared.css?v=20261031f">
 <style>
+body{background:
+  radial-gradient(ellipse 75% 50% at 25% -8%,rgba(94,234,212,.11),transparent),
+  radial-gradient(ellipse 60% 45% at 80% 12%,rgba(251,191,36,.09),transparent),
+  radial-gradient(ellipse 50% 40% at 50% 100%,rgba(244,114,182,.06),transparent),
+  #0a1020}
+.fp-wrap::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(circle at 20% 35%,rgba(94,234,212,.05) 0 2.5px,transparent 2.5px),
+    radial-gradient(circle at 80% 25%,rgba(251,191,36,.05) 0 2px,transparent 2px),
+    radial-gradient(circle at 45% 70%,rgba(244,114,182,.04) 0 1.5px,transparent 1.5px);
+  background-size:170px 170px,210px 210px,190px 190px;opacity:.55}
+.fp-shell{position:relative;overflow:hidden}
+/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+.fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fp-shell::after{content:"🍀";position:absolute;right:-22px;top:-32px;font-size:185px;opacity:.032;
+  transform:rotate(20deg);pointer-events:none;filter:grayscale(.15)}
+@media (max-width:900px){.fp-shell::after{font-size:125px;right:-12px;top:-22px}}
+/* 浅色模式适配 */
+body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+body.light .fp-wrap::before{opacity:.28}
+body.light .fp-shell::after{opacity:.022}
 :root{
   --grad:linear-gradient(135deg,var(--acc),var(--acc2));
   --hair:var(--line);
 }
 ::selection{background:rgba(108,140,255,.4)}
 
-/* 卡片网格 */
-.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:stretch}
-@media (min-width:1120px){
-  .tools{grid-template-columns:repeat(6,minmax(0,1fr))}
-  .tools .cell:nth-child(-n+3){grid-column:span 2}
-  .tools .cell:nth-child(n+4){grid-column:span 3}
-}
-@media (max-width:620px){.tools{grid-template-columns:1fr}}
-.cell{background:rgba(255,255,255,.03);border:1px solid var(--hair);border-radius:16px;padding:20px;
-  display:flex;flex-direction:column;gap:12px;min-width:0;min-height:238px;transition:border-color .25s,background .3s,transform .25s,box-shadow .3s}
-.cell:hover{border-color:rgba(108,140,255,.4);background:rgba(108,140,255,.05);
-  transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.28)}
-.cell-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:800;color:var(--ink)}
-.cell-t .ci{margin-left:auto;font-size:10px;color:var(--ink3);letter-spacing:1px;font-weight:400}
-.cell-d{font-size:11.5px;color:var(--ink3);line-height:1.6;margin-top:-6px}
-.cell-act{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+.play-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:14px}
+.gc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:15px;border-radius:16px;
+  background:rgba(255,255,255,.03);border:1px solid var(--hair);transition:border-color .2s,background .25s,box-shadow .25s}
+.gc:hover{border-color:rgba(108,140,255,.35);background:rgba(108,140,255,.05);box-shadow:0 14px 30px rgba(0,0,0,.24)}
+.gc-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--ink);min-width:0}
+.gc-h .gc-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gc-en{margin-left:auto;font-size:9.5px;color:var(--ink3);letter-spacing:1px;font-weight:400}
+.gc-prev{height:96px;display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden}
+.gc-act{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap}
+.gc-act .btn{padding:6px 11px;font-size:11px;border-radius:9px}
 
-/* 运势 */
-.fortune-box{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
-  background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.28)}
-.fortune-box .f-ic{font-size:26px}
-.fortune-box .f-t{font-weight:800;font-size:13.5px;color:var(--ink)}
-.fortune-box .f-d{font-size:11px;color:var(--ink2);margin-top:2px;line-height:1.55}
+/* 签面（运势 / 人格共用） */
+.pv{height:96px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+  display:flex;flex-direction:column;justify-content:center;gap:5px;overflow:hidden}
+.pv-m{font-size:9px;color:var(--ink3);letter-spacing:.8px}
+.pv-t{font-size:11.5px;color:var(--ink2);line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 
-/* 快答 */
-.quick-q{font-size:12.5px;line-height:1.7;color:#dbeafe;padding:12px 14px;border-radius:14px;
-  background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.38);min-height:70px}
-.quick-ans{display:none;font-size:11.5px;color:var(--ink2);line-height:1.75;padding:11px 14px;
-  border-radius:14px;background:rgba(65,224,200,.07);border:1px solid rgba(65,224,200,.32)}
-.quick-ans.show{display:block;animation:rise .4s both}
+/* 快答卡面预览 */
+.gc .quick-q{font-size:11.5px;line-height:1.62;padding:9px 11px;border-radius:12px;color:#dbeafe;
+  background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.35);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 
-/* 翻卡 */
-.flip-wrap{perspective:1000px;height:146px}
-.flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer}
-.flip-card.flipped{transform:rotateY(180deg)}
-.flip-face{position:absolute;inset:0;border-radius:14px;padding:14px 15px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
-.flip-f{background:rgba(255,255,255,.04);border:1px solid var(--line)}
-.flip-f .fc-tag{font-size:9.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1.5px}
-.flip-f .fc-ic{font-size:19px;margin-bottom:6px}
-.flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));
+/* 翻卡卡面预览 */
+.gc .flip-wrap{height:96px;perspective:800px}
+.gc .flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer;border-radius:12px}
+.gc .flip-card.flipped{transform:rotateY(180deg)}
+.gc .flip-face{position:absolute;inset:0;border-radius:12px;padding:10px 11px;backface-visibility:hidden;
+  display:flex;flex-direction:column;justify-content:center}
+.gc .flip-f{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.gc .flip-f .fc-tag{font-size:8px;color:var(--ink3);margin-bottom:5px;letter-spacing:1.2px}
+.gc .flip-f .fc-ic{font-size:15px;margin-bottom:4px}
+.gc .flip-f .fc-line{font-size:11px;line-height:1.55;color:#cdd8ff}
+.gc .flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));
   border:1px solid rgba(65,224,200,.34);transform:rotateY(180deg)}
-.flip-b .fc-tip{font-size:12px;line-height:1.7;color:#bfdbfe}
-.flip-b .fc-q{font-size:9.5px;color:var(--ink3);margin-top:7px;
+.gc .flip-b .fc-tip{font-size:10.5px;line-height:1.55;color:#bfdbfe;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.gc .flip-b .fc-q{font-size:8px;color:var(--ink3);margin-top:4px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* 人格 */
-.pq{padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.pq .pq-q{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.55}
-.pq .pq-opts{display:flex;flex-direction:column;gap:6px}
-.pq button.popt{text-align:left;padding:8px 11px;border-radius:10px;font-size:11.5px;
+/* 梗卡面预览 */
+.gc .meme-card{height:96px;padding:9px 11px;border-radius:12px;overflow:hidden;
+  background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.35)}
+.gc .meme-card .m-t{font-size:11.5px;font-weight:800;color:#a5b4fc;margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc .meme-card .m-d{font-size:10.5px;color:var(--ink2);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+
+/* 小游戏战果预览 */
+.gm-prev{font-size:11.5px;line-height:1.65;color:var(--ink2);padding:10px 12px;border-radius:12px;
+  background:rgba(108,140,255,.07);border:1px dashed rgba(108,140,255,.32);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+
+/* 人格弹层：题目与结果 */
+.pq{padding:13px 15px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.pq .pq-q{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.55}
+.pq .pq-opts{display:flex;flex-direction:column;gap:7px}
+.pq button.popt{text-align:left;padding:10px 12px;border-radius:10px;font-size:12px;
   background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);transition:.15s}
 .pq button.popt:hover{background:rgba(108,140,255,.1);border-color:rgba(108,140,255,.4);color:var(--ink)}
 .pq button.popt:active{transform:scale(.98)}
-.persona-result{padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.1));
+.persona-result{padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(108,140,255,.15),rgba(65,224,200,.1));
   border:1px solid rgba(108,140,255,.32);text-align:center}
-.persona-result .pr-ic{font-size:32px}
-.persona-result .pr-t{font-size:14px;font-weight:800;color:var(--ink);margin-top:2px}
-.persona-result .pr-rate{font-size:10.5px;color:var(--acc2);margin-top:3px}
-.persona-result .pr-d{font-size:11.5px;color:var(--ink2);line-height:1.7;margin-top:8px;text-align:left}
+.persona-result .pr-ic{font-size:34px}
+.persona-result .pr-t{font-size:15px;font-weight:800;color:var(--ink);margin-top:2px}
+.persona-result .pr-rate{font-size:11px;color:var(--acc2);margin-top:3px}
+.persona-result .pr-d{font-size:12px;color:var(--ink2);line-height:1.75;margin-top:9px;text-align:left}
 
-/* 梗 */
-.meme-card{padding:13px 14px;border-radius:14px;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.35)}
-.meme-card .m-t{font-size:13.5px;font-weight:800;color:#a5b4fc;margin-bottom:5px}
-.meme-card .m-d{font-size:11.5px;color:var(--ink2);line-height:1.75}
-.fortune-card,.quick-card,.flip-card,.meme-card{display:flex;flex-direction:column;justify-content:center;min-height:128px}
+/* 响应式与浅色适配 */
+@media (max-width:1024px){.play-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){
+  .play-grid{grid-template-columns:1fr}
+  .gc-prev,.pv,.gc .meme-card{height:auto;min-height:84px}
+}
+body.light .gc,body.light .pv{background:#fff;box-shadow:0 6px 20px rgba(15,23,42,.06)}
+body.light .gc:hover{background:#f6f8fc}
+body.light .gc .quick-q,body.light .gm-prev{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.3);color:#1e3a8a}
+body.light .gc .flip-f .fc-line{color:#33415c}
 
 /* 收尾 */
 .closing{margin-top:26px;padding:22px 24px;border-radius:16px;
@@ -91,56 +124,9 @@ footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--hair);
   color:var(--ink3);letter-spacing:1px;line-height:1.9}
 footer .fr{margin-left:auto;text-align:right}
 
-/* 剧本杀 */
-.sjs-card{padding:13px 14px;border-radius:14px;background:rgba(108,140,255,.07);border:1px solid rgba(108,140,255,.3)}
-.sjs-card .sjs-t{font-size:13.5px;font-weight:800;color:#cdd8ff;margin-bottom:5px}
-.sjs-card .sjs-d{font-size:11.5px;color:var(--ink2);line-height:1.75}
-.sjs-opts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.sjs-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
-.sjs-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
-.sjs-row .who{font-weight:800;color:var(--ink)}
-.sjs-row .tag-ai{font-size:10px;color:var(--acc2);border:1px solid rgba(65,224,200,.35);border-radius:999px;padding:2px 7px}
-.sjs-row .role{margin-left:auto;color:var(--acc2);font-weight:800;letter-spacing:1px}
-.sjs-row .role.hide{color:var(--ink3);filter:blur(5px);user-select:none}
-.sjs-clue{padding:11px 13px;border-radius:12px;background:rgba(65,224,200,.07);border:1px solid rgba(65,224,200,.25);font-size:12px;line-height:1.75;color:var(--ink2)}
-.sjs-vote{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
-.sjs-vote select{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px}
-.sjs-reveal{padding:12px 14px;border-radius:14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);line-height:1.8}
-.sjs-row,.sjs-clue,.sjs-card{will-change:transform,opacity}
-.sjs-row{animation:sjsDeal .46s cubic-bezier(.2,.8,.3,1) both}
-.sjs-row .role{transition:filter .22s,opacity .22s,transform .22s;transform-origin:center}
-.sjs-row .role.hide{opacity:.55;transform:rotateX(72deg)}
-.sjs-row .role.sjs-flip{animation:sjsFlip .38s cubic-bezier(.2,.8,.3,1) both}
-.sjs-line{animation:sjsUp .42s cubic-bezier(.2,.8,.3,1) both}
-.sjs-stamp{display:inline-block;margin-left:6px;animation:sjsStamp .48s cubic-bezier(.2,1.4,.3,1) both}
-.sjs-card:hover{box-shadow:0 0 0 3px rgba(108,140,255,.08),0 14px 30px rgba(108,140,255,.12)}
-@keyframes sjsDeal{from{opacity:0;transform:translateY(16px) rotateX(35deg) scale(.98)}to{opacity:1;transform:none}}
-@keyframes sjsFlip{from{opacity:.2;transform:rotateX(72deg) scale(.96)}to{opacity:1;transform:none}}
-@keyframes sjsUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes sjsStamp{from{opacity:0;transform:scale(1.8) rotate(-8deg)}to{opacity:1;transform:scale(1) rotate(0)}}
-
-/* 剧本杀底部大展位 */
-.sjs-feature{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.28fr) minmax(320px,.72fr);gap:22px;align-items:center;
-  padding:24px;border-radius:22px;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,rgba(108,140,255,.14),rgba(65,224,200,.08));
-  border:1px solid rgba(108,140,255,.34);box-shadow:0 22px 48px -24px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.06)}
-.sjs-feature::before{content:"";position:absolute;left:26px;right:26px;top:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(108,140,255,.6),rgba(65,224,200,.4),transparent)}
-.sjs-f-main{min-width:0}
-.sjs-f-kicker{font-size:12px!important;color:var(--acc2);letter-spacing:2px;font-weight:800;margin-bottom:8px}
-.sjs-f-title{display:flex;align-items:center;gap:12px;font-size:26px!important;font-weight:900;color:var(--ink);line-height:1.35}
-.sjs-f-title .sjs-f-ic{width:46px;height:46px;flex:none;border-radius:15px;display:grid;place-items:center;font-size:24px;
-  background:rgba(108,140,255,.16);border:1px solid rgba(108,140,255,.38)}
-.sjs-f-desc{margin-top:12px;font-size:15px!important;color:var(--ink2);line-height:1.95;max-width:760px}
-.sjs-f-roles{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.sjs-f-role{padding:10px 13px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line);
-  font-size:13.5px!important;color:var(--ink);font-weight:700}
-.sjs-f-side{display:flex;flex-direction:column;gap:12px;justify-content:center;padding:18px;border-radius:18px;
-  background:rgba(255,255,255,.04);border:1px solid var(--line)}
-.sjs-f-side .sjs-f-step{font-size:14px!important;color:var(--ink2);line-height:1.8;display:flex;gap:10px}
-.sjs-f-side .sjs-f-step b{color:var(--ink)}
-.sjs-f-act{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-@media (max-width:860px){.sjs-feature{grid-template-columns:1fr}.sjs-f-title{font-size:24px!important}}
+/* 小玩法结果卡 */
+.res-reveal{padding:12px 14px;border-radius:14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);line-height:1.8}
+.cell-act{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
 
 /* 弹层同主题 */
 .mask{background:rgba(6,10,20,.7)}
@@ -149,12 +135,61 @@ footer .fr{margin-left:auto;text-align:right}
 .toast{background:rgba(16,24,42,.96);border-color:rgba(255,255,255,.14)}
 .toast.ok{border-color:rgba(65,224,200,.5)}
 .toast.warn{border-color:rgba(251,191,36,.5)}
+
+/* 面试找茬 */
+.fx-bar{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink2);margin-bottom:10px;flex-wrap:wrap}
+.fx-timer{margin-left:auto;font-weight:900;font-size:17px;color:var(--acc2);font-variant-numeric:tabular-nums}
+.fx-timer.low{color:#fda4af}
+.fx-line{display:block;width:100%;text-align:left;padding:9px 12px;margin-bottom:7px;border-radius:10px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);font-size:12.5px;
+  line-height:1.65;cursor:pointer;transition:.18s;font-family:inherit}
+.fx-line:hover{border-color:rgba(108,140,255,.5);background:rgba(108,140,255,.08)}
+.fx-line.found{border-color:rgba(65,224,200,.6);background:rgba(65,224,200,.12);color:var(--ink)}
+.fx-line.shot{border-color:rgba(251,113,133,.6);background:rgba(251,113,133,.1);animation:fxShake .3s}
+.fx-why{display:block;margin-top:5px;font-size:11px;color:#7dead6;line-height:1.6}
+@keyframes fxShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* 你来当面试官 */
+.rv-ans{display:block;width:100%;text-align:left;padding:11px 13px;margin-bottom:8px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:12px;line-height:1.75;
+  color:var(--ink2);cursor:pointer;transition:.18s;font-family:inherit}
+.rv-ans:hover{border-color:rgba(108,140,255,.5)}
+.rv-ans.bad{border-color:rgba(251,113,133,.6);background:rgba(251,113,133,.1)}
+.rv-ans.good{border-color:rgba(65,224,200,.6);background:rgba(65,224,200,.12)}
+.rv-ans.on{border-color:rgba(251,191,36,.65);box-shadow:0 0 0 2px rgba(251,191,36,.18)}
+.rv-why{display:block;margin-top:6px;font-size:11px;line-height:1.65;color:var(--ink2)}
+.rv-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;margin-bottom:5px}
+.rv-tag.rj{background:rgba(251,113,133,.18);color:#ffb3bd}
+.rv-tag.ps{background:rgba(65,224,200,.16);color:#8ff0dd}
+.rv-tag.wk{background:rgba(251,191,36,.16);color:#ffd68a}
+
+/* HR 潜台词翻译机 */
+.dec-quote{font-size:14px;line-height:1.8;font-weight:700;padding:14px 16px;border-radius:14px;
+  background:rgba(108,140,255,.1);border:1px solid rgba(108,140,255,.32);color:var(--ink);margin-bottom:12px}
+.dec-opt{display:block;width:100%;text-align:left;padding:11px 13px;margin-bottom:8px;border-radius:11px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink2);font-size:12.5px;
+  line-height:1.6;cursor:pointer;font-family:inherit;transition:.18s}
+.dec-opt:hover{border-color:rgba(108,140,255,.5)}
+.dec-opt.ok{border-color:rgba(65,224,200,.65);background:rgba(65,224,200,.13);color:var(--ink)}
+.dec-opt.no{border-color:rgba(251,113,133,.6);background:rgba(251,113,133,.1)}
+.dec-stat{display:flex;gap:10px;font-size:11px;color:var(--ink3);margin-bottom:10px}
+
+/* 薪资谈判 */
+.neg-top{display:flex;gap:10px;margin-bottom:12px}
+.neg-k{flex:1;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:center}
+.neg-k .l{font-size:10px;color:var(--ink3)}
+.neg-k .v{font-size:19px;font-weight:900;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
+.neg-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.09);overflow:hidden;margin:0 0 4px}
+.neg-bar>i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#41E0C8,#6C8CFF);transition:.35s}
+.neg-hr{font-size:12.5px;line-height:1.75;color:var(--ink2);padding:11px 13px;border-radius:12px;
+  background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.28);margin:10px 0}
 </style>
 </head>
 <body>
 
 <div class="fp-wrap">
   <div class="fp-shell rise">
+    <div class="fx-stars" aria-hidden="true"><div id="rlStars1"></div><div id="rlStars2"></div><div id="rlStars3"></div></div>
     <!-- 页头 -->
     <div class="fp-head">
       <div class="fp-ic">🍀</div>
@@ -162,85 +197,101 @@ footer .fr{margin-left:auto;text-align:right}
         <h1>轻松一下</h1>
         <p class="fp-sub">抽一签看看今天的面试运势，随手翻一张知识卡，或者测测自己是哪种面试人格。不用正襟危坐，碎片时间也能攒点底气。</p>
       </div>
-      <div class="fp-acts"><button class="btn pri sm" onclick="location.href='interview.html'">🎤 开始模拟面试</button></div>
     </div>
-    <div class="fp-tip">
-      <span class="fp-tip-ic">✨</span>
-      <div style="flex:1">
-        <div class="fp-tip-t">FORTUNE · QUICK · FLIP · PERSONA · MEME · SCRIPT</div>
-        <div class="fp-tip-d">六个小工具轮流玩：运势求彩头、快答练反应、翻卡攒技巧、人格知短板、梗百科扫盲、剧本杀练试探。</div>
+    <div class="play-grid d1">
+      <!-- 1 今日运势 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🔮 今日运势</span><span class="gc-en">FORTUNE</span></div>
+        <div class="gc-prev">
+          <div class="pv" id="fortunePrev">
+            <div class="pv-m">FORTUNE · 每日一签</div>
+            <div class="pv-t">今天的运势还没抽，点「今日一抽」求个好彩头。</div>
+          </div>
+        </div>
+        <div class="gc-act"><button class="btn pri sm" id="drawBtn">✨ 今日一抽</button></div>
+      </div>
+
+      <!-- 2 随机快答 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">⚡ 随机快答</span><span class="gc-en">QUICK</span></div>
+        <div class="gc-prev">
+          <div class="quick-q" id="quickQ">点「换一题」随机抽一道真题，先自己口述 60 秒，再看要点对照。</div>
+        </div>
+        <div class="gc-act">
+          <button class="btn gho sm" id="quickBtn">🎲 换一题</button>
+          <button class="btn gho sm" id="quickShow">看要点</button>
+        </div>
+      </div>
+
+      <!-- 3 知识翻卡 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🃏 知识翻卡</span><span class="gc-en">FLIP</span></div>
+        <div class="gc-prev">
+          <div class="flip-wrap"><div class="flip-card" id="flipCard">
+            <div class="flip-face flip-f"><div class="fc-tag">TAP TO FLIP</div><div class="fc-line">随机一条答题技巧，点卡片翻面看解析。</div></div>
+            <div class="flip-face flip-b"><div class="fc-tip" id="flipTip">点卡片翻面，随机抽一条答题技巧</div><div class="fc-q" id="flipQ">FROM / —</div></div>
+          </div></div>
+        </div>
+        <div class="gc-act"><button class="btn gho sm" id="flipBtn">🔄 换一张</button></div>
+      </div>
+
+      <!-- 4 面试人格 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🎭 面试人格</span><span class="gc-en">PERSONA</span></div>
+        <div class="gc-prev">
+          <div class="pv" id="personaPrev">
+            <div class="pv-m">PERSONA · 5 题</div>
+            <div class="pv-t">5 道题测出你的面试人格，附改进建议。</div>
+          </div>
+        </div>
+        <div class="gc-act"><button class="btn gho sm" id="pqBtn">🎭 开始测试</button></div>
+      </div>
+
+      <!-- 5 梗百科 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">📖 梗百科</span><span class="gc-en">MEME</span></div>
+        <div class="gc-prev">
+          <div class="meme-card"><div class="m-t" id="mTitle">“抓手”</div><div class="m-d" id="mDesc">“找个抓手”= 找个切入点/着力点。互联网圈高频。</div></div>
+        </div>
+        <div class="gc-act"><button class="btn gho sm" id="memeBtn">🔄 换一个梗</button></div>
+      </div>
+
+      <!-- 6 面试找茬 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🔍 面试找茬</span><span class="gc-en">FIND</span></div>
+        <div class="gc-prev">
+          <div class="gm-prev" id="fxPrev">60 秒在一段自述里挑出 3 处雷点，点错扣 5 秒。</div>
+        </div>
+        <div class="gc-act"><button class="btn pri sm" id="fxBtn">🔍 开始找茬</button></div>
+      </div>
+
+      <!-- 7 你来当面试官 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🎤 你来当面试官</span><span class="gc-en">REVERSE</span></div>
+        <div class="gc-prev">
+          <div class="gm-prev" id="rvPrev">同一道题，三种回答，其中只有一份必须淘汰。</div>
+        </div>
+        <div class="gc-act"><button class="btn pri sm" id="rvBtn">🎤 开始评审</button></div>
+      </div>
+
+      <!-- 8 HR 潜台词 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">🗣️ HR 潜台词</span><span class="gc-en">DECODER</span></div>
+        <div class="gc-prev">
+          <div class="gm-prev" id="decPrev">八句黑话听出真实含义，连对越多分越高。</div>
+        </div>
+        <div class="gc-act"><button class="btn pri sm" id="decBtn">🗣️ 开始翻译</button></div>
+      </div>
+
+      <!-- 9 薪资谈判 -->
+      <div class="gc">
+        <div class="gc-h"><span class="gc-t">💰 薪资谈判</span><span class="gc-en">NEGOTIATE</span></div>
+        <div class="gc-prev">
+          <div class="gm-prev" id="negPrev">HR 开价 18K，你期望 22K，四轮博弈，目标 20K 以上且不翻脸。</div>
+        </div>
+        <div class="gc-act"><button class="btn pri sm" id="negBtn">💰 开始谈判</button></div>
       </div>
     </div>
-
-    <!-- 卡片 -->
-    <div class="tools d1">
-    <div class="cell">
-      <div class="cell-t">🔮 今日面试运势<span class="ci">FORTUNE</span></div>
-      <div class="cell-d">每天一签，求个好彩头。</div>
-      <div class="fortune-box" id="fortuneBox"><span class="f-ic">🔮</span><div><div class="f-t">今天的运势还没抽</div><div class="f-d">点下面的按钮，抽一支属于你的面试签。</div></div></div>
-      <div class="cell-act"><button class="btn pri sm" id="drawBtn">✨ 今日一抽</button></div>
-    </div>
-
-    <div class="cell">
-      <div class="cell-t">⚡ 随机快答<span class="ci">QUICK</span></div>
-      <div class="cell-d">60 秒口述思路，再看参考要点（连答 10 次解锁成就）。</div>
-      <div class="quick-q" id="quickQ">点「换一题」随机抽一道真题，先自己口述 60 秒，再看要点对照。</div>
-      <div class="quick-ans" id="quickAns"></div>
-      <div class="cell-act">
-        <button class="btn gho sm" id="quickBtn">🎲 换一题</button>
-        <button class="btn gho sm" id="quickShow">看要点</button>
-      </div>
-    </div>
-
-    <div class="cell">
-      <div class="cell-t">🃏 知识翻卡<span class="ci">FLIP</span></div>
-      <div class="cell-d">随机一条答题技巧，翻面看完整解析。</div>
-      <div class="flip-wrap"><div class="flip-card" id="flipCard">
-        <div class="flip-face flip-f"><div class="fc-tag">TAP TO FLIP / 点卡片翻面</div><div class="fc-ic">💡</div><div style="font-size:12px;color:#bfdbfe">随机一个面试答题技巧</div></div>
-        <div class="flip-face flip-b"><div class="fc-tip" id="flipTip">点卡片翻面，随机抽一条答题技巧</div><div class="fc-q" id="flipQ">FROM / —</div></div>
-      </div></div>
-      <div class="cell-act"><button class="btn gho sm" id="flipBtn">🔄 换一张</button></div>
-    </div>
-
-    <div class="cell">
-      <div class="cell-t">🎭 面试人格测试<span class="ci">PERSONA</span></div>
-      <div class="cell-d">5 道题测出你的面试人格，附改进建议。</div>
-      <div id="pqArea">
-        <div class="pq"><div class="pq-q">准备开始 5 道小测题…</div></div>
-      </div>
-    </div>
-
-    <div class="cell">
-      <div class="cell-t">📖 面试梗百科<span class="ci">MEME</span></div>
-      <div class="cell-d">互联网黑话扫盲，面试听到不懵。</div>
-      <div class="meme-card"><div class="m-t" id="mTitle">“抓手”</div><div class="m-d" id="mDesc">“找个抓手”= 找个切入点/着力点。互联网圈高频。</div></div>
-      <div class="cell-act"><button class="btn gho sm" id="memeBtn">🔄 换一个梗</button></div>
-    </div>
-  </div>
-
-  <!-- 剧本杀底部大展位 -->
-  <div class="sjs-feature d2">
-    <div class="sjs-f-main">
-      <div class="sjs-f-kicker">SCRIPT MYSTERY</div>
-      <div class="sjs-f-title"><span class="sjs-f-ic">🕵️</span>面试剧本杀</div>
-      <p class="sjs-f-desc">每人抽一张隐藏身份：内推关系户、卧底竞对、只想拿 offer 练手。面试过程中互相试探，从回答细节里找破绽，最后投票抓人。可以和朋友同屏轮流看身份，也可以自己开局，剩余位置交给 AI。</p>
-      <div class="sjs-f-roles">
-        <span class="sjs-f-role">🎟️ 内推关系户</span>
-        <span class="sjs-f-role">🕳️ 卧底竞对</span>
-        <span class="sjs-f-role">🎯 只想拿 offer 练手</span>
-        <span class="sjs-f-role">💼 认真候选人</span>
-      </div>
-    </div>
-    <div class="sjs-f-side">
-      <div class="sjs-f-step"><b>1</b><span>选「好友同屏」或「AI 补位」，3-5 人随机开局。</span></div>
-      <div class="sjs-f-step"><b>2</b><span>身份只给本人看；公开题回答时互相提问试探。</span></div>
-      <div class="sjs-f-step"><b>3</b><span>分别投出三种隐藏身份，揭晓并计分。</span></div>
-      <div class="sjs-f-act">
-        <button class="btn pri" id="sjsBtn">🎬 开本</button>
-        <button class="btn gho" id="sjsHow">玩法说明</button>
-      </div>
-    </div>
-  </div>
 
   <!-- 收尾 -->
   <div class="closing d2">
@@ -259,9 +310,11 @@ footer .fr{margin-left:auto;text-align:right}
   </div>
 </div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 if(!initPage('relax',true))throw new Error('login required');
+/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+seedStars('rlStars1',700,1,60);seedStars('rlStars2',200,2,120);seedStars('rlStars3',100,3,180);
 
 var FORTUNES=[
   {ic:'🌟',t:'大吉 · 面霸附体',d:'今天状态绝佳，适合冲一场高难度模拟面试！'},
@@ -271,43 +324,50 @@ var FORTUNES=[
   {ic:'🔥',t:'吉 · 灵感迸发',d:'表达欲旺盛，适合练自我介绍和项目讲述。'},
   {ic:'🌈',t:'末吉 · 否极泰来',d:'即使答得不顺也别气馁，每道错题都是进步的台阶。'}
 ];
-var fKey='ivsim_fortune',today=new Date().toDateString();
+var fKey='fortune',today=new Date().toDateString();
 function renderFortune(f){
-  document.getElementById('fortuneBox').innerHTML=
-    '<span class="f-ic">'+f.ic+'</span><div><div class="f-t">'+f.t+'</div><div class="f-d">'+f.d+'</div></div>';
+  document.getElementById('fortunePrev').innerHTML=
+    '<div class="pv-m">FORTUNE · 今日签</div>'+
+    '<div class="pv-t"><b class="txG">'+esc(f.ic+' '+f.t)+'</b><br>'+esc(f.d)+'</div>';
 }
-var savedF=storeGet(fKey,null);
+var savedF=userGet(fKey,null);
 if(savedF&&savedF.day===today){renderFortune(savedF.f);document.getElementById('drawBtn').textContent='✅ 今日已抽'}
 document.getElementById('drawBtn').onclick=function(){
   if(!canUseFeature())return;
-  var cur=storeGet(fKey,null);
+  var cur=userGet(fKey,null);
   if(cur&&cur.day===today){miniPop('今天已经抽过啦','明天再来试试手气吧');return}
   var f=FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
-  storeSet(fKey,{day:today,f:f});renderFortune(f);
+  userSet(fKey,{day:today,f:f});renderFortune(f);
   this.textContent='✅ 今日已抽';toast('抽签成功！','ok');
   setTimeout(function(){tryUnlockAll()},200);
 };
 
-var curQ=null,quickCnt=storeGet('ivsim_quick_cnt',0);
+var curQ=null,quickCnt=userGet('quick_cnt',0);
 document.getElementById('quickBtn').onclick=function(){
   if(!canUseFeature())return;
   curQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
   document.getElementById('quickQ').innerHTML=
     '<b style="color:'+SCENE_COLOR[curQ.scene]+'">['+SCENES[curQ.scene].name+' · '+LV_NAME[curQ.lv]+']</b> '+esc(curQ.q)+
     '<div style="font-size:10px;color:var(--ink3);margin-top:6px;letter-spacing:1px">60s 口述 · 已练 '+quickCnt+' 次</div>';
-  document.getElementById('quickAns').className='quick-ans';
-  document.getElementById('quickShow').style.display='';
-  quickCnt++;storeSet('ivsim_quick_cnt',quickCnt);
+  quickCnt++;userSet('quick_cnt',quickCnt);
   if(quickCnt>=10)setTimeout(function(){tryUnlockAll()},100);
 };
 document.getElementById('quickShow').onclick=function(){
   if(!canUseFeature())return;
+  if(!curQ)document.getElementById('quickBtn').onclick();
   if(!curQ)return;
-  var a=document.getElementById('quickAns');
-  a.innerHTML='<b style="color:var(--acc2)">考察点：</b>'+esc(curQ.point)+
-    '<br><b style="color:var(--acc2)">参考要点：</b><br>'+
-    curQ.ans.slice(0,2).map(function(x){return '· '+esc(x)}).join('<br>');
-  a.className='quick-ans show';
+  var html='<div class="m-head"><div><h3>⚡ 随机快答 · 参考要点</h3><div class="m-sub">'+esc(SCENES[curQ.scene].name+' · '+LV_NAME[curQ.lv])+'</div></div><button class="m-x" id="qsX">✕</button></div>'+
+    '<div class="dec-quote">'+esc(curQ.q)+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px">考察点</div>'+
+    '<div class="res-reveal">'+esc(curQ.point)+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink3);margin:14px 0 8px;letter-spacing:1px">参考要点</div>'+
+    '<div style="font-size:12.5px;line-height:1.9;color:var(--ink2);margin-bottom:14px">'+
+      curQ.ans.map(function(x,i){return '<div>'+(i+1)+'. '+esc(x)+'</div>'}).join('')+'</div>'+
+    '<div class="cell-act"><button class="btn pri sm" id="qsNext">🎲 换一题</button><button class="btn gho sm" id="qsClose">收下经验</button></div>';
+  var m=openMask(html);
+  document.getElementById('qsX').onclick=closeMask;
+  document.getElementById('qsClose').onclick=closeMask;
+  document.getElementById('qsNext').onclick=function(){closeMask();setTimeout(function(){document.getElementById('quickBtn').onclick()},80)};
 };
 
 function doFlip(){
@@ -334,166 +394,349 @@ renderMeme();
 document.getElementById('memeBtn').onclick=gateLogin(renderMeme);
 
 (function(){
-  var area=document.getElementById('pqArea'),pers=storeGet('ivsim_persona',null);
-  if(pers){showPersona(pers);return}
-  runPQ();
-  function showPersona(r){
-    area.innerHTML=
-      '<div class="persona-result"><div class="pr-ic">'+esc(r.ic)+'</div>'+
-      '<div class="pr-t">'+esc(r.t)+'</div>'+
-      '<div class="pr-rate">'+esc(r.rate)+' · SCORE '+r.score+' / '+PERSONA_QS.length*5+'</div>'+
-      '<div class="pr-d">'+esc(r.d)+'</div></div>'+
-      '<div class="cell-act"><button class="btn gho sm" id="pqReset">🔄 重新测一次</button></div>';
-    document.getElementById('pqReset').onclick=function(){localStorage.removeItem('ivsim_persona');runPQ()};
-      if(!canUseFeature())return;
+  var prev=document.getElementById('personaPrev'),btn=document.getElementById('pqBtn');
+  paint(userGet('persona',null));
+
+  function paint(r){
+    if(!r){
+      prev.innerHTML='<div class="pv-m">PERSONA · 5 题</div><div class="pv-t">5 道题测出你的面试人格，附改进建议。</div>';
+      btn.textContent='🎭 开始测试';return;
+    }
+    prev.innerHTML='<div class="pv-m">'+esc(r.ic)+' '+esc(r.t)+'</div><div class="pv-t">'+esc(r.d)+'</div>';
+    btn.textContent='🔄 重新测试';
   }
-  function runPQ(){
+
+  btn.onclick=function(){
+    if(!canUseFeature())return;
     var vals=[],idx=0;
+    var m=openMask('<div class="m-head"><div><h3>🎭 面试人格测试</h3><div class="m-sub">5 道题 · 结果自动保存</div></div><button class="m-x" id="pqX">✕</button></div><div id="pqArea"></div>');
+    document.getElementById('pqX').onclick=closeMask;
+    var area=document.getElementById('pqArea');
+    render();
+
     function render(){
-      if(idx>=PERSONA_QS.length){
-        var r=calcPersona(vals);
-        storeSet('ivsim_persona',r);
-        setTimeout(function(){tryUnlockAll()},100);
-        showPersona(r);return;
-      }
+      if(idx>=PERSONA_QS.length){finish();return}
       var q=PERSONA_QS[idx];
-      var opts=q.opts.map(function(o,i){
-        return '<button class="popt" data-v="'+o.v+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>';
-      }).join('');
       area.innerHTML=
         '<div style="font-size:10px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px">Q'+(idx+1)+' / '+PERSONA_QS.length+'</div>'+
-        '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+opts+'</div></div>'+
+        '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+
+          q.opts.map(function(o,i){return '<button type="button" class="popt" data-v="'+o.v+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>'}).join('')+
+        '</div></div>'+
         '<div class="cell-act"><button class="btn gho sm" id="pqSkip">跳过</button></div>';
-      $$('.popt',area).forEach(function(b){b.onclick=function(){if(!canUseFeature())return;vals[idx]=+b.dataset.v;idx++;render()}});
+      $$('.popt',area).forEach(function(b){
+        b.onclick=function(){if(!canUseFeature())return;vals[idx]=+b.dataset.v;idx++;render()};
+      });
       document.getElementById('pqSkip').onclick=function(){vals[idx]=3;idx++;render()};
-        if(!canUseFeature())return;
     }
-    render();
-  }
+
+    function finish(){
+      var r=calcPersona(vals);
+      userSet('persona',r);paint(r);
+      setTimeout(function(){tryUnlockAll()},100);
+      area.innerHTML='<div class="persona-result"><div class="pr-ic">'+esc(r.ic)+'</div>'+
+        '<div class="pr-t">'+esc(r.t)+'</div>'+
+        '<div class="pr-rate">'+esc(r.rate)+' · SCORE '+r.score+' / '+PERSONA_QS.length*5+'</div>'+
+        '<div class="pr-d">'+esc(r.d)+'</div></div>'+
+        '<div class="cell-act"><button class="btn pri sm" id="pqAgain">🔄 再测一次</button><button class="btn gho sm" id="pqClose">收下建议</button></div>';
+      document.getElementById('pqAgain').onclick=function(){vals=[];idx=0;render()};
+      document.getElementById('pqClose').onclick=closeMask;
+      toast('人格测出来了','ok');
+    }
+  };
 })();
 
-var SJS_ROLES=[
-  {k:'neitui',t:'内推关系户',ic:'🎟️',goal:'悄悄确认谁最可能威胁你的内推名额，别暴露你认识面试官。',probe:'假装不经意问：“你觉得这次面试更看重资源，还是更看重能力？”',clue:'对流程异常熟，回答里总带出“我有个朋友说过”。'},
-  {k:'wodi',t:'卧底竞对',ic:'🕳️',goal:'套取大家的答题框架和项目细节，同时别被发现你在记录。',probe:'追问别人：“你刚说的项目数据，统计口径到底是什么？”',clue:'不太聊自己，反而一直追问细节、竞品和复盘方法。'},
-  {k:'lian',t:'只想拿offer练手',ic:'🎯',goal:'把每道题都当模拟题，能混过去就行，别暴露你并不真想来。',probe:'抛一个兜底问题：“如果这场挂了，你会怎么复盘下一场？”',clue:'回答很标准但缺真实动机，被追问“为什么想来”会绕。'}
+var FX_CASES=[
+ {q:'先做个自我介绍吧。',lines:[
+  {t:'面试官好，我是李明，XX 大学统计学应届生，投的是数据分析岗。'},
+  {t:'我这个人比较内向，不太会说话，但做事很踏实。',why:'一开口就给自己贴负面标签，面试官会顺着这个印象看你。'},
+  {t:'大学四年做过三个数据分析项目，最有代表性的是用 SQL 清洗了 300 万条订单数据。'},
+  {t:'那个项目最后帮社团把活动报名率提升了 27%。'},
+  {t:'不过上一家实习的公司特别乱，leader 什么都不懂，我也没学到什么。',why:'公开贬低前雇主，是面试里最快出局的说法之一。'},
+  {t:'我平时也关注行业动态，会看一些公众号。'},
+  {t:'大概就是这样，谢谢。',why:'收尾太随意，缺了“为什么是这个岗位”的一句收口。'}
+ ]},
+ {q:'你为什么想离开现在的公司？',lines:[
+  {t:'我现在这家做了两年，主要负责用户增长这块。'},
+  {t:'主要是公司业务调整，我负责的项目被砍了，能做的事越来越少。'},
+  {t:'老板画饼画了一年，承诺的晋升一直没兑现，这种人我实在受不了。',why:'情绪化抱怨，面试官会担心你换家公司也一样吐槽。'},
+  {t:'所以我想找一个业务更稳定、能长期投入的平台。'},
+  {t:'当然钱也是一部分原因，现在给得太少了。',why:'只说钱，等于告诉对方你随时会被更高价挖走。'},
+  {t:'我看贵司这个岗位的职责和我这两年做的事重合度很高。'},
+  {t:'如果薪资能翻倍，我肯定来。',why:'把 offer 当交易，且过早谈薪，暴露动机单一。'}
+ ]},
+ {q:'讲一个你遇到过的最难的技术问题。',lines:[
+  {t:'有一次线上订单服务突然超时，监控里 P99 从 80ms 涨到 2 秒。'},
+  {t:'我第一反应是重启服务，先恢复再说。',why:'没定位就重启，只会把问题掩盖到下一次爆发。'},
+  {t:'排查下来是一个慢 SQL 在高峰期扫了全表。'},
+  {t:'我加了索引，并把查询拆成两段，P99 回到 90ms。'},
+  {t:'这个方案是网上抄的，具体原理我也没太搞懂。',why:'不会可以，但直接承认抄且不懂，等于放弃可信度。'},
+  {t:'事后我补了慢查询监控和压测，避免再次出现。'},
+  {t:'整个过程基本我一个人搞定的，其他人都在旁边看着。',why:'抢功同时贬低团队，协作信号直接归零。'}
+ ]}
 ];
-var SJS_NORMAL={k:'normal',t:'认真候选人',ic:'💼',goal:'正常发挥，顺便找出谁在带节奏。',probe:'要求每个人用一句话说清求职动机。',clue:'动机稳定，项目细节能自洽。'};
-var SJS_PROBE_POOL=[
-  '用一句话说清你为什么想来这家公司。',
-  '你最近做过最有说服力的项目指标是什么？',
-  '如果只能保留一个答题框架，你留哪个？为什么？',
-  '你刚刚的回答里，哪一点最像背模板？',
-  '说一个你面试翻车后又救回来的经历。',
-  '你最不想让面试官追问哪个细节？'
-];
-var SJS=null;
-function sjsOpen(html){var m=openMask(html);return m.querySelector('.modal')}
-function sjsBuild(mode,count){
-  var names=mode==='ai'?['我','AI · 阿黎','AI · 北辰','AI · 蔚然','AI · 韩梅']:['我','好友 A','好友 B','好友 C','好友 D'];
-  var deck=SJS_ROLES.slice();
-  for(var r=3;r<count;r++)deck.push(SJS_NORMAL);
-  deck=shuffle(deck);
-  var ps=[];
-  for(var i=0;i<count;i++)ps.push({name:names[i],role:deck[i],ai:mode==='ai'&&i>0,seen:false});
-  return {mode:mode,count:count,players:ps,q:QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)]};
-}
-function sjsSetup(){
-  if(!canUseFeature())return;
-  var cfg={mode:'friends',count:3};
-  var html='<div class="sec-t" style="margin-top:0">🕵️ 面试剧本杀</div>'+
-    '<div class="sjs-clue">每人抽一张隐藏身份：<b>内推关系户</b>、<b>卧底竞对</b>、<b>只想拿 offer 练手</b>；超过 3 人时，其余为认真候选人。面试中互相试探，最后投票抓人。</div>'+
-    '<div class="fp-sec-t" style="margin-top:18px">开局方式</div>'+
-    '<div class="sjs-opts"><button class="sjs-opt fp-opt on" data-mode="friends">👥 好友同屏</button><button class="sjs-opt fp-opt" data-mode="ai">🤖 自己开局 · AI 补位</button></div>'+
-    '<div class="fp-sec-t">人数</div>'+
-    '<div class="sjs-opts"><button class="sjs-opt fp-opt on" data-count="3">3 人局</button><button class="sjs-opt fp-opt" data-count="4">4 人局</button><button class="sjs-opt fp-opt" data-count="5">5 人局</button></div>'+
-    '<button class="btn pri" id="sjsStart" style="width:100%">🎬 抽身份开本</button>';
-  var box=sjsOpen(html);
-  function sync(){
-    $$('.sjs-opt',box).forEach(function(b){
-      var on=(b.dataset.mode&&b.dataset.mode===cfg.mode)||(b.dataset.count&&+b.dataset.count===cfg.count);
-      b.classList.toggle('on',!!on);
-    });
-  }
-  $$('.sjs-opt',box).forEach(function(b){b.onclick=function(){if(b.dataset.mode)cfg.mode=b.dataset.mode;if(b.dataset.count)cfg.count=+b.dataset.count;sync()}});
-  document.getElementById('sjsStart').onclick=function(){if(!canUseFeature())return;SJS=sjsBuild(cfg.mode,cfg.count);sjsReveal()};
-}
-function sjsReveal(){
-  var rows=SJS.players.map(function(p,i){
-    var role=p.ai?'<span class="role">AI 保密</span>':'<span class="role hide" id="sjsRole'+i+'">'+esc(p.role.ic+' '+p.role.t)+'</span>';
-    var btn=p.ai?'<button class="btn gho sm" disabled>AI 保密</button>':'<button class="btn gho sm" data-reveal="'+i+'">查看身份</button>';
-    return '<div class="sjs-row" style="animation-delay:'+(i*70)+'ms"><span class="who">'+esc(p.name)+'</span>'+(p.ai?'<span class="tag-ai">AI</span>':'')+role+btn+'</div>';
-  }).join('');
-  var tip=SJS.mode==='ai'?'你是唯一真人：只看自己的身份；AI 身份全程保密，靠后面的公开发言推理。':'好友同屏：一个接一个点「查看身份」，看完立刻遮好，别偷看别人。';
-  var html='<div class="sec-t" style="margin-top:0">抽隐藏身份</div>'+
-    '<div class="sjs-clue">'+tip+'</div><div class="sjs-list">'+rows+'</div>'+
-    '<button class="btn pri" id="sjsLock" style="width:100%" disabled>全部遮好，进入面试 →</button>';
-  var box=sjsOpen(html);
-  $$('[data-reveal]',box).forEach(function(btn){
-    btn.onclick=function(){
-      var i=+btn.getAttribute('data-reveal'),p=SJS.players[i],sp=document.getElementById('sjsRole'+i);
-      p.seen=true;
-      if(sp.classList.contains('hide')){sp.classList.remove('hide');sp.classList.add('sjs-flip');btn.textContent='遮好'}else{sp.classList.add('hide');sp.classList.remove('sjs-flip');btn.textContent='再看一眼'}
-      var ok=SJS.mode==='ai'?SJS.players[0].seen:SJS.players.every(function(x){return x.ai||x.seen});
-      document.getElementById('sjsLock').disabled=!ok;
+(function(){
+  var best=userGet('fx_best',0),btn=document.getElementById('fxBtn');
+  if(best)document.getElementById('fxPrev').textContent='最佳成绩 '+best+' 分 · 一段自述里藏着 3 处雷点，点错扣 5 秒。';
+  btn.onclick=function(){
+    if(!canUseFeature())return;
+    var c=FX_CASES[Math.floor(Math.random()*FX_CASES.length)],lines=c.lines;
+    var total=0;lines.forEach(function(l){if(l.why)total++});
+    var html='<div class="m-head"><div><h3>🔍 面试找茬</h3><div class="m-sub">点出全部 '+total+' 处雷点 · 点错扣 5 秒</div></div><button class="m-x" id="fxX">✕</button></div>'+
+      '<div class="fx-bar"><span>面试官：'+esc(c.q)+'</span><span>已找到 <b id="fxFound">0</b>/'+total+'</span><span class="fx-timer" id="fxT">60</span></div>'+
+      '<div id="fxList">'+lines.map(function(l,i){return '<button type="button" class="fx-line" data-i="'+i+'">'+esc(l.t)+'</button>'}).join('')+'</div>'+
+      '<div id="fxEnd"></div>';
+    var m=openMask(html);
+    document.getElementById('fxX').onclick=closeMask;
+    var found=0,left=60,wrong=0,over=false,tEl=document.getElementById('fxT');
+    var tid=setInterval(function(){
+      if(!m.isConnected){clearInterval(tid);return}
+      if(over)return;
+      left--;tEl.textContent=left;
+      if(left<=10)tEl.classList.add('low');
+      if(left<=0)finish();
+    },1000);
+    function finish(){
+      if(over)return;over=true;clearInterval(tid);
+      var score=Math.max(0,found*100-wrong*10+Math.max(0,left)*2);
+      if(score>best){best=score;userSet('fx_best',score)}
+      $$('.fx-line',m).forEach(function(b){
+        var l=lines[+b.dataset.i];
+        if(l.why&&!b.classList.contains('found')){
+          b.classList.add('found');
+          b.innerHTML=esc(l.t)+'<span class="fx-why">⚠️ 漏掉：'+esc(l.why)+'</span>';
+        }
+      });
+      document.getElementById('fxEnd').innerHTML='<div class="res-reveal">得分 <b>'+score+'</b> · 找到 '+found+'/'+total+' · 误点 '+wrong+' 次</div>'+
+        '<div class="cell-act"><button class="btn pri sm" id="fxAgain">🔁 再来一局</button><button class="btn gho sm" id="fxClose">收下经验</button></div>';
+      document.getElementById('fxAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
+      document.getElementById('fxClose').onclick=closeMask;
+      document.getElementById('fxPrev').textContent='最佳成绩 '+best+' 分 · 找到 '+found+'/'+total+'，误点 '+wrong+' 次。';
+      toast('找茬结束：'+score+' 分','ok');setTimeout(function(){tryUnlockAll()},150);
+    }
+    document.getElementById('fxList').onclick=function(e){
+      var b=e.target.closest('.fx-line');if(!b||over)return;
+      var l=lines[+b.dataset.i];
+      if(b.classList.contains('found'))return;
+      if(l.why){
+        b.classList.add('found');
+        b.innerHTML=esc(l.t)+'<span class="fx-why">✅ '+esc(l.why)+'</span>';
+        found++;document.getElementById('fxFound').textContent=found;
+        if(found>=total)finish();
+      }else{
+        b.classList.add('shot');wrong++;left-=5;
+        setTimeout(function(){b.classList.remove('shot')},300);
+      }
     };
-  });
-  document.getElementById('sjsLock').onclick=function(){sjsInterview()};
-}
-function sjsInterview(){
-  var q=SJS.q;
-  var players=SJS.players.map(function(p){return '<span class="chip">'+esc(p.name)+(p.ai?' · AI':'')+'</span>'}).join('');
-  var probes=shuffle(SJS_PROBE_POOL).slice(0,4).map(function(x){return '<div class="sjs-clue">🧪 试探问题：'+esc(x)+'</div>'}).join('');
-  var aiPart=SJS.mode==='ai'
-    ? '<div class="sjs-clue" id="sjsAiBox">AI 玩家已就位。点下方按钮生成他们的“公开发言”，从措辞里找破绽。</div><div class="cell-act" style="margin-top:0"><button class="btn gho sm" id="sjsAiBtn">🗣️ 生成 AI 发言</button></div>'
-    : '<div class="sjs-clue">好友同屏玩法：轮流用 60 秒回答公开题；每人必须向另一个人提一个试探问题。说完再进入投票。</div>';
-  var html='<div class="sec-t" style="margin-top:0">面试中互相试探</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+players+'</div>'+
-    '<div class="sjs-card"><div class="sjs-t">公开面试题</div><div class="sjs-d"><b style="color:'+SCENE_COLOR[q.scene]+'">['+SCENES[q.scene].name+' · '+LV_NAME[q.lv]+']</b> '+esc(q.q)+'</div></div>'+
-    '<div class="fp-sec-t" style="margin-top:18px">推理提示</div>'+probes+aiPart+
-    '<button class="btn pri" id="sjsVoteBtn" style="width:100%;margin-top:14px">🗳️ 进入投票</button>';
-  var box=sjsOpen(html);
-  var aiBtn=document.getElementById('sjsAiBtn');
-  if(aiBtn)aiBtn.onclick=function(){
-    var lines=SJS.players.filter(function(p){return p.ai}).map(function(p,idx){return '<div class="sjs-line" style="margin:6px 0;animation-delay:'+(idx*140)+'ms"><b>'+esc(p.name)+'：</b>'+esc(p.role.clue)+'</div>'}).join('');
-    document.getElementById('sjsAiBox').innerHTML='<b>AI 公开发言</b>'+lines;
-    aiBtn.disabled=true;aiBtn.textContent='已生成';
   };
-  document.getElementById('sjsVoteBtn').onclick=function(){sjsVote()};
-}
-function sjsVote(){
-  var opts='<option value="-1">选择嫌疑人</option>'+SJS.players.map(function(p,i){return '<option value="'+i+'">'+esc(p.name)+(p.ai?'（AI）':'')+'</option>'}).join('');
-  var html='<div class="sec-t" style="margin-top:0">最后投票</div>'+
-    '<div class="sjs-clue">根据刚才的回答和试探，把三个隐藏身份分别投出来。投对几个算几分。</div>'+
-    '<div class="sjs-vote">'+
-      '<label>🎟️ 谁是内推关系户？<select id="voteNeitui">'+opts+'</select></label>'+
-      '<label>🕳️ 谁是卧底竞对？<select id="voteWodi">'+opts+'</select></label>'+
-      '<label>🎯 谁只想拿 offer 练手？<select id="voteLian">'+opts+'</select></label>'+
-    '</div><button class="btn pri" id="sjsDone" style="width:100%">揭晓身份</button>';
-  var box=sjsOpen(html);
-  document.getElementById('sjsDone').onclick=function(){
-    var picks={neitui:+document.getElementById('voteNeitui').value,wodi:+document.getElementById('voteWodi').value,lian:+document.getElementById('voteLian').value};
-    if(picks.neitui<0||picks.wodi<0||picks.lian<0){toast('三个身份都要投完','warn');return}
-    var hit=0;
-    var rows=SJS.players.map(function(p,i){
-      var marks=SJS_ROLES.map(function(r,ri){
-        if(picks[r.k]!==i)return '';
-        if(p.role.k===r.k){hit++;return '<span class="sjs-stamp" style="animation-delay:'+(ri*90)+'ms;color:#7dd3fc">✅ 投对'+r.t+'</span>'}
-        return '<span class="sjs-stamp" style="animation-delay:'+(ri*90)+'ms;color:#fda4af">❌ 错投'+r.t+'</span>';
-      }).join('');
-      return '<div class="sjs-row" style="animation-delay:'+(i*80)+'ms"><span class="who">'+esc(p.name)+'</span>'+(p.ai?'<span class="tag-ai">AI</span>':'')+'<span class="role">'+esc(p.role.ic+' '+p.role.t)+'</span><span style="font-size:11px;color:var(--ink3)">'+marks+'</span></div>';
-    }).join('');
-    var html='<div class="sec-t" style="margin-top:0">身份揭晓</div>'+
-      '<div class="sjs-reveal">本局得分：<b>'+hit+' / 3</b>。'+ (hit===3?'全员狼人杀毕业，推理很稳。':hit===2?'差一点满分，注意谁在回避真实动机。':'多盯“追问细节的人”和“只说框架的人”。') +'</div>'+
-      '<div class="sjs-list">'+rows+'</div>'+
-      '<div class="cell-act"><button class="btn pri sm" id="sjsAgain">🔁 再开一局</button><button class="btn gho sm" id="sjsClose">收下经验</button></div>';
-    var box2=sjsOpen(html);
-    document.getElementById('sjsAgain').onclick=function(){sjsSetup()};
-    document.getElementById('sjsClose').onclick=function(){closeMask()};
-    setTimeout(function(){tryUnlockAll()},120);
+})();
+
+var RV_CASES=[
+ {q:'你最大的缺点是什么？',a:[
+  {n:'候选人 A',t:'我有时候太追求完美，一个细节能抠很久。',v:'weak',why:'假缺点套路，面试官一天能听八遍，反而显得不真诚。'},
+  {n:'候选人 B',t:'我公开发言容易紧张，所以我会提前把要点写成提纲，也主动申请主持周会来练手。',v:'pass',why:'真实、具体、带改进行动，这才是可接受的缺点回答。'},
+  {n:'候选人 C',t:'我没什么缺点，同事都觉得我挺全能的。',v:'reject',why:'拒绝自我认知，还顺手自夸，这一份必须淘汰。'}
+ ]},
+ {q:'为什么选择我们公司？',a:[
+  {n:'候选人 A',t:'因为你们给的钱多，而且离我家近。',v:'reject',why:'只谈钱和通勤，说明你对这份工作本身没有兴趣。'},
+  {n:'候选人 B',t:'你们在这个赛道做得比较久，我看过你们去年的产品发布，其中 X 功能和我之前做的经验很契合。',v:'pass',why:'做了功课，并且把公司需求和个人经验连起来了。'},
+  {n:'候选人 C',t:'觉得贵司平台大，应该有发展空间。',v:'weak',why:'不算错，但每家公司都能这么套，没有信息增量。'}
+ ]},
+ {q:'给你一个没做过的任务，你会怎么处理？',a:[
+  {n:'候选人 A',t:'先确认目标、交付时间和可用资源，再拆成小块，找做过类似事情的同事请教，先做出一个可验证的小版本。',v:'pass',why:'有拆解、有求助、有验证，是成熟的处理路径。'},
+  {n:'候选人 B',t:'我一般先答应下来，边做边学，实在不行再说。',v:'reject',why:'先承诺后兜底，把风险转给团队，这种人面试官最怕。'},
+  {n:'候选人 C',t:'我会先问问为什么是我，如果确实没人做我再接。',v:'weak',why:'防御性太强，显得不愿意承担，但还不至于直接淘汰。'}
+ ]}
+];
+(function(){
+  var cnt=userGet('rv_cnt',0),hit=userGet('rv_hit',0),btn=document.getElementById('rvBtn');
+  function prev(){
+    if(cnt)document.getElementById('rvPrev').textContent='已评审 '+cnt+' 场 · 判对 '+hit+' 场（'+Math.round(hit/cnt*100)+'%）';
+  }
+  prev();
+  btn.onclick=function(){
+    if(!canUseFeature())return;
+    var c=RV_CASES[Math.floor(Math.random()*RV_CASES.length)],rej=-1;
+    c.a.forEach(function(x,i){if(x.v==='reject')rej=i});
+    var html='<div class="m-head"><div><h3>🎤 你来当面试官</h3><div class="m-sub">三份回答里只有一份必须淘汰</div></div><button class="m-x" id="rvX">✕</button></div>'+
+      '<div class="dec-quote">面试官：'+esc(c.q)+'</div>'+
+      '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:10px">点选你认为最该淘汰的那一份：</div>'+
+      '<div id="rvList">'+c.a.map(function(x,i){
+        return '<button type="button" class="rv-ans" data-i="'+i+'"><b>'+esc(x.n)+'</b><br>“'+esc(x.t)+'”</button>';
+      }).join('')+'</div><div id="rvEnd"></div>';
+    var m=openMask(html);
+    document.getElementById('rvX').onclick=closeMask;
+    var done=false;
+    document.getElementById('rvList').onclick=function(e){
+      var b=e.target.closest('.rv-ans');if(!b||done)return;
+      done=true;
+      var ok=+b.dataset.i===rej;
+      $$('.rv-ans',m).forEach(function(el){
+        var x=c.a[+el.dataset.i],tag=x.v==='reject'?'rj':x.v==='pass'?'ps':'wk';
+        el.innerHTML='<b>'+esc(x.n)+'</b> <span class="rv-tag '+tag+'">'+(x.v==='reject'?'必须淘汰':x.v==='pass'?'优秀回答':'勉强及格')+'</span><br>“'+esc(x.t)+'”<span class="rv-why">'+esc(x.why)+'</span>';
+        el.classList.remove('on');
+        if(x.v==='reject')el.classList.add('bad');else if(x.v==='pass')el.classList.add('good');
+      });
+      cnt++;if(ok)hit++;userSet('rv_cnt',cnt);userSet('rv_hit',hit);
+      document.getElementById('rvEnd').innerHTML='<div class="res-reveal">'+
+        (ok?'🎯 抓对了：'+esc(c.a[rej].n)+' 就是必须淘汰的那一份。':'😮 判断偏了：真正该淘汰的是 '+esc(c.a[rej].n)+'。')+'</div>'+
+        '<div class="cell-act"><button class="btn pri sm" id="rvAgain">🔁 再评审一场</button><button class="btn gho sm" id="rvClose">收下经验</button></div>';
+      document.getElementById('rvAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
+      document.getElementById('rvClose').onclick=closeMask;
+      prev();toast(ok?'判对了！':'再看看解析','ok');setTimeout(function(){tryUnlockAll()},150);
+    };
   };
-}
-document.getElementById('sjsBtn').onclick=function(){sjsSetup()};
-document.getElementById('sjsHow').onclick=function(){miniPop('面试剧本杀玩法','先选好友同屏或 AI 补位；每人抽隐藏身份并只看自己的。公开题回答时互相提试探问题，最后分别投出内推关系户、卧底竞对和练手玩家。')};
+})();
+
+var DEC_POOL=[
+ {s:'我们团队比较扁平。',n:'可能没有明确层级，也可能没人专门带新人。'},
+ {s:'团队节奏比较快。',n:'加班大概率不少，项目排期通常很紧。'},
+ {s:'我们希望候选人抗压能力强。',n:'这个岗位压力大，随时可能要救火。'},
+ {s:'这个岗位成长空间很大。',n:'现阶段薪资给不高，所以先画个未来。'},
+ {s:'你先回去等通知吧。',n:'大概率没有下一轮了，别死等。'},
+ {s:'我们会综合考虑所有候选人。',n:'你目前不是最优选，还在看别人。'},
+ {s:'我们实行弹性工作制。',n:'没有固定上下班，也可能随时被找。'},
+ {s:'这个岗位是核心岗位。',n:'责任重、要求高，出问题大概率你扛。'},
+ {s:'我们更看重潜力。',n:'经验或技能暂时不匹配，但想招个便宜的。'},
+ {s:'公司正在快速扩张。',n:'组织变动多，流程和职责可能还不稳定。'},
+ {s:'这个项目非常有挑战性。',n:'资源少、时间紧，而且大概率没人做过。'},
+ {s:'我们内部机会很多。',n:'现在这个坑可能不太舒服，以后可以内部转。'}
+];
+(function(){
+  var best=userGet('dec_best',0),btn=document.getElementById('decBtn');
+  if(best)document.getElementById('decPrev').textContent='最高分 '+best+' · 一句黑话三个含义，只有一个是真的。';
+  btn.onclick=function(){
+    if(!canUseFeature())return;
+    var qs=shuffle(DEC_POOL).slice(0,8),idx=0,score=0,streak=0,maxStreak=0,answered=false;
+    var html='<div class="m-head"><div><h3>🗣️ HR 潜台词翻译机</h3><div class="m-sub">8 句黑话 · 选出真实含义</div></div><button class="m-x" id="decX">✕</button></div>'+
+      '<div class="dec-stat"><span>第 <b id="decN">1</b>/8 句</span><span>得分 <b id="decS">0</b></span><span>连击 <b id="decK">0</b></span></div>'+
+      '<div class="dec-quote" id="decQ"></div><div id="decOpts"></div><div id="decEnd"></div>';
+    var m=openMask(html);
+    document.getElementById('decX').onclick=closeMask;
+    function render(){
+      var q=qs[idx];
+      answered=false;
+      document.getElementById('decN').textContent=idx+1;
+      document.getElementById('decQ').textContent='“'+q.s+'”';
+      var others=shuffle(DEC_POOL.filter(function(x){return x!==q})).slice(0,2).map(function(x){return x.n});
+      document.getElementById('decOpts').innerHTML=shuffle([q.n].concat(others)).map(function(t){
+        return '<button type="button" class="dec-opt" data-t="'+esc(t)+'">'+esc(t)+'</button>';
+      }).join('')+'<div id="decNext"></div>';
+      $$('.dec-opt',m).forEach(function(b){
+        b.onclick=function(){
+          if(answered)return;answered=true;
+          var ok=b.dataset.t===q.n;
+          $$('.dec-opt',m).forEach(function(x){if(x.dataset.t===q.n)x.classList.add('ok')});
+          if(!ok){b.classList.add('no');streak=0}
+          else{score+=10+streak*2;streak++;if(streak>maxStreak)maxStreak=streak}
+          document.getElementById('decS').textContent=score;
+          document.getElementById('decK').textContent=streak;
+          document.getElementById('decNext').innerHTML='<button class="btn pri sm" id="decGo" style="width:100%;margin-top:6px">'+(idx<7?'下一句 →':'看结果')+'</button>';
+          document.getElementById('decGo').onclick=function(){
+            if(idx<7){idx++;render()}else{finish()}
+          };
+        };
+      });
+    }
+    function finish(){
+      var title=score>=120?'🏆 老练翻译官':score>=90?'👂 听得出话外音':score>=60?'🙂 基本能听懂':'🌱 容易被话术带走';
+      if(score>best){best=score;userSet('dec_best',score)}
+      document.getElementById('decOpts').innerHTML='';
+      document.getElementById('decQ').textContent='翻译结束';
+      document.getElementById('decEnd').innerHTML='<div class="res-reveal">得分 <b>'+score+'</b> · 最高连击 '+maxStreak+' · '+title+'</div>'+
+        '<div style="font-size:11.5px;color:var(--ink3);line-height:1.8;margin-bottom:10px">提醒：潜台词只是概率判断，真遇到这些话，直接追问一句“具体能说说是怎样的节奏吗”，比猜更稳。</div>'+
+        '<div class="cell-act"><button class="btn pri sm" id="decAgain">🔁 再来一轮</button><button class="btn gho sm" id="decClose">收下经验</button></div>';
+      document.getElementById('decAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
+      document.getElementById('decClose').onclick=closeMask;
+      document.getElementById('decPrev').textContent='最高分 '+best+' · 最高连击 '+maxStreak+'，还能再练。';
+      setTimeout(function(){tryUnlockAll()},150);
+    }
+    render();
+  };
+})();
+
+var NEG_ROUNDS=[
+ {hr:'我们这边的预算就是 18K，你看可以吗？',opts:[
+  {t:'坚持 20K，说明这是市场价',offer:1.5,gw:-15,say:'18K 和我的预期有点距离，我手上同岗位的报价基本在 20K 上下。'},
+  {t:'先按 18K 答应，入职以后再说',offer:0.5,gw:-5,say:'行，那就 18K 吧，入职以后再聊。'},
+  {t:'不报数字，强调自己上手快',offer:2,gw:-8,say:'我这两年做的就是这块业务，进来就能接手上线，能不能按匹配度重新看一下？'}
+ ]},
+ {hr:'我去申请了，最多到 20K，这个数能签吗？',opts:[
+  {t:'争取 21K，并给出明确理由',offer:1,gw:-14,say:'感谢帮我争取。如果能到 21K，我这周就可以定下来。'},
+  {t:'接受 20K，表达感谢',offer:0,gw:6,say:'20K 我可以接受，谢谢您帮忙争取。'},
+  {t:'20K 可以，但问问签字费',offer:0.8,gw:-9,say:'20K 我接受，另外想问问有没有签字费或者入职补贴？'}
+ ]},
+ {hr:'你手上还有其他 offer 吗？',opts:[
+  {t:'坦白有一家，说在谈数字',offer:1.2,gw:-12,say:'有一家在谈，大概 22K，但我更倾向你们团队。'},
+  {t:'说还在看，不报具体数字',offer:0.5,gw:-4,say:'还有几家在流程里，具体数字还没定。'},
+  {t:'说没有，只认真投了你们',offer:0,gw:8,say:'目前只认真投了你们这一家。'}
+ ]},
+ {hr:'那今天就先定下来吧，你还有什么要求？',opts:[
+  {t:'最后争取到 22K',offer:1.5,gw:-20,say:'如果可以到 22K，我今天就可以确认。'},
+  {t:'定在 20.5K，换尽快出 offer',offer:0.6,gw:-3,say:'20.5K 我可以签，希望尽快出 offer letter。'},
+  {t:'接受当前数字，先拿 offer',offer:0,gw:6,say:'就按现在的数字吧，我这边没问题。'}
+ ]}
+];
+(function(){
+  var best=userGet('neg_best',0),btn=document.getElementById('negBtn');
+  if(best)document.getElementById('negPrev').textContent='最佳战果 '+best+'K · 四轮博弈，目标 20K 以上且诚意值不崩。';
+  btn.onclick=function(){
+    if(!canUseFeature())return;
+    var offer=18,gw=60,idx=0;
+    var html='<div class="m-head"><div><h3>💰 薪资谈判拉锯</h3><div class="m-sub">你的期望 22K · 共 4 轮</div></div><button class="m-x" id="negX">✕</button></div>'+
+      '<div class="neg-top"><div class="neg-k"><div class="l">当前报价</div><div class="v" id="negOffer">18.0K</div></div>'+
+      '<div class="neg-k"><div class="l">HR 诚意值</div><div class="v" id="negGw">60</div></div>'+
+      '<div class="neg-k"><div class="l">剩余轮次</div><div class="v" id="negLeft">4</div></div></div>'+
+      '<div class="neg-bar"><i id="negBar" style="width:60%"></i></div><div id="negBody"></div>';
+    var m=openMask(html);
+    document.getElementById('negX').onclick=closeMask;
+    function paint(){
+      document.getElementById('negOffer').textContent=offer.toFixed(1)+'K';
+      document.getElementById('negGw').textContent=Math.round(gw);
+      document.getElementById('negLeft').textContent=NEG_ROUNDS.length-idx;
+      document.getElementById('negBar').style.width=Math.max(0,Math.min(100,gw))+'%';
+    }
+    function round(){
+      if(idx>=NEG_ROUNDS.length){finish();return}
+      var r=NEG_ROUNDS[idx];
+      paint();
+      document.getElementById('negBody').innerHTML='<div class="neg-hr">HR：'+esc(r.hr)+'</div>'+
+        r.opts.map(function(o,i){return '<button type="button" class="dec-opt" data-i="'+i+'">'+esc(o.t)+'</button>'}).join('');
+      $$('.dec-opt',m).forEach(function(b){
+        b.onclick=function(){
+          var o=r.opts[+b.dataset.i];
+          offer=Math.min(22,offer+o.offer);gw=Math.max(0,Math.min(100,gw+o.gw));
+          idx++;paint();
+          $$('.dec-opt',m).forEach(function(x){x.disabled=true;x.style.opacity=.45});
+          b.classList.add('ok');
+          document.getElementById('negBody').insertAdjacentHTML('beforeend','<div class="neg-hr">你：'+esc(o.say)+'<br><br>HR：'+
+            esc(o.gw<-10?'我得再想想，这个数字有点超出范围了。':o.gw>0?'理解，你说的这些我们也能接受。':'行，我记下来，尽量帮你争取。')+'</div>'+
+            '<button class="btn pri sm" id="negGo" style="width:100%">'+(idx<NEG_ROUNDS.length?'下一轮 →':'看结果')+'</button>');
+          document.getElementById('negGo').onclick=function(){round()};
+        };
+      });
+    }
+    function finish(){
+      var verdict;
+      if(offer>=21&&gw>=40){verdict='🏆 双赢：拿到涨幅，也给对方留了台阶。'}
+      else if(offer>=20&&gw>=25){verdict='✅ 谈到位了：数字达标，关系也没崩。'}
+      else if(offer>=20){verdict='⚠️ 数字到了，但诚意值见底，入职后要留个心眼。'}
+      else if(offer>=19){verdict='😐 只挪了一点点，下次先准备好市场价再上桌。'}
+      else{verdict='❌ 基本照着对方报价走了，等于没谈。'}
+      if(offer>best){best=+offer.toFixed(1);userSet('neg_best',best)}
+      document.getElementById('negBody').innerHTML='<div class="neg-top"><div class="neg-k"><div class="l">最终报价</div><div class="v">'+offer.toFixed(1)+'K</div></div>'+
+        '<div class="neg-k"><div class="l">诚意值</div><div class="v">'+Math.round(gw)+'</div></div>'+
+        '<div class="neg-k"><div class="l">期望</div><div class="v">22K</div></div></div>'+
+        '<div class="res-reveal">'+verdict+'</div>'+
+        '<div style="font-size:11.5px;color:var(--ink3);line-height:1.8;margin-bottom:10px">复盘：谈判里最容易犯的错是“只报数字不给理由”。先讲你能解决什么问题，再谈钱，对方才有台阶往上加。</div>'+
+        '<div class="cell-act"><button class="btn pri sm" id="negAgain">🔁 再谈一次</button><button class="btn gho sm" id="negClose">收下经验</button></div>';
+      document.getElementById('negAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
+      document.getElementById('negClose').onclick=closeMask;
+      document.getElementById('negPrev').textContent='最佳战果 '+best+'K · 上次谈到 '+offer.toFixed(1)+'K，诚意值 '+Math.round(gw)+'。';
+      toast(verdict,'ok');setTimeout(function(){tryUnlockAll()},150);
+    }
+    round();
+  };
+})();
 </script>
 </body>
 </html>

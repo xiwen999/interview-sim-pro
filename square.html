@@ -3,9 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>视频广场 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261039">
+<title>观摩大厅 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=20261031f">
 <style>
+body{background:
+  radial-gradient(ellipse 70% 45% at 30% -5%,rgba(244,114,182,.1),transparent),
+  radial-gradient(ellipse 55% 40% at 75% 15%,rgba(251,191,36,.07),transparent),
+  radial-gradient(ellipse 45% 35% at 50% 95%,rgba(138,189,255,.05),transparent),
+  #0a1020}
+.fp-wrap::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(circle at 25% 30%,rgba(244,114,182,.05) 0 2px,transparent 2px),
+    radial-gradient(circle at 75% 45%,rgba(251,191,36,.04) 0 1.5px,transparent 1.5px),
+    radial-gradient(circle at 50% 75%,rgba(138,189,255,.04) 0 1px,transparent 1px);
+  background-size:200px 200px,180px 180px,240px 240px;opacity:.5}
+.fp-shell{position:relative;overflow:hidden}
+/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+.fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fp-shell::after{content:"🎬";position:absolute;right:-25px;top:-35px;font-size:190px;opacity:.028;
+  transform:rotate(-12deg);pointer-events:none;filter:grayscale(.2)}
+@media (max-width:900px){.fp-shell::after{font-size:130px;right:-15px;top:-25px}}
+/* 浅色模式适配 */
+body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+body.light .fp-wrap::before{opacity:.22}
+body.light .fp-shell::after{opacity:.018}
 /* 统计行 */
 .sq-stats{display:flex;gap:26px;margin:2px 0 0 18px;flex:none}
 .sq-stat .n{font-size:24px;font-weight:900;color:var(--ink)}
@@ -39,10 +59,11 @@
 <body>
 <div class="fp-wrap">
   <div class="fp-shell rise">
+    <div class="fx-stars" aria-hidden="true"><div id="sqStars1"></div><div id="sqStars2"></div><div id="sqStars3"></div></div>
     <div class="fp-head">
       <div class="fp-ic">🌐</div>
       <div>
-        <h1>视频广场</h1>
+        <h1>观摩大厅</h1>
         <p class="fp-sub">这里展示所有通过审核的模拟面试视频，看看别人怎么答，取长补短。</p>
       </div>
       <div class="fp-acts"><button class="btn pri sm" id="goUp">⬆️ 去个人中心上传</button></div>
@@ -65,9 +86,11 @@
   </div>
 </div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 if(!initPage('square',true))throw new Error('login required');
+/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+seedStars('sqStars1',700,1,60);seedStars('sqStars2',200,2,120);seedStars('sqStars3',100,3,180);
 
 var DEMO_VIDEOS=[
   {emoji:'🎯',title:'自我介绍满分示范：三段式表达法',scene:'job',owner:'金牌讲师 Linda'},
@@ -137,12 +160,13 @@ document.getElementById('goUp').onclick=function(){location.href='videos.html#vi
 
 function render(){
   var me=(getUser()||{}).name||'访客';
+  var uid=ensureUid();
   var all=getVideos().filter(function(v){return v.shared&&v.status==='approved'});
   /* 统计 */
   document.getElementById('stTotal').textContent=all.length;
   var owners={};all.forEach(function(v){owners[v.owner]=1});
   document.getElementById('stUser').textContent=Object.keys(owners).length;
-  document.getElementById('stMine').textContent=all.filter(function(v){return v.owner===me}).length;
+  document.getElementById('stMine').textContent=all.filter(function(v){return (uid&&v.ownerUid)?v.ownerUid===uid:v.owner===me}).length;
   /* 列表 */
   var list=SCENE_F==='all'?all:all.filter(function(v){return v.scene===SCENE_F});
   document.getElementById('list').innerHTML=list.length?('<div class="sq-grid">'+list.map(function(v){

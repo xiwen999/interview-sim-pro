@@ -30,6 +30,13 @@ button{font-family:inherit;cursor:pointer}
 .ad-top .sp{flex:1}
 .ad-top .who{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#c7d2fe}
 .ad-top .who b{color:#fff}
+.src-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:20px;
+  font-size:11.5px;font-weight:600;cursor:help;transition:.2s}
+.src-badge .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.src-badge.src-server{background:rgba(45,212,191,.16);color:#5eead4;border:1px solid rgba(45,212,191,.4)}
+.src-badge.src-server .dot{background:#34d399;box-shadow:0 0 6px #34d399}
+.src-badge.src-local{background:rgba(251,191,36,.14);color:#fcd34d;border:1px solid rgba(251,191,36,.35)}
+.src-badge.src-local .dot{background:#fbbf24;box-shadow:0 0 6px #fbbf24}
 .ad-tbtn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#dbe4ff;
   padding:6px 12px;border-radius:9px;font-size:12.5px;transition:.18s}
 .ad-tbtn:hover{background:rgba(255,255,255,.18);color:#fff}
@@ -167,6 +174,14 @@ table.tb tbody tr:hover{background:#f8faff}
 .toast.err{background:rgba(239,68,68,.96)}
 
 .foot-note{font-size:11.5px;color:var(--ink3);margin-top:18px;line-height:1.9}
+
+/* 前后台数据关联提示条 */
+.link-banner{font-size:12.5px;line-height:1.7;color:#cfe3ff;background:rgba(59,130,246,.16);
+  border:1px solid rgba(96,165,250,.4);border-radius:12px;padding:11px 14px;margin-bottom:14px}
+.link-banner b{color:#fff}
+/* 当前前台用户所在行高亮 */
+.row-me{background:rgba(59,130,246,.10)}
+.row-me td:first-child{border-left:3px solid #60a5fa}
 @media (max-width:860px){
   .ad-side{width:64px;padding:10px 6px}
   .ad-side .grp{display:none}
@@ -185,8 +200,9 @@ table.tb tbody tr:hover{background:#f8faff}
     <div class="ic">🛡️</div>
     <h2>管理后台</h2>
     <div class="ds">模拟面试训练营 Pro · 运营管理控制台</div>
-    <div class="f"><div class="lab">管理员账号</div><input class="ad-in" id="gAcc" placeholder="admin" autocomplete="username"></div>
-    <div class="f"><div class="lab">管理员密码</div><input class="ad-in" id="gPwd" type="password" placeholder="请输入密码" autocomplete="current-password"></div>
+    <div class="f"><div class="lab">管理员账号</div><input class="ad-in" id="gAcc" placeholder="请输入管理员账号" autocomplete="username" aria-label="管理员账号"></div>
+    <div class="f"><div class="lab">管理员密码</div><input class="ad-in" id="gPwd" type="password" placeholder="请输入密码" autocomplete="current-password" aria-label="管理员密码"></div>
+    <div class="f" id="gPwd2F" style="display:none"><div class="lab">确认密码（首次初始化）</div><input class="ad-in" id="gPwd2" type="password" placeholder="再次输入密码" autocomplete="new-password" aria-label="确认密码"></div>
     <div class="err" id="gErr"></div>
     <button class="btn pri" id="gOk" style="width:100%">登 录 后 台</button>
     <a class="back" href="index.html">← 返回用户前台</a>
@@ -206,7 +222,7 @@ table.tb tbody tr:hover{background:#f8faff}
       模拟面试训练营 Pro <span class="tag">管理后台</span>
     </div>
     <div class="sp"></div>
-    <div class="who">👑 <b id="topWho">管理员</b> · 数据源：本机浏览器</div>
+    <div class="who">👑 <b id="topWho">管理员</b> · 数据源：<span id="topSrc">本机浏览器</span></div>
     <button class="ad-tbtn" id="topFront">← 返回前台</button>
     <button class="ad-tbtn" id="topOut">退出管理员</button>
   </header>
@@ -228,10 +244,45 @@ table.tb tbody tr:hover{background:#f8faff}
 
 <div class="ad-mask" id="mask" style="display:none"><div class="box" id="mbox"></div></div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 var TAB='dash', VF='pending', KW={u:'',s:'',v:''};
 var $m=document.getElementById('main');
+var DATA=null; /* 当前后台数据集（来自本地后端，失败时回落本地 AdminDB） */
+
+/* 管理端鉴权 token（localStorage 持久化；后端优先，离线回落本地 ADMIN_ACCOUNT） */
+var ADMIN_TOKEN_KEY='ivsim_admin_token';
+function adminToken(){return storeGet(ADMIN_TOKEN_KEY,null)}
+function setAdminToken(t){if(t)storeSet(ADMIN_TOKEN_KEY,t);else storeRemove(ADMIN_TOKEN_KEY)}
+function findUser(id){(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)return u});
+  var f=null;(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)f=u});return f}
+
+/* 加载后台数据集：优先本地后端，失败 / 离线回落到本地 AdminDB */
+async function adminLoad(){
+  try{
+    var r=await apiCall('/api/admin/db',{token:adminToken(),silent:true});
+    if(r.data&&r.data.ok){
+      var users=r.data.users||[];
+      var sessions=[],videos=[];
+      users.forEach(function(u){(u.sessions||[]).forEach(function(s){sessions.push({u:u,s:s})});(u.videos||[]).forEach(function(v){videos.push({u:u,v:v})})});
+      return {src:'server',users:users,stats:r.data.stats,day7:r.data.day7,logs:r.data.logs,sessions:sessions,videos:videos};
+    }
+  }catch(e){}
+  AdminDB.syncLocal();
+  return {src:'local',users:AdminDB.users(),stats:AdminDB.stats(),day7:AdminDB.day7(),logs:AdminDB.logs(),
+    sessions:AdminDB.sessions(),videos:AdminDB.videos()};
+}
+/* 管理动作：走后端；失败 / 离线时执行 fallback（本地 AdminDB） */
+async function adminAct(method,path,body,fallback){
+  try{
+    var r=await apiCall(path,{method:method,body:body,token:adminToken()});
+    if(r.ok){render();return true;}
+  }catch(e){
+    /* 网络错误才回落本地；业务错误已弹 toast，不回落 */
+    if(e&&e.networkError&&fallback){fallback();render();}
+  }
+  return false;
+}
 
 function pad(n){return n<10?'0'+n:''+n}
 function dt(ts){var d=new Date(ts);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
@@ -269,10 +320,10 @@ function openM(html){
 function closeM(){document.getElementById('mask').style.display='none'}
 
 function viewDash(){
-  var s=AdminDB.stats(),d7=AdminDB.day7(),max=Math.max.apply(null,d7.map(function(x){return x.n}).concat([1]));
-  var pend=AdminDB.videos().filter(function(x){return x.v.status==='pending'}).slice(0,5);
-  var logs=AdminDB.logs().slice(0,6);
-  var recent=AdminDB.sessions().slice(0,5);
+  var s=DATA.stats,d7=DATA.day7,max=Math.max.apply(null,d7.map(function(x){return x.n}).concat([1]));
+  var pend=DATA.videos.filter(function(x){return x.v.status==='pending'}).slice(0,5);
+  var logs=DATA.logs.slice(0,6);
+  var recent=DATA.sessions.slice(0,5);
   var h='';
   h+='<div class="hd"><h1>📊 数据概览</h1><div class="sub">全站用户训练与内容概况 · 每 60 秒自动刷新</div><div class="sp"></div>'+
      '<button class="btn sm" id="rf">🔄 刷新</button></div>';
@@ -310,18 +361,23 @@ function logHtml(logs){
 }
 
 function viewUsers(){
-  var us=AdminDB.users().slice();
+  var us=DATA.users.slice();
   var kw=(KW.u||'').toLowerCase();
   if(kw)us=us.filter(function(u){return (u.name+' '+u.account).toLowerCase().indexOf(kw)>=0});
   us.sort(function(a,b){return (b.last||0)-(a.last||0)});
-  var h='<div class="hd"><h1>👥 用户管理</h1><div class="sub">共 '+AdminDB.users().length+' 位用户</div><div class="sp"></div>'+
+  var cu=getUser()||{};
+  var isMeFn=function(u){return (cu.uid&&u.uid&&u.uid===cu.uid)||(cu.account&&u.account&&String(u.account).toLowerCase()===String(cu.account).toLowerCase())};
+  var h='<div class="hd"><h1>👥 用户管理</h1><div class="sub">共 '+DATA.users.length+' 位用户'+(DATA.src==='local'?'（本地缓存）':'')+'</div><div class="sp"></div>'+
     '<input class="ad-in" id="kwU" placeholder="搜索昵称 / 账号" value="'+esc(KW.u)+'" style="width:220px"></div>';
+  h+='<div class="link-banner">🔗 后台与用户前台数据已关联：当前前台'+(cu.account?('账号 <b>@'+esc(cu.account)+'</b>'):('身份「'+esc(cu.name||'未登录')+'」'))+' 的所有面试与视频，都会实时同步到下方高亮条目。</div>';
   h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
   if(!us.length)h+='<tr><td colspan="8"><div class="empty">没有匹配的用户</div></td></tr>';
   us.forEach(function(u){
     var ss=u.sessions||[],vs=u.videos||[];
     var avg=ss.length?Math.round(ss.reduce(function(a,b){return a+(b.avg||0)},0)/ss.length*10)/10:0;
-    h+='<tr><td>'+uCell(u)+'</td><td>'+day(u.joined)+'</td><td>'+ago(u.last||u.joined)+'</td>'+
+    var me=isMeFn(u);
+    var linkTag=me?' <span class="bd blue" title="与当前前台账号实时关联">🔗 当前前台用户</span>':'';
+    h+='<tr'+(me?' class="row-me"':'')+'><td>'+uCell(u)+linkTag+'</td><td>'+day(u.joined)+'</td><td>'+ago(u.last||u.joined)+'</td>'+
       '<td><b>'+ss.length+'</b> 场 / '+(u.stat&&u.stat.questions?u.stat.questions+' 题':ss.reduce(function(a,b){return a+(b.count||0)},0)+' 题')+'</td>'+
       '<td>'+stars(avg)+'</td><td>'+vs.length+' 个（待审 '+vs.filter(function(v){return v.status==='pending'}).length+'）</td>'+
       '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':'<span class="bd ok">正常</span>')+'</td>'+
@@ -335,7 +391,7 @@ function viewUsers(){
   return h;
 }
 function userDetail(id){
-  var u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
+  var u=null;DATA.users.forEach(function(x){if(x.id===id)u=x});
   if(!u)return;
   var ss=(u.sessions||[]).slice(0,8),vs=u.videos||[];
   openM('<h3>'+(u.avatar||'🙂')+' '+esc(u.name)+'</h3><div class="ms">@'+esc(u.account)+' · '+
@@ -361,7 +417,7 @@ function userDetail(id){
 }
 
 function viewSessions(){
-  var all=AdminDB.sessions();
+  var all=DATA.sessions;
   var kw=(KW.s||'').toLowerCase();
   var list=all.filter(function(x){
     if(kw&&(x.u.name+' '+x.u.account+' '+x.s.type+' '+AdminDB.sceneName(x.s.scene)).toLowerCase().indexOf(kw)<0)return false;
@@ -414,7 +470,7 @@ function vcard(x){
     '</div><div class="ac">'+acts+'</div></div>';
 }
 function viewVideos(){
-  var all=AdminDB.videos();
+  var all=DATA.videos;
   var cnt={pending:0,approved:0,rejected:0,all:all.length};
   all.forEach(function(x){if(cnt[x.v.status]!=null)cnt[x.v.status]++});
   var kw=(KW.v||'').toLowerCase();
@@ -423,7 +479,7 @@ function viewVideos(){
     if(kw&&(x.v.title+' '+x.u.name).toLowerCase().indexOf(kw)<0)return false;
     return true;
   });
-  var h='<div class="hd"><h1>🎬 视频审核</h1><div class="sub">审核用户投稿的练习视频，通过后展示到「视频广场」</div><div class="sp"></div>'+
+  var h='<div class="hd"><h1>🎬 视频审核</h1><div class="sub">审核用户投稿的练习视频，通过后展示到「观摩大厅」</div><div class="sp"></div>'+
     '<input class="ad-in" id="kwV" placeholder="搜索标题 / 作者" value="'+esc(KW.v)+'" style="width:200px"></div>';
   h+='<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">'+
     [['pending','待审核'],['approved','已通过'],['rejected','已拒绝'],['all','全部']].map(function(t){
@@ -439,15 +495,15 @@ function rejectBox(uid,vid,title){
     '<textarea class="ad-in" id="rjTxt" rows="3" style="width:100%;resize:vertical" placeholder="例如：画面噪音过大 / 涉及隐私信息 / 内容与场景不符"></textarea>'+
     '<div class="ft"><button class="btn" id="rjNo">取消</button><button class="btn dan" id="rjOk">确认拒绝</button></div>');
   document.getElementById('rjNo').onclick=closeM;
-  document.getElementById('rjOk').onclick=function(){
+  document.getElementById('rjOk').onclick=async function(){
     var r=(document.getElementById('rjTxt').value||'').trim()||'未说明原因';
-    AdminDB.setVideoStatus(uid,vid,'rejected',r);
-    closeM();toast('已拒绝该视频','warn');render();
+    await adminAct('PUT','/api/admin/video/'+vid,{status:'rejected',reason:r},function(){AdminDB.setVideoStatus(uid,vid,'rejected',r)});
+    closeM();toast('已拒绝该视频','warn');
   };
 }
 
 function viewLogs(){
-  var l=AdminDB.logs();
+  var l=DATA.logs;
   var h='<div class="hd"><h1>📜 操作日志</h1><div class="sub">记录后台所有审核与管理动作</div><div class="sp"></div>'+
     '<button class="btn sm" id="clrLog">清空日志</button></div>'+logHtml(l);
   return h;
@@ -457,19 +513,18 @@ function viewSettings(){
   return '<div class="hd"><h1>⚙️ 系统设置</h1><div class="sub">后台数据源与维护</div></div>'+
     '<div class="card"><div class="ct">🗄 数据源说明</div>'+
       '<div style="font-size:12.5px;color:var(--ink2);line-height:1.95">'+
-      '· 当前为<b>纯本地演示环境</b>，后台数据保存在本机浏览器 localStorage（<code>ivsim_admin_db</code> / <code>ivsim_admin_log</code>），不会上传到任何服务器。<br>'+
-      '· <b>本人 / 本机真实用户</b>：你在前台实际完成的每一场模拟面试、上传的每一个视频，都会实时同步进后台。<br>'+
-      '· <b>其余示例用户</b>：首次进入后台时生成的内置演示数据，用于展示后台能力，可一键重置。'+
+      '· 后台数据由<b>本地后端</b>（运行于 <code>http://localhost:3000</code> 的 Node 服务）统一管理，持久化在 <code>server/data/db.json</code>，仅存在于你本机，不会上传到任何外部服务器。<br>'+
+      '· 当后端不可达（服务未启动 / 离线）时，自动回落到<b>本机浏览器缓存</b>以保证页面可用，恢复后会继续走后端。<br>'+
+      '· <b>本人 / 本机真实用户</b>：你在前台实际完成的每一场模拟面试、上传的每一个视频，都会实时同步进后端数据库，并关联展示在用户管理的高亮条目。<br>'+
+      '· <b>其余示例用户</b>：首次启动后端时生成的内置演示数据，用于展示后台能力，可一键重置。'+
       '</div></div>'+
     '<div class="card"><div class="ct">👑 管理员账号（独立身份）</div>'+
-      '<div class="kv"><div class="k">账号</div><div class="v">admin</div>'+
-      '<div class="k">密码</div><div class="v">admin123</div>'+
-      '<div class="k">登录态</div><div class="v">会话级（关闭标签页失效）</div>'+
+      '<div class="kv"><div class="k">登录态</div><div class="v">会话级（关闭标签页失效）</div>'+
       '<div class="k">入口</div><div class="v">仅本页 admin.html（用户端不显示任何入口）</div></div>'+
       '<div style="font-size:12px;color:var(--ink3);line-height:1.9">'+
         '· 管理员账号与用户账号是两套完全独立的体系：不共用身份、不共用数据、不互相叠加。<br>'+
-        '· 在用户端登录框输入 admin 会被拒绝，并提示到本后台登录。<br>'+
-        '· 正式部署时应改为服务端校验 + 角色权限表，不要把账号写在前端。</div></div>'+
+        '· 在用户端登录框输入管理员账号会被拒绝，并提示到本后台登录。<br>'+
+        '· 凭据已配置在后台，不在此页面明文展示；正式部署时应改为服务端校验 + 角色权限表。</div></div>'+
     '<div class="card"><div class="ct">🧰 维护操作</div>'+
       '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
         '<button class="btn" id="expBtn">⬇ 导出后台数据 JSON</button>'+
@@ -479,9 +534,9 @@ function viewSettings(){
       '<div style="font-size:12px;color:var(--ink3);margin-top:10px">重置会清空后台已有的审核记录与示例用户，重新生成一份演示数据集。</div></div>';
 }
 
-function render(){
-  AdminDB.syncLocal();
+async function render(){
   var t=TAB;
+  DATA=await adminLoad();
   $m.innerHTML = t==='dash'?viewDash() : t==='users'?viewUsers() :
                  t==='sessions'?viewSessions() : t==='videos'?viewVideos() :
                  t==='logs'?viewLogs() : viewSettings();
@@ -489,9 +544,16 @@ function render(){
   document.querySelectorAll('.ad-item').forEach(function(b){
     b.classList.toggle('on',b.dataset.go===t);
   });
-  var pc=AdminDB.stats().pend;
+  var pc=DATA.stats.pend;
   var sc=document.getElementById('sideCnt');
-  sc.textContent=pc||'';sc.style.display=pc?'grid':'none';
+  if(sc){sc.textContent=pc||'';sc.style.display=pc?'grid':'none';}
+  var srcEl=document.getElementById('topSrc');
+  if(srcEl){
+    var isSrv=DATA.src==='server';
+    srcEl.className='src-badge '+(isSrv?'src-server':'src-local');
+    srcEl.innerHTML=(isSrv?'<span class="dot"></span>本地后端':'<span class="dot"></span>本机浏览器');
+    srcEl.title=isSrv?'数据来自本地后端 localhost:3000':'后端不可达，当前使用浏览器本地缓存';
+  }
   bind();
   window.scrollTo(0,0);
 }
@@ -512,86 +574,122 @@ function bind(){
   document.querySelectorAll('[data-ud]').forEach(function(b){
     b.onclick=function(){userDetail(b.dataset.ud)}});
   document.querySelectorAll('[data-ub]').forEach(function(b){
-    b.onclick=function(){
-      var id=b.dataset.ub,u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
-      if(!u)return;
+    b.onclick=async function(){
+      var id=b.dataset.ub,u=findUser(id);if(!u)return;
       var ban=u.status!=='banned';
-      AdminDB.setUserStatus(id,ban?'banned':'active');
-      toast(ban?'已封禁 '+u.name:'已解除封禁 '+u.name,ban?'warn':'ok');render();
+      await adminAct('PUT','/api/admin/user/'+id,{status:ban?'banned':'active'},function(){AdminDB.setUserStatus(id,ban?'banned':'active')});
+      toast(ban?'已封禁 '+u.name:'已解除封禁 '+u.name,ban?'warn':'ok');
     }});
   document.querySelectorAll('[data-ux]').forEach(function(b){
-    b.onclick=function(){
-      var id=b.dataset.ux,u=null;AdminDB.users().forEach(function(x){if(x.id===id)u=x});
-      if(!u)return;
+    b.onclick=async function(){
+      var id=b.dataset.ux,u=findUser(id);if(!u)return;
       if(!confirm('确定删除用户「'+u.name+'」？其面试与视频数据会一并移除。'))return;
-      AdminDB.delUser(id);toast('已删除 '+u.name,'warn');render();
+      await adminAct('DELETE','/api/admin/user/'+id,null,function(){AdminDB.delUser(id)});
+      toast('已删除 '+u.name,'warn');
     }});
   document.querySelectorAll('[data-vok]').forEach(function(b){
-    b.onclick=function(){
+    b.onclick=async function(){
       var p=b.dataset.vok.split('|');
-      AdminDB.setVideoStatus(p[0],p[1],'approved');
-      toast('已通过，视频已发布到广场','ok');render();
+      await adminAct('PUT','/api/admin/video/'+p[1],{status:'approved'},function(){AdminDB.setVideoStatus(p[0],p[1],'approved')});
+      toast('已通过，视频已发布到观摩大厅','ok');
     }});
   document.querySelectorAll('[data-vno]').forEach(function(b){
     b.onclick=function(){
       var p=b.dataset.vno.split('|');
-      var v=null;AdminDB.videos().forEach(function(x){if(x.v.id===p[1])v=x});
+      var v=null;DATA.videos.forEach(function(x){if(x.v.id===p[1])v=x});
       rejectBox(p[0],p[1],v?v.v.title:'该视频');
     }});
   document.querySelectorAll('[data-vrst]').forEach(function(b){
-    b.onclick=function(){
+    b.onclick=async function(){
       var p=b.dataset.vrst.split('|');
-      AdminDB.setVideoStatus(p[0],p[1],'pending');
-      toast('已改为待审核','ok');render();
+      await adminAct('PUT','/api/admin/video/'+p[1],{status:'pending'},function(){AdminDB.setVideoStatus(p[0],p[1],'pending')});
+      toast('已改为待审核','ok');
     }});
   document.querySelectorAll('[data-vdel]').forEach(function(b){
-    b.onclick=function(){
+    b.onclick=async function(){
       var p=b.dataset.vdel.split('|');
-      var v=null;AdminDB.videos().forEach(function(x){if(x.v.id===p[1])v=x});
+      var v=null;DATA.videos.forEach(function(x){if(x.v.id===p[1])v=x});
       if(!confirm('确定删除视频「'+(v?v.v.title:'')+'」？'))return;
-      AdminDB.delVideo(p[0],p[1]);toast('已删除','ok');render();
+      await adminAct('DELETE','/api/admin/video/'+p[1],null,function(){AdminDB.delVideo(p[0],p[1])});
+      toast('已删除','ok');
     }});
   var cl=document.getElementById('clrLog');
-  if(cl)cl.onclick=function(){AdminDB.clearLogs();toast('日志已清空','ok');render()};
+  if(cl)cl.onclick=async function(){
+    if(!confirm('确定清空全部操作日志？'))return;
+    await adminAct('DELETE','/api/admin/logs',null,function(){AdminDB.clearLogs()});
+    toast('日志已清空','ok');
+  };
   var ex=document.getElementById('expBtn');
   if(ex)ex.onclick=function(){
-    var blob=new Blob([JSON.stringify({users:AdminDB.users(),logs:AdminDB.logs()},null,2)],{type:'application/json'});
+    var blob=new Blob([JSON.stringify({src:DATA.src,users:DATA.users,logs:DATA.logs},null,2)],{type:'application/json'});
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);
     a.download='admin-data-'+day(Date.now())+'.json';a.click();
     toast('已导出 JSON','ok');
   };
   var rs=document.getElementById('rstBtn');
-  if(rs)rs.onclick=function(){
+  if(rs)rs.onclick=async function(){
     if(!confirm('重置为内置示例数据？当前后台记录会被覆盖。'))return;
-    AdminDB.reset();toast('已重置为示例数据','ok');render();
+    await adminAct('POST','/api/admin/reset',null,function(){AdminDB.reset()});
+    toast('已重置为示例数据','ok');
   };
   var fb=document.getElementById('frontBtn');
   if(fb)fb.onclick=function(){location.href='index.html'};
 }
 
-function boot(){
-  if(!isAdmin()){
-    document.getElementById('gate').style.display='flex';
-    var ga=document.getElementById('gAcc'),gp=document.getElementById('gPwd'),
-        ge=document.getElementById('gErr'),go=document.getElementById('gOk');
-    function sub(){
-      var r=adminLogin(ga.value,gp.value);
-      if(!r.ok){ge.textContent=r.msg||'登录失败';gp.value='';gp.focus();return}
-      ge.textContent='';location.reload();
-    }
-    go.onclick=sub;
-    [ga,gp].forEach(function(el){el.addEventListener('keydown',function(e){if(e.key==='Enter')sub()})});
-    setTimeout(function(){ga.focus()},150);
-    return;
+function showGate(){
+  document.getElementById('gate').style.display='flex';
+  var ga=document.getElementById('gAcc'),gp=document.getElementById('gPwd'),
+      ge=document.getElementById('gErr'),go=document.getElementById('gOk');
+  async function sub(){
+    var acc=(ga.value||'').trim(), pw=gp.value||'';
+    if(!acc){ge.textContent='请输入管理员账号';return;}
+    /* 后端优先：用本地后端 /api/admin/login 校验；失败回落本地 */
+    withLoading(go,function(){
+      return apiCall('/api/admin/login',{method:'POST',body:{account:acc,password:pw}})
+        .then(function(r){
+          if(r.data&&r.data.ok){setAdminToken(r.data.token||'');ge.textContent='';showApp();}
+        })
+        .catch(function(){ gateLocal(acc,pw); });
+    });
   }
+  var initMode=false,gp2=document.getElementById('gPwd2');
+  function gateLocal(acc,pw){
+    var l=adminLogin(acc,pw);
+    /* 本机从未设置管理员：进入初始化流程（账号+加盐哈希仅写本机 localStorage） */
+    if(!l.ok&&l.needInit&&!initMode){
+      initMode=true;
+      document.getElementById('gPwd2F').style.display='block';
+      go.textContent='初始化并登录';
+      ge.textContent='本机尚未初始化管理员账号：请直接设置账号与密码，仅保存在本机浏览器。';
+      return;
+    }
+    if(!l.ok&&l.needInit&&initMode){
+      var pw2=gp2.value||'';
+      if(acc.length<3){ge.textContent='账号至少 3 位';return;}
+      if(pw.length<6){ge.textContent='密码至少 6 位';return;}
+      if(pw!==pw2){ge.textContent='两次输入的密码不一致';gp2.value='';gp2.focus();return;}
+      setAdminProfile(acc,pw);
+      var l2=adminLogin(acc,pw);
+      if(!l2.ok){ge.textContent=l2.msg||'初始化失败';return;}
+      ge.textContent='';showApp();return;
+    }
+    if(!l.ok){ge.textContent=l.msg||'登录失败';gp.value='';gp.focus();return;}
+    ge.textContent='';showApp();
+  }
+  go.onclick=sub;
+  [ga,gp,gp2].forEach(function(el){el.addEventListener('keydown',function(e){if(e.key==='Enter')sub()})});
+  setTimeout(function(){ga.focus()},150);
+}
+function showApp(){
+  document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='block';
   /* 支持 #videos / #users 这类深链（前台「审核中心」可直接跳进来） */
   var h=(location.hash||'').replace('#','');
   if(['dash','users','sessions','videos','logs','settings'].indexOf(h)>=0)TAB=h;
   if(h==='videos')VF='pending';
-  document.getElementById('topWho').textContent=(ADMIN_ACCOUNT&&ADMIN_ACCOUNT.name)||'管理员';
+  document.getElementById('topWho').textContent=(getAdminProfile()||{}).name||'管理员';
   document.getElementById('topOut').onclick=function(){
-    adminLogout();toast('已退出管理员','ok');
+    setAdminToken(null);adminLogout();toast('已退出管理员','ok');
     setTimeout(function(){location.href='index.html'},420);
   };
   document.getElementById('topFront').onclick=function(){location.href='index.html'};
@@ -602,6 +700,20 @@ function boot(){
   render();
   /* 概览：每分钟自动刷新一次 */
   setInterval(function(){if(TAB==='dash')render()},60000);
+}
+async function boot(){
+  /* 已持有管理员 token：用后端 /api/admin/db 校验有效性（后端优先） */
+  var tk=adminToken(), authed=false;
+  if(tk){
+    try{
+      var r=await apiCall('/api/admin/db',{token:tk,silent:true});
+      if(r.data&&r.data.ok)authed=true;
+    }catch(e){}
+  }
+  /* 离线 / token 失效：回落本地会话（仅演示环境） */
+  if(!authed&&isAdmin())authed=true;
+  if(!authed){showGate();return;}
+  showApp();
 }
 boot();
 </script>

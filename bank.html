@@ -1,11 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>浏览题库 · 模拟面试训练</title>
-<link rel="stylesheet" href="shared.css?v=20261039">
+<title>浏览题库 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=20261031f">
 <style>
+body{background:
+  radial-gradient(ellipse 80% 50% at 20% -10%,rgba(138,189,255,.12),transparent),
+  radial-gradient(ellipse 60% 40% at 80% 10%,rgba(94,234,212,.08),transparent),
+  radial-gradient(ellipse 50% 30% at 50% 100%,rgba(108,140,255,.06),transparent),
+  #0a1020}
+.fp-wrap::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(circle at 15% 25%,rgba(138,189,255,.06) 0 2px,transparent 2px),
+    radial-gradient(circle at 85% 35%,rgba(94,234,212,.05) 0 1.5px,transparent 1.5px),
+    radial-gradient(circle at 45% 65%,rgba(108,140,255,.04) 0 1px,transparent 1px);
+  background-size:180px 180px,220px 220px,160px 160px;opacity:.6}
+.fp-shell{position:relative;overflow:hidden}
+/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+.fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fp-shell::after{content:"📚";position:absolute;right:-20px;top:-30px;font-size:180px;opacity:.03;
+  transform:rotate(15deg);pointer-events:none;filter:grayscale(.3)}
+@media (max-width:900px){.fp-shell::after{font-size:120px;right:-10px;top:-20px}}
+/* 浅色模式适配 */
+body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+body.light .fp-wrap::before{opacity:.25}
+body.light .fp-shell::after{opacity:.02}
 /* 筛选按钮：对齐 interview 设置页选项风格（JS 仍用 .chip/.on，仅改视觉） */
 .filters .chip{padding:10px 16px;border-radius:13px;font-size:13px;font-weight:600;color:var(--ink2);
   background:var(--card);border:1.5px solid var(--line);
@@ -44,6 +64,7 @@
 <body>
 <div class="fp-wrap">
   <div class="fp-shell rise">
+    <div class="fx-stars" aria-hidden="true"><div id="bkStars1"></div><div id="bkStars2"></div><div id="bkStars3"></div></div>
     <div class="fp-head">
       <div class="fp-ic">📚</div>
       <div>
@@ -60,7 +81,7 @@
       </div>
     </div>
     <div class="toolbar">
-      <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…"></div>
+      <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…" aria-label="搜索题目关键词"></div>
       <div class="filters" id="scFilter"></div>
       <div class="filters" style="margin-top:8px" id="lvFilter"></div>
     </div>
@@ -69,9 +90,11 @@
   </div>
 </div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 if(!initPage('bank',true))throw new Error('login required');
+/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+seedStars('bkStars1',700,1,60);seedStars('bkStars2',200,2,120);seedStars('bkStars3',100,3,180);
 document.getElementById('srchIc').innerHTML=ICONS.search;
 
 var F={scene:'all',lv:0,kw:'',fav:false};
@@ -114,8 +137,8 @@ function render(){
       '<div class="qi-h">'+
         '<span class="tag" style="background:'+SCENE_COLOR[q.scene]+'22;color:'+SCENE_COLOR[q.scene]+';flex:none">'+SCENES[q.scene].name+'</span>'+
         '<span class="qt">'+esc(q.q)+'</span>'+
-        '<button class="qi-fav" data-id="'+q.id+'" title="收藏/取消" style="font-size:16px;padding:6px 8px;border-radius:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:#ffd68a;cursor:pointer">'+favIcon+'</button>'+
-        '<span class="tag" style="background:rgba(108,140,255,.13);color:#8ABDFF;flex:none">'+LV_NAME[q.lv]+'</span>'+
+        '<button class="qi-fav txA" data-id="'+q.id+'" title="收藏/取消" style="font-size:16px;padding:6px 8px;border-radius:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);cursor:pointer">'+favIcon+'</button>'+
+        '<span class="tag txB2" style="background:rgba(108,140,255,.13);flex:none">'+LV_NAME[q.lv]+'</span>'+
         '<button class="qi-practice" data-s="'+q.scene+'">练这道 →</button>'+
         '<span class="chev">'+ICONS.chev+'</span>'+
       '</div>'+

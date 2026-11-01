@@ -4,19 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>个人中心 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261039">
+<link rel="stylesheet" href="shared.css?v=20261031f">
 <style>
-.vtabs{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
-.vtab{padding:10px 16px;border-radius:13px;background:var(--card);border:1.5px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:.18s;
-  box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
-.vtab:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
-.vtab.on{border-color:var(--acc);color:var(--ink);background:rgba(108,140,255,.14);
-  box-shadow:0 0 0 3px rgba(108,140,255,.14),0 10px 24px rgba(108,140,255,.22)}
-.vtabs.sub{margin:0 0 14px}
-.vtabs.sub .vtab{padding:8px 14px;font-size:12.5px}
-.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.vcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;cursor:pointer}
-.vcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+/* 卡片语言 = rgba(255,255,255,.055→.02) 的白色玻璃渐变；背景用完全同源的白色光感，不带彩色色相 */
+body{background:
+  radial-gradient(ellipse 100% 60% at 50% -18%,rgba(255,255,255,.06),transparent 62%),
+  radial-gradient(ellipse 58% 50% at 100% 38%,rgba(255,255,255,.035),transparent 65%),
+  radial-gradient(ellipse 66% 55% at 0% 102%,rgba(255,255,255,.028),transparent 65%),
+  #0a1020}
+/* 与卡片玻璃渐变同向的白色渐变罩（上微亮→下微暗），让背景像卡片材质的延伸 */
+.fp-wrap::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 32%,transparent 72%,rgba(255,255,255,.014))}
+/* 右上微光斑：同样只用白色透明度，与壳体材质一致 */
+.fp-shell{position:relative;overflow:hidden}
+.fp-shell::after{content:"";position:absolute;right:-90px;top:-90px;width:360px;height:360px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.055),rgba(255,255,255,.02) 46%,transparent 70%)}
+/* 浅色模式适配 */
+body.light{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 42%,#eff4ff 100%)}
+body.light .fp-wrap::before{background:linear-gradient(180deg,rgba(37,99,235,.028),transparent 34%,transparent 74%,rgba(37,99,235,.016))}
+body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.5),rgba(255,255,255,.12) 46%,transparent 70%)}
+.pc-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.vtabs{display:flex;gap:8px;margin:0 0 20px;flex-wrap:wrap;padding:6px;background:rgba(255,255,255,.03);
+  border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.vtab{padding:11px 18px;border-radius:12px;background:transparent;border:none;font-size:13px;font-weight:600;color:var(--ink2);
+  cursor:pointer;transition:.2s;position:relative;display:flex;align-items:center;gap:6px}
+.vtab:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+.vtab.on{color:#fff;background:linear-gradient(135deg,#6c8cff,#41e0c8);
+  box-shadow:0 6px 18px rgba(108,140,255,.35)}
+.vtabs.sub{margin:0 0 16px;padding:4px;border-radius:14px}
+.vtabs.sub .vtab{padding:9px 15px;font-size:12.5px}
+.vtabs.sub .vtab.on{box-shadow:0 4px 14px rgba(108,140,255,.3)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.vcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.25s;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.vcard:hover{transform:translateY(-4px);border-color:rgba(108,140,255,.4);box-shadow:0 16px 36px rgba(0,0,0,.35),0 0 0 1px rgba(108,140,255,.15)}
 .vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative}
 .vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
 .vcard:hover .vplay{opacity:1}
@@ -30,21 +52,23 @@
 .vbadge.rejected{background:rgba(251,113,133,.15);color:#fda4af}
 .vactions{display:flex;gap:6px;margin-top:10px}
 .vactions .btn{flex:1;padding:7px 0;font-size:11.5px;border-radius:10px}
-.vempty{text-align:center;padding:60px 20px;color:var(--ink3);font-size:13px}
-.vempty .big{font-size:44px;margin-bottom:10px}
-.up-card{max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 24px}
+.vempty{text-align:center;padding:70px 20px;color:var(--ink3);font-size:13.5px}
+.vempty .big{font-size:52px;margin-bottom:14px;display:inline-block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.up-card{max-width:540px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 26px;
+  box-shadow:0 8px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.04)}
 .up-drop{border:2px dashed var(--line2);border-radius:16px;padding:34px 16px;text-align:center;color:var(--ink3);font-size:13px;cursor:pointer;transition:.2s;margin-bottom:14px}
 .up-drop:hover,.up-drop.has{border-color:var(--acc);color:var(--ink2);background:rgba(108,140,255,.06)}
 .up-drop .big{font-size:36px;display:block;margin-bottom:8px}
 .up-note{margin-top:12px;font-size:11.5px;color:var(--ink3);line-height:1.8;padding:10px 14px;border-radius:12px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3)}
-/* 右侧快捷栏是 fixed 的，给内容让出空间，避免遮住表格最后一行按钮 */
-@media (min-width:1100px){.fp-wrap{padding-right:104px}}
 .mg-dot{display:inline-block;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#f59e0b;
   color:#1b1200;font-size:10.5px;font-weight:800;line-height:17px;text-align:center;vertical-align:1px}
-.mg-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
-.mg-k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.mg-k .l{font-size:11px;color:var(--ink3)}
-.mg-k .v{font-size:19px;font-weight:800;margin-top:2px}
+.mg-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px}
+.mg-k{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.04);transition:.2s}
+.mg-k:hover{transform:translateY(-2px);border-color:rgba(108,140,255,.35)}
+.mg-k .l{font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:5px}
+.mg-k .v{font-size:24px;font-weight:900;margin-top:6px;line-height:1}
 .mg-list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .mg-hd,.mg-row{display:grid;grid-template-columns:52px minmax(0,1fr) 146px 110px 246px;gap:12px;align-items:center;padding:12px 16px}
 .mg-hd{font-size:11px;color:var(--ink3);background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);font-weight:700}
@@ -69,24 +93,10 @@
   .mg-row .mg-acts{grid-area:ac;justify-content:flex-start}
 }
 
-.myc-hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);
-  border:1px solid var(--line);border-radius:20px;padding:16px 20px;margin-bottom:16px}
-.myc-av{width:62px;height:62px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:29px;
-  background:radial-gradient(circle at 35% 30%,rgba(108,140,255,.5),rgba(65,224,200,.2));
-  border:1px solid rgba(108,140,255,.45);overflow:hidden}
-.myc-av img{width:100%;height:100%;object-fit:cover}
-.myc-id{min-width:150px;flex:1}
-.myc-nm{font-size:19px;font-weight:800;line-height:1.3}
-.myc-ac{font-size:11.5px;color:var(--ink3);margin-top:2px}
-.myc-hst{display:flex;gap:20px;flex-wrap:wrap;margin-left:auto}
-.myc-hst>div{text-align:center;min-width:52px}
-.myc-hst .v{font-size:17px;font-weight:800;line-height:1.2}
-.myc-hst .l{font-size:11px;color:var(--ink3);margin-top:2px}
-@media (max-width:700px){.myc-hst{margin-left:0;width:100%;justify-content:space-between}}
-
-.myc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.myc-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 16px 18px}
-.myc-card .ct{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.myc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.myc-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 18px 20px;margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.04)}
+.myc-card .ct{font-size:13.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .myc-rows{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
 .myc-row{display:grid;grid-template-columns:120px minmax(0,1fr) 92px 84px;gap:12px;align-items:center;
   padding:11px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
@@ -104,17 +114,15 @@
   -webkit-background-text-stroke:0;-webkit-background-clip:text;background-clip:text;color:transparent}
 .myc-cd .u{font-size:13px;color:var(--ink3);margin-left:2px}
 .myc-cd .d{font-size:12px;color:var(--ink3);line-height:1.7}
-.myc-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
-.myc-abtn{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);
-  border:1px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer;transition:.18s;width:100%}
-.myc-abtn:hover{border-color:var(--acc);background:rgba(108,140,255,.08);transform:translateY(-2px)}
-.myc-abtn .ic{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:19px;
-  background:linear-gradient(135deg,rgba(108,140,255,.28),rgba(65,224,200,.18))}
-.myc-abtn .t{display:block;font-size:13px;font-weight:700}
-.myc-abtn .d{display:block;font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
-.myc-fav{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
-.myc-fav .f{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 15px;cursor:pointer;transition:.18s}
-.myc-fav .f:hover{border-color:var(--acc);transform:translateY(-2px)}
+.f-err{font-size:11px;color:#f87171;margin-top:4px;min-height:14px}
+.b-field label em.err{color:#f87171}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.myc-fav{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+.myc-fav .f{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 16px;cursor:pointer;transition:.2s;
+  box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.myc-fav .f:hover{border-color:rgba(108,140,255,.4);transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.28)}
 .myc-fav .ft{font-size:13px;font-weight:700;line-height:1.5}
 .myc-fav .fm{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:11px;color:var(--ink3);flex-wrap:wrap}
 .myc-gate{max-width:520px;margin:4px auto 0;background:var(--card);border:1px solid var(--line);border-radius:22px;
@@ -136,35 +144,149 @@
   .myc-row.head{display:none}
   .myc-row .tm,.myc-row .sc{grid-column:1}
 }
+/* 个人中心画幅铺满全屏：去掉最大宽度限制、外框留白与卡片壳边框 */
+.wrap.fp-wrap{max-width:none;padding:0 0 40px}
+.fp-shell{border-radius:0;border-left:0;border-right:0;border-top:0;
+  padding:clamp(20px,2.6vw,36px) clamp(18px,3vw,44px) 64px;
+  min-height:calc(100vh - 64px)}
+/* 背景与壳体一体化 + 左右对称：快捷栏让位移入壳内，左侧补等量让位，任何屏宽下左右留白一致 */
+@media (min-width:1100px){.fp-shell{
+  padding-right:calc(clamp(18px,3vw,44px) + 104px);
+  padding-left:calc(clamp(18px,3vw,44px) + 104px)}}
+.fp-shell::before{left:0;right:0}
+.b-shell{display:grid;grid-template-columns:292px minmax(0,1fr);gap:18px;align-items:start;max-width:none}
+.b-main{min-width:0}
+.rail{position:relative;position:sticky;top:16px;border-radius:20px;padding:24px 20px;text-align:center;overflow:hidden;
+  background:linear-gradient(180deg,rgba(108,140,255,.15),rgba(65,224,200,.04)),var(--card);
+  border:1px solid var(--line);box-shadow:0 18px 44px -20px rgba(0,0,0,.55)}
+.rail::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(108,140,255,.85),rgba(65,224,200,.6),transparent)}
+.rail-avwrap{position:relative;width:92px;margin:0 auto 12px}
+.rail-av{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;font-size:44px;overflow:hidden;
+  background:radial-gradient(circle at 32% 28%,rgba(108,140,255,.55),rgba(65,224,200,.18));
+  border:2px solid rgba(108,140,255,.45);box-shadow:0 10px 30px rgba(108,140,255,.3)}
+.rail-av img{width:100%;height:100%;object-fit:cover}
+.rail-dot{position:absolute;right:2px;bottom:6px;width:12px;height:12px;border-radius:50%;background:var(--acc2);border:2px solid #0a1020;box-shadow:0 0 10px var(--acc2)}
+body.light .rail-dot{border-color:#fff}
+.rail-nm{font-size:21px;font-weight:800}
+.rail-ac{font-size:10.5px;color:var(--ink3);margin-top:5px}
+.rail-sig{font-size:12px;color:var(--ink2);line-height:1.7;margin:10px 2px 14px}
+.rail-streak{display:flex;align-items:center;gap:8px;justify-content:center;padding:10px 12px;border-radius:12px;margin-bottom:12px;
+  background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(244,114,182,.1));border:1px solid rgba(251,191,36,.32)}
+.rail-streak b{font-size:19px;font-weight:800;color:#ffd68a;line-height:1}
+.rail-streak em{font-style:normal;font-size:10.5px;color:var(--ink3)}
+body.light .rail-streak b{color:#b45309}
+.rail-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.rail-mini>div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:11px;padding:9px 4px}
+.rail-mini b{display:block;font-size:16px;font-weight:800}
+.rail-mini span{font-size:9.5px;color:var(--ink3)}
+body.light .rail-mini>div{background:rgba(15,23,42,.03)}
+.rail-badges{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+.rail-badge{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.rail-badge.lock{filter:grayscale(1);opacity:.45}
+body.light .rail-badge{background:rgba(15,23,42,.04)}
+.rail-logout{width:100%;padding:9px;border-radius:10px;border:1px solid var(--line);background:transparent;font-size:12px;color:var(--ink3);transition:.2s}
+.rail-logout:hover{border-color:rgba(251,113,133,.4);color:#ffb3bd}
+body.light .rail-logout:hover{color:#be123c}
+.b-greet{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.b-greet b{font-size:22px;font-weight:900;letter-spacing:-.01em}
+.b-greet span{display:block;font-size:11.5px;color:var(--ink3);margin-top:4px}
+.b-quick{display:flex;gap:8px}
+.b-quick button{padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink2);transition:.2s}
+.b-quick button:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
+.b-quick .pri{background:linear-gradient(135deg,var(--acc),#4f6ef0);border:none;color:#fff;box-shadow:0 6px 18px rgba(79,110,240,.3)}
+#secTabs.b-seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--card);border:1px solid var(--line);margin:0 0 16px;box-shadow:none;flex-wrap:nowrap;overflow-x:auto}
+#secTabs.b-seg .vtab{flex:1;justify-content:center;padding:9px 10px;border-radius:9px;font-size:12.5px;background:transparent;box-shadow:none;color:var(--ink3);white-space:nowrap}
+#secTabs.b-seg .vtab:hover{color:var(--ink2);background:transparent}
+#secTabs.b-seg .vtab.on{color:var(--ink);background:var(--card2);box-shadow:inset 0 0 0 1px var(--line)}
+.b-set{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.b-swide{grid-column:1/-1}
+.b-scard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.b-shead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.b-shead .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:14px;flex:none}
+body.light .b-shead .ic{background:rgba(15,23,42,.05)}
+.b-shead b{font-size:13.5px}
+.b-shead span{font-size:10.5px;color:var(--ink3);margin-left:auto}
+.b-field{margin-bottom:12px}
+.b-field label{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.12em;color:var(--ink3);font-weight:700;margin-bottom:6px}
+.b-field label em{font-style:normal;font-size:9.5px;letter-spacing:0}
+.b-inp{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;color:var(--ink);outline:none;transition:.2s}
+body.light .b-inp{background:#fff}
+.b-inp:focus{border-color:rgba(108,140,255,.55);box-shadow:0 0 0 3px rgba(108,140,255,.1)}
+.b-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.b-avrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.b-avrow .av-emoji{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;cursor:pointer;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);transition:.18s}
+.b-avrow .av-emoji:hover{border-color:rgba(108,140,255,.5);transform:scale(1.08)}
+.b-avrow .av-emoji.on{border-color:#41e0c8;background:rgba(65,224,200,.12);box-shadow:0 0 0 2px rgba(65,224,200,.25)}
+body.light .b-avrow .av-emoji{background:#fff}
+.b-inp textarea{resize:vertical}
+.b-field .b-inp{font-family:inherit}
+.b-two .b-field{margin-bottom:12px}
+.b-cur{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:rgba(108,140,255,.12);border:1px solid rgba(108,140,255,.4);overflow:hidden}
+.b-cur img{width:100%;height:100%;object-fit:cover}
+.b-upbtn{padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:transparent;font-size:11px;color:var(--ink2);transition:.2s}
+.b-upbtn:hover{border-color:var(--line2);color:var(--ink)}
+.b-upbtn.danger{color:#ffb3bd;border-color:rgba(251,113,133,.35)}
+.b-savebar{display:flex;align-items:center;gap:12px;padding-top:14px;margin-top:4px;border-top:1px solid var(--line)}
+.b-save{padding:10px 22px;border-radius:9px;background:linear-gradient(135deg,var(--acc),#4f6ef0);color:#fff;font-size:12.5px;font-weight:700;box-shadow:0 6px 18px rgba(79,110,240,.28)}
+.b-save:disabled{opacity:.6;cursor:not-allowed}
+.b-savebar span{font-size:10.5px;color:var(--ink3)}
+.b-danger{border-color:rgba(251,113,133,.3);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.b-danger b{display:block;font-size:13px}
+.b-danger span{display:block;font-size:10.5px;color:var(--ink3);margin-top:3px}
+.b-out{padding:9px 16px;border-radius:9px;border:1px solid rgba(251,113,133,.4);color:#ffb3bd;font-size:12.5px;font-weight:700;background:rgba(251,113,133,.08);transition:.2s;flex:none}
+.b-out:hover{background:rgba(251,113,133,.16);color:#fff}
+body.light .b-out{color:#be123c}
+body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
+@media (max-width:900px){
+  .b-shell{grid-template-columns:1fr}
+  .rail{position:static;text-align:left;display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:center;padding:18px}
+  .rail-avwrap{margin:0}
+  .rail-av{width:64px;height:64px;font-size:30px}
+  .rail-nm{font-size:17px}
+  .rail-sig{grid-column:1/-1;margin:0}
+  .rail-streak{grid-column:1/-1;margin:0}
+  .rail-mini{grid-column:1/-1;margin:0}
+  .rail-badges{grid-column:1/-1;justify-content:flex-start;margin:0}
+  .rail-logout{grid-column:1/-1}
+  .b-set{grid-template-columns:1fr}
+  .b-two{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="fp-wrap">
   <div class="fp-shell rise">
+    <div class="pc-stars" aria-hidden="true"><div id="pcStars1"></div><div id="pcStars2"></div><div id="pcStars3"></div></div>
     <div class="fp-head">
       <div class="fp-ic" id="headAv">🧑</div>
       <div>
         <h1>个人中心</h1>
         <p class="fp-sub">视频回放、练习数据、收藏与账号设置，都在这里。</p>
       </div>
-      <div class="fp-acts"><a class="btn gho sm" href="square.html" style="text-decoration:none">🌐 去视频广场 →</a></div>
+      <div class="fp-acts"><a class="btn gho sm" href="square.html" style="text-decoration:none">🌐 去观摩大厅 →</a></div>
     </div>
 
     <div id="gateBox"></div>
-    <div id="heroCard"></div>
 
-    <div class="vtabs" id="secTabs">
-      <button class="vtab on" data-s="videos">🎬 我的视频</button>
-      <button class="vtab" data-s="data">📊 我的数据</button>
-      <button class="vtab" data-s="fav">⭐ 我的收藏 <span class="mg-dot" id="favDot" style="display:none"></span></button>
-      <button class="vtab" data-s="set">⚙️ 账号设置</button>
+    <div class="b-shell" id="accBody">
+      <div id="heroCard"></div>
+      <div class="b-main">
+        <div id="greetCard"></div>
+        <div class="vtabs b-seg" id="secTabs">
+          <button class="vtab on" data-s="videos">🎬 我的视频</button>
+          <button class="vtab" data-s="data">📊 我的数据</button>
+          <button class="vtab" data-s="fav">⭐ 我的收藏 <span class="mg-dot" id="favDot" style="display:none"></span></button>
+          <button class="vtab" data-s="set">⚙️ 账号设置</button>
+        </div>
+        <div id="pane"></div>
+      </div>
     </div>
-
-    <div id="pane"></div>
   </div>
 </div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 if(!initPage('videos',true))throw new Error('login required');
 
@@ -187,6 +309,14 @@ function bindSecTabs(){
     };
   });
 }
+/* 编程式切换分区（供「查看全部」等按钮调用） */
+function switchSec(s){
+  if(s===SEC){renderSec();return}
+  SEC=s;
+  try{history.replaceState(null,'','#'+s)}catch(e){}
+  $$('#secTabs .vtab').forEach(function(x){x.classList.toggle('on',x.dataset.s===s)});
+  renderSec();
+}
 $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
 
 function renderGate(){
@@ -199,7 +329,7 @@ function renderGate(){
       '<button class="btn pri" id="gLogin">🔑 登录 / 注册</button>'+
       '<button class="btn gho" id="gQuick">🎭 游客快速登录</button>'+
     '</div>'+
-    '<div class="gn">🔒 数据只保存在本机浏览器，登录不会上传任何信息。<br>游客身份只能浏览公开内容（首页、题库、视频广场），个人中心需要登录后才解锁。</div>'+
+    '<div class="gn">🔒 数据只保存在本机浏览器，登录不会上传任何信息。<br>游客身份只能浏览公开内容（首页、题库、观摩大厅），个人中心需要登录后才解锁。</div>'+
     '<div class="gback"><a href="index.html">← 先随便逛逛</a></div>'+
   '</div>';
   document.getElementById('gLogin').onclick=function(){openLoginModal()};
@@ -211,21 +341,17 @@ function renderGate(){
 function applyGate(){
   guestMode=isGuestUser();
   var g=document.getElementById('gateBox');
-  var hero=document.getElementById('heroCard');
-  var tabs=document.getElementById('secTabs');
+  var body=document.getElementById('accBody');
   var pn=document.getElementById('pane');
   if(guestMode){
     var ha=document.getElementById('headAv');
     if(ha){ha.innerHTML='';ha.textContent='🔐'}
-    if(hero)hero.style.display='none';
-    if(tabs)tabs.style.display='none';
-    if(pn)pn.style.display='none';
+    if(body)body.style.display='none';
     if(pn)pn.innerHTML='';
     g.style.display='';renderGate();
     return false;
   }
-  if(hero)hero.style.display='';
-  if(tabs)tabs.style.display='';
+  if(body)body.style.display='';
   if(pn)pn.style.display='';
   g.style.display='none';g.innerHTML='';
   return true;
@@ -238,27 +364,52 @@ function renderHero(){
   var st=getStat(),ci=getCheckInfo();
   var achs=[];try{achs=getAchievements()}catch(e){}
   var got=achs.filter(function(a){return a.unlocked}).length;
-  var mine=myVideos();
-  var pend=mine.filter(function(v){return stOf(v)==='pending'}).length;
   var avg=st.questions?st.scoreSum/st.questions:0;
-  box.innerHTML='<div class="myc-hero rise">'+
-    '<div class="myc-av" id="heroAv"></div>'+
-    '<div class="myc-id">'+
-      '<div class="myc-nm">'+esc(u.name||'访客')+'</div>'+
-      '<div class="myc-ac">@'+esc(u.account||'guest')+' · 加入第 '+Math.max(1,(ci.total||0))+' 天'+(u.guest?' · 游客身份':'')+'</div>'+
+  var a4=achs.slice(0,4).map(function(a){
+    return '<div class="rail-badge'+(a.unlocked?'':' lock')+'" title="'+esc(a.t)+' · '+esc(a.d)+'">'+a.ic+'</div>';
+  }).join('');
+  var hh=new Date().getHours();
+  var greet=hh<6?'夜深了':hh<12?'早上好':hh<18?'下午好':'晚上好';
+  var cd=null;try{cd=cdParts()}catch(e){}
+  var tip=cd?('距目标面试还有 '+cd.day+' 天 · 连续签到 '+(ci.days||0)+' 天'):('连续签到 '+(ci.days||0)+' 天 · 今天也来开口练一场');
+
+  box.innerHTML='<div class="rail">'+
+    '<div class="rail-avwrap"><div class="rail-av" id="heroAv"></div><span class="rail-dot"></span></div>'+
+    '<div class="rail-nm">'+esc(u.name||'访客')+'</div>'+
+    '<div class="rail-ac">@'+esc(u.account||'guest')+' · '+(u.guest?'游客':(u.oauth?'第三方':'本机账号'))+'</div>'+
+    (u.signature?'<div class="rail-sig">'+esc(u.signature)+'</div>':'')+
+    '<div class="rail-streak"><span>🔥</span><b>'+(ci.days||0)+'</b><em>连续签到</em></div>'+
+    '<div class="rail-mini">'+
+      '<div><b>'+(st.times||0)+'</b><span>面试场次</span></div>'+
+      '<div><b>'+(st.questions||0)+'</b><span>作答题目</span></div>'+
+      '<div><b>'+(avg?avg.toFixed(1):'—')+'</b><span>平均自评</span></div>'+
+      '<div><b>'+got+'/'+achs.length+'</b><span>成就解锁</span></div>'+
     '</div>'+
-    '<div class="myc-hst">'+
-      '<div><div class="v">'+(st.times||0)+'</div><div class="l">面试场次</div></div>'+
-      '<div><div class="v">'+(st.questions||0)+'</div><div class="l">作答题目</div></div>'+
-      '<div><div class="v" style="color:#7dead6">'+(avg?avg.toFixed(1):'—')+'</div><div class="l">平均自评</div></div>'+
-      '<div><div class="v" style="color:#ffd68a">'+(ci.days||0)+'</div><div class="l">连续签到</div></div>'+
-      '<div><div class="v">'+got+'/'+achs.length+'</div><div class="l">已解锁成就</div></div>'+
-      '<div><div class="v">'+mine.length+(pend?' <span class="mg-dot">'+pend+'</span>':'')+'</div><div class="l">我的视频</div></div>'+
-    '</div>'+
+    '<div class="rail-badges">'+a4+'</div>'+
+    '<button class="rail-logout" id="heroOut">🚪 退出登录</button>'+
   '</div>';
+
+  var g=document.getElementById('greetCard');
+  if(g){
+    g.innerHTML='<div class="b-greet">'+
+      '<div><b>'+greet+'，'+esc(u.name||'访客')+'</b><span>'+tip+'</span></div>'+
+      '<div class="b-quick">'+
+        '<button class="pri" id="goPractice">▶ 继续练习</button>'+
+        '<button id="goUpload">⬆ 上传视频</button>'+
+      '</div>'+
+    '</div>';
+    var gp=document.getElementById('goPractice');if(gp)gp.onclick=function(){location.href='interview.html'};
+    var gu=document.getElementById('goUpload');if(gu)gu.onclick=function(){TAB='upload';switchSec('videos')};
+  }
+
   var hAv=document.getElementById('heroAv');
   renderAvatar(hAv,u.avatar||'🦊');
   renderAvatar(document.getElementById('headAv'),u.avatar||'🦊');
+  var ho=document.getElementById('heroOut');
+  if(ho)ho.onclick=function(){
+    if(!confirm('确定退出登录吗？本机数据与视频会保留。'))return;
+    logout();
+  };
 }
 
 function renderSec(){
@@ -314,7 +465,12 @@ function stBadge(s){
 }
 function myVideos(){
   var me=(getUser()||{}).name||'访客';
-  return getVideos().filter(function(v){return v.owner===me});
+  var uid=ensureUid();
+  return getVideos().filter(function(v){
+    if(uid&&v.ownerUid)return v.ownerUid===uid;
+    /* 兼容未带 ownerUid 的历史视频 */
+    return v.owner===me;
+  });
 }
 
 function render(){
@@ -326,8 +482,8 @@ function render(){
   if(TAB==='mine'){
     pane.innerHTML=mine.length?('<div class="vgrid">'+mine.map(function(v){
       var acts='<button class="btn gho sm act-del">🗑 删除</button>';
-      if(!v.shared&&v.status!=='pending')acts='<button class="btn pri sm act-share">🌐 投稿到广场</button>'+acts;
-      else if(v.shared)acts='<button class="btn gho sm" disabled>'+(v.status==='pending'?'等待审核':v.status==='approved'?'已在广场':'未通过，可重新投稿')+'</button>'+acts;
+      if(!v.shared&&v.status!=='pending')acts='<button class="btn pri sm act-share">🌐 投稿到观摩大厅</button>'+acts;
+      else if(v.shared)acts='<button class="btn gho sm" disabled>'+(v.status==='pending'?'等待审核':v.status==='approved'?'已在观摩大厅':'未通过，可重新投稿')+'</button>'+acts;
       return vCard(v,acts);
     }).join('')+'</div>'):emptyHtml('🎬','还没有回放。<br>去「模拟面试」录制视频作答，或在「上传视频」投稿你的作品');
   }else if(TAB==='upload'){
@@ -349,9 +505,9 @@ function renderManage(){
   var h='';
   h+='<div class="mg-sum">'+
     '<div class="mg-k"><div class="l">我的视频</div><div class="v">'+mine.length+'</div></div>'+
-    '<div class="mg-k"><div class="l">⏳ 审核中</div><div class="v" style="color:#ffd68a">'+c.pending+'</div></div>'+
-    '<div class="mg-k"><div class="l">✓ 已通过</div><div class="v" style="color:#7dead6">'+c.approved+'</div></div>'+
-    '<div class="mg-k"><div class="l">✕ 未通过</div><div class="v" style="color:#fda4af">'+c.rejected+'</div></div>'+
+    '<div class="mg-k"><div class="l">⏳ 审核中</div><div class="v txA">'+c.pending+'</div></div>'+
+    '<div class="mg-k"><div class="l">✓ 已通过</div><div class="v txG">'+c.approved+'</div></div>'+
+    '<div class="mg-k"><div class="l">✕ 未通过</div><div class="v txP">'+c.rejected+'</div></div>'+
     '<div class="mg-k"><div class="l">🔒 仅本机</div><div class="v" style="color:var(--ink3)">'+c.private+'</div></div>'+
   '</div>';
   h+='<div class="mg-list"><div class="mg-hd"><div>封面</div><div>视频</div><div>审核状态</div><div>提交时间</div><div style="text-align:right">操作</div></div>';
@@ -367,21 +523,21 @@ function renderManage(){
       '</div>'+
       '<div class="mg-st">'+stBadge(s)+
         (s==='pending'?'<div class="mg-mt" style="margin-top:4px">通常在 1 个工作日内处理</div>':'')+
-        (s==='approved'?'<div class="mg-mt" style="margin-top:4px">已展示在视频广场</div>':'')+
+        (s==='approved'?'<div class="mg-mt" style="margin-top:4px">已展示在观摩大厅</div>':'')+
       '</div>'+
       '<div class="mg-mt" style="margin:0">'+fmtTime(v.ts||Date.now())+'</div>'+
       '<div class="mg-acts">'+
         '<button class="btn gho" data-act="play" title="播放视频">▶</button>'+
-        (s==='private'?'<button class="btn pri" data-act="share" title="投稿到视频广场">投稿</button>':'')+
+        (s==='private'?'<button class="btn pri" data-act="share" title="投稿到观摩大厅">投稿</button>':'')+
         (s==='pending'?'<button class="btn gho" data-act="undo" title="撤回投稿，恢复为仅本机可见">撤回</button>':'')+
-        (s==='approved'?'<button class="btn gho" data-act="down" title="从视频广场撤下">撤下</button>':'')+
+        (s==='approved'?'<button class="btn gho" data-act="down" title="从观摩大厅撤下">撤下</button>':'')+
         (s==='rejected'?'<button class="btn pri" data-act="share" title="修改后重新投稿">重新投稿</button>':'')+
         '<button class="btn" data-act="rename" title="修改标题">改名</button>'+
         '<button class="btn dan" data-act="del" title="删除视频">删除</button>'+
       '</div>'+
     '</div>';
   });
-  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「视频广场」；<b>未通过</b> 会给出理由，你可以修改后重新投稿。视频文件只保存在本机浏览器，删除后不可恢复。</div>';
+  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「观摩大厅」；<b>未通过</b> 会给出理由，你可以修改后重新投稿。视频文件只保存在本机浏览器，删除后不可恢复。</div>';
   pane.innerHTML=h;
   bindManage();
 }
@@ -404,7 +560,7 @@ function bindManage(){
         }
         if(a==='down'){
           updateVideoMeta(id,{shared:false,status:'private'});
-          playSound('click');toast('已从广场撤下','ok');render();return;
+          playSound('click');toast('已从观摩大厅撤下','ok');render();return;
         }
         if(a==='rename'){
           var v=find();
@@ -429,7 +585,7 @@ function bindCards(){
     c.querySelector('.vthumb').onclick=function(){playVideo(id)};
     var share=c.querySelector('.act-share');
     if(share)share.onclick=function(e){e.stopPropagation();
-      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到广场','ok');render();renderHero();
+      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到观摩大厅','ok');render();renderHero();
     };
     var del=c.querySelector('.act-del');
     if(del)del.onclick=function(e){e.stopPropagation();
@@ -459,7 +615,7 @@ function renderUpload(){
     '<div class="f-lab" style="margin-top:12px">所属场景</div>'+
     '<select class="f-in" id="upScene">'+scOpts+'</select>'+
     '<button class="btn pri" id="upBtn" style="width:100%;margin-top:16px">提交审核</button>'+
-    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「视频广场」，其他用户才能看到。视频文件仅保存在本机浏览器（IndexedDB），不会上传到服务器。</div>'+
+    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「观摩大厅」，其他用户才能看到。视频文件仅保存在本机浏览器（IndexedDB），不会上传到服务器。</div>'+
   '</div>';
   var file=null;
   var drop=document.getElementById('upDrop'),fi=document.getElementById('upFile');
@@ -477,10 +633,10 @@ function renderUpload(){
     if(!title){toast('请填写视频标题','warn');return}
     var id='v_'+Date.now();
     saveVideoBlob(id,file).then(function(){
-      addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',status:'pending',ts:Date.now(),src:'upload',shared:true});
+      addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'pending',ts:Date.now(),src:'upload',shared:true});
       /* 同步到管理后台数据集，管理员可在「视频审核」中处理 */
       try{AdminDB.addVideo({id:id,title:title,scene:scene,status:'pending',ts:Date.now(),dur:0})}catch(e){}
-      playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到广场','ok');
+      playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到观摩大厅','ok');
       TAB='mine';renderSec();renderHero();
     }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
   };
@@ -501,9 +657,9 @@ function renderData(){
   h+='<div class="myc-grid">'+
     '<div class="mg-k"><div class="l">累计面试场次</div><div class="v">'+(st.times||0)+'</div></div>'+
     '<div class="mg-k"><div class="l">累计作答题目</div><div class="v">'+(st.questions||0)+'</div></div>'+
-    '<div class="mg-k"><div class="l">平均自评</div><div class="v" style="color:#7dead6">'+(avg?avg.toFixed(1):'—')+'</div></div>'+
-    '<div class="mg-k"><div class="l">累计签到</div><div class="v" style="color:#ffd68a">'+(ci.total||0)+'</div></div>'+
-    '<div class="mg-k"><div class="l">连续签到</div><div class="v" style="color:#ffd68a">'+(ci.days||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">平均自评</div><div class="v txG">'+(avg?avg.toFixed(1):'—')+'</div></div>'+
+    '<div class="mg-k"><div class="l">累计签到</div><div class="v txA">'+(ci.total||0)+'</div></div>'+
+    '<div class="mg-k"><div class="l">连续签到</div><div class="v txA">'+(ci.days||0)+'</div></div>'+
     '<div class="mg-k"><div class="l">我的视频</div><div class="v">'+mine.length+'</div></div>'+
   '</div>';
 
@@ -547,7 +703,7 @@ function renderData(){
         '<div><div class="ti">'+esc(s.type||'综合')+' · '+esc((SCENES[s.scene]||{}).name||'综合')+'</div>'+
           (s.ai?'<div class="ai">🤖 '+esc(s.ai)+'</div>':'')+'</div>'+
         '<div class="sc">'+(s.count||0)+' 题</div>'+
-        '<div class="sc" style="color:#7dead6">'+(s.avg?s.avg.toFixed(1):'—')+' 星</div>'+
+        '<div class="sc txG">'+(s.avg?s.avg.toFixed(1):'—')+' 星</div>'+
       '</div>';
     });
     h+='</div>';
@@ -592,7 +748,7 @@ function renderFav(){
       if(e.target&&e.target.dataset&&e.target.dataset.unfav){
         e.stopPropagation();
         var list=getFavs().filter(function(x){return x!==e.target.dataset.unfav});
-        storeSet('ivsim_favs',list);toast('已取消收藏','warn');renderFav();return;
+        userSet('favs',list);toast('已取消收藏','warn');renderFav();return;
       }
       location.href='bank.html';
     };
@@ -601,25 +757,110 @@ function renderFav(){
 
 function renderSet(){
   var u=getUser()||{};
-  pane.innerHTML='<div class="myc-grid" style="margin-bottom:14px">'+
-      '<div class="mg-k"><div class="l">当前身份</div><div class="v" style="font-size:15px">'+esc(u.name||'访客')+'</div></div>'+
-      '<div class="mg-k"><div class="l">账号</div><div class="v" style="font-size:15px">@'+esc(u.account||'guest')+'</div></div>'+
-      '<div class="mg-k"><div class="l">登录方式</div><div class="v" style="font-size:15px">'+(u.guest?'游客':(u.oauth?'第三方':'本机账号'))+'</div></div>'+
+  var isCustomAv=typeof u.avatar==='string'&&u.avatar.indexOf('data:')===0;
+  var curAv=isCustomAv?'<img src="'+esc(u.avatar)+'">':esc(u.avatar||'__person__');
+  var sig=u.signature||'';
+  /* emoji 列表 */
+  var avHtml=AVATARS.map(function(a){
+    return '<button class="av-emoji'+((!isCustomAv&&a===u.avatar)?' on':'')+'" data-a="'+a+'">'+a+'</button>';
+  }).join('');
+  /* 性别选项 */
+  var genders=[{v:'',t:'保密'},{v:'male',t:'♂ 男'},{v:'female',t:'♀ 女'},{v:'other',t:'⚧ 其他'}];
+  var genHtml=genders.map(function(g){return '<option value="'+g.v+'"'+(u.gender===g.v?' selected':'')+'>'+g.t+'</option>'}).join('');
+
+  pane.innerHTML='<div class="b-set">'+
+    /* 身份资料 */
+    '<div class="b-scard b-swide" id="mycEdit">'+
+      '<div class="b-shead"><span class="ic">🧑</span><b>身份资料</b><span>保存后全站同步</span></div>'+
+      '<div class="b-field">'+
+        '<label>头像 <em>emoji 或上传图片</em></label>'+
+        '<div class="b-avrow">'+
+          '<div class="b-cur" id="curAvBox">'+curAv+'</div>'+avHtml+
+          '<button type="button" class="b-upbtn" id="avUpload">📷 上传图片</button>'+
+          (isCustomAv?'<button type="button" class="b-upbtn danger" id="avClear">✕ 清除</button>':'')+
+        '</div>'+
+        '<input type="file" id="avFile" accept="image/*" style="display:none">'+
+      '</div>'+
+      '<div class="b-two">'+
+        '<div class="b-field"><label>昵称 <em id="nmCnt">'+(u.name||'').length+'/12</em></label>'+
+          '<input class="b-inp" id="fName" maxlength="12" value="'+esc(u.name||'')+'" placeholder="1-12 个字符">'+
+          '<div class="f-err" id="nmErr"></div></div>'+
+        '<div class="b-field"><label>个性签名 <em id="sigCnt">'+sig.length+'/50</em></label>'+
+          '<input class="b-inp" id="fSig" maxlength="50" value="'+esc(sig)+'" placeholder="一句话介绍自己（选填）">'+
+          '<div class="f-err" id="sigErr"></div></div>'+
+      '</div>'+
+      '<div class="b-two">'+
+        '<div class="b-field"><label>性别</label><select id="fGender" class="b-inp">'+genHtml+'</select></div>'+
+        '<div class="b-field"><label>生日</label><input class="b-inp" id="fBd" value="'+esc(u.birthday||'')+'" placeholder="如 2000-01-01"></div>'+
+      '</div>'+
+      '<div class="b-savebar"><button class="b-save" id="editSave">💾 保存资料</button><span>所有数据仅保存在本机浏览器</span></div>'+
     '</div>'+
-    '<div class="myc-acts">'+
-      '<button class="myc-abtn" id="setProfile"><span class="ic">🧑</span><span><span class="t">编辑资料</span><span class="d">头像、昵称、个人背景主题</span></span></button>'+
-      '<button class="myc-abtn" id="setPref"><span class="ic">⚙️</span><span><span class="t">偏好设置</span><span class="d">深色 / 浅色、背景、音效、AI Key</span></span></button>'+
-      '<button class="myc-abtn" id="setCd"><span class="ic">⏳</span><span><span class="t">面试倒计时</span><span class="d">设置目标面试日期</span></span></button>'+
-      '<button class="myc-abtn" id="setAch"><span class="ic">🏅</span><span><span class="t">成就墙</span><span class="d">查看全部勋章与解锁条件</span></span></button>'+
-      '<button class="myc-abtn" id="setCi"><span class="ic">📅</span><span><span class="t">每日签到</span><span class="d">连签拿阶梯奖励</span></span></button>'+
-      '<button class="myc-abtn" id="setOut"><span class="ic">🚪</span><span><span class="t">退出登录</span><span class="d">清除本机登录状态</span></span></button>'+
+    /* 退出登录 */
+    '<div class="b-scard b-danger">'+
+      '<div><b>退出登录</b><span>清除本机登录状态，数据与视频会保留</span></div>'+
+      '<button class="b-out" id="setOut">🚪 退出登录</button>'+
     '</div>'+
-    '<div class="mg-tip">🔒 所有数据都保存在本机浏览器（localStorage / IndexedDB），不会上传到任何服务器；清除浏览数据会一并清空。</div>';
-  document.getElementById('setProfile').onclick=function(){openProfile();setTimeout(function(){renderHero();renderSet()},700)};
-  document.getElementById('setPref').onclick=function(){openSettings()};
-  document.getElementById('setCd').onclick=function(){openCountdownModal()};
-  document.getElementById('setAch').onclick=function(){openAchievements()};
-  document.getElementById('setCi').onclick=function(){checkIn();showCheckinPanel()};
+  '</div>';
+
+  var editState={avatar:u.avatar||'__person__'};
+  var curAvBox=document.getElementById('curAvBox');
+  function refreshAv(){
+    var isC=typeof editState.avatar==='string'&&editState.avatar.indexOf('data:')===0;
+    curAvBox.innerHTML=isC?'<img src="'+esc(editState.avatar)+'">':esc(editState.avatar);
+    $$('#mycEdit .av-emoji').forEach(function(b){b.classList.toggle('on',!isC&&b.dataset.a===editState.avatar)});
+  }
+  $$('#mycEdit .av-emoji').forEach(function(b){b.onclick=function(){editState.avatar=this.dataset.a;refreshAv()}});
+  document.getElementById('avUpload').onclick=function(){document.getElementById('avFile').click()};
+  document.getElementById('avFile').onchange=function(e){
+    var f=e.target.files&&e.target.files[0];if(!f)return;
+    if(f.size>3*1024*1024){toast('图片需小于 3MB','warn');return}
+    compressImage(f,256,0.8,function(data){
+      if(data){editState.avatar=data;refreshAv();toast('头像已更新','ok')}
+      else toast('图片处理失败','warn');
+    });
+    e.target.value='';
+  };
+  var clr=document.getElementById('avClear');
+  if(clr)clr.onclick=function(){editState.avatar='__person__';refreshAv()};
+  var fName=document.getElementById('fName');
+  fName.oninput=function(){
+    var v=this.value;
+    document.getElementById('nmCnt').textContent=v.length+'/12';
+    document.getElementById('nmCnt').classList.toggle('err',v.length>12);
+    document.getElementById('nmErr').textContent='';
+  };
+  var fSig=document.getElementById('fSig');
+  fSig.oninput=function(){
+    var v=this.value;
+    document.getElementById('sigCnt').textContent=v.length+'/50';
+    document.getElementById('sigCnt').classList.toggle('err',v.length>50);
+  };
+  /* 保存 */
+  document.getElementById('editSave').onclick=function(){
+    var name=fName.value.trim();
+    var sigVal=fSig.value.trim();
+    var err=0;
+    if(!name||name.length<1){document.getElementById('nmErr').textContent='昵称不能为空';err++}
+    else if(name.length>12){document.getElementById('nmErr').textContent='昵称不能超过 12 个字符';err++}
+    else document.getElementById('nmErr').textContent='';
+    if(sigVal.length>50){document.getElementById('sigErr').textContent='签名不能超过 50 个字符';err++}
+    else document.getElementById('sigErr').textContent='';
+    if(err)return;
+    var btn=this;btn.disabled=true;btn.innerHTML='<span class="spin"></span>保存中...';
+    setTimeout(function(){
+      var nu=getUser()||{};
+      nu.name=name;nu.avatar=editState.avatar;
+      nu.signature=sigVal;nu.gender=document.getElementById('fGender').value;
+      nu.birthday=document.getElementById('fBd').value.trim();
+      storeSet('ivsim_user',nu);
+      refreshNavAvatar();renderHero();
+      btn.innerHTML='✅ 已保存';
+      toast('资料已保存','ok');
+      setTimeout(function(){btn.disabled=false;btn.innerHTML='💾 保存资料'},1500);
+    },400);
+  };
+
+  /* 退出登录 */
   document.getElementById('setOut').onclick=function(){
     if(!confirm('确定退出登录吗？本机数据与视频会保留。'))return;
     logout();
@@ -627,6 +868,10 @@ function renderSet(){
 }
 
 bindSecTabs();
+/* 壳内星空：与首页 .bg-fx 同一套 seedStars（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘） */
+seedStars('pcStars1',700,1,60);
+seedStars('pcStars2',200,2,120);
+seedStars('pcStars3',100,3,180);
 function boot(){
   if(!applyGate())return;
   $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});

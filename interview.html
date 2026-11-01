@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>开始模拟面试 · 模拟面试训练</title>
-<link rel="stylesheet" href="shared.css?v=20261039">
+<title>开始模拟面试 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=20261031f">
 <style>
 /* 全屏：解除 shared.css 的 1120px 容器限制，内容铺满整个视口宽度 */
 .wrap{max-width:none}
@@ -276,7 +276,7 @@
     <!-- 设置 -->
     <div class="view on" id="vSetup">
       <div class="card setup rise">
-        <h2 style="font-size:21px;font-weight:900">🎬 开始一场模拟面试</h2>
+        <h1 style="font-size:21px;font-weight:900">🎬 开始一场模拟面试</h1>
         <p style="font-size:13.5px;color:var(--ink3);margin-top:9px;line-height:1.9;max-width:720px">连续答完全部题目（中途不打断），最后统一给每道题打分，并生成 AI 评价与复盘报告。</p>
 
         <div class="setup-tipbar">
@@ -336,14 +336,14 @@
         <div class="q-meta" id="qMeta"></div>
         <div class="q-text" id="qText"></div>
         <div class="q-point" id="qPoint"></div>
-        <textarea class="ans-ta" id="ansTa" placeholder="在这里写下你的回答思路，或点下方麦克风语音作答…"></textarea>
+        <textarea class="ans-ta" id="ansTa" placeholder="在这里写下你的回答思路，或点下方麦克风语音作答…" aria-label="回答输入区"></textarea>
         <div class="vrec-box" id="vrecBox" style="display:none">
-          <div style="font-size:11.5px;color:#fda4af;margin-bottom:6px">● 正在录制本题作答，点「⏹ 停止并保存」结束 · <span id="vrecTimer"></span></div>
+          <div class="txP" style="font-size:11.5px;margin-bottom:6px">● 正在录制本题作答，点「⏹ 停止并保存」结束 · <span id="vrecTimer"></span></div>
           <video id="vrecPrev" autoplay muted playsinline></video>
         </div>
         <div class="ans-bar">
           <button class="mic-btn" id="micBtn"></button>
-          <span class="hint" id="micHint" style="color:#fda4af"></span>
+          <span class="hint txP" id="micHint"></span>
           <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
           <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「视频 · 我的回放」">📹 录制</button>
           <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
@@ -402,10 +402,10 @@
 
           <!-- 模式2：文字作答 -->
           <div id="animCtrls">
-            <textarea class="ans-ta" id="animTa" style="min-height:115px;margin-top:14px" placeholder="在这里写下你的回答，也可以点麦克风语音输入…"></textarea>
+            <textarea class="ans-ta" id="animTa" style="min-height:115px;margin-top:14px" placeholder="在这里写下你的回答，也可以点麦克风语音输入…" aria-label="回答输入区"></textarea>
             <div class="ans-bar">
               <button class="mic-btn" id="animMicBtn"></button>
-              <span class="hint" id="animMicHint" style="color:#fda4af"></span>
+              <span class="hint txP" id="animMicHint"></span>
               <button class="mic-btn" id="animTtsBtn" style="padding:9px 12px">📢 重听题目</button>
               <span class="hint" id="animWordCnt">已输入 0 字</span>
               <button class="btn pri" id="animSubmit" style="margin-left:auto">提交作答</button>
@@ -495,7 +495,7 @@
   <div class="tt-d" id="ttD"></div>
 </div>
 
-<script src="shared.js?v=20261039"></script>
+<script src="shared.js?v=20261031g"></script>
 <script>
 if(!initPage('interview',true))throw new Error('login required');
 
@@ -633,7 +633,7 @@ var MODE_OPTS=[
   {k:'anim',ic:'🤖',t:'动画互动',d:'AI 面试官动画提问并朗读题目，你用文字回答'},
   {k:'cam', ic:'🎥',t:'摄像头语音',d:'模拟真实视频面试，全程开口语音作答（推荐 Chrome）'}
 ];
-var savedMode=storeGet('ivsim_ans_mode','text');
+var savedMode=userGet('ans_mode','text');
 if(!MODE_OPTS.some(function(m){return m.k===savedMode}))savedMode='text';
 S.mode=savedMode;
 var modePicks=document.getElementById('modePicks');
@@ -642,7 +642,7 @@ modePicks.innerHTML=MODE_OPTS.map(function(o){
     '<div class="mp-ic">'+o.ic+'</div><div class="mp-t">'+o.t+'</div><div class="mp-d">'+o.d+'</div></button>';
 }).join('');
 $$('#modePicks .m-pick').forEach(function(b){b.onclick=function(){
-  S.mode=b.dataset.k;storeSet('ivsim_ans_mode',S.mode);
+  S.mode=b.dataset.k;userSet('ans_mode',S.mode);
   $$('#modePicks .m-pick').forEach(function(x){x.classList.toggle('on',x===b)});
 }});
 
@@ -709,7 +709,7 @@ document.getElementById('warmBtn').onclick=function(){
 function beginWarmView(){
   show('vSession');
   var q=S.qs[0];
-  document.getElementById('qMeta').innerHTML=metaHtml(q)+'<span class="tag" style="background:rgba(251,191,36,.15);color:#ffd68a">热身模式</span>';
+  document.getElementById('qMeta').innerHTML=metaHtml(q)+'<span class="tag txA" style="background:rgba(251,191,36,.15)">热身模式</span>';
   document.getElementById('qText').textContent='热身 · '+q.q;
   document.getElementById('qPoint').textContent='快速答一下思路，答完直接看参考要点';
   document.getElementById('progBar').style.width='100%';
@@ -717,7 +717,7 @@ function beginWarmView(){
   clearInterval(S.timer);S.left=999;ring.style.stroke='#FBBF24';timerBox.classList.remove('danger');tNum.textContent='∞';
   applyModeUI();
   if(S.mode!=='text'){
-    document.getElementById('aiTags').innerHTML='<span class="tag" style="background:rgba(251,191,36,.15);color:#ffd68a">热身模式</span>';
+    document.getElementById('aiTags').innerHTML='<span class="tag txA" style="background:rgba(251,191,36,.15)">热身模式</span>';
     syncMiniTimer();
     aiAsk(q);
   }
@@ -826,15 +826,15 @@ function onVRecStop(){
   vrecLimitSel.disabled=false;
   var id='v_'+Date.now();
   saveVideoBlob(id,blob).then(function(){
-    addVideoMeta({id:id,title:(lastQ||'模拟面试作答').slice(0,30),scene:S.scene,owner:(getUser()||{}).name||'访客',status:'approved',ts:Date.now(),src:'interview',shared:false});
+    addVideoMeta({id:id,title:(lastQ||'模拟面试作答').slice(0,30),scene:S.scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'approved',ts:Date.now(),src:'interview',shared:false});
     playSound('unlock');
-    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「视频 · 我的回放」，可投稿到广场','ok');
+    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「视频 · 我的回放」，可投稿到观摩大厅','ok');
   }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
 }
 
 function metaHtml(q){
   return '<span class="tag" style="background:'+SCENE_COLOR[q.scene]+'22;color:'+SCENE_COLOR[q.scene]+'">'+SCENES[q.scene].name+'</span>'+
-    '<span class="tag" style="background:rgba(108,140,255,.15);color:#8ABDFF">'+LV_NAME[q.lv]+'</span>';
+    '<span class="tag txB2" style="background:rgba(108,140,255,.15)">'+LV_NAME[q.lv]+'</span>';
 }
 
 var ring=document.getElementById('ring'),tNum=document.getElementById('tNum'),timerBox=document.getElementById('timerBox');
@@ -1048,8 +1048,8 @@ function finish(){
   var totalAnsLen=S.recs.reduce(function(s,r){return s+(r.ans?' '+r.ans:'').replace(/\s/g,'').length},0);
   var avgAnsLen=Math.round(totalAnsLen/Math.max(total,1));
   var level=avgAnsLen>=100?5:avgAnsLen>=70?4:avgAnsLen>=45?3:avgAnsLen>=20?2:1;
-  var st=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0});
-  st.times++;st.questions+=total;storeSet('ivsim_stat',st);
+  var st=userGet('stat',{times:0,questions:0,scoreSum:0});
+  st.times++;st.questions+=total;userSet('stat',st);
   document.getElementById('rvGrid').innerHTML=
     '<div class="card"><div class="v">'+total+'</div><div class="l">完成题数</div></div>'+
     '<div class="card"><div class="v">'+avgAnsLen+'</div><div class="l">平均作答字数</div></div>'+
@@ -1082,10 +1082,10 @@ function finish(){
   document.getElementById('radarDesc').innerHTML=radarDescs.map(function(s){return '· '+s}).join('<br>');
 
   /* 场次数记录，供全场景判断成就 */
-  var stat=storeGet('ivsim_stat',{times:0,questions:0,scoreSum:0,scenes:{}});
+  var stat=userGet('stat',{times:0,questions:0,scoreSum:0,scenes:{}});
   stat.scenes=stat.scenes||{};
   stat.scenes[S.scene]=(stat.scenes[S.scene]||0)+1;
-  storeSet('ivsim_stat',stat);tryUnlockAll();
+  userSet('stat',stat);tryUnlockAll();
   /* 同步到管理后台数据集（管理员可在后台看到这场练习） */
   try{
     var sc=0,n=0;S.recs.forEach(function(r){if(r.score>0){sc+=r.score;n++}});
