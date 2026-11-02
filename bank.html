@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>浏览题库 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261031f">
+<link rel="stylesheet" href="shared.css?v=20261101b">
 <style>
 body{background:
   radial-gradient(ellipse 80% 50% at 20% -10%,rgba(138,189,255,.12),transparent),
@@ -21,13 +21,13 @@ body{background:
 .fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .fp-shell::after{content:"📚";position:absolute;right:-20px;top:-30px;font-size:180px;opacity:.03;
   transform:rotate(15deg);pointer-events:none;filter:grayscale(.3)}
-@media (max-width:900px){.fp-shell::after{font-size:120px;right:-10px;top:-20px}}
+@media (max-width:1024px){.fp-shell::after{font-size:120px;right:-10px;top:-20px}}
 /* 浅色模式适配 */
 body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
 body.light .fp-wrap::before{opacity:.25}
 body.light .fp-shell::after{opacity:.02}
 /* 筛选按钮：对齐 interview 设置页选项风格（JS 仍用 .chip/.on，仅改视觉） */
-.filters .chip{padding:10px 16px;border-radius:13px;font-size:13px;font-weight:600;color:var(--ink2);
+.filters .chip{padding:10px 16px;border-radius:13px;font-size:var(--fs-base);font-weight:600;color:var(--ink2);
   background:var(--card);border:1.5px solid var(--line);
   box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
 .filters .chip:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
@@ -38,27 +38,43 @@ body.light .fp-shell::after{opacity:.02}
   border-radius:13px;padding:11px 16px;margin-bottom:12px;transition:.2s}
 .search-box:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.14)}
 .search-box svg{color:var(--ink3);flex:none}
-.search-box input{flex:1;background:none;border:none;outline:none;font-size:14px}
+.search-box input{flex:1;background:none;border:none;outline:none;font-size:var(--fs-base)}
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-.filters .fg-lab{font-size:12px;color:var(--ink3);align-self:center;margin:0 2px 0 6px}
-.count-line{font-size:12px;color:var(--ink3);margin:14px 2px 12px}
+.filters .fg-lab{font-size:var(--fs-xs);color:var(--ink3);align-self:center;margin:0 2px 0 6px}
+.count-line{font-size:var(--fs-xs);color:var(--ink3);margin:14px 2px 12px}
 .q-item{border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;background:var(--card);transition:.2s}
 .q-item:hover{border-color:var(--line2)}
-.q-item .qi-h{display:flex;align-items:center;gap:11px;padding:17px 20px;cursor:pointer}
-.q-item .qi-h .qt{flex:1;font-size:14.5px;font-weight:700;line-height:1.6}
+.q-item .qi-h{display:flex;align-items:center;gap:11px;padding:clamp(14px,1.8vw,17px) clamp(14px,2vw,20px);cursor:pointer}
+.q-item .qi-h .qt{flex:1;min-width:0;font-size:var(--fs-md);font-weight:700;line-height:1.6}
 .q-item .qi-h .chev{color:var(--ink3);display:flex;transition:.25s;flex:none}
 .q-item.open .qi-h .chev{transform:rotate(180deg)}
 .q-item .qi-b{display:none;padding:0 20px 18px;border-top:1px dashed var(--line)}
 .q-item.open .qi-b{display:block;animation:rise .3s both}
-.q-item .qi-b h5{font-size:12px;font-weight:800;color:var(--acc2);margin:14px 0 8px}
-.q-item .qi-b li{list-style:none;font-size:13px;line-height:1.8;color:var(--ink2);padding-left:17px;position:relative;margin-bottom:5px}
+.q-item .qi-b h5{font-size:var(--fs-xs);font-weight:800;color:var(--acc2);margin:14px 0 8px}
+.q-item .qi-b li{list-style:none;font-size:var(--fs-base);line-height:1.8;color:var(--ink2);padding-left:17px;position:relative;margin-bottom:5px}
 .q-item .qi-b .ans li::before{content:"▸";position:absolute;left:0;color:var(--acc)}
-.q-item .qi-b .tip li::before{content:"💡";position:absolute;left:-4px;font-size:10.5px;top:3px}
-.qi-practice{flex:none;font-size:12px;padding:7px 14px;border-radius:9px;background:rgba(108,140,255,.15);
+.q-item .qi-b .tip li::before{content:"💡";position:absolute;left:-4px;font-size:var(--fs-2xs);top:3px}
+.qi-practice{flex:none;font-size:var(--fs-xs);padding:7px 14px;border-radius:9px;background:rgba(108,140,255,.15);
   border:1px solid rgba(108,140,255,.4);color:#cdd8ff;transition:.18s}
 .qi-practice:hover{background:rgba(108,140,255,.3)}
-.empty{text-align:center;padding:60px 20px;color:var(--ink3);font-size:13.5px}
+.empty{text-align:center;padding:clamp(40px,6vw,60px) 20px;color:var(--ink3);font-size:var(--fs-base)}
 .empty .e-ic{font-size:44px;display:block;margin-bottom:12px}
+
+/* ≤480：题目行改为多行排列，标签/按钮不再挤压题干 */
+@media (max-width:480px){
+  .q-item .qi-h{flex-wrap:wrap;row-gap:8px}
+  .q-item .qi-h .qt{flex:1 1 100%;order:3}
+  .qi-practice{margin-left:auto;order:4}
+  .q-item .qi-h .chev{order:5}
+  .q-item .qi-b{padding:0 16px 16px}
+}
+@media (pointer:coarse){
+  .qi-practice{min-height:44px;padding:10px 16px}
+  .q-item .qi-h .chev{min-width:44px;min-height:44px;align-items:center;justify-content:flex-end}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
@@ -90,7 +106,7 @@ body.light .fp-shell::after{opacity:.02}
   </div>
 </div>
 
-<script src="shared.js?v=20261031g"></script>
+<script src="shared.js?v=20261101b"></script>
 <script>
 if(!initPage('bank',true))throw new Error('login required');
 /* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */

@@ -955,9 +955,8 @@ function mountNav(active){
   var notLogin=!!(u&&u.autoGuest); /* 初始未登录态：占位身份，不显示为「游客」 */
   var nav=document.createElement('nav');nav.className='nav';nav.setAttribute('aria-label','主导航');
   nav.innerHTML=
-    '<a class="logo" href="index.html"><span class="lg-ic">'+ICONS.micNav+'</span>模拟面试训练营 Pro</a>'+
+    '<a class="logo" href="index.html" title="返回首页"><span class="lg-ic">'+ICONS.micNav+'</span>模拟面试训练营 Pro</a>'+
     '<div class="links">'+
-      '<a href="index.html" class="'+(active==='home'?'on':'')+'">首页</a>'+
       '<a href="interview.html" class="'+(active==='interview'?'on':'')+'">模拟面试</a>'+
       '<a href="bank.html" class="'+(active==='bank'?'on':'')+'">题库</a>'+
       '<a href="square.html" class="'+(active==='square'?'on':'')+'">观摩大厅</a>'+
@@ -1627,6 +1626,13 @@ function pulseBadges(ids){
 function getAchievements(){var set=userGet('ach',{});return ACH_DEFS.map(function(a){return Object.assign({},a,{unlocked:!!set[a.id],t:set[a.id]})})}
 
 /* 智能体规则（放在所有依赖 var 定义之后，避免初始化时引用 undefined） */
+/* 每日挑战题面兜底：题库为空或索引失效时，避免把 undefined 拼进回复 */
+var DC_Q_TEXT=(function(){
+  try{
+    var d=dailyChallenge();
+    return (d&&d.q&&typeof d.q.q==='string')?d.q.q.trim():'';
+  }catch(e){return ''}
+})();
 var AGENT_RULES=[
   {k:['你好','hi','hello','在吗','在不在'],r:'你好呀！我是面试小助手 🤖，可以问我：怎么开始模拟面试、题库怎么用、语音作答、自评标准、复盘报告等问题。'},
   {k:['开始','怎么练','如何开始','怎么用','如何使用','流程'],r:'流程很简单：<br>1️⃣ 点顶部「开始模拟面试」<br>2️⃣ 选择场景、题数和每题时间<br>3️⃣ 限时作答（支持语音输入）<br>4️⃣ 对照参考答案自评打分<br>5️⃣ 生成复盘报告，看自己的短板',acts:[{t:'去练一场',go:'interview.html'}]},
@@ -1645,7 +1651,7 @@ var AGENT_RULES=[
   {k:['签到','打卡','每日签到'],r:'右下角有 ✔️ 签到按钮，或者浮动快捷菜单里也能一键签到。连续签到 3 天、累计签到 15 天都能解锁成就哦！',acts:[{t:'去签到',act:'checkin'}]},
   {k:['成就','勋章','徽章','解锁'],r:'目前有 '+ACH_DEFS.length+' 个成就可以解锁，包括初次面试、全场景王者、连续签到、面试人格测试等。右下角 🏅 按钮可以查看已解锁的成就墙。',acts:[{t:'查看成就墙',act:'ach'}]},
   {k:['人格','面试人格','测试','性格'],r:'首页娱乐区有「面试人格测试」，5 道题测出你是"即兴戏精 / 结构王者 / 成长型选手 / 佛系选手"中的哪一类，附个性化改进建议。',acts:[{t:'去测一测',go:'index.html#persona'}]},
-  {k:['每日挑战','今日挑战','今天练什么'],r:'首页有「每日挑战」，每天根据日期生成一道固定面试题，今天的挑战是：<b>'+dailyChallenge().q.q+'</b>。点"去练"直接进入面试间。',acts:[{t:'去练这道',go:'interview.html'}]},
+  {k:['每日挑战','今日挑战','今天练什么'],r:'首页有「每日挑战」，每天根据日期生成一道固定面试题，'+(DC_Q_TEXT?'今天的挑战是：<b>'+DC_Q_TEXT+'</b>。':'今天的题目暂时没有收录，可以先去题库挑一道练。')+'点"去练"直接进入面试间。',acts:[{t:'去练这道',go:'interview.html'}]},
   {k:['梗','黑话','面试梗','互联网黑话'],r:'面试里经常会出现一些互联网黑话，比如"闭环""赋能""北极星指标""MVP"。首页有「面试梗百科」卡片，每天翻一个，下次听到就不会懵啦～'},
   {k:['翻卡','知识卡','tips','知识点'],r:'首页有「知识翻卡」，随机蹦出一个答题技巧点（来自 50 道题库），点一下翻一张，碎片时间也能练一下。'},
   {k:['快答','随机快答','趣味'],r:'首页娱乐区有「随机快答一题」，随机蹦题，60 秒口述思路再对答案，低成本热身效果好。连答 10 次解锁"快答战士"成就！'}
@@ -1990,7 +1996,8 @@ function mountOnboarding(){
         '<button class="btn pri sm" id="tnNext">'+s.btn+'</button></div>');
     /* 事件只绑在本层弹层内部，避免命中残留的同名节点 */
     function q(sel){return box.querySelector(sel)}
-    q('#tnX').onclick=closeMask;q('#tnSkip').onclick=done;
+    q('#tnX').onclick=function(){done();closeMask()};
+    q('#tnSkip').onclick=function(){done();closeMask()};
     if(i>0)q('#tnBack').onclick=function(){i--;show()};
     q('#tnNext').onclick=function(){i++;if(i>=STEPS.length){closeMask();done();location.href='interview.html'}else{closeMask();show()}};
   }
