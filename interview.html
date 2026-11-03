@@ -6,8 +6,8 @@
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
 <link rel="stylesheet" href="shared.css?v=20261101b">
 <style>
-/* 内容壳：与全站统一 1280px 上限；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
-.wrap{max-width:var(--shell-max)}
+/* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
+.wrap{max-width:2400px}
 .stage{width:100%;max-width:none;margin:0 auto}
 #vSession,#vFb,#vRate,#vReview{max-width:var(--reading-max);margin:0 auto}
 .view{display:none}
@@ -150,7 +150,13 @@
 .us-who{font-size:var(--fs-xs);color:var(--ink3);margin-top:5px;text-align:right}
 .cam-stage{position:relative;margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid rgba(251,113,133,.42);background:#000;display:none}
 .cam-stage.on{display:block}
-.cam-stage video{width:100%;max-height:250px;object-fit:cover;display:block}
+.cam-stage video{width:100%;max-height:250px;object-fit:cover;display:block;transform:scaleX(-1)} /* 预览镜像，符合照镜子的直觉 */
+.cam-tools{position:absolute;right:10px;top:8px;display:flex;gap:6px}
+.cam-tool{width:28px;height:28px;border-radius:9px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.55);color:#fff;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cam-tool:hover{background:rgba(0,0,0,.75);border-color:rgba(255,255,255,.4)}
+.cam-nocam{display:none;padding:16px 14px;font-size:var(--fs-xs);color:#fda4af;line-height:1.7}
+.cam-stage.audio-only video,.cam-stage.audio-only .cam-tools{display:none}
+.cam-stage.audio-only .cam-nocam{display:block}
 .cam-tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.6);font-size:var(--fs-xs);padding:3px 11px;border-radius:99px;color:#fff;display:flex;gap:7px;align-items:center}
 .cam-tag i{width:7px;height:7px;border-radius:50%;background:#fb7185;animation:aiblink 1.1s infinite}
 .cam-fail{display:none;margin-top:12px;padding:11px 14px;border-radius:12px;font-size:var(--fs-xs);line-height:1.6;
@@ -324,6 +330,46 @@
   .chip,.sc-pick,.m-pick,.mic-btn,.popt,.btn{min-height:44px}
   .stars button{width:44px;height:44px}
 }
+.setup h1{font-size:clamp(21px,1.22vw,31px)!important;font-weight:900;line-height:1.35}
+.setup>p.setup-sub{font-size:clamp(13.5px,.66vw,17px)!important;line-height:1.9!important;
+  color:var(--ink3);margin-top:9px;max-width:none}
+@media (min-width:1600px){
+  #vSetup{
+    --fs-3xs:clamp(10px,.44vw,12.5px);
+    --fs-2xs:clamp(11px,.5vw,14px);
+    --fs-xs:clamp(12.5px,.6vw,16px);
+    --fs-sm:clamp(14px,.68vw,18px);
+    --fs-base:clamp(16px,.82vw,22px);
+    --fs-md:clamp(16px,.82vw,22px);
+    --fs-lg:clamp(17px,.9vw,24px);
+    --fs-xl:clamp(19px,1vw,26px);
+    --fs-2xl:clamp(21px,1.1vw,30px);
+  }
+  /* 左栏放宽，右侧作答方式保持紧凑，场景 5 项单行排布 */
+  #vSetup .setup{padding:clamp(24px,2vw,38px)}
+  #vSetup .setup-cols{grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:0 clamp(36px,3vw,76px)}
+  #vSetup .scol-right{padding-top:0}
+  #vSetup #scOpts{grid-template-columns:repeat(5,minmax(0,1fr))}
+  #vSetup .setup .opts{gap:clamp(10px,.85vw,18px)}
+  #vSetup .setup .opt-row{margin-top:clamp(20px,1.5vw,26px)}
+  #vSetup .opt-row .o-lab{font-size:clamp(13px,.6vw,15px);margin-bottom:8px}
+  #vSetup .setup .opts .chip{padding:clamp(11px,.6vw,14px) clamp(18px,1.1vw,26px)}
+  #vSetup .sc-pick{padding:clamp(12px,.7vw,15px) 12px}
+  #vSetup .setup-tipbar{padding:14px 18px;margin-bottom:16px}
+  #vSetup .setup-tipbar .ti-t{font-size:clamp(14px,.68vw,17px)}
+  #vSetup .setup-tipbar .ti-d{font-size:clamp(12px,.55vw,14px)}
+  #vSetup .m-pick{padding:clamp(14px,.9vw,18px)}
+  #vSetup .m-pick .mp-ic{font-size:clamp(26px,1.2vw,32px)}
+  #vSetup .m-pick .mp-t{font-size:clamp(15px,.72vw,18px);margin:7px 0 3px}
+  #vSetup .m-pick .mp-d{font-size:clamp(12px,.55vw,14px)}
+  #vSetup .sc-preview{margin-top:14px;gap:10px}
+  #vSetup .sc-preview .sp-card{font-size:clamp(12px,.55vw,14px);padding:11px 13px}
+  #vSetup .setup-why div{font-size:clamp(13px,.6vw,16px);padding:clamp(12px,.8vw,16px)}
+  #vSetup .warmup{padding:clamp(16px,1vw,20px)}
+  #vSetup .warmup .w-body{font-size:clamp(12px,.58vw,15px)}
+  #vSetup #warmBtn{font-size:clamp(14px,.66vw,16px);padding:11px 20px;border-radius:13px}
+  #vSetup #startBtn{font-size:clamp(16px,.85vw,20px)!important;padding:clamp(15px,1vw,20px)!important}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -334,8 +380,8 @@
     <!-- 设置 -->
     <div class="view on" id="vSetup">
       <div class="card setup rise">
-        <h1 style="font-size:21px;font-weight:900">🎬 开始一场模拟面试</h1>
-        <p style="font-size:13.5px;color:var(--ink3);margin-top:9px;line-height:1.9;max-width:720px">连续答完全部题目（中途不打断），最后统一给每道题打分，并生成 AI 评价与复盘报告。</p>
+        <h1>🎬 开始一场模拟面试</h1>
+        <p class="setup-sub">连续答完全部题目（中途不打断），最后统一给每道题打分，并生成 AI 评价与复盘报告。</p>
 
         <div class="setup-tipbar">
           <span class="ti-ic">💡</span>
@@ -404,7 +450,7 @@
           <button class="mic-btn" id="micBtn"></button>
           <span class="hint txP" id="micHint"></span>
           <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
-          <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「视频 · 我的回放」">📹 录制</button>
+          <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「个人中心 · 我的回放」">📹 录制</button>
           <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
           <span class="hint" id="wordCnt">已输入 0 字</span>
           <button class="btn pri" id="submitBtn" style="margin-left:auto">提交作答</button>
@@ -458,6 +504,11 @@
           <div class="cam-stage" id="camStage">
             <video id="camVideo" autoplay muted playsinline></video>
             <div class="cam-tag"><i></i><span id="camTag">摄像头已开启</span></div>
+            <div class="cam-tools">
+              <button type="button" class="cam-tool" id="camToggleBtn" title="暂停摄像头画面">📷</button>
+              <button type="button" class="cam-tool" id="camMuteBtn" title="静音">🎤</button>
+            </div>
+            <div class="cam-nocam">🎙 摄像头不可用，已切换为仅录音模式，语音作答照常进行</div>
           </div>
 
           <!-- 模式2：文字作答 -->
@@ -537,6 +588,11 @@
         <div class="coach" id="rvCoach"></div>
         <h4 style="font-size:14px;font-weight:800;margin-bottom:12px">逐题回顾</h4>
         <div id="rvList"></div>
+        <div id="rvVideoBox" style="display:none;align-items:center;gap:12px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.34);border-radius:14px;padding:14px 16px;margin-top:18px">
+          <span style="font-size:22px">🎬</span>
+          <div style="flex:1;font-size:var(--fs-xs);line-height:1.7;color:var(--ink2)" id="rvVideoTxt">本场摄像头作答的回放正在保存…</div>
+          <button class="btn pri sm" style="flex:none" onclick="location.href='videos.html#videos'">去个人中心看回放</button>
+        </div>
         <div style="display:flex;gap:10px;margin-top:22px">
           <button class="btn gho" style="flex:1" onclick="location.href='index.html'">回首页</button>
           <button class="btn gho" style="flex:1" onclick="location.href='bank.html'">去题库巩固</button>
@@ -745,14 +801,45 @@ function enterSession(done){
     if(!SRc){miniPop('当前浏览器不支持语音识别','摄像头语音模式需要语音识别能力，请使用最新版 Chrome / Edge，或改用「🤖 动画互动」文字模式。');return}
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){miniPop('无法调用摄像头','当前浏览器不支持摄像头/麦克风，请改用其他作答方式。');return}
     toast('正在申请摄像头和麦克风权限…');
-    navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:400}},audio:true}).then(function(st){
-      S.camStream=st;showCamPreview();done();
-    }).catch(function(){
-      miniPop('无法访问摄像头/麦克风','请点击地址栏的摄像头图标，允许摄像头和麦克风权限后重试；也可以改用「🤖 动画互动」或「📝 经典文字」模式。');
+    openCamStream(function(st){
+      S.camStream=st;bindCamTracks();showCamPreview();startCamRec();done();
+    },function(tip){
+      miniPop('无法访问摄像头/麦克风',tip);
     });
     return;
   }
   done();
+}
+/* 先要「摄像头 + 麦克风」；摄像头被占用 / 没插摄像头时降级为仅麦克风，
+   语音作答照常进行，回放录成音频，不至于整场开不起来 */
+function openCamStream(ok,fail){
+  navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:400}},audio:true})
+  .then(function(st){ok(st)})
+  .catch(function(e){
+    var name=(e&&e.name)||'';
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+      toast('摄像头不可用，已切换为「仅录音」模式：语音作答不受影响','warn');
+      ok(st);
+    }).catch(function(){
+      var tip='请点击地址栏的摄像头图标，允许摄像头和麦克风权限后重试；也可以改用「🤖 动画互动」或「📝 经典文字」模式。';
+      if(name==='NotAllowedError'||name==='SecurityError')tip='权限被拒绝了：请点击地址栏的摄像头图标，允许摄像头和麦克风后重试。';
+      else if(name==='NotReadableError'||name==='TrackStartError')tip='摄像头被其它程序占用（会议软件、相机应用等）：请先关闭它们再试，或改用「🤖 动画互动」模式。';
+      else if(name==='NotFoundError'||name==='OverconstrainedError')tip='没有检测到可用的摄像头 / 麦克风设备：请检查设备连接，或改用「🤖 动画互动」模式。';
+      fail&&fail(tip);
+    });
+  });
+}
+/* 设备被拔掉 / 被系统抢占时给个明确提示，别让画面悄悄黑掉 */
+function bindCamTracks(){
+  if(!S.camStream)return;
+  S.camStream.getTracks().forEach(function(t){
+    if(t._camBound)return;t._camBound=true;
+    t.onended=function(){
+      if(!S.camStream)return;
+      toast('摄像头 / 麦克风连接中断，本场回放可能不完整','warn');
+      setCamTag();
+    };
+  });
 }
 
 /* 热身按钮 */
@@ -852,7 +939,8 @@ function startVRec(){
 /* 选择当前浏览器支持的录制格式，并限制码率防止视频过大撑爆 IndexedDB（约 75KB/s） */
 function pickRecOpts(st){
   var hasVideo=st.getVideoTracks().length>0;
-  var cands=hasVideo?['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+  /* vp8 优先：兼容性最好、编码最稳。vp9 在部分机器上会出现「权限给了但编码器不出数据」 */
+  var cands=hasVideo?['video/webm;codecs=vp8,opus','video/webm;codecs=vp9,opus','video/webm']
                    :['audio/webm;codecs=opus','audio/webm'];
   var mime='';
   if(window.MediaRecorder&&typeof MediaRecorder.isTypeSupported==='function'){
@@ -890,8 +978,92 @@ function onVRecStop(){
   saveVideoBlob(id,blob).then(function(){
     addVideoMeta({id:id,title:(lastQ||'模拟面试作答').slice(0,30),scene:S.scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'approved',ts:Date.now(),src:'interview',shared:false});
     playSound('unlock');
-    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「视频 · 我的回放」，可投稿到观摩大厅','ok');
+    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「个人中心 · 我的回放」，可投稿到观摩大厅','ok');
   }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
+}
+
+var CAMREC={mr:null,chunks:[],on:false,maxTimer:null,guard:null,checkTimer:null,bytes:0,retry:0,saved:0,started:false,t0:0};
+/* keep/keepBytes：重启录制器时带上已录到的分片，不丢前面几秒 */
+function startCamRec(keep,keepBytes){
+  try{
+    if(!S.camStream||!window.MediaRecorder)return;
+    CAMREC.chunks=keep||[];CAMREC.bytes=keepBytes||0;CAMREC.started=true;
+    if(!keep)CAMREC.t0=Date.now(); /* 只在整场第一次启动时记时间 */
+    var mr=new MediaRecorder(S.camStream,pickRecOpts(S.camStream));
+    mr.ondataavailable=function(e){
+      if(e.data&&e.data.size){CAMREC.chunks.push(e.data);CAMREC.bytes+=e.data.size}
+    };
+    mr.onerror=function(){}; /* 出错也不打断作答，由自检 / 落盘环节给出提示 */
+    mr.onstop=saveCamRec;
+    CAMREC.mr=mr;
+    mr.start(1000); /* 每秒分片，避免最后一次性拿到超大块 */
+    CAMREC.on=true;
+    setCamTag();
+    /* 单段兜底上限 10 分钟：到点先落盘这一段，再接着录下一段（长场次不丢内容） */
+    clearTimeout(CAMREC.maxTimer);
+    CAMREC.maxTimer=setTimeout(function(){if(CAMREC.on)rotateCamRec()},REC_MAX*1000);
+    /* 自检：某些机器 / 浏览器首次录制拿不到任何数据（权限给了但编码器没出流），
+       静默失败会让人以为「没录上」，这里重启一次录制器自救 */
+    clearTimeout(CAMREC.checkTimer);
+    CAMREC.checkTimer=setTimeout(function(){
+      if(!CAMREC.on||CAMREC.bytes>0)return;
+      if(CAMREC.retry>=1){toast('没能录到摄像头画面/声音，本场回放可能无法生成','warn');return}
+      CAMREC.retry++;
+      var kp=CAMREC.chunks.slice(),kb=CAMREC.bytes,old=CAMREC.mr;
+      if(old){old.onstop=null;try{old.stop()}catch(e){}}
+      CAMREC.mr=null;CAMREC.on=false;clearTimeout(CAMREC.maxTimer);
+      startCamRec(kp,kb);
+    },3500);
+  }catch(e){CAMREC.mr=null;CAMREC.on=false;setCamTag()}
+}
+function stopCamRec(){
+  if(CAMREC.mr&&CAMREC.on){
+    CAMREC.on=false;
+    clearTimeout(CAMREC.maxTimer);clearTimeout(CAMREC.checkTimer);
+    try{CAMREC.mr.stop()}catch(e){saveCamRec()}
+  }
+}
+/* 单段到上限：先存下已录的一段，再重新起一段继续录（摄像头不释放） */
+function rotateCamRec(){
+  if(!CAMREC.on||!CAMREC.mr)return;
+  var old=CAMREC.mr,keep=CAMREC.chunks.slice(),kb=CAMREC.bytes,mime=old.mimeType;
+  old.onstop=null; /* 这段自己保存，不走 saveCamRec（那会顺手把摄像头关掉） */
+  CAMREC.mr=null;CAMREC.on=false;CAMREC.chunks=[];CAMREC.bytes=0;
+  clearTimeout(CAMREC.maxTimer);clearTimeout(CAMREC.checkTimer);
+  try{old.stop()}catch(e){}
+  if(kb>=1024)camRecSave(keep,mime);
+  CAMREC.t0=Date.now();
+  startCamRec();
+  toast('单段录制已达 '+(REC_MAX/60)+' 分钟，已自动保存并继续录制下一段','ok');
+}
+function saveCamRec(){
+  clearTimeout(CAMREC.maxTimer);clearTimeout(CAMREC.checkTimer);
+  var chunks=CAMREC.chunks;CAMREC.chunks=[];
+  var mime=(CAMREC.mr&&CAMREC.mr.mimeType)||'video/webm';
+  CAMREC.mr=null;CAMREC.bytes=0;
+  finishStopCam(); /* 录制已结束，释放摄像头与 UI */
+  camRecSave(chunks,mime);
+}
+function camRecSave(chunks,mime){
+  var size=0;chunks&&chunks.forEach(function(c){size+=c.size||0});
+  if(!chunks||!chunks.length||size<1024){
+    /* 录了个寂寞：明确告诉用户，而不是假装保存过了 */
+    if(S.mode==='cam')toast('未能生成回放：没有录到摄像头画面或声音，请检查浏览器摄像头/麦克风权限后重试','warn');
+    return;
+  }
+  var blob=new Blob(chunks,{type:mime||'video/webm'});
+  if(!blob||!blob.size){if(S.mode==='cam')toast('未能生成回放：录制内容为空','warn');return}
+  var id='v_'+Date.now();
+  saveVideoBlob(id,blob).then(function(){
+    CAMREC.saved++;
+    addVideoMeta({id:id,
+      title:'模拟面试回放 · '+((SCENES[S.scene]&&SCENES[S.scene].name)||'综合')+(CAMREC.saved>1?'（第'+CAMREC.saved+'段）':''),
+      scene:S.scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),
+      status:'approved',ts:Date.now(),src:'interview',shared:false,
+      dur:CAMREC.t0?Math.round((Date.now()-CAMREC.t0)/1000):0});
+    playSound('unlock');
+    toast('本场摄像头作答已生成回放，可在「个人中心 · 我的回放」查看','ok');
+  }).catch(function(){toast('回放保存失败：浏览器存储空间不足','warn')});
 }
 
 function metaHtml(q){
@@ -1168,6 +1340,19 @@ function finish(){
   $$('#rvList .ri-h').forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open')}});
   document.getElementById('progBar').style.width='100%';
   show('vReview');
+  renderReviewVideoBox();                 /* 立刻给个状态 */
+  setTimeout(renderReviewVideoBox,1500);  /* 回放落盘是异步的，稍后再校正一次文案 */
+  setTimeout(renderReviewVideoBox,4000);
+}
+/* 复盘页的回放入口：摄像头作答时明确告诉用户回放去哪看 */
+function renderReviewVideoBox(){
+  var box=document.getElementById('rvVideoBox');if(!box)return;
+  if(S.mode!=='cam'){box.style.display='none';return}
+  box.style.display='flex';
+  var txt=document.getElementById('rvVideoTxt');if(!txt)return;
+  if(CAMREC.saved)txt.innerHTML='<b>已生成 '+CAMREC.saved+' 个作答回放</b>，已存到「个人中心 · 我的回放」，可回看也可投稿到观摩大厅。';
+  else if(CAMREC.started)txt.innerHTML='本场回放正在保存，稍后可在「个人中心 · 我的回放」查看；若一直没出现，请检查浏览器摄像头 / 麦克风权限。';
+  else txt.innerHTML='本场没有生成回放。选择「🎥 摄像头语音」模式作答会自动录制并保存回放。';
 }
 
 var recog=null,micOn=false,micMode='ta',micFinal='',micWantRun=false;
@@ -1395,21 +1580,84 @@ function resetUserBubble(){
 }
 
 /* 摄像头 */
+var camToggleBtn=document.getElementById('camToggleBtn'),camMuteBtn=document.getElementById('camMuteBtn');
+function camTracks(kind){return S.camStream?S.camStream.getTracks().filter(function(t){return t.kind===kind}):[]}
+function camPaused(){var v=camTracks('video');return !!(v.length&&!v[0].enabled)}
+function camMuted(){var a=camTracks('audio');return !!(a.length&&!a[0].enabled)}
+/* 状态标签统一在这里写，避免各处的文案互相覆盖（之前每次进题都被刷回「已开启」） */
+function setCamTag(){
+  if(!camTag)return;
+  if(!S.camStream){camTag.textContent='摄像头未开启';syncCamTools();return}
+  var noVid=!camTracks('video').length;
+  var t=noVid?'🎙 仅录音模式（摄像头不可用）'
+    :camPaused()?'● 画面已暂停'
+    :(CAMREC.on?'● 录制中（本场结束自动保存回放）':'● 摄像头已开启');
+  if(camMuted())t+=' · 已静音';
+  camTag.textContent=t;
+  syncCamTools();
+}
+function syncCamTools(){
+  if(camToggleBtn){
+    var v=camTracks('video');
+    camToggleBtn.textContent=camPaused()?'📷‍🚫':'📷';
+    camToggleBtn.title=camPaused()?'恢复摄像头画面':'暂停摄像头画面（答题继续）';
+    camToggleBtn.style.display=v.length?'':'none';
+  }
+  if(camMuteBtn){
+    camMuteBtn.textContent=camMuted()?'🔇':'🎤';
+    camMuteBtn.title=camMuted()?'取消静音':'静音（回放里不会录进你的声音）';
+  }
+}
 function showCamPreview(){
   if(!S.camStream)return;
-  camVideo.srcObject=S.camStream;
-  var p=camVideo.play();if(p&&p.catch)p.catch(function(){});
+  var hasV=camTracks('video').length>0;
+  camStage.classList.toggle('audio-only',!hasV);
+  if(hasV){
+    if(camVideo.srcObject!==S.camStream)camVideo.srcObject=S.camStream;
+    var p=camVideo.play();if(p&&p.catch)p.catch(function(){});
+  }
   camStage.classList.add('on');
-  camTag.textContent='● 摄像头已开启';
+  setCamTag();
 }
-function stopCam(){
+/* 暂停 / 恢复画面与声音：只切 enabled，不 stop 轨道，录制器不会断 */
+if(camToggleBtn)camToggleBtn.onclick=function(){
+  if(!canUseFeature())return;
+  var v=camTracks('video');if(!v.length){toast('当前没有可用的摄像头','warn');return}
+  var on=!v[0].enabled;
+  v.forEach(function(t){t.enabled=on});
+  toast(on?'摄像头画面已恢复':'摄像头画面已暂停（声音仍在录制）','ok');
+  setCamTag();
+};
+if(camMuteBtn)camMuteBtn.onclick=function(){
+  if(!canUseFeature())return;
+  var a=camTracks('audio');if(!a.length){toast('当前没有可用的麦克风','warn');return}
+  var on=!a[0].enabled;
+  a.forEach(function(t){t.enabled=on});
+  toast(on?'麦克风已开启':'麦克风已静音，回放里不会录进你的声音','ok');
+  setCamTag();
+};
+function finishStopCam(){
+  clearTimeout(CAMREC.guard);CAMREC.guard=null;
   if(S.camStream){
     try{S.camStream.getTracks().forEach(function(t){t.stop()})}catch(e){}
     S.camStream=null;
   }
   try{camVideo.srcObject=null}catch(e){}
-  camStage.classList.remove('on');
-  camTag.textContent='摄像头未开启';
+  camStage.classList.remove('on');camStage.classList.remove('audio-only');
+  setCamTag();
+}
+function stopCam(){
+  /* 摄像头模式正在自动录制：先停录制器，等 onstop 把最后一段数据落盘后再释放轨道 */
+  if(CAMREC.mr&&CAMREC.on){
+    CAMREC.on=false;
+    clearTimeout(CAMREC.maxTimer);clearTimeout(CAMREC.checkTimer);
+    clearTimeout(CAMREC.guard);
+    CAMREC.guard=setTimeout(function(){if(S.camStream)finishStopCam()},2500); /* 兜底：onstop 没触发也能释放摄像头 */
+    try{CAMREC.mr.stop()}catch(e){saveCamRec()}
+    return;
+  }
+  if(CAMREC.mr)return; /* 录制器正在收尾（onstop 未触发），等 saveCamRec 释放，别掐掉最后一段 */
+  finishStopCam();
 }
 window.addEventListener('beforeunload',stopCam);
 
