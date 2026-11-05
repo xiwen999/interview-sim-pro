@@ -261,7 +261,6 @@ table.tb tbody tr:hover{background:#f8faff}
     <div class="f" id="gPwd2F" style="display:none"><div class="lab">确认密码（首次初始化）</div><input class="ad-in" id="gPwd2" type="password" placeholder="再次输入密码" autocomplete="new-password" aria-label="确认密码"></div>
     <div class="err" id="gErr"></div>
     <button class="btn pri" id="gOk" style="width:100%">登 录 后 台</button>
-    <a class="back" href="index.html">← 返回用户前台</a>
   </div>
 </div>
 
@@ -279,13 +278,13 @@ table.tb tbody tr:hover{background:#f8faff}
     </div>
     <div class="sp"></div>
     <div class="who">👑 <b id="topWho">管理员</b> · 数据源：<span id="topSrc">本机浏览器</span></div>
-    <button class="ad-tbtn" id="topFront">← 返回前台</button>
     <button class="ad-tbtn" id="topOut">退出管理员</button>
   </header>
   <div class="ad-body">
     <aside class="ad-side">
       <div class="grp">数 据</div>
       <button class="ad-item" data-go="dash"><span class="ic">📊</span>概览</button>
+      <button class="ad-item" data-go="online"><span class="ic">🟢</span>实时在线<span class="cnt" id="sideOnline" style="background:#10b981"></span></button>
       <button class="ad-item" data-go="users"><span class="ic">👥</span>用户管理</button>
       <button class="ad-item" data-go="sessions"><span class="ic">🎤</span>面试数据</button>
       <div class="grp">运 营</div>
@@ -300,7 +299,7 @@ table.tb tbody tr:hover{background:#f8faff}
 
 <div class="ad-mask" id="mask" style="display:none"><div class="box" id="mbox"></div></div>
 
-<script src="shared.js?v=20261101b"></script>
+<script src="shared.js?v=20261104b"></script>
 <script>
 var TAB='dash', VF='pending', KW={u:'',s:'',v:''};
 var SESS_PAGE=80, SESS_SHOW=SESS_PAGE; /* 面试数据每次加载条数 / 当前已加载条数 */
@@ -313,6 +312,19 @@ function adminToken(){return storeGet(ADMIN_TOKEN_KEY,null)}
 function setAdminToken(t){if(t)storeSet(ADMIN_TOKEN_KEY,t);else storeRemove(ADMIN_TOKEN_KEY)}
 function findUser(id){(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)return u});
   var f=null;(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)f=u});return f}
+/* 封禁 / 解封后把状态镜像到本地副本 ivsim_admin_db。
+   前台的封禁门禁只读这份本地数据；后端在线时 adminAct 走 /api 而不执行 fallback，
+   不镜像的话前台既感知不到封禁，也无法在解封后自动恢复。 */
+function mirrorBanStatus(u,status){
+  try{
+    var d=AdminDB.db(),hit=null,acc=String(u.account||'').toLowerCase();
+    d.users.forEach(function(x){
+      if(!hit&&u.uid&&x.uid&&x.uid===u.uid)hit=x;
+      else if(!hit&&acc&&String(x.account||'').toLowerCase()===acc)hit=x;
+    });
+    if(hit){hit.status=status;AdminDB.save(d)}
+  }catch(e){}
+}
 
 /* 加载后台数据集：优先本地后端，失败 / 离线回落到本地 AdminDB */
 async function adminLoad(){
@@ -385,7 +397,7 @@ function viewDash(){
   h+='<div class="hd"><h1>📊 数据概览</h1><div class="sub">全站用户训练与内容概况 · 每 60 秒自动刷新</div><div class="sp"></div>'+
      '<button class="btn sm" id="rf">🔄 刷新</button></div>';
   h+='<div class="kpis">'+
-    kpi('a','👥 注册用户',s.users,('封禁 '+s.banned+' 人'))+
+    kpi('a','👥 注册用户',s.users,('封禁 '+s.banned+' · 在线 '+s.online+' 人'))+
     kpi('b','🎤 累计面试场次',s.sessions,('今日 '+s.today+' · 近 7 天 '+s.week))+
     kpi('e','❓ 累计作答题数',s.questions,('平均 '+s.avgUsed+' 秒 / 场'))+
     kpi('c','🎬 视频投稿',s.videos,('播放 '+s.plays+' 次'))+
@@ -427,24 +439,27 @@ function viewUsers(){
   var h='<div class="hd"><h1>👥 用户管理</h1><div class="sub">共 '+DATA.users.length+' 位用户'+(DATA.src==='local'?'（本地缓存）':'')+'</div><div class="sp"></div>'+
     '<input class="ad-in" id="kwU" placeholder="搜索昵称 / 账号" value="'+esc(KW.u)+'" style="width:220px"></div>';
   h+='<div class="link-banner">🔗 后台与用户前台数据已关联：当前前台'+(cu.account?('账号 <b>@'+esc(cu.account)+'</b>'):('身份「'+esc(cu.name||'未登录')+'」'))+' 的所有面试与视频，都会实时同步到下方高亮条目。</div>';
-  h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
-  if(!us.length)h+='<tr><td colspan="8"><div class="empty">没有匹配的用户</div></td></tr>';
+  h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>题库</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
+  if(!us.length)h+='<tr><td colspan="9"><div class="empty">没有匹配的用户</div></td></tr>';
   us.forEach(function(u){
     var ss=u.sessions||[],vs=u.videos||[];
     var avg=ss.length?Math.round(ss.reduce(function(a,b){return a+(b.avg||0)},0)/ss.length*10)/10:0;
     var me=isMeFn(u);
     var linkTag=me?' <span class="bd blue" title="与当前前台账号实时关联">🔗 当前前台用户</span>':'';
+    var favN=(u.bank&&u.bank.favs&&u.bank.favs.length)||0;
+    var onlineBadge=u.online?' <span class="bd ok" style="background:rgba(16,185,129,.13);color:#047857">🟢 在线</span>':'';
     h+='<tr'+(me?' class="row-me"':'')+'><td>'+uCell(u)+linkTag+'</td><td class="tb-date">'+day(u.joined)+'</td><td class="tb-date">'+ago(u.last||u.joined)+'</td>'+
       '<td><b>'+ss.length+'</b> 场 / '+(u.stat&&u.stat.questions?u.stat.questions+' 题':ss.reduce(function(a,b){return a+(b.count||0)},0)+' 题')+'</td>'+
       '<td>'+stars(avg)+'</td><td>'+vs.length+' 个（待审 '+vs.filter(function(v){return v.status==='pending'}).length+'）</td>'+
-      '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':'<span class="bd ok">正常</span>')+'</td>'+
+      '<td>'+favN+' 收藏'+(u.bank&&u.bank.practice?(' · 练 '+u.bank.practice+' 次'):'')+'</td>'+
+      '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':('<span class="bd ok">正常</span>'+onlineBadge))+'</td>'+
       '<td class="tb-acts">'+
         '<button class="btn sm" data-ud="'+u.id+'">详情</button> '+
         (u.status==='banned'?'<button class="btn sm" data-ub="'+u.id+'">解封</button>':'<button class="btn sm dan" data-ub="'+u.id+'">封禁</button>')+' '+
         '<button class="btn sm" data-ux="'+u.id+'">删除</button></td></tr>';
   });
   h+='</tbody></table></div>';
-  h+='<div class="foot-note">💡 「本人」= 本机真实使用记录（含面试与上传的视频）；其余为内置示例数据，用于演示后台功能。<br>删除 / 封禁仅影响后台数据集，不会清空该用户本机浏览器里的个人数据。</div>';
+  h+='<div class="foot-note">💡 「本人」= 本机真实使用记录（含面试与上传的视频）；其余为内置示例数据，用于演示后台功能。<br>封禁后该账号在前台会被强制回到首页、显示全屏封禁警告，除「退出登录」外无法使用任何功能；解封后警告自动消失并恢复使用。删除 / 封禁不会清空该用户本机浏览器里的个人数据。</div>';
   return h;
 }
 function userDetail(id){
@@ -460,6 +475,8 @@ function userDetail(id){
       '<div class="k">上传视频</div><div class="v">'+vs.length+' 个</div>'+
       '<div class="k">账号状态</div><div class="v">'+(u.status==='banned'?'已封禁':'正常')+'</div>'+
       '<div class="k">连续签到</div><div class="v">'+(u.checkin||0)+' 天</div>'+
+      '<div class="k">题库收藏</div><div class="v">'+((u.bank&&u.bank.favs&&u.bank.favs.length)||0)+' 题'+(u.bank&&u.bank.practice?(' · 练习 '+u.bank.practice+' 次'):'')+'</div>'+
+      '<div class="k">实时状态</div><div class="v">'+(u.online?'🟢 在线':'⚪ 离线')+'</div>'+
     '</div>'+
     '<div class="ct" style="font-weight:800;font-size:13px;margin-bottom:8px">🎤 最近面试记录</div>'+
     (ss.length?('<table class="mini-tb"><thead><tr><th>时间</th><th>题型</th><th>场景</th><th>题数</th><th>自评</th><th>用时</th></tr></thead><tbody>'+
@@ -591,24 +608,76 @@ function viewSettings(){
       '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
         '<button class="btn" id="expBtn">⬇ 导出后台数据 JSON</button>'+
         '<button class="btn dan" id="rstBtn">♻ 重置为示例数据</button>'+
-        '<button class="btn" id="frontBtn">← 返回用户前台</button>'+
       '</div>'+
       '<div style="font-size:12px;color:var(--ink3);margin-top:10px">重置会清空后台已有的审核记录与示例用户，重新生成一份演示数据集。</div></div>';
 }
 
+var onlineTimer=null;
+function clearOnlineTimer(){ if(onlineTimer){clearInterval(onlineTimer);onlineTimer=null;} }
+function pageName(p){
+  return ({home:'首页',index:'首页',interview:'模拟面试',bank:'题库',square:'观摩大厅',
+    videos:'个人中心',product:'产品蓝图',relax:'轻松一下',admin:'管理后台'})[p]||(p||'未知');
+}
+function onlineListHtml(on,list){
+  var n=document.getElementById('onlineN'); if(n)n.textContent=on||0;
+  if(!list||!list.length)return '<div class="empty"><span class="big">🌙</span>当前没有在线用户（60 秒内心跳才会显示）</div>';
+  var now=Date.now();
+  return '<div class="vgrid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">'+list.map(function(u){
+    var dur=Math.floor((now-(u.onlineAt||now))/1000);
+    var dm = dur<60 ? (dur+' 秒') : (Math.floor(dur/60)+' 分 '+(dur%60)+' 秒');
+    var st = u.status==='banned'
+      ? '<span class="bd no">已封禁</span>'
+      : '<span class="bd ok" style="background:rgba(16,185,129,.13);color:#047857">🟢 在线</span>';
+    return '<div class="vc" style="flex-direction:row;align-items:center;gap:12px;padding:12px">'+
+      '<div class="av" style="width:42px;height:42px;font-size:20px;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#e0f2fe);display:grid;place-items:center;flex:none">'+(u.avatar||'🙂')+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+esc(u.name)+' '+st+'</div>'+
+        '<div style="font-size:11.5px;color:var(--ink3)">@'+esc(u.account)+'</div>'+
+        '<div style="font-size:12px;margin-top:4px;color:var(--ink2)">📍 正在浏览：<b>'+pageName(u.page)+'</b> · 已在线 '+dm+'</div>'+
+        '<div style="font-size:11.5px;margin-top:3px;color:var(--ink3)">面试 '+u.sessions+' 场 · 视频 '+u.videos+' 个 · 收藏 '+u.favs+' 题</div>'+
+      '</div></div>';
+  }).join('')+'</div>';
+}
+async function viewOnline(){
+  clearOnlineTimer();
+  async function load(){
+    var box=document.getElementById('onlineBody'); if(!box)return;
+    var on=0,list=[];
+    try{
+      var r=await apiCall('/api/admin/online',{token:adminToken(),silent:true});
+      if(r.data&&r.data.ok){on=r.data.count;list=r.data.online||[];}
+    }catch(e){}
+    box.innerHTML=onlineListHtml(on,list);
+    var c=document.getElementById('sideOnline'); if(c){c.textContent=on||'';c.style.display=on?'grid':'none';}
+  }
+  var h='<div class="hd"><h1>🟢 实时在线</h1><div class="sub">当前已登录且活跃的用户（60 秒内心跳视为在线，每 5 秒自动刷新）</div><div class="sp"></div>'+
+    '<span class="src-badge src-server" style="background:rgba(16,185,129,.14);color:#047857;border-color:rgba(16,185,129,.4)"><span class="dot" style="background:#10b981;box-shadow:0 0 6px #10b981"></span><b id="onlineN">0</b> 人在线</span>'+
+    '<button class="btn sm" id="onRf" style="margin-left:10px">🔄 刷新</button></div>';
+  h+='<div class="card"><div class="ct">🟢 当前在线用户 <span class="sp"></span>'+
+     '<span style="font-size:12px;color:var(--ink3)">数据实时来自本地后端 <code>localhost:3000</code></span></div>'+
+     '<div id="onlineBody"><div class="empty"><span class="big">⏳</span>加载中…</div></div></div>';
+  await load();
+  onlineTimer=setInterval(load,5000);
+  var rf=document.getElementById('onRf'); if(rf)rf.onclick=function(){load()};
+  return h;
+}
+
 async function render(){
   var t=TAB;
+  clearOnlineTimer();
   DATA=await adminLoad();
-  $m.innerHTML = t==='dash'?viewDash() : t==='users'?viewUsers() :
-                 t==='sessions'?viewSessions() : t==='videos'?viewVideos() :
-                 t==='logs'?viewLogs() : viewSettings();
-  /* 侧栏高亮 + 待审数量 */
+  $m.innerHTML = t==='dash'?viewDash() : t==='online'?viewOnline() :
+                 t==='users'?viewUsers() : t==='sessions'?viewSessions() :
+                 t==='videos'?viewVideos() : t==='logs'?viewLogs() : viewSettings();
+  /* 侧栏高亮 + 待审 / 在线数量 */
   document.querySelectorAll('.ad-item').forEach(function(b){
     b.classList.toggle('on',b.dataset.go===t);
   });
   var pc=DATA.stats.pend;
   var sc=document.getElementById('sideCnt');
   if(sc){sc.textContent=pc||'';sc.style.display=pc?'grid':'none';}
+  var oc=document.getElementById('sideOnline');
+  if(oc){var on=DATA.stats.online||0;oc.textContent=on||'';oc.style.display=on?'grid':'none';}
   var srcEl=document.getElementById('topSrc');
   if(srcEl){
     var isSrv=DATA.src==='server';
@@ -643,8 +712,9 @@ function bind(){
   document.querySelectorAll('[data-ub]').forEach(function(b){
     b.onclick=async function(){
       var id=b.dataset.ub,u=findUser(id);if(!u)return;
-      var ban=u.status!=='banned';
-      await adminAct('PUT','/api/admin/user/'+id,{status:ban?'banned':'active'},function(){AdminDB.setUserStatus(id,ban?'banned':'active')});
+      var ban=u.status!=='banned',st=ban?'banned':'active';
+      var ok=await adminAct('PUT','/api/admin/user/'+id,{status:st},function(){AdminDB.setUserStatus(id,st)});
+      if(ok)mirrorBanStatus(u,st);
       toast(ban?'已封禁 '+u.name:'已解除封禁 '+u.name,ban?'warn':'ok');
     }});
   document.querySelectorAll('[data-ux]').forEach(function(b){
@@ -699,8 +769,6 @@ function bind(){
     await adminAct('POST','/api/admin/reset',null,function(){AdminDB.reset()});
     toast('已重置为示例数据','ok');
   };
-  var fb=document.getElementById('frontBtn');
-  if(fb)fb.onclick=function(){location.href='index.html'};
 }
 
 function showGate(){
@@ -759,7 +827,6 @@ function showApp(){
     setAdminToken(null);adminLogout();toast('已退出管理员','ok');
     setTimeout(function(){location.href='index.html'},420);
   };
-  document.getElementById('topFront').onclick=function(){location.href='index.html'};
   document.querySelectorAll('.ad-item').forEach(function(b){
     b.onclick=function(){TAB=b.dataset.go;render()};
   });

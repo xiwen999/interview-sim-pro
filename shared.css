@@ -743,3 +743,63 @@ body.light .fp-opt.on{background:rgba(108,140,255,.12)}
 .fp-shell .fp-opt,.fp-shell .chip,.fp-shell .btn,.fp-shell .vtab,.fp-shell .sq-chip{font-size:var(--fs-md)!important}
 .fp-shell input,.fp-shell textarea,.fp-shell select{font-size:var(--fs-lg)!important}
 .fp-shell small,.fp-shell .meta,.fp-shell .q-meta,.fp-shell .v-meta,.fp-shell .sub{font-size:var(--fs-base)!important}
+
+.ban-overlay{
+  position:fixed;inset:0;z-index:480;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(4,7,16,.76);
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+}
+.ban-card{
+  width:min(460px,100%);text-align:center;padding:34px 30px 28px;border-radius:24px;
+  color:var(--ink);
+  background:linear-gradient(160deg,rgba(32,40,70,.97),rgba(16,22,42,.98));
+  border:1px solid rgba(251,113,133,.48);
+  box-shadow:0 28px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
+  animation:banPop .24s ease-out;
+}
+@keyframes banPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+body.no-motion .ban-card{animation:none}
+.ban-card-ic{font-size:46px;line-height:1;margin-bottom:14px}
+.ban-card h2{font-size:var(--fs-2xl);margin-bottom:12px;color:#fda4af}
+.ban-card p{font-size:var(--fs-sm);line-height:1.9;color:var(--ink2)}
+.ban-card p b{color:var(--ink);font-weight:700}
+.ban-card .ban-sub{margin-top:10px;font-size:var(--fs-xs);color:var(--ink3)}
+.ban-card .ban-state{margin-top:14px;min-height:18px;font-size:var(--fs-xs);color:var(--warn)}
+.ban-card-acts{display:flex;gap:10px;margin-top:20px}
+.ban-card-acts button{
+  flex:1;padding:12px 14px;border-radius:14px;font-size:var(--fs-sm);font-weight:700;
+  background:var(--card2);border:1px solid var(--line2);color:var(--ink);
+  transition:filter .18s,background .18s;
+}
+.ban-card-acts button:hover{background:rgba(255,255,255,.16)}
+.ban-card-acts button.danger{
+  background:linear-gradient(135deg,#fb7185,#e11d48);border-color:transparent;color:#fff;
+  box-shadow:0 8px 22px rgba(225,29,72,.3);
+}
+.ban-card-acts button.danger:hover{filter:brightness(1.1)}
+body.light .ban-overlay{background:rgba(15,23,42,.44);backdrop-filter:blur(6px)}
+body.light .ban-card{
+  background:#fff;border-color:#fda4af;box-shadow:0 24px 60px rgba(15,23,42,.18);
+}
+body.light .ban-card h2{color:#be123c}
+body.light .ban-card .ban-state{color:#b45309}
+body.light .ban-card-acts button{background:#f8fafc;border-color:#cbd5e1;color:#0f172a}
+body.light .ban-card-acts button.danger{
+  background:linear-gradient(135deg,#fb7185,#e11d48);color:#fff;border-color:transparent;
+}
+/* 封禁时禁止背景滚动；主内容交互锁定作为遮罩之外的双保险 */
+body.banned-mode{overflow:hidden}
+body.banned-mode .ban-lock button,
+body.banned-mode .ban-lock input,
+body.banned-mode .ban-lock select,
+body.banned-mode .ban-lock textarea,
+body.banned-mode .ban-lock [role="button"],
+body.banned-mode .agent-fab,
+body.banned-mode .quick-bar-btn{
+  pointer-events:none!important;opacity:.45;filter:grayscale(.5);
+}
+@media(max-width:640px){
+  .ban-overlay{padding:16px}
+  .ban-card{padding:28px 20px 22px}
+  .ban-card-acts{flex-direction:column}
+}

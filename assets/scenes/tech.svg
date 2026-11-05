@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1440">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfe7f2"/><stop offset="1" stop-color="#aebccf"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1440" fill="url(#bg)"/>
+  <rect x="80" y="140" width="420" height="360" rx="16" fill="#1c2637" opacity="0.55"/>
+  <rect x="100" y="162" width="120" height="10" rx="5" fill="#5ee0c2" opacity="0.5"/>
+  <rect x="100" y="186" width="180" height="10" rx="5" fill="#6c8cff" opacity="0.5"/>
+  <rect x="100" y="210" width="90" height="10" rx="5" fill="#f0b64f" opacity="0.5"/>
+  <rect x="600" y="180" width="400" height="320" rx="16" fill="#1c2637" opacity="0.5"/>
+  <rect x="620" y="205" width="360" height="8" rx="4" fill="#6c8cff" opacity="0.45"/>
+  <rect x="620" y="228" width="250" height="8" rx="4" fill="#5ee0c2" opacity="0.45"/>
+  <path d="M130 1440 L130 900 Q140 660 350 630 L440 610 L640 610 L730 630 Q940 660 950 900 L950 1440 Z" fill="#1f2a44"/>
+  <path d="M420 620 L540 760 L660 620 L660 700 L540 820 L420 700 Z" fill="#dfe5ee"/>
+  <path d="M505 610 L540 760 L575 610 L560 588 L520 588 Z" fill="#3d5fa8"/>
+  <rect x="480" y="500" width="120" height="150" rx="26" fill="#dfa27c"/>
+  <ellipse cx="540" cy="346" rx="108" ry="189" fill="#ecb48f"/>
+  <path d="M428 300 Q448 128 540 126 Q632 128 652 300 L652 250 Q640 110 540 108 Q440 110 428 250 Z" fill="#23262b"/>
+  <circle cx="450" cy="317" r="60" fill="#cfe6ff" opacity="0.12" stroke="#2b2f38" stroke-width="9"/>
+  <circle cx="630" cy="317" r="60" fill="#cfe6ff" opacity="0.12" stroke="#2b2f38" stroke-width="9"/>
+  <line x1="510" y1="317" x2="570" y2="317" stroke="#2b2f38" stroke-width="9"/>
+  <ellipse cx="450" cy="317" rx="15" ry="19" fill="#2c2f36"/>
+  <ellipse cx="630" cy="317" rx="15" ry="19" fill="#2c2f36"/>
+  <rect x="420" y="270" width="56" height="12" rx="6" fill="#3a3d43"/>
+  <rect x="606" y="270" width="56" height="12" rx="6" fill="#3a3d43"/>
+  <path d="M534 366 Q540 376 546 366" stroke="#d9a279" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M496 432 Q540 444 584 432" stroke="#7c4a3c" stroke-width="14" fill="none" stroke-linecap="round"/>
+</svg>

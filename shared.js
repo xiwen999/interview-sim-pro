@@ -232,13 +232,17 @@ function withLoading(btn,fn){
 }
 /* 拉取 /api/me 刷新本地缓存的用户画像（带 token 时） */
 function refreshMe(){
-  if(!API.token())return Promise.resolve(null);
+  if(!API.token()){BAN_SERVER=null;return Promise.resolve(null)}
   return apiCall('/api/me',{silent:true}).then(function(r){
     if(r.ok&&r.data.user){var u=getUser()||{};var s=r.data.user;
+      /* 后端在线时透传账号状态：只存内存（BAN_SERVER），不写进 ivsim_user，
+         否则后台解封后本地旧缓存会让账号一直处于受限状态。 */
+      BAN_SERVER=(s.status==='banned'||s.banned===true||s.isBanned===true);
       u.uid=s.uid;u.account=s.account;u.name=s.name;u.avatar=s.avatar;if(s.bg)u.bg=s.bg;
       storeSet('ivsim_user',u);return u;}
+    BAN_SERVER=null;
     return null;
-  }).catch(function(){return null});
+  }).catch(function(){BAN_SERVER=null;return null});
 }
 function applyBg(){
   var u=getUser();
@@ -248,6 +252,34 @@ function applyBg(){
   var st=storeGet('ivsim_settings',{});
   document.body.classList.toggle('no-motion',!!st.motionOff);
 }
+
+var HEARTBEAT_MS = 15000;
+function ivPageName(){
+  var f=(location.pathname.split('/').pop()||'index.html').replace('.html','')||'index';
+  return f;
+}
+function sendHeartbeat(){
+  var tk=API.token();
+  if(!tk)return;
+  try{ apiCall('/api/heartbeat',{method:'POST',body:{page:ivPageName()},silent:true}).catch(function(){}) }catch(e){}
+}
+function startHeartbeat(){
+  if(!API.token())return;
+  sendHeartbeat();
+  if(window.__IVSIM_HB__)return;
+  window.__IVSIM_HB__=setInterval(function(){sendHeartbeat()},HEARTBEAT_MS);
+  try{
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden) sendHeartbeat(); });
+    window.addEventListener('focus',function(){ sendHeartbeat(); });
+  }catch(e){}
+}
+/* 题库收藏 / 练习同步到后端（供后台「用户全景」整合展示） */
+function syncBank(){
+  var tk=API.token();
+  if(!tk)return;
+  try{ apiCall('/api/bank',{method:'POST',body:{favs:getFavs()},silent:true}).catch(function(){}) }catch(e){}
+}
+
 function requireLogin(){
   /* 无独立登录页：首次访问自动创建一个「占位身份」以便页面与功能门禁正常工作。
      注意：这是“未登录”占位，而非游客登录——显示上应表现为「未登录」，
@@ -684,8 +716,15 @@ function openLoginModal(){
     storeSet('ivsim_user',{name:rec.name||rec.account,avatar:rec.avatar||'__person__',
       bg:(u.bg||BG_PRESETS[0]),account:rec.account,uid:(rec.uid||genUid())});
     closeMask();
+    /* 登录时若该账号在后台已被封禁，立刻告知并进入受限模式（解封后自动恢复） */
+    if(isBanned()){
+      toast('该账号已被封禁，将返回首页并暂停使用；请联系管理员解封','warn');
+      try{mountBanGuard()}catch(e){}
+    }
     /* 广播登录成功：个人中心等页面据此解锁 */
     try{window.dispatchEvent(new CustomEvent('ivsim:login'))}catch(e){}
+    /* 登录成功后立即开始心跳上报（在线状态 + 当前模块） */
+    try{startHeartbeat()}catch(e){}
   }
   /* 把账号镜像进本地账号表，便于后端不可用时离线登录；uid 为后端返回的稳定 id */
   function mirrorLocal(acc,pw,name,avatar,uid){
@@ -932,9 +971,46 @@ function openCountdownModal(){
   };
 }
 
+/* ---- 账号封禁门禁（与管理后台 ivsim_admin_db 实时联动） ----
+   后台「封禁 / 解封」写入的是同一份 localStorage，前台每次判定都重新读取，
+   因此解封后无需刷新页面即可恢复。未登录占位身份（autoGuest）不参与判定。 */
+var BAN_TIP='账号已被封禁，全部功能已暂停；请联系管理员解封';
+var BAN_SERVER=null;   /* /api/me 透传的后端封禁态，仅存内存 */
+var BAN_GUARD=null;    /* 封禁提示条实例，保证重复调用不会叠加监听 */
+/* 在后台数据集中找到当前前台账号对应的记录；没有后台数据时返回 null */
+function banRecord(u){
+  if(!u||u.autoGuest)return null;
+  var d=null;
+  try{d=storeGet('ivsim_admin_db',null)}catch(e){return null}
+  if(!d||!d.users||!d.users.length)return null;
+  var uid=u.uid||'',acc=String(u.account||'').toLowerCase(),byUid=null,byAcc=null;
+  for(var i=0;i<d.users.length;i++){
+    var x=d.users[i];
+    if(uid&&x.uid&&x.uid===uid){byUid=x;break}   /* 稳定 uid 优先 */
+    /* 内置示例用户不按账号匹配，避免与真实账号重名时误封 */
+    if(acc&&!x.demo&&String(x.account||'').toLowerCase()===acc)byAcc=x;
+  }
+  return byUid||byAcc;
+}
+function isBanned(){
+  var u=getUser();
+  if(!u)return false;
+  var rec=banRecord(u);
+  var local=!!(rec&&rec.status==='banned');
+  /* 后台已明确解封时，清掉可能残留的旧标记，保证账号能自动恢复 */
+  if(rec&&!local&&(u.status==='banned'||u.banned===true)){
+    delete u.status;delete u.banned;storeSet('ivsim_user',u);
+  }
+  return local||BAN_SERVER===true||u.status==='banned'||u.banned===true;
+}
+
 var FEATURE_LOCK_TIP='登录后才能使用这个功能哦';
-/* 放行返回 true；游客则提示并弹登录窗 */
+/* 放行返回 true；被封禁账号 / 游客则提示并拦截 */
 function canUseFeature(silent){
+  if(isBanned()){
+    if(!silent){toast(BAN_TIP,'warn');if(BAN_GUARD)BAN_GUARD.render()}
+    return false;
+  }
   if(!isGuestUser())return true;
   if(!silent){toast(FEATURE_LOCK_TIP,'warn');openLoginModal()}
   return false;
@@ -1890,8 +1966,10 @@ function isFav(id){return getFavs().indexOf(id)>=0}
 function toggleFav(id){
   var list=getFavs();
   var i=list.indexOf(id);
-  if(i>=0){list.splice(i,1);userSet('favs',list);toast('已取消收藏','warn');return false}
-  list.push(id);userSet('favs',list);toast('⭐ 已加入收藏','ok');return true
+  if(i>=0){list.splice(i,1);userSet('favs',list);toast('已取消收藏','warn');}
+  else {list.push(id);userSet('favs',list);toast('⭐ 已加入收藏','ok');}
+  syncBank();
+  return i<0;
 }
 function favQues(limit){var ids=getFavs();var list=QUESTIONS.filter(function(q){return ids.indexOf(q.id)>=0});return limit?list.slice(0,limit):list}
 
@@ -2005,6 +2083,100 @@ function mountOnboarding(){
   setTimeout(show,600);
 }
 
+/* ---- 账号封禁守卫：全屏居中警告 + 强制回到首页 ----
+   被封禁时任何非首页页面都会先被拉回首页，再由全屏遮罩锁住全部功能；
+   后台解封后靠 storage 事件 / 轮询 / 切回页面复查，自动解除限制。 */
+function mountBanGuard(){
+  if(BAN_GUARD){BAN_GUARD.render();return BAN_GUARD}
+  var timer=null,tick=0,lastGo=0;
+  function mainEl(){
+    return document.querySelector('main')||document.querySelector('.wrap')||
+      document.querySelector('.fp-wrap')||document.querySelector('.fp-shell');
+  }
+  function isHomePage(){
+    var p=String(location.pathname||'').split('/').pop().toLowerCase();
+    p=p.split('?')[0].split('#')[0];
+    return !p||p==='index.html'||p==='index.htm';
+  }
+  function goHome(force){
+    /* replace 而非 href：不让被封禁页面留在历史里，避免后退时反复横跳；
+       1.2 秒节流可防止路径判断异常时陷入无限重定向。
+       force=true 用于用户主动点「退出登录」，必须立刻响应，不能被节流吞掉。 */
+    var now=Date.now();if(!force&&now-lastGo<1200)return;lastGo=now;
+    try{location.replace('index.html')}catch(e){location.href='index.html'}
+  }
+  function render(){
+    var banned=isBanned();
+    document.body.classList.toggle('banned-mode',banned);
+    var m=mainEl();if(m)m.classList.toggle('ban-lock',banned);
+    var ov=document.getElementById('banOverlay');
+    if(banned){
+      /* 只要不在首页就强制回首页，禁止从其它页面继续使用功能 */
+      if(!isHomePage()){goHome();return}
+      var u=getUser()||{},who=u.account||u.name||'当前账号';
+      if(!ov){
+        ov=document.createElement('div');ov.id='banOverlay';ov.className='ban-overlay';
+        ov.setAttribute('role','alertdialog');ov.setAttribute('aria-modal','true');
+        ov.setAttribute('aria-label','账号已被封禁');
+        ov.innerHTML='<div class="ban-card">'+
+          '<div class="ban-card-ic">🚫</div>'+
+          '<h2>账号已被封禁</h2>'+
+          '<p>账号 <b class="ban-who"></b> 已被管理员封禁，模拟面试、题库、上传视频等全部功能已暂停。</p>'+
+          '<p class="ban-sub">当前无法使用其他功能，也无法切换到别的页面。请联系管理员解封，解封后本提示会自动消失。</p>'+
+          '<div class="ban-state"></div>'+
+          '<div class="ban-card-acts">'+
+            '<button type="button" id="banRefresh">刷新状态</button>'+
+            '<button type="button" id="banLogout" class="danger">退出登录</button>'+
+          '</div></div>';
+        document.body.appendChild(ov);
+        var br=document.getElementById('banRefresh'),bl=document.getElementById('banLogout');
+        if(br)br.onclick=function(){
+          render();
+          if(!isBanned()){toast('账号已恢复正常，欢迎回来','ok');return}
+          var st=ov.querySelector('.ban-state');
+          if(st)st.textContent='刚刚检查过：账号仍处于封禁状态';
+        };
+        if(bl)bl.onclick=function(){
+          /* 只清前台登录态，不动管理员会话（后台可能正开着准备解封） */
+          try{localStorage.removeItem('ivsim_user')}catch(e){}
+          try{storeRemove('ivsim_token')}catch(e){}
+          BAN_SERVER=null;
+          goHome(true);
+        };
+      }
+      var em=ov.querySelector('.ban-who');if(em)em.textContent=who;
+      if(!timer)timer=setInterval(poll,2000);
+    }else{
+      if(ov)ov.remove();
+      if(timer){clearInterval(timer);timer=null}
+    }
+  }
+  function poll(){
+    render();
+    /* 后端在线时定期复查 /api/me（节流到约 10 秒一次），服务端解封也能自动恢复 */
+    if(API.token()&&(++tick%5===0))refreshMe().then(function(){render()});
+  }
+  /* 后台在另一个标签页封禁 / 解封：localStorage 变化立即同步 */
+  window.addEventListener('storage',function(e){
+    if(!e.key||e.key==='ivsim_admin_db'||e.key==='ivsim_user')render();
+  });
+  window.addEventListener('focus',render);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)render()});
+  /* 兜底：受限区域内的交互一律拦截，避免绕过功能门禁 */
+  document.addEventListener('click',function(e){
+    if(!isBanned()||!e.target||!e.target.closest)return;
+    var t=e.target.closest('.ban-lock button,.ban-lock input,.ban-lock select,'+
+      '.ban-lock textarea,.ban-lock [role="button"],.agent-fab,.quick-bar-btn');
+    if(!t)return;
+    e.preventDefault();e.stopPropagation();toast(BAN_TIP,'warn');
+  },true);
+  BAN_GUARD={render:render};
+  render();
+  /* 后端在线时，首屏再拉一次账号状态 */
+  if(API.token())refreshMe().then(function(){render()});
+  return BAN_GUARD;
+}
+
 function initPage(active,needLogin){
   function boot(){
     /* 必须等整页解析完再清理：保存的静态 DOM 可能写在脚本之后，
@@ -2014,8 +2186,11 @@ function initPage(active,needLogin){
     if(needLogin&&!requireLogin())return;
     migrateUserData();
     mountNav(active);mountAgent();mountQuickBar();
-    setTimeout(function(){tryUnlockAll()},800);
-    setTimeout(mountOnboarding,1200);
+    mountBanGuard();
+    /* 已登录用户（含游客 / 真实账号）开始心跳上报在线状态 */
+    try{startHeartbeat()}catch(e){}
+    setTimeout(function(){if(!isBanned())tryUnlockAll()},800);
+    setTimeout(function(){if(!isBanned())mountOnboarding()},1200);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
   else boot();
