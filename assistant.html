@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 面试助手</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  html,body{height:100%;margin:0}
+  body{background:radial-gradient(1200px 600px at 20% 0%,#17233f 0%,#0a1224 60%);overflow:hidden}
+  .agent-fab,.quick-bar,.nav{display:none!important}
+  .agent-panel{left:8px!important;right:8px!important;top:8px!important;bottom:8px!important;
+    width:auto!important;height:auto!important;opacity:1!important;pointer-events:auto!important;
+    transform:none!important;border-radius:16px!important}
+  .agent-head .m-x{display:none!important}
+  .agent-panel .agent-body{font-size:13.5px}
+  .agent-panel .agent-input input{min-width:0}
+  .agent-panel .agent-foot{white-space:nowrap}
+</style>
+</head>
+<body>
+<script src="shared.js"></script>
+<script>
+(function(){
+  function boot(){
+    if(typeof mountAgent!=='function')return;
+    mountAgent();
+    var p=document.querySelector('.agent-panel');
+    if(p)p.classList.add('show');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>

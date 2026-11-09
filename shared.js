@@ -252,34 +252,6 @@ function applyBg(){
   var st=storeGet('ivsim_settings',{});
   document.body.classList.toggle('no-motion',!!st.motionOff);
 }
-
-var HEARTBEAT_MS = 15000;
-function ivPageName(){
-  var f=(location.pathname.split('/').pop()||'index.html').replace('.html','')||'index';
-  return f;
-}
-function sendHeartbeat(){
-  var tk=API.token();
-  if(!tk)return;
-  try{ apiCall('/api/heartbeat',{method:'POST',body:{page:ivPageName()},silent:true}).catch(function(){}) }catch(e){}
-}
-function startHeartbeat(){
-  if(!API.token())return;
-  sendHeartbeat();
-  if(window.__IVSIM_HB__)return;
-  window.__IVSIM_HB__=setInterval(function(){sendHeartbeat()},HEARTBEAT_MS);
-  try{
-    document.addEventListener('visibilitychange',function(){ if(!document.hidden) sendHeartbeat(); });
-    window.addEventListener('focus',function(){ sendHeartbeat(); });
-  }catch(e){}
-}
-/* 题库收藏 / 练习同步到后端（供后台「用户全景」整合展示） */
-function syncBank(){
-  var tk=API.token();
-  if(!tk)return;
-  try{ apiCall('/api/bank',{method:'POST',body:{favs:getFavs()},silent:true}).catch(function(){}) }catch(e){}
-}
-
 function requireLogin(){
   /* 无独立登录页：首次访问自动创建一个「占位身份」以便页面与功能门禁正常工作。
      注意：这是“未登录”占位，而非游客登录——显示上应表现为「未登录」，
@@ -723,8 +695,6 @@ function openLoginModal(){
     }
     /* 广播登录成功：个人中心等页面据此解锁 */
     try{window.dispatchEvent(new CustomEvent('ivsim:login'))}catch(e){}
-    /* 登录成功后立即开始心跳上报（在线状态 + 当前模块） */
-    try{startHeartbeat()}catch(e){}
   }
   /* 把账号镜像进本地账号表，便于后端不可用时离线登录；uid 为后端返回的稳定 id */
   function mirrorLocal(acc,pw,name,avatar,uid){
@@ -1425,16 +1395,22 @@ function openProfile(){
   });
 }
 
+var DESKTOP_API='http://127.0.0.1:47821';
+function desktopSettings(method,data){
+  var opt={method:method,cache:'no-store'};
+  if(method==='POST'&&data){
+    opt.headers={'Content-Type':'text/plain;charset=UTF-8'};
+    opt.body=JSON.stringify(data);
+  }
+  return fetch(DESKTOP_API+'/settings',opt).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  });
+}
+
 function openSettings(){
   var st=storeGet('ivsim_settings',{});
   var isDark=st.theme!=='light';
-  var aiKey=!!st.aiKey;
-  var provs=[
-    {k:'dashscope',t:'通义千问 (dashscope)'},
-    {k:'openai',t:'OpenAI (openai.com)'},
-    {k:'deepseek',t:'DeepSeek (deepseek.com)'}
-  ];
-  var pSel=st.aiProv||'dashscope';
 
   /* 构建设置弹层 */
   var body=
@@ -1442,19 +1418,24 @@ function openSettings(){
     settingRow('主题模式','深色 / 浅色界面切换','chip '+(isDark?'on':''),'stTheme',isDark?'深色':'浅色')+
     settingRow('背景动效','关闭可减少卡顿、更省电','chip '+(st.motionOff?'':'on'),'stMotion',st.motionOff?'已关闭':'已开启')+
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
-    /* AI 助手区块 */
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
-      '<div style="font-weight:700;font-size:14px;margin-bottom:4px">🤖 AI 助手 API Key</div>'+
-      '<div style="font-size:12px;color:var(--ink3);margin-bottom:10px">可选填。填了调用真实大模型，不填走本地关键词模拟。</div>'+
-      '<div style="margin-bottom:8px"><select id="stProv" class="f-in" style="padding:8px 12px" aria-label="选择大模型服务商">'+
-        provs.map(function(p){return '<option value="'+p.k+'"'+(p.k===pSel?' selected':'')+'>'+p.t+'</option>'}).join('')+
-      '</select></div>'+
-      '<input id="stKey" type="password" class="f-in" style="padding:8px 12px" value="'+esc(st.aiKey||'')+'" placeholder="sk-xxxxxx 你的 API Key" aria-label="AI 助手 API Key">'+
-      '<div style="display:flex;gap:8px;margin-top:8px">'+
-        '<button class="btn gho sm" id="stKeySave" style="flex:1">保存 Key</button>'+
-        '<button class="btn gho sm" id="stKeyClear" style="flex:1;color:var(--danger);border-color:rgba(251,113,133,.4)">清除</button>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+        '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
+        '<span id="dsStatus" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
       '</div>'+
-      '<div id="stKeyHint" style="font-size:11.5px;color:'+(aiKey?'#7EE7A7':'var(--ink3)')+';margin-top:8px">'+(aiKey?'✅ 已配置，AI 助手将使用真实大模型对话':'💡 当前为模拟模式')+'</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">桌面助手常驻后台，可在这里随时开启或关闭悬浮球。</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)">'+
+        '<div><div style="font-weight:600;font-size:13px">桌面助手</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭后悬浮球消失，可随时在此重新开启</div></div>'+
+        '<button class="chip" id="dsPower" disabled>读取中…</button>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
+        '<div><div style="font-weight:600;font-size:13px">网页打开时隐藏悬浮球</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭网页后自动出现</div></div>'+
+        '<button class="chip" id="dsHide" disabled>读取中…</button>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
+        '<div><div style="font-weight:600;font-size:13px">开机自动启动</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">登录 Windows 后自动运行桌面助手</div></div>'+
+        '<button class="chip" id="dsStart" disabled>读取中…</button>'+
+      '</div>'+
     '</div>'+
     '<div style="padding:14px 0"><div style="font-weight:700;font-size:14px;margin-bottom:4px">数据管理</div>'+
       '<button class="btn gho sm" id="stClear" style="color:var(--danger);border-color:rgba(251,113,133,.4)">清空全部本地数据</button></div>'+
@@ -1467,22 +1448,56 @@ function openSettings(){
   $('#stTheme').onclick=function(){isDark=!isDark;st.theme=isDark?'dark':'light';storeSet('ivsim_settings',st);applyTheme();this.className='chip '+(isDark?'on':'');this.textContent=isDark?'深色':'浅色';};
   $('#stMotion').onclick=function(){st.motionOff=!st.motionOff;storeSet('ivsim_settings',st);applyBg();this.className='chip '+(st.motionOff?'':'on');this.textContent=st.motionOff?'已关闭':'已开启';};
   $('#stVoice').onclick=function(){st.voiceOff=!st.voiceOff;storeSet('ivsim_settings',st);this.className='chip '+(st.voiceOff?'':'on');this.textContent=st.voiceOff?'已关闭':'已开启';};
-  $('#stProv').onchange=function(){st.aiProv=this.value};
-  $('#stKeySave').onclick=function(){
-    var v=$('#stKey').value.trim();st.aiKey=v;storeSet('ivsim_settings',st);
-    $('#stKeyHint').textContent=v?'✅ 已配置':'💡 当前为模拟模式';
-    $('#stKeyHint').style.color=v?'#7EE7A7':'var(--ink3)';
-    toast(v?'已保存':'已清除','ok');
-  };
-  $('#stKeyClear').onclick=function(){
-    st.aiKey='';storeSet('ivsim_settings',st);$('#stKey').value='';
-    $('#stKeyHint').textContent='💡 当前为模拟模式';
-    $('#stKeyHint').style.color='var(--ink3)';toast('API Key 已清除','ok');
-  };
   $('#stClear').onclick=function(){
     ['ivsim_userdata','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
     closeMask();toast('本地数据已清空','ok');
   };
+
+  /* 桌面助手设置 */
+  var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
+  var ds={autoHide:true,autoStart:true,enabled:true,online:false,busy:false};
+  function dsPaint(){
+    if(!ds.online){
+      dsStatus.textContent='桌面助手服务未运行 · 正在重试…';
+      dsStatus.style.color='var(--ink3)';
+      dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;
+      dsPower.className='chip';dsPower.textContent='不可用';
+      dsHide.className='chip';dsHide.textContent='不可用';
+      dsStart.className='chip';dsStart.textContent='不可用';
+      return;
+    }
+    dsStatus.textContent=ds.enabled?'已连接 · 悬浮球运行中':'已连接 · 悬浮球已关闭';
+    dsStatus.style.color='#7EE7A7';
+    dsPower.disabled=false;dsHide.disabled=false;dsStart.disabled=false;
+    dsPower.className='chip '+(ds.enabled?'on':'');dsPower.textContent=ds.enabled?'已开启':'已关闭';
+    dsHide.className='chip '+(ds.autoHide?'on':'');dsHide.textContent=ds.autoHide?'已开启':'已关闭';
+    dsStart.className='chip '+(ds.autoStart?'on':'');dsStart.textContent=ds.autoStart?'已开启':'已关闭';
+  }
+  function dsSend(msg){
+    ds.busy=true;
+    desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;ds.busy=false;dsPaint();
+      toast(msg||'桌面助手设置已更新','ok');
+    })['catch'](function(){
+      ds.online=false;ds.busy=false;dsPaint();toast('连不上桌面助手服务，正在重试…','');
+    });
+  }
+  dsPower.onclick=function(){if(!ds.online)return;ds.enabled=!ds.enabled;dsPaint();dsSend(ds.enabled?'桌面助手已开启':'桌面助手已关闭')};
+  dsHide.onclick=function(){if(!ds.online)return;ds.autoHide=!ds.autoHide;dsPaint();dsSend()};
+  dsStart.onclick=function(){if(!ds.online)return;ds.autoStart=!ds.autoStart;dsPaint();dsSend()};
+  /* 弹层打开期间每 2.5 秒重试一次，服务恢复后自动连上 */
+  function dsRefresh(){
+    if(!$('#dsPower')) return;
+    desktopSettings('GET').then(function(r){
+      if(ds.busy)return;
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;dsPaint();
+    })['catch'](function(){
+      if(ds.busy)return;
+      ds.online=false;dsPaint();
+    });
+    setTimeout(dsRefresh,2500);
+  }
+  dsRefresh();
 }
 function settingRow(title,desc,btnClass,btnId,btnText){
   return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)">'+
@@ -1502,99 +1517,123 @@ function agentReply(text){
   return {r:'这个问题我暂时答不上来 😅 你可以换个说法问我（比如"怎么开始面试""题库在哪里"），或者直接把问题发给官方，他们会回复你。',acts:[{t:'发给官方',fb:1}]};
 }
 
-var _aiMsgs=[];
-var _SYSTEM_PROMPT='你是"面试小助手"。用简洁中文回答面试相关问题，200字以内。';
-function aiEndpoint(provider){
-  if(provider==='openai')return {url:'https://api.openai.com/v1/chat/completions',model:'gpt-4o-mini'};
-  if(provider==='deepseek')return {url:'https://api.deepseek.com/v1/chat/completions',model:'deepseek-chat'};
-  return {url:'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',model:'qwen-plus'};
+var _fabDragAt=0;
+function clampFabPos(fab,x,y){
+  var m=6,w=fab.offsetWidth||58,h=fab.offsetHeight||58;
+  return {left:Math.max(m,Math.min(x,Math.max(m,innerWidth-w-m))),
+          top:Math.max(m,Math.min(y,Math.max(m,innerHeight-h-m)))};
 }
-function chatWithRealAI(userMsg){
-  var st=storeGet('ivsim_settings',{});
-  if(!st.aiKey){return Promise.resolve(null)}
-  var ep=aiEndpoint(st.aiProv||'dashscope');
-  _aiMsgs=_aiMsgs.concat({role:'user',content:userMsg});
-  var msgs=[{role:'system',content:_SYSTEM_PROMPT}].concat(_aiMsgs.slice(-10));
-  return fetch(ep.url,{
-    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+st.aiKey},
-    body:JSON.stringify({model:ep.model,messages:msgs,temperature:.7})
-  }).then(function(resp){
-    if(!resp.ok){
-      return resp.json().catch(function(){return {}}).then(function(t){
-        var em=t.error&&t.error.message?' · '+t.error.message:'';
-        return {error:'API '+resp.status+em};
-      });
+function applyFabPos(fab,pos){
+  if(!pos||!isFinite(pos.left)||!isFinite(pos.top))return;
+  var p=clampFabPos(fab,+pos.left,+pos.top);
+  fab.style.right='auto';fab.style.bottom='auto';
+  fab.style.left=p.left+'px';fab.style.top=p.top+'px';
+}
+function placeAgentPanel(fab,panel){
+  if(!fab.style.left)return;
+  var f=fab.getBoundingClientRect(),pw=panel.offsetWidth||360,ph=panel.offsetHeight||500,m=10,gap=10;
+  var left=f.right-pw,top=f.top-ph-gap;
+  if(top<m)top=(f.bottom+gap+ph<=innerHeight-m)?f.bottom+gap:m;
+  left=Math.max(m,Math.min(left,innerWidth-pw-m));
+  top=Math.max(m,Math.min(top,innerHeight-ph-m));
+  panel.style.right='auto';panel.style.bottom='auto';
+  panel.style.left=left+'px';panel.style.top=top+'px';
+}
+function attachFabDrag(fab,panel){
+  var active=false,moved=false,sx=0,sy=0,ox=0,oy=0;
+  function finish(e){
+    if(!active)return;
+    active=false;fab.classList.remove('dragging');
+    if(moved){
+      _fabDragAt=Date.now();
+      storeSet('ivsim_fab_pos',{left:parseFloat(fab.style.left),top:parseFloat(fab.style.top)});
+      if(panel.classList.contains('show'))placeAgentPanel(fab,panel);
     }
-    return resp.json().then(function(data){
-      var text=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||'';
-      if(text){_aiMsgs=_aiMsgs.concat({role:'assistant',content:text})}
-      return {text:text};
-    });
-  }).catch(function(e){return {error:'网络错误：'+e.message}});
+    if(e){try{fab.releasePointerCapture(e.pointerId)}catch(_){}}
+  }
+  fab.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    var r=fab.getBoundingClientRect();
+    sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;moved=false;active=true;
+    fab.classList.add('dragging');
+    try{fab.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  fab.addEventListener('pointermove',function(e){
+    if(!active)return;
+    var dx=e.clientX-sx,dy=e.clientY-sy;
+    if(!moved&&Math.abs(dx)+Math.abs(dy)<5)return;
+    moved=true;
+    var p=clampFabPos(fab,ox+dx,oy+dy);
+    fab.style.right='auto';fab.style.bottom='auto';
+    fab.style.left=p.left+'px';fab.style.top=p.top+'px';
+    e.preventDefault();
+  });
+  fab.addEventListener('pointerup',finish);
+  fab.addEventListener('pointercancel',finish);
+  window.addEventListener('resize',function(){
+    if(fab.style.left)applyFabPos(fab,{left:parseFloat(fab.style.left),top:parseFloat(fab.style.top)});
+    if(panel.classList.contains('show'))placeAgentPanel(fab,panel);
+  });
 }
-function resetAIContext(){_aiMsgs=[]}
 function mountAgent(){
   $$('.agent-fab,.agent-panel').forEach(function(n){n.remove()});
-  var fab=document.createElement('button');fab.className='agent-fab';fab.title='面试小助手';
+  var fab=document.createElement('button');fab.className='agent-fab';fab.title='面试小助手（可拖动到任意位置）';
   fab.innerHTML=ICONS.robot+'<span class="dot"></span>';
-  var stNow=storeGet('ivsim_settings',{});
-  var headerStatus=stNow.aiKey?'在线 · AI 真实对话':'在线 · 模拟模式';
+  var headerStatus='在线 · 随时待命';
   var panel=document.createElement('div');panel.className='agent-panel';
   panel.innerHTML=
     '<div class="agent-head"><div class="a-av">🤖</div><div style="flex:1"><div class="a-nm">AI 面试助手</div><div class="a-st" id="agStatus">'+headerStatus+'</div></div><button class="m-x" id="agX">✕</button></div>'+
     '<div class="agent-body" id="agBody"></div>'+
     '<div class="agent-quick"><button data-q="怎么开始模拟面试？">怎么开始</button><button data-q="题库在哪里？">题库</button><button data-q="怎么用语音作答？">语音作答</button><button data-q="面试紧张怎么办？">缓解紧张</button></div>'+
-    '<div class="agent-input"><input id="agIn" placeholder="输入你的问题…（可问大模型）" maxlength="200" aria-label="输入你的问题"><button id="agSend" title="发送" aria-label="发送">'+ICONS.send+'</button></div>'+
-    '<div class="agent-foot"><span id="agCtx" style="font-size:10.5px;color:var(--ink3)">对话记录: 0</span><button id="agReset" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">🔄 重置对话</button><button id="agSet" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">⚙️ API 配置</button></div>';
+    '<div class="agent-input"><input id="agIn" placeholder="输入你的问题…" maxlength="200" aria-label="输入你的问题"><button id="agSend" title="发送" aria-label="发送">'+ICONS.send+'</button></div>'+
+    '<div class="agent-foot"><span id="agCtx" style="font-size:10.5px;color:var(--ink3)">对话记录: 0</span><button id="agReset" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">🔄 重置对话</button></div>';
   document.body.appendChild(fab);document.body.appendChild(panel);
+  applyFabPos(fab,storeGet('ivsim_fab_pos',null));
+  attachFabDrag(fab,panel);
   var body=panel.querySelector('#agBody'),input=panel.querySelector('#agIn'),
       statusEl=panel.querySelector('#agStatus'),ctxEl=panel.querySelector('#agCtx');
   function push(html,me){
     var d=document.createElement('div');d.className='msg '+(me?'me':'bot');d.innerHTML=html;body.appendChild(d);body.scrollTop=body.scrollHeight;return d;
   }
+  var turns=0;
   function updateStatus(){
-    var st2=storeGet('ivsim_settings',{});
-    statusEl.textContent=st2.aiKey?'在线 · AI 真实对话':'在线 · 模拟模式';
-    ctxEl.textContent='对话记录: '+_aiMsgs.length;
+    statusEl.textContent='在线 · 随时待命';
+    ctxEl.textContent='对话记录: '+turns;
   }
   function answer(q){
     push(esc(q),true);
+    turns++;
     fab.querySelector('.dot')&&fab.querySelector('.dot').remove();
     var loading=document.createElement('div');loading.className='msg bot';loading.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';body.appendChild(loading);body.scrollTop=body.scrollHeight;
 
-    var st2=storeGet('ivsim_settings',{});
-    if(st2.aiKey){
-      /* 有 API Key：走真实大模型；失败回退本地 */
-      chatWithRealAI(q).then(function(res){
-        loading.remove();
-        if(res&&res.text){push(res.text)}
-        else if(res&&res.error){push('⚠️ AI 调用失败：'+res.error+'<br>已切换到本地模拟回答：<br><br>'+agentReply(q).r)}
-        else{var r=agentReply(q);push(r.r)}
-        updateStatus();
-      });
-    }else{
-      /* 模拟模式：本地关键词匹配 */
-      setTimeout(function(){
-        loading.remove();
-        var r=agentReply(q);
-        var html=r.r+'<div class="m-act"><button data-act="set">🤖 启用真实 AI</button></div>';
-        var d=push(html);
-        $$('.m-act button',d).forEach(function(b){b.onclick=function(){if(b.dataset.act==='set'){openSettings();panel.classList.remove('show')}}});
-        if(r.acts){
-          var actHtml='<div class="m-act">'+r.acts.map(function(a,i){return '<button data-i="'+i+'">'+esc(a.t)+'</button>'}).join('')+'</div>';
-          d.insertAdjacentHTML('beforeend',actHtml);
-          $$('.m-act button[data-i]',d).forEach(function(b){b.onclick=function(){var a=r.acts[+b.dataset.i];if(a.go)location.href=a.go;else if(a.fb){panel.classList.remove('show');openFeedback()}else if(a.act==='checkin'){panel.classList.remove('show');checkIn();showCheckinPanel()}else if(a.act==='ach'){panel.classList.remove('show');openAchievements()}}});
-        }
-      },400);
-    }
+    setTimeout(function(){
+      loading.remove();
+      var r=agentReply(q);
+      var d=push(r.r);
+      if(r.acts){
+        var actHtml='<div class="m-act">'+r.acts.map(function(a,i){return '<button data-i="'+i+'">'+esc(a.t)+'</button>'}).join('')+'</div>';
+        d.insertAdjacentHTML('beforeend',actHtml);
+        $$('.m-act button[data-i]',d).forEach(function(b){b.onclick=function(){var a=r.acts[+b.dataset.i];if(a.go)location.href=a.go;else if(a.fb){panel.classList.remove('show');openFeedback()}else if(a.act==='checkin'){panel.classList.remove('show');checkIn();showCheckinPanel()}else if(a.act==='ach'){panel.classList.remove('show');openAchievements()}}});
+      }
+      updateStatus();
+    },400);
   }
-  push('嗨～我是 AI 面试助手 🤖 模拟模式下回答训练营相关问题，填入 API Key 后能调用真实大模型提供更个性化的面试技巧指导。');
+  push('嗨～我是 AI 面试助手 🤖 可以问我：怎么开始模拟面试、题库怎么用、语音作答、自评标准、复盘报告等问题。');
   updateStatus();
-  fab.onclick=function(){panel.classList.toggle('show');var d=fab.querySelector('.dot');if(d)d.remove()};
+  fab.onclick=function(){
+    if(Date.now()-_fabDragAt<350)return;
+    var willShow=!panel.classList.contains('show');
+    panel.classList.toggle('show',willShow);
+    if(willShow)placeAgentPanel(fab,panel);
+    var d=fab.querySelector('.dot');if(d)d.remove();
+  };
   panel.querySelector('#agX').onclick=function(){panel.classList.remove('show')};
   panel.querySelector('#agSend').onclick=function(){var v=input.value.trim();if(!v)return;input.value='';answer(v)};
-  panel.querySelector('#agReset').onclick=function(){resetAIContext();updateStatus();toast('对话历史已重置','ok');closeMask();fab.click()};
-  panel.querySelector('#agSet').onclick=function(){panel.classList.remove('show');openSettings()};
+  panel.querySelector('#agReset').onclick=function(){
+    body.innerHTML='';turns=0;updateStatus();
+    push('嗨～我是 AI 面试助手 🤖 可以问我：怎么开始模拟面试、题库怎么用、语音作答、自评标准、复盘报告等问题。');
+    toast('对话历史已重置','ok');
+  };
   input.addEventListener('keydown',function(e){if(e.key==='Enter'){var v=input.value.trim();if(!v)return;input.value='';answer(v)}});
   $$('.agent-quick button',panel).forEach(function(b){b.onclick=function(){answer(b.dataset.q)}});
 }
@@ -1966,20 +2005,23 @@ function isFav(id){return getFavs().indexOf(id)>=0}
 function toggleFav(id){
   var list=getFavs();
   var i=list.indexOf(id);
-  if(i>=0){list.splice(i,1);userSet('favs',list);toast('已取消收藏','warn');}
-  else {list.push(id);userSet('favs',list);toast('⭐ 已加入收藏','ok');}
-  syncBank();
-  return i<0;
+  if(i>=0){list.splice(i,1);userSet('favs',list);toast('已取消收藏','warn');return false}
+  list.push(id);userSet('favs',list);toast('⭐ 已加入收藏','ok');return true
 }
 function favQues(limit){var ids=getFavs();var list=QUESTIONS.filter(function(q){return ids.indexOf(q.id)>=0});return limit?list.slice(0,limit):list}
 
 var ttsOn=false,ttsUttr=null;
 function canTTS(){return !!('speechSynthesis' in window)}
-function speakTTS(text){
+function speakTTS(text,opt){
   if(!canTTS()){toast('浏览器不支持语音朗读（需要 SpeechSynthesis API）','warn');return}
   stopSpeak();
+  var o=opt||{};
   ttsUttr=new SpeechSynthesisUtterance(text);
-  ttsUttr.lang='zh-CN';ttsUttr.rate=0.95;ttsUttr.pitch=1;
+  ttsUttr.lang=o.lang||'zh-CN';
+  ttsUttr.rate=(typeof o.rate==='number')?o.rate:0.95;
+  ttsUttr.pitch=(typeof o.pitch==='number')?o.pitch:1;
+  ttsUttr.volume=(typeof o.volume==='number')?o.volume:1;
+  if(o.voice){try{ttsUttr.voice=o.voice}catch(e){}}
   window.speechSynthesis.speak(ttsUttr);ttsOn=true;
   ttsUttr.onend=function(){ttsOn=false};
   ttsUttr.onerror=function(){ttsOn=false};
@@ -2187,8 +2229,6 @@ function initPage(active,needLogin){
     migrateUserData();
     mountNav(active);mountAgent();mountQuickBar();
     mountBanGuard();
-    /* 已登录用户（含游客 / 真实账号）开始心跳上报在线状态 */
-    try{startHeartbeat()}catch(e){}
     setTimeout(function(){if(!isBanned())tryUnlockAll()},800);
     setTimeout(function(){if(!isBanned())mountOnboarding()},1200);
   }

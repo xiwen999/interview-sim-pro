@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261104b">
+<link rel="stylesheet" href="shared.css?v=20261105b">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
 .stage{width:100%;max-width:none;margin:0 auto}
 #vSession,#vFb,#vRate,#vReview{max-width:var(--reading-max);margin:0 auto}
 /* 动画互动 / 摄像头模式：让场景舞台有更大的展示宽度 */
-#vSession.wide-anim{max-width:min(96vw,1460px)}
+#vSession.wide-anim{max-width:min(97vw,1720px)}
 .view{display:none}
 .view.on{display:block;animation:rise .45s both}
 
@@ -36,24 +36,6 @@
   .scol-right{padding-top:20px}
   .scol-right .sc-preview{grid-template-columns:repeat(2,1fr)}
 }
-
-.tt-pop{position:fixed;z-index:9999;width:272px;padding:10px 10px 12px;border-radius:18px;
-  background:rgba(13,22,40,.97);border:1px solid rgba(108,140,255,.34);
-  box-shadow:0 22px 54px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04) inset;
-  opacity:0;transform:translateY(6px) scale(.97);pointer-events:none;
-  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.8,.3,1);backdrop-filter:blur(10px)}
-.tt-pop.show{opacity:1;transform:translateY(0) scale(1)}
-.tt-art{border-radius:12px;overflow:hidden;line-height:0;background:#101c33}
-.tt-art svg{width:100%;height:auto;display:block}
-.tt-t{font-size:var(--fs-base);font-weight:800;color:var(--ink);margin:10px 2px 3px;display:flex;align-items:center;gap:6px}
-.tt-t i{font-style:normal;font-size:var(--fs-2xs);font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:99px;
-  color:var(--acc2);background:rgba(65,224,200,.12);border:1px solid rgba(65,224,200,.3)}
-.tt-d{font-size:var(--fs-xs);color:var(--ink3);line-height:1.65;margin:0 2px}
-/* 悬停时按钮同步高亮 */
-#typeOpts .chip{transition:.18s}
-#typeOpts .chip.tt-on{border-color:var(--acc);background:rgba(108,140,255,.16);color:#fff;
-  box-shadow:0 0 0 3px rgba(108,140,255,.13),0 6px 18px rgba(108,140,255,.22);transform:translateY(-1px)}
-@media (hover:none){.tt-pop{display:none}}
 
 /* 面试视图 */
 .s-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
@@ -100,30 +82,62 @@
 .m-pick .mp-d{font-size:var(--fs-xs);color:var(--ink3);line-height:1.6}
 
 .chat-card{padding:clamp(14px,1.8vw,22px)}
-.anim-grid{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(320px,.95fr);
+.anim-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.78fr);
   gap:clamp(14px,1.5vw,24px);align-items:start}
 
-/* --- 场景舞台：图片大面积铺满左栏，人物有动画片式的动态 --- */
+/* --- 场景舞台：背景保持不动，只让画面里的人物随问答做动作 --- */
 .scene-stage{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;
   background:#0b1424;border:1px solid rgba(108,140,255,.3);
   box-shadow:0 22px 50px -22px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.05);
   transition:border-color .35s,box-shadow .35s}
 .scene-media{position:absolute;inset:0;overflow:hidden}
-.scene-figure{position:absolute;inset:-2.5%;transform-origin:52% 46%;
-  animation:sceneBreathe 6.4s ease-in-out infinite;will-change:transform}
+/* 底图整体放大，以人物脸部为缩放中心：人物占比更大，背景仍然是静的 */
+.scene-figure{position:absolute;inset:0;transform:scale(var(--zoom,1.18));
+  transform-origin:var(--hx,50%) var(--hy,24%);transition:transform .6s cubic-bezier(.2,.7,.3,1)}
 .scene-img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;
-  transform-origin:54% 42%;animation:sceneKen 26s ease-in-out infinite alternate;
-  filter:saturate(1.06) contrast(1.03);will-change:transform}
-@keyframes sceneKen{0%{transform:scale(1.04)}100%{transform:scale(1.13) translate(-.9%,-.7%)}}
-@keyframes sceneBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-.7%)}}
-/* 提问 / 聆听 / 记录：不同的动态痕迹，像动画里的人物小动作 */
-.scene-stage.speaking .scene-figure{animation:sceneTalk 2.1s ease-in-out infinite}
-.scene-stage.listening .scene-figure{animation:sceneListen 3s ease-in-out infinite}
-.scene-stage.thinking .scene-figure{animation:sceneThink 3s ease-in-out infinite}
-@keyframes sceneTalk{0%,100%{transform:translateY(0) rotate(0)}32%{transform:translateY(-.9%) rotate(-.26deg)}
-  68%{transform:translateY(.5%) rotate(.2deg)}}
-@keyframes sceneListen{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-.7%) scale(1.014)}}
-@keyframes sceneThink{0%,100%{transform:rotate(-.42deg)}50%{transform:rotate(.42deg) translateY(-.4%)}}
+  filter:saturate(1.06) contrast(1.03)}
+/* 人物木偶：同一张图的复制层，用羽化椭圆遮罩只露出头部 / 下颌。
+   静止时与底图完全重合，动作幅度很小，边缘靠羽化过渡，背景不受影响。 */
+.person-head{position:absolute;inset:0;pointer-events:none;backface-visibility:hidden;
+  -webkit-mask-image:radial-gradient(ellipse var(--hrx,10%) var(--hry,13%) at var(--hx,50%) var(--hy,24%),
+    #000 58%,rgba(0,0,0,.9) 72%,rgba(0,0,0,0) 88%);
+  mask-image:radial-gradient(ellipse var(--hrx,10%) var(--hry,13%) at var(--hx,50%) var(--hy,24%),
+    #000 58%,rgba(0,0,0,.9) 72%,rgba(0,0,0,0) 88%);
+  transform-origin:var(--hx,50%) var(--necky,38%);
+  animation:personSway 6.8s ease-in-out infinite;will-change:transform}
+.person-img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;
+  filter:saturate(1.06) contrast(1.03)}
+.person-jaw{position:absolute;inset:0;pointer-events:none;backface-visibility:hidden;
+  -webkit-mask-image:radial-gradient(ellipse var(--jrx,6%) var(--jry,4.4%) at var(--hx,50%) var(--jy,32%),
+    #000 50%,rgba(0,0,0,.85) 70%,rgba(0,0,0,0) 88%);
+  mask-image:radial-gradient(ellipse var(--jrx,6%) var(--jry,4.4%) at var(--hx,50%) var(--jy,32%),
+    #000 50%,rgba(0,0,0,.85) 70%,rgba(0,0,0,0) 88%);
+  transform-origin:var(--hx,50%) calc(var(--jy,32%) - var(--jry,4.4%));
+  animation:jawIdle 6s ease-in-out infinite;will-change:transform}
+@keyframes personSway{0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translate(-.04%,.2%) rotate(.12deg)}}
+@keyframes jawIdle{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.01)}}
+/* 提问：脸部几乎不动，只让嘴唇轻轻开合，接近真人幅度 */
+.scene-stage.speaking .person-head{animation:personTalk 4s ease-in-out infinite}
+.scene-stage.speaking .person-jaw{animation:jawTalk .3s ease-in-out infinite alternate}
+@keyframes personTalk{0%,100%{transform:translate(0,0) rotate(-.08deg)}
+  28%{transform:translate(-.06%,.25%) rotate(.28deg)}
+  55%{transform:translate(.04%,-.03%) rotate(-.15deg)}
+  80%{transform:translate(-.02%,.15%) rotate(.1deg)}}
+@keyframes jawTalk{0%{transform:scaleY(1) translateY(0)}
+  100%{transform:scaleY(1.08) translateY(.12%)}}
+/* 聆听：轻微侧头 */
+.scene-stage.listening .person-head{animation:personListen 6s ease-in-out infinite}
+.scene-stage.listening .person-jaw{animation:jawIdle 5.2s ease-in-out infinite}
+@keyframes personListen{0%,100%{transform:translate(0,0) rotate(0)}
+  26%{transform:translate(-.14%,-.06%) rotate(-.45deg)}
+  58%{transform:translate(.08%,.12%) rotate(.18deg)}
+  80%{transform:translate(-.02%,.03%) rotate(-.22deg)}}
+/* 记录：轻微低头 */
+.scene-stage.thinking .person-head{animation:personThink 6.4s ease-in-out infinite}
+.scene-stage.thinking .person-jaw{animation:jawIdle 7s ease-in-out infinite}
+@keyframes personThink{0%,100%{transform:translate(-.03%,.2%) rotate(-.4deg)}
+  50%{transform:translate(.01%,-.06%) rotate(-.1deg)}}
 .scene-sheen{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
   background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.16) 47%,rgba(160,200,255,.09) 53%,transparent 64%);
   background-size:260% 100%;animation:sceneSheen 9s ease-in-out infinite}
@@ -279,8 +293,6 @@
 .warmup .w-body{flex:1;font-size:var(--fs-xs);color:var(--ink2);line-height:1.7}
 .warmup .w-body b{color:#ffd68a}
 .warmup button{flex:none}
-.setup-why{display:grid;grid-template-columns:repeat(auto-fit,minmax(var(--g-opt),1fr));gap:10px;margin-top:14px;font-size:var(--fs-xs);color:var(--ink3)}
-.setup-why div{padding:10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:center;line-height:1.5}
 
 .setup,.fb,.rv,.qcard{position:relative}
 .setup::before,.rv::before{content:"";position:absolute;left:26px;right:26px;top:0;height:1px;
@@ -303,7 +315,6 @@
 }
 .setup h2{font-size:clamp(22px,2.4vw,28px)!important}
 .setup>p{font-size:var(--fs-base)!important;line-height:1.85!important;max-width:760px}
-.setup-why div{padding:14px;border-radius:14px;font-size:var(--fs-sm)}
 .setup-tipbar{padding:16px 18px;border-radius:16px}
 .warmup{padding:18px 20px;border-radius:16px}
 
@@ -328,7 +339,6 @@
 .m-pick:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.36)}
 .ans-ta{min-height:200px;font-size:var(--fs-lg);line-height:1.85;padding:18px 20px;border-radius:16px}
 #animTa{min-height:115px;margin-top:14px}
-#startBtn{padding:17px!important;font-size:var(--fs-lg)!important;border-radius:18px!important}
 
 .rv-card{padding:clamp(14px,1.8vw,22px);border-radius:18px;border:1px solid var(--line);
   background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
@@ -429,21 +439,332 @@
   #vSetup .opt-row .o-lab{font-size:clamp(13px,.6vw,15px);margin-bottom:8px}
   #vSetup .setup .opts .chip{padding:clamp(11px,.6vw,14px) clamp(18px,1.1vw,26px)}
   #vSetup .sc-pick{padding:clamp(12px,.7vw,15px) 12px}
-  #vSetup .setup-tipbar{padding:14px 18px;margin-bottom:16px}
-  #vSetup .setup-tipbar .ti-t{font-size:clamp(14px,.68vw,17px)}
-  #vSetup .setup-tipbar .ti-d{font-size:clamp(12px,.55vw,14px)}
   #vSetup .m-pick{padding:clamp(14px,.9vw,18px)}
   #vSetup .m-pick .mp-ic{font-size:clamp(26px,1.2vw,32px)}
   #vSetup .m-pick .mp-t{font-size:clamp(15px,.72vw,18px);margin:7px 0 3px}
   #vSetup .m-pick .mp-d{font-size:clamp(12px,.55vw,14px)}
   #vSetup .sc-preview{margin-top:14px;gap:10px}
   #vSetup .sc-preview .sp-card{font-size:clamp(12px,.55vw,14px);padding:11px 13px}
-  #vSetup .setup-why div{font-size:clamp(13px,.6vw,16px);padding:clamp(12px,.8vw,16px)}
   #vSetup .warmup{padding:clamp(16px,1vw,20px)}
   #vSetup .warmup .w-body{font-size:clamp(12px,.58vw,15px)}
   #vSetup #warmBtn{font-size:clamp(14px,.66vw,16px);padding:11px 20px;border-radius:13px}
-  #vSetup #startBtn{font-size:clamp(16px,.85vw,20px)!important;padding:clamp(15px,1vw,20px)!important}
 }
+.wz-bar{display:flex;align-items:center;margin:22px 0 26px}
+.wz-step{display:flex;align-items:center;gap:9px;flex:none;font-size:var(--fs-xs);font-weight:800;
+  color:var(--ink3);transition:.25s}
+.wz-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:rgba(255,255,255,.07);border:1.5px solid var(--line);color:var(--ink3);
+  font-size:var(--fs-sm);transition:.25s}
+.wz-step.done{color:var(--acc2)}
+.wz-step.done .wz-dot{background:rgba(65,224,200,.14);border-color:rgba(65,224,200,.45);color:var(--acc2)}
+.wz-step.on{color:var(--ink)}
+.wz-step.on .wz-dot{background:linear-gradient(135deg,var(--acc),#4f6ef0);border-color:transparent;color:#fff;
+  box-shadow:0 0 0 4px rgba(108,140,255,.16),0 6px 18px rgba(108,140,255,.35)}
+.wz-line{flex:1;height:2px;min-width:14px;margin:0 10px;border-radius:2px;
+  background:var(--line);transition:.3s}
+.wz-line.done{background:linear-gradient(90deg,var(--acc),var(--acc2))}
+
+.wz-panel{display:none}
+.wz-panel.on{display:block;animation:rise .38s both}
+.wz-note{font-size:var(--fs-xs);color:var(--ink3);line-height:1.75;margin:18px 0 0;max-width:820px}
+#vSetup .wz-panel .opt-row:first-of-type{margin-top:0}
+
+/* Step 1：岗位大类 + 细分方向 */
+.job-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(118px,10vw,150px),1fr));gap:12px}
+.job-cat{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 12px;border-radius:16px;
+  background:var(--card);border:1.5px solid var(--line);color:var(--ink2);cursor:pointer;
+  font-size:var(--fs-base);font-weight:700;white-space:nowrap;transition:.2s;
+  box-shadow:0 4px 14px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.05)}
+.job-cat:hover{border-color:var(--line2);transform:translateY(-2px);color:var(--ink);
+  box-shadow:0 12px 26px rgba(0,0,0,.36)}
+.job-cat.on{border-color:var(--acc);background:rgba(108,140,255,.14);color:#fff;
+  box-shadow:0 0 0 3px rgba(108,140,255,.13),0 10px 24px rgba(108,140,255,.22)}
+.job-cat .jc-ic{font-size:20px;line-height:1}
+.job-sub-wrap{display:none;margin-top:22px}
+.job-sub-wrap.on{display:block;animation:subIn .32s both}
+@keyframes subIn{from{opacity:0;transform:translateY(-6px)}}
+.job-sub-lab{display:flex;align-items:center;gap:8px}
+.job-sub-lab .js-opt{font-size:var(--fs-2xs);font-weight:600;color:var(--ink3);padding:2px 8px;border-radius:99px;
+  background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.job-subs{display:flex;flex-wrap:wrap;gap:9px}
+.job-sub{padding:9px 16px;border-radius:99px;background:var(--card);border:1.5px solid var(--line);
+  color:var(--ink2);font-size:var(--fs-sm);font-weight:600;cursor:pointer;transition:.18s}
+.job-sub:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
+.job-sub.on{border-color:var(--acc);background:rgba(108,140,255,.16);color:#fff;
+  box-shadow:0 0 0 3px rgba(108,140,255,.12)}
+.job-sub-tip{margin-top:12px}
+body.light .job-cat,body.light .job-sub{background:#ffffff;border-color:rgba(15,23,42,.14);color:#0f172a}
+body.light .job-cat:hover,body.light .job-sub:hover{border-color:rgba(37,99,235,.5);color:#1d4ed8}
+body.light .job-cat.on,body.light .job-sub.on{background:rgba(37,99,235,.12);border-color:#2563eb;color:#1d4ed8}
+
+/* Step 4：左规则 / 右汇总与预览 */
+.wz-final{display:grid;grid-template-columns:1fr;gap:20px}
+.wz-side{display:flex;flex-direction:column;gap:14px}
+#vSetup .wz-side .sc-preview{margin-top:0}
+.wz-sum{padding:16px 18px;border-radius:16px;border:1px solid rgba(108,140,255,.3);
+  background:linear-gradient(135deg,rgba(108,140,255,.12),rgba(65,224,200,.06))}
+.wz-sum .ws-h{font-size:var(--fs-sm);font-weight:800;color:var(--ink);margin-bottom:8px;
+  display:flex;align-items:center;gap:7px}
+.wz-sum .ws-row{display:flex;gap:12px;padding:7px 0;font-size:var(--fs-xs);line-height:1.7;
+  border-top:1px dashed rgba(255,255,255,.1)}
+.wz-sum .ws-row:first-of-type{border-top:0}
+.wz-sum .ws-k{flex:0 0 70px;color:var(--ink3)}
+.wz-sum .ws-v{color:var(--ink);font-weight:700;min-width:0;word-break:break-word}
+.wz-foot{font-size:11.5px;color:var(--ink3);text-align:center;margin-top:14px;line-height:1.8}
+@media (min-width:1024px){
+  .wz-final{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:0 40px;align-items:start}
+  .wz-rules{padding-right:6px}
+}
+@media (min-width:1600px){
+  #vSetup .wz-final{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:0 clamp(36px,3vw,70px)}
+  #vSetup .wz-panel[data-step="4"] .opt-row{margin-top:clamp(20px,1.5vw,26px)}
+  #vSetup .wz-panel[data-step="4"] .wz-rules .opt-row:first-of-type{margin-top:0}
+}
+
+/* 底部固定操作栏：留出底部安全区，避免遮挡页面内容 */
+.wz-actions{position:fixed;left:0;right:0;bottom:0;z-index:85;display:none;pointer-events:none;
+  padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,rgba(6,10,24,0),rgba(6,10,24,.76))}
+.wz-actions.on{display:block}
+.wz-actions-in{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:18px;background:rgba(13,20,38,.93);border:1px solid var(--line2);
+  box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(14px);pointer-events:auto}
+.wz-cnt{flex:1;text-align:center;font-size:var(--fs-xs);color:var(--ink3);white-space:nowrap}
+#wzPrev,#wzNext{padding:12px 22px;font-size:var(--fs-base);border-radius:12px}
+#wzPrev.hide{display:none}
+#wzNext{min-width:clamp(132px,18vw,180px)}
+#wzNext.final{min-width:clamp(168px,22vw,220px);
+  background:linear-gradient(135deg,#2dd4bf,#4f6ef0);box-shadow:0 8px 24px rgba(45,212,191,.3)}
+#vSetup .setup{padding-bottom:clamp(120px,11vw,150px)}
+@media (max-width:760px){
+  /* 右下角常驻悬浮球占位，避免按钮被压住 */
+  .wz-actions{padding-right:86px}
+}
+@media (max-width:640px){
+  .wz-bar{margin:18px 0 20px}
+  .wz-step .wz-t{display:none}
+  .wz-line{margin:0 8px}
+  .wz-dot{width:30px;height:30px}
+  .wz-actions{padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));padding-right:78px}
+  .wz-actions-in{gap:8px;padding:8px 9px;border-radius:16px}
+  .wz-cnt{display:none}
+  #wzPrev,#wzNext{padding:11px 16px;font-size:var(--fs-sm)}
+  #wzNext{flex:1;min-width:0}
+  #wzPrev{flex:none}
+}
+/* 浅色模式 */
+body.light .wz-dot{background:rgba(15,23,42,.06);border-color:rgba(15,23,42,.14);color:#475569}
+body.light .wz-step.done{color:#0f766e}
+body.light .wz-step.done .wz-dot{background:rgba(15,118,110,.12);border-color:rgba(15,118,110,.4);color:#0f766e}
+body.light .wz-step.on{color:#0f172a}
+body.light .wz-line{background:rgba(15,23,42,.12)}
+body.light .wz-actions{background:linear-gradient(180deg,rgba(255,255,255,0),rgba(245,247,252,.92))}
+body.light .wz-actions-in{background:rgba(255,255,255,.96);border-color:rgba(15,23,42,.14);
+  box-shadow:0 18px 44px rgba(15,23,42,.16)}
+body.light .wz-sum{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(15,118,110,.05));
+  border-color:rgba(37,99,235,.24)}
+body.light .wz-sum .ws-row{border-top-color:rgba(15,23,42,.1)}
+#vSetup .setup{
+  position:relative;padding:clamp(24px,2.5vw,40px);
+  padding-bottom:clamp(120px,11vw,150px);
+  border-radius:26px;border-color:rgba(255,255,255,.115);
+  background:
+    radial-gradient(900px 420px at 6% -14%,rgba(108,140,255,.16),transparent 64%),
+    radial-gradient(720px 400px at 98% -6%,rgba(65,224,200,.09),transparent 66%),
+    linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.016)) var(--card);
+  box-shadow:0 40px 90px -38px rgba(0,0,0,.82),0 10px 26px rgba(0,0,0,.3),
+    inset 0 1px 0 rgba(255,255,255,.085)}
+#vSetup .setup h1{
+  font-size:clamp(25px,2.7vw,34px);letter-spacing:-.4px;color:#f2f6ff;
+  text-shadow:0 2px 26px rgba(108,140,255,.28)}
+#vSetup .setup-sub{max-width:820px;margin-top:10px;line-height:1.85;color:var(--ink3)}
+
+/* 进度条：当前步发光、已完成打勾 */
+#vSetup .wz-bar{margin:26px 0 30px;padding:2px 4px}
+#vSetup .wz-step{letter-spacing:.2px}
+#vSetup .wz-dot{width:36px;height:36px;font-weight:800;
+  background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+#vSetup .wz-step.on .wz-dot{box-shadow:0 0 0 5px rgba(108,140,255,.14),
+  0 10px 26px rgba(79,110,240,.45),inset 0 1px 0 rgba(255,255,255,.28)}
+#vSetup .wz-step.done .wz-dot{font-size:0}
+#vSetup .wz-step.done .wz-dot::after{content:'✓';font-size:14px;font-weight:800;line-height:1}
+#vSetup .wz-line{height:3px;background:rgba(255,255,255,.08)}
+#vSetup .wz-line.done{box-shadow:0 0 10px rgba(65,224,200,.3)}
+
+/* 分步面板与标题节奏 */
+#vSetup .wz-panel.on{animation:panelIn .34s cubic-bezier(.2,.7,.3,1) both}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}}
+#vSetup .opt-row{margin-top:32px}
+#vSetup .opt-row .o-lab{display:flex;align-items:center;gap:9px;
+  font-size:var(--fs-base);letter-spacing:.2px;color:var(--ink);margin-bottom:13px}
+#vSetup .opt-row .o-lab::before,#vSetup .job-sub-lab::before{
+  content:'';width:3px;height:14px;border-radius:3px;flex:none;
+  background:linear-gradient(180deg,var(--acc2),var(--acc));
+  box-shadow:0 0 8px rgba(108,140,255,.45)}
+#vSetup .job-sub-lab{display:flex;align-items:center;gap:9px;margin-bottom:12px;
+  font-size:var(--fs-base);font-weight:700;color:var(--ink)}
+#vSetup .wz-note{max-width:780px;line-height:1.8}
+
+/* Step 1：大类卡片与细分药丸 */
+#vSetup .job-cat{border-radius:15px;border-color:rgba(255,255,255,.11);
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.018)) var(--card);
+  box-shadow:0 6px 18px -8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+#vSetup .job-cat:hover{border-color:rgba(108,140,255,.45);color:var(--ink);
+  box-shadow:0 16px 32px -14px rgba(0,0,0,.6),inset 0 0 0 1px rgba(108,140,255,.12)}
+#vSetup .job-cat.on{border-color:rgba(140,166,255,.9);
+  background:linear-gradient(140deg,rgba(108,140,255,.26),rgba(79,110,240,.09) 70%,rgba(65,224,200,.06));
+  box-shadow:0 0 0 3px rgba(108,140,255,.16),0 18px 36px -16px rgba(79,110,240,.7),
+    inset 0 1px 0 rgba(255,255,255,.16)}
+#vSetup .job-cat.on .jc-ic{filter:drop-shadow(0 0 9px rgba(140,166,255,.65))}
+#vSetup .job-sub{border-radius:99px;border-color:rgba(255,255,255,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)) var(--card);
+  transition:transform .18s,box-shadow .18s,border-color .18s,background .18s,color .18s}
+#vSetup .job-sub:hover{transform:translateY(-2px);box-shadow:0 8px 18px -10px rgba(0,0,0,.7)}
+#vSetup .job-sub.on{border-color:rgba(140,166,255,.85);color:#f2f6ff;
+  background:linear-gradient(120deg,rgba(108,140,255,.3),rgba(65,224,200,.13));
+  box-shadow:0 0 0 3px rgba(108,140,255,.15),0 10px 24px -12px rgba(79,110,240,.8),
+    inset 0 1px 0 rgba(255,255,255,.18)}
+#vSetup .job-sub-lab .js-opt{background:rgba(65,224,200,.1);
+  border-color:rgba(65,224,200,.3);color:var(--acc2)}
+@media (max-width:1240px){
+  #vSetup .job-cats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  #vSetup .job-cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #vSetup .job-cat{padding:13px 10px;font-size:var(--fs-sm)}
+}
+
+/* Step 2：题型分组多选卡片 */
+.type-groups{display:flex;flex-direction:column;gap:22px}
+.tg-h{display:flex;align-items:center;gap:9px;font-size:var(--fs-base);font-weight:700;color:var(--ink);margin-bottom:12px}
+.tg-h::before{content:'';width:3px;height:14px;border-radius:3px;flex:none;
+  background:linear-gradient(180deg,var(--acc2),var(--acc));box-shadow:0 0 8px rgba(108,140,255,.45)}
+.tg-tip{font-size:var(--fs-2xs);font-weight:600;color:var(--ink3);padding:2px 9px;border-radius:99px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.type-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(176px,15vw,224px),1fr));gap:12px}
+.type-card{position:relative;display:flex;align-items:center;gap:12px;padding:14px 30px 14px 15px;text-align:left;
+  border-radius:15px;border:1.5px solid rgba(255,255,255,.11);color:var(--ink2);cursor:pointer;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.018)) var(--card);
+  box-shadow:0 6px 18px -8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .18s,box-shadow .18s,border-color .18s,background .18s,color .18s}
+.type-card:hover{border-color:rgba(108,140,255,.45);color:var(--ink);transform:translateY(-2px);
+  box-shadow:0 16px 32px -14px rgba(0,0,0,.65),inset 0 0 0 1px rgba(108,140,255,.12)}
+.type-card .tc-ic{font-size:22px;line-height:1;flex:none;filter:grayscale(.35);transition:.18s}
+.type-card .tc-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.type-card .tc-body b{font-size:var(--fs-base);font-weight:800;color:inherit;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type-card .tc-body i{font-style:normal;font-size:var(--fs-xs);color:var(--ink3);line-height:1.5;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type-card .tc-check{position:absolute;top:9px;right:10px;width:17px;height:17px;border-radius:50%;
+  display:grid;place-items:center;font-size:10px;font-weight:800;color:transparent;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);transition:.18s}
+.type-card.on{border-color:rgba(140,166,255,.9);color:#f2f6ff;
+  background:linear-gradient(140deg,rgba(108,140,255,.26),rgba(79,110,240,.09) 70%,rgba(65,224,200,.06));
+  box-shadow:0 0 0 3px rgba(108,140,255,.16),0 18px 36px -16px rgba(79,110,240,.7),
+    inset 0 1px 0 rgba(255,255,255,.16)}
+.type-card.on .tc-ic{filter:none;transform:scale(1.06)}
+.type-card.on .tc-check{color:#fff;background:rgba(65,224,200,.9);border-color:transparent;
+  box-shadow:0 0 10px rgba(65,224,200,.5)}
+.tg-empty{padding:14px 16px;border-radius:14px;border:1px dashed rgba(255,255,255,.16);
+  background:rgba(255,255,255,.025);font-size:var(--fs-xs);color:var(--ink3);line-height:1.7}
+@media (max-width:600px){
+  .type-cards{grid-template-columns:1fr}
+  .type-card{padding:13px 30px 13px 13px}
+}
+body.light .type-card{background:linear-gradient(180deg,#ffffff,#f7f9ff);
+  border-color:rgba(15,23,42,.13);color:#334155;
+  box-shadow:0 6px 16px -10px rgba(15,23,42,.18)}
+body.light .type-card:hover{border-color:rgba(37,99,235,.5);color:#1d4ed8}
+body.light .type-card .tc-body i{color:#64748b}
+body.light .type-card.on{background:linear-gradient(140deg,rgba(37,99,235,.14),rgba(15,118,110,.08));
+  border-color:#2563eb;color:#1e3a8a;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1),0 10px 24px -14px rgba(37,99,235,.45)}
+body.light .type-card.on .tc-body i{color:#475569}
+body.light .tg-tip,body.light .tg-empty{background:rgba(15,23,42,.04);
+  border-color:rgba(15,23,42,.12);color:#64748b}
+
+/* Step 2-4：选项卡片质感统一 */
+#vSetup .opts .chip,#vSetup .m-pick{border-color:rgba(255,255,255,.11);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018)) var(--card);
+  box-shadow:0 6px 18px -8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+#vSetup .opts .chip.on,#vSetup .m-pick.on{border-color:rgba(140,166,255,.9);
+  background:linear-gradient(140deg,rgba(108,140,255,.24),rgba(79,110,240,.08));
+  box-shadow:0 0 0 3px rgba(108,140,255,.15),0 12px 26px -12px rgba(79,110,240,.6),
+    inset 0 1px 0 rgba(255,255,255,.15)}
+
+/* Step 4：汇总与预览 */
+#vSetup .wz-sum{padding:18px 20px;border-radius:18px;border-color:rgba(108,140,255,.36);
+  background:
+    radial-gradient(420px 200px at 100% 0%,rgba(65,224,200,.1),transparent 70%),
+    linear-gradient(145deg,rgba(108,140,255,.17),rgba(108,140,255,.05));
+  box-shadow:0 20px 40px -24px rgba(79,110,240,.75),inset 0 1px 0 rgba(255,255,255,.1)}
+#vSetup .wz-sum .ws-h{font-size:var(--fs-base);letter-spacing:.2px}
+#vSetup .wz-sum .ws-v{color:#f2f6ff}
+#vSetup .wz-sum .ws-row{padding:8px 0}
+#vSetup .sc-preview .sp-card{border-radius:14px;border-color:rgba(255,255,255,.1);
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  box-shadow:0 8px 20px -14px rgba(0,0,0,.7)}
+#vSetup .warmup{border-radius:18px;border-color:rgba(251,191,36,.22);
+  background:linear-gradient(120deg,rgba(251,191,36,.075),rgba(255,255,255,.015));
+  box-shadow:0 16px 36px -26px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.05)}
+
+/* 按钮与底部操作栏 */
+#vSetup .setup .btn{transition:transform .18s,box-shadow .18s,filter .18s}
+#vSetup .setup .btn.pri{background:linear-gradient(135deg,#6C8CFF,#4f6ef0 60%,#3f5ae0);
+  box-shadow:0 12px 28px -12px rgba(79,110,240,.85),inset 0 1px 0 rgba(255,255,255,.22)}
+#vSetup .setup .btn.pri:hover{transform:translateY(-1px);filter:brightness(1.05);
+  box-shadow:0 16px 34px -12px rgba(79,110,240,.95),inset 0 1px 0 rgba(255,255,255,.26)}
+#vSetup .setup .btn.pri:active{transform:translateY(0) scale(.99)}
+#wzActions .wz-actions-in{padding:11px 13px;border-radius:20px;
+  border-color:rgba(255,255,255,.14);
+  background:linear-gradient(180deg,rgba(18,26,46,.97),rgba(9,14,28,.97));
+  box-shadow:0 26px 64px -18px rgba(0,0,0,.85),0 0 0 1px rgba(108,140,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.09)}
+#wzNext.final{box-shadow:0 12px 30px -10px rgba(45,212,191,.5),
+  inset 0 1px 0 rgba(255,255,255,.24)}
+#wzCount{letter-spacing:.4px}
+
+/* 浅色模式适配 */
+body.light #vSetup .setup{border-color:rgba(15,23,42,.1);
+  background:
+    radial-gradient(900px 420px at 6% -14%,rgba(37,99,235,.1),transparent 64%),
+    radial-gradient(720px 400px at 98% -6%,rgba(15,118,110,.07),transparent 66%),
+    linear-gradient(180deg,#ffffff,#f7f9ff);
+  box-shadow:0 30px 70px -34px rgba(15,23,42,.25),0 8px 20px rgba(15,23,42,.06),
+    inset 0 1px 0 #ffffff}
+body.light #vSetup .setup h1{color:#0f172a;text-shadow:none}
+body.light #vSetup .setup-sub{color:#475569}
+body.light #vSetup .wz-dot{background:#fff;border-color:rgba(15,23,42,.16);
+  color:#475569;box-shadow:none}
+body.light #vSetup .wz-step.on .wz-dot{color:#fff;
+  background:linear-gradient(135deg,#2563eb,#6C8CFF);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+body.light #vSetup .wz-line{background:rgba(15,23,42,.1)}
+body.light #vSetup .job-cat,body.light #vSetup .job-sub,
+body.light #vSetup .opts .chip,body.light #vSetup .m-pick{
+  background:linear-gradient(180deg,#ffffff,#f7f9ff);border-color:rgba(15,23,42,.13);
+  color:#334155;box-shadow:0 6px 16px -10px rgba(15,23,42,.18)}
+body.light #vSetup .job-cat.on,body.light #vSetup .job-sub.on,
+body.light #vSetup .opts .chip.on,body.light #vSetup .m-pick.on{
+  background:linear-gradient(140deg,rgba(37,99,235,.14),rgba(15,118,110,.08));
+  border-color:#2563eb;color:#1e3a8a;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1),0 10px 24px -14px rgba(37,99,235,.45)}
+body.light #vSetup .job-sub-lab .js-opt{background:rgba(15,118,110,.08);
+  border-color:rgba(15,118,110,.25);color:#0f766e}
+body.light #vSetup .wz-sum{border-color:rgba(37,99,235,.24);
+  background:linear-gradient(145deg,rgba(37,99,235,.1),rgba(15,118,110,.05));
+  box-shadow:0 16px 36px -24px rgba(15,23,42,.28),inset 0 1px 0 #ffffff}
+body.light #vSetup .wz-sum .ws-v{color:#0f172a}
+body.light #vSetup .wz-sum .ws-row{border-top-color:rgba(15,23,42,.1)}
+body.light #vSetup .sc-preview .sp-card{background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border-color:rgba(15,23,42,.1)}
+body.light #vSetup .warmup{background:linear-gradient(120deg,rgba(180,83,9,.06),#ffffff);
+  border-color:rgba(180,83,9,.18)}
+body.light #wzActions .wz-actions-in{background:linear-gradient(180deg,#ffffff,#f5f8ff);
+  border-color:rgba(15,23,42,.13);
+  box-shadow:0 22px 52px -18px rgba(15,23,42,.22),inset 0 1px 0 #ffffff}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -457,44 +778,91 @@
         <h1>🎬 开始一场模拟面试</h1>
         <p class="setup-sub">连续答完全部题目（中途不打断），最后统一给每道题打分，并生成 AI 评价与复盘报告。</p>
 
-        <div class="setup-tipbar">
-          <span class="ti-ic">💡</span>
-          <div class="ti-body">
-            <div class="ti-t">面试小 tips（本轮随机 3 条）</div>
-            <div class="ti-d" id="tipBox"></div>
-          </div>
+        <!-- 向导进度条 -->
+        <div class="wz-bar" id="wzBar" role="list" aria-label="设置进度">
+          <div class="wz-step on" role="listitem" data-step="1"><span class="wz-dot">1</span><span class="wz-t">目标岗位</span></div>
+          <span class="wz-line"></span>
+          <div class="wz-step" role="listitem" data-step="2"><span class="wz-dot">2</span><span class="wz-t">面试题型</span></div>
+          <span class="wz-line"></span>
+          <div class="wz-step" role="listitem" data-step="3"><span class="wz-dot">3</span><span class="wz-t">作答方式</span></div>
+          <span class="wz-line"></span>
+          <div class="wz-step" role="listitem" data-step="4"><span class="wz-dot">4</span><span class="wz-t">规则确认</span></div>
         </div>
 
-        <div class="setup-cols">
-          <div class="scol-left">
-            <div class="opt-row"><div class="o-lab">① 选择面试场景</div><div class="opts" id="scOpts"></div></div>
-            <div class="opt-row"><div class="o-lab">② 题目数量</div><div class="opts" id="cntOpts"></div></div>
-            <div class="opt-row"><div class="o-lab">③ 每题限时</div><div class="opts" id="secOpts"></div></div>
-            <div class="opt-row"><div class="o-lab">④ 面试题型</div><div class="opts" id="typeOpts"></div></div>
-            <div class="opt-row"><div class="o-lab">⑤ 难度偏向</div><div class="opts" id="lvOpts"></div></div>
-          </div>
-          <div class="scol-right">
-            <div class="opt-row"><div class="o-lab">⑥ 选择作答方式</div><div class="m-picks" id="modePicks"></div></div>
-            <div class="sc-preview" id="scPreview"></div>
-          </div>
-        </div>
+        <div class="wz-panels" id="wzPanels">
+          <!-- Step 1：目标岗位 -->
+          <section class="wz-panel on" data-step="1">
+            <div class="opt-row"><div class="o-lab">① 选择目标岗位大类</div><div class="job-cats" id="jobCats"></div></div>
+            <div class="job-sub-wrap" id="jobSubWrap">
+              <div class="o-lab job-sub-lab">选择细分方向<span class="js-opt">可选</span></div>
+              <div class="job-subs" id="jobSubs"></div>
+              <p class="wz-note job-sub-tip">不选细分方向时，按该大类的通用方向出题。</p>
+            </div>
+          </section>
 
-        <div class="setup-why">
-          <div>🎤 支持<br><b style="color:var(--acc2)">语音输入</b></div>
-          <div>🤖 答完<br><b style="color:var(--acc2)">AI 评价</b></div>
-          <div>📊 结束<br><b style="color:var(--acc2)">复盘报告</b></div>
-        </div>
+          <!-- Step 2：面试题型（分组多选） -->
+          <section class="wz-panel" data-step="2">
+            <div class="type-groups">
+              <div class="tg">
+                <div class="tg-h">✨ 为你推荐<span class="tg-tip" id="typeRecTip"></span></div>
+                <div class="type-cards" id="typeRec"></div>
+                <div class="tg-empty" id="typeRecEmpty"></div>
+              </div>
+              <div class="tg">
+                <div class="tg-h">📦 通用必考<span class="tg-tip">任何岗位都适用</span></div>
+                <div class="type-cards" id="typeUni"></div>
+              </div>
+            </div>
+            <p class="wz-note">可多选，选中的题型会影响抽题范围；系统已按你上一步选择的岗位大类给出推荐，可继续增减。</p>
+          </section>
 
-        <div class="warmup">
-          <span class="w-ic">🔥</span>
-          <div class="w-body">
-            <b>热身模式：</b>不计时快速答 1 道题，直接看参考要点和技巧，适合刚登录先找找状态。
-          </div>
-          <button class="btn gho sm" id="warmBtn">⚡ 快速答一题</button>
-        </div>
+          <!-- Step 3：作答方式 -->
+          <section class="wz-panel" data-step="3">
+            <div class="opt-row"><div class="o-lab">③ 选择作答方式</div><div class="m-picks" id="modePicks"></div></div>
+            <p class="wz-note">经典文字：专注打字作答；动画互动：AI 面试官动画提问并朗读；摄像头语音：模拟真实视频面试（推荐 Chrome）。</p>
+          </section>
 
-        <button class="btn pri" id="startBtn" style="width:100%;margin-top:22px;padding:14px;font-size:15px">🚀 进入面试间 →</button>
-        <div style="font-size:11.5px;color:var(--ink3);text-align:center;margin-top:11px;line-height:1.8">流程：连续答完全部题目 → 统一打分 → AI 评价 → 复盘报告<br>超时会自动提交当前作答 · 语音识别推荐 Chrome 浏览器</div>
+          <!-- Step 4：规则与确认 -->
+          <section class="wz-panel" data-step="4">
+            <div class="wz-final">
+              <div class="wz-rules">
+                <div class="opt-row"><div class="o-lab">④ 题目数量</div><div class="opts" id="cntOpts"></div></div>
+                <div class="opt-row"><div class="o-lab">⑤ 每题限时</div><div class="opts" id="secOpts"></div></div>
+                <div class="opt-row"><div class="o-lab">⑥ 难度偏向</div><div class="opts" id="lvOpts"></div></div>
+                <!-- 压力模式开关：仅在 Step 4 展示 -->
+                <div class="opt-row" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding:14px 18px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.3);border-radius:14px">
+                  <div>
+                    <div style="font-size:var(--fs-base);font-weight:800;color:#fb7185">🔥 开启压力模式</div>
+                    <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:4px">AI 将进行打断、质疑、连环追问</div>
+                  </div>
+                  <button type="button" class="chip" id="stressToggle" style="border-radius:99px;padding:8px 18px;font-weight:700">关闭</button>
+                </div>
+              </div>
+              <div class="wz-side">
+                <div class="wz-sum" id="wzSummary"></div>
+                <div class="sc-preview" id="scPreview"></div>
+              </div>
+            </div>
+
+            <div class="warmup">
+              <span class="w-ic">🔥</span>
+              <div class="w-body">
+                <b>热身模式：</b>不计时快速答 1 道题，直接看参考要点和技巧，适合刚登录先找找状态。
+              </div>
+              <button class="btn gho sm" id="warmBtn">⚡ 快速答一题</button>
+            </div>
+            <div class="wz-foot">流程：连续答完全部题目 → 统一打分 → AI 评价 → 复盘报告<br>超时会自动提交当前作答 · 语音识别推荐 Chrome 浏览器</div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置向导：底部固定操作栏 -->
+    <div class="wz-actions on" id="wzActions">
+      <div class="wz-actions-in">
+        <button type="button" class="btn gho hide" id="wzPrev">← 上一步</button>
+        <span class="wz-cnt" id="wzCount">第 1 步 / 共 4 步</span>
+        <button type="button" class="btn pri" id="wzNext">下一步 →</button>
       </div>
     </div>
 
@@ -540,8 +908,15 @@
             <!-- 场景舞台：按所选岗位切换，人物持续微动 -->
             <div class="scene-stage idle" id="sceneStage">
               <div class="scene-media">
-                <div class="scene-figure">
+                <div class="scene-figure" id="sceneFigure">
                   <img class="scene-img" id="sceneImg" src="assets/scenes/general.svg" alt="模拟面试场景">
+                  <!-- 人物层：复制同一张图，只露出头部 / 下颌，随提问做拟人动作 -->
+                  <div class="person-head" id="personHead">
+                    <img class="person-img" id="sceneHeadImg" src="assets/scenes/general.svg" alt="" aria-hidden="true">
+                    <div class="person-jaw" id="personJaw">
+                      <img class="person-img" id="sceneJawImg" src="assets/scenes/general.svg" alt="" aria-hidden="true">
+                    </div>
+                  </div>
                 </div>
                 <div class="scene-sheen"></div>
                 <div class="scene-dust"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -688,24 +1063,68 @@
   </div>
 </div>
 
-<!-- 面试题型插画：悬停时浮出 -->
-<div class="tt-pop" id="ttPop" aria-hidden="true">
-  <div class="tt-art" id="ttArt"></div>
-  <div class="tt-t" id="ttT">—</div>
-  <div class="tt-d" id="ttD"></div>
-</div>
-
-<script src="shared.js?v=20261104b"></script>
+<script src="shared.js?v=20261105b"></script>
 <script>
 if(!initPage('interview',true))throw new Error('login required');
 
 var RING_LEN=175.9;
-var S={scene:'job',count:5,sec:90,type:'general',lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null};
+var S={scene:'job',count:5,sec:90,types:[],lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null,stressMode:false};
 
-var scOpts=document.getElementById('scOpts');
-scOpts.innerHTML=Object.keys(SCENES).map(function(k){var s=SCENES[k];
-  return '<button class="sc-pick'+(k===S.scene?' on':'')+'" data-k="'+k+'">'+ICONS[s.icon]+s.name+'</button>'}).join('');
-$$('#scOpts .sc-pick').forEach(function(b){b.onclick=function(){S.scene=b.dataset.k;$$('#scOpts .sc-pick').forEach(function(x){x.classList.toggle('on',x===b)});renderPreview(S.scene);preloadScene(S.scene)}});
+var JOB_CATEGORIES=[
+  {id:'tech',label:'研发 / 技术',icon:'💻',subs:['后端开发','前端开发','客户端','测试开发','运维/DevOps','安全工程师']},
+  {id:'algorithm',label:'算法 / 数据',icon:'📊',subs:['算法工程师','数据分析师','数据开发','数据产品','AI工程师']},
+  {id:'product',label:'产品 / 策划',icon:'📦',subs:['C端产品','B端产品','策略产品','游戏策划','商业化产品']},
+  {id:'operation',label:'运营 / 营销',icon:'📈',subs:['用户运营','内容运营','活动运营','增长黑客','市场营销']},
+  {id:'design',label:'设计 / 交互',icon:'🎨',subs:['UI设计','交互设计','视觉设计','用户体验研究']},
+  {id:'business',label:'业务 / 销售',icon:'🤝',subs:['大客户销售','渠道销售','商务拓展(BD)','客户成功']},
+  {id:'support',label:'职能 / 支撑',icon:'🏢',subs:['人力资源(HR)','财务/审计','法务/合规','供应链/物流','行政/战略']}
+];
+/* 大类 → 原有抽题场景（使用现有题库场景，无专属场景的走合理兜底） */
+var JOB_SCENE={tech:'tech',algorithm:'data',product:'product',operation:'product',
+  design:'general',business:'general',support:'general'};
+var selectedCategory=null,selectedSubJob=null; /* 两个状态：大类 / 细分方向 */
+var jobCats=document.getElementById('jobCats'),jobSubWrap=document.getElementById('jobSubWrap'),
+    jobSubs=document.getElementById('jobSubs');
+
+function renderJobCats(){
+  jobCats.innerHTML=JOB_CATEGORIES.map(function(c){
+    return '<button type="button" class="job-cat'+(c.id===selectedCategory?' on':'')+'" data-k="'+c.id+'">'+
+      '<span class="jc-ic">'+c.icon+'</span>'+esc(c.label)+'</button>';
+  }).join('');
+  $$('#jobCats .job-cat').forEach(function(b){b.onclick=function(){selectJobCategory(b.dataset.k)}});
+}
+
+function renderJobSubs(){
+  var cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0];
+  if(!cat){jobSubWrap.classList.remove('on');jobSubs.innerHTML='';return}
+  jobSubWrap.classList.add('on'); /* 平滑展开当前大类的细分方向 */
+  var subs=cat.subs||[]; /* 读取新字段 subs */
+  var pills=[{k:'',t:'🎯 大类通用'}].concat(subs.map(function(s){return {k:s,t:s}}));
+  jobSubs.innerHTML=pills.map(function(p){
+    var on=p.k?p.k===selectedSubJob:!selectedSubJob;
+    return '<button type="button" class="job-sub'+(on?' on':'')+'" data-k="'+esc(p.k)+'">'+esc(p.t)+'</button>';
+  }).join('');
+  $$('#jobSubs .job-sub').forEach(function(b){b.onclick=function(){
+    selectedSubJob=b.dataset.k||null; /* 大类通用 = null */
+    $$('#jobSubs .job-sub').forEach(function(x){x.classList.toggle('on',x===b)});
+    renderSummary();
+  }});
+}
+
+/* 选中大类：切换大类时清空细分方向，并接回既有 S.scene */
+function selectJobCategory(id){
+  var cat=JOB_CATEGORIES.filter(function(c){return c.id===id})[0];
+  if(!cat)return;
+  if(selectedCategory!==cat.id)selectedSubJob=null;
+  selectedCategory=cat.id;
+  renderJobCats();renderJobSubs();
+  S.scene=JOB_SCENE[cat.id]||'general';
+  renderPreview(S.scene);preloadScene(S.scene);
+  /* 大类变化后重新同步推荐题型：清掉无效旧选择 + 默认选中新推荐第一项 */
+  syncTypesForCategory();
+  renderSummary();
+}
+renderJobCats();renderJobSubs();
 var cntOpts=document.getElementById('cntOpts');
 cntOpts.innerHTML=[3,5,8].map(function(n){return '<button class="chip'+(n===5?' on':'')+'" data-n="'+n+'">'+n+' 题</button>'}).join('');
 $$('#cntOpts .chip').forEach(function(b){b.onclick=function(){S.count=+b.dataset.n;$$('#cntOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
@@ -714,118 +1133,134 @@ secOpts.innerHTML=[[60,'60 秒 · 快答'],[90,'90 秒 · 标准'],[120,'120 秒
   return '<button class="chip'+(p[0]===90?' on':'')+'" data-n="'+p[0]+'">'+p[1]+'</button>'}).join('');
 $$('#secOpts .chip').forEach(function(b){b.onclick=function(){S.sec=+b.dataset.n;$$('#secOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
 
-/* 面试题型（每个题型配一张插画，悬停时浮出） */
-var TYPE_ART={
-  general:`<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
-    <rect width="200" height="130" rx="16" fill="#0e1729"/>
-    <circle cx="100" cy="70" r="48" fill="#6C8CFF" opacity=".07"/>
-    <rect x="30" y="84" width="140" height="11" rx="5.5" fill="#2c3c66"/>
-    <circle cx="56" cy="54" r="9" fill="#A5B4FC"/>
-    <rect x="44" y="66" width="24" height="20" rx="10" fill="#6C8CFF"/>
-    <circle cx="100" cy="42" r="11" fill="#E0E7FF"/>
-    <rect x="86" y="56" width="28" height="30" rx="13" fill="#8B9DFF"/>
-    <circle cx="144" cy="54" r="9" fill="#8ff0dd"/>
-    <rect x="132" y="66" width="24" height="20" rx="10" fill="#41E0C8"/>
-    <rect x="88" y="62" width="24" height="3" rx="1.5" fill="#dbe4ff" opacity=".45"/>
-    <rect x="88" y="69" width="16" height="3" rx="1.5" fill="#dbe4ff" opacity=".3"/>
-    <rect x="112" y="13" width="40" height="17" rx="8.5" fill="#41E0C8" opacity=".28"/>
-    <circle cx="123" cy="21.5" r="2" fill="#c9fff4"/><circle cx="132" cy="21.5" r="2" fill="#c9fff4"/><circle cx="141" cy="21.5" r="2" fill="#c9fff4"/>
-    <rect x="44" y="17" width="30" height="14" rx="7" fill="#6C8CFF" opacity=".24"/>
-    <rect x="52" y="22" width="14" height="3" rx="1.5" fill="#b9c6ff" opacity=".7"/>
-  </svg>`,
-  tech:`<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
-    <rect width="200" height="130" rx="16" fill="#0e1729"/>
-    <circle cx="80" cy="62" r="48" fill="#6C8CFF" opacity=".09"/>
-    <rect x="22" y="20" width="136" height="84" rx="10" fill="#111b33" stroke="#2b3a5e"/>
-    <rect x="36" y="34" width="42" height="6" rx="3" fill="#8B9DFF"/>
-    <rect x="84" y="34" width="24" height="6" rx="3" fill="#41E0C8" opacity=".85"/>
-    <rect x="42" y="48" width="58" height="6" rx="3" fill="#3e5080"/>
-    <rect x="42" y="62" width="34" height="6" rx="3" fill="#3e5080"/>
-    <rect x="82" y="62" width="30" height="6" rx="3" fill="#FBBF24" opacity=".8"/>
-    <rect x="42" y="76" width="48" height="6" rx="3" fill="#3e5080"/>
-    <rect x="96" y="74" width="2.5" height="10" rx="1.2" fill="#41E0C8"/>
-    <circle cx="176" cy="34" r="13" fill="#FBBF24" opacity=".15"/>
-    <path d="M176 23a7.5 7.5 0 00-3.2 14.3v2.6h6.4v-2.6A7.5 7.5 0 00176 23z" fill="#FBBF24"/>
-    <rect x="173.5" y="41" width="5" height="3" rx="1.5" fill="#FBBF24"/>
-  </svg>`,
-  hr:`<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
-    <rect width="200" height="130" rx="16" fill="#0e1729"/>
-    <circle cx="100" cy="64" r="52" fill="#FBBF24" opacity=".07"/>
-    <circle cx="44" cy="56" r="9.5" fill="#A5B4FC"/>
-    <path d="M30 88c0-8.3 6.3-15 14-15s14 6.7 14 15z" fill="#6C8CFF" opacity=".9"/>
-    <circle cx="156" cy="56" r="9.5" fill="#8ff0dd"/>
-    <path d="M142 88c0-8.3 6.3-15 14-15s14 6.7 14 15z" fill="#41E0C8" opacity=".9"/>
-    <rect x="76" y="30" width="48" height="58" rx="5" fill="#e9efff" opacity=".95"/>
-    <rect x="84" y="39" width="20" height="6" rx="3" fill="#31406c"/>
-    <rect x="84" y="50" width="32" height="3" rx="1.5" fill="#9fadd2"/>
-    <rect x="84" y="57" width="26" height="3" rx="1.5" fill="#9fadd2"/>
-    <rect x="84" y="64" width="32" height="3" rx="1.5" fill="#9fadd2"/>
-    <circle cx="91" cy="77" r="4" fill="#41E0C8"/>
-    <rect x="66" y="12" width="26" height="13" rx="6.5" fill="#6C8CFF" opacity=".38"/>
-    <rect x="108" y="12" width="26" height="13" rx="6.5" fill="#41E0C8" opacity=".38"/>
-  </svg>`,
-  pressure:`<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
-    <rect width="200" height="130" rx="16" fill="#0e1729"/>
-    <circle cx="112" cy="58" r="44" fill="#FB7185" opacity=".07"/>
-    <circle cx="56" cy="66" r="10" fill="#FCA5B5"/>
-    <rect x="44" y="79" width="24" height="24" rx="12" fill="#FB7185"/>
-    <rect x="88" y="24" width="36" height="15" rx="7.5" fill="#FB7185" opacity=".22"/>
-    <rect x="114" y="48" width="36" height="15" rx="7.5" fill="#FB7185" opacity=".38"/>
-    <rect x="88" y="72" width="36" height="15" rx="7.5" fill="#FB7185" opacity=".55"/>
-    <rect x="103" y="28.5" width="3" height="6" rx="1.5" fill="#ffe4e6"/>
-    <circle cx="104.5" cy="36.5" r="1.4" fill="#ffe4e6"/>
-    <rect x="129" y="52.5" width="3" height="6" rx="1.5" fill="#ffe4e6"/>
-    <circle cx="130.5" cy="60.5" r="1.4" fill="#ffe4e6"/>
-    <rect x="103" y="76.5" width="3" height="6" rx="1.5" fill="#ffe4e6"/>
-    <circle cx="104.5" cy="84.5" r="1.4" fill="#ffe4e6"/>
-    <path d="M32 22l-9 18h8l-4 15 15-21h-8l5-13z" fill="#FBBF24"/>
-  </svg>`
-};
-var TYPE_OPTS=[
-  {k:'general',t:'综合面试',en:'OVERVIEW',d:'多维度提问，考整体表达与岗位匹配度，最接近真实校招首轮。'},
-  {k:'tech',t:'技术面',en:'TECH',d:'深挖项目细节与实现原理，从方案选型一路追问到边界情况。'},
-  {k:'hr',t:'HR 面',en:'HR',d:'围绕稳定性、薪资期望、职业规划与团队协作，看你怎么回答"为什么离职"。'},
-  {k:'pressure',t:'压力面',en:'STRESS',d:'连续追问 + 质疑式提问，考察抗压能力与临场反应，答不上来也别慌。'}
+/* 面试题型：通用字典 + 各大类专属字典 */
+var GENERAL_TYPES=[
+  {id:'self_intro',label:'自我介绍',desc:'破冰与核心亮点提炼'},
+  {id:'behavior',label:'行为面试 (BEI)',desc:'STAR法则深挖过往经历'},
+  {id:'hr_round',label:'HR 综合面',desc:'求职动机、稳定性与职业规划'},
+  {id:'reverse_q',label:'反问环节',desc:'考察你提问的深度与主动性'}
 ];
-var typeOpts=document.getElementById('typeOpts');
-typeOpts.innerHTML=TYPE_OPTS.map(function(o){return '<button class="chip'+(o.k==='general'?' on':'')+'" data-k="'+o.k+'">'+o.t+'</button>'}).join('');
+var SPECIFIC_TYPES={
+  tech:[
+    {id:'tech_basic',label:'专业基础/八股',desc:'语言特性、网络、操作系统'},
+    {id:'tech_sys',label:'系统设计',desc:'高并发、分布式架构设计'},
+    {id:'tech_algo',label:'手撕代码/算法',desc:'LeetCode与数据结构'},
+    {id:'tech_proj',label:'项目深挖',desc:'技术选型、难点排查与复盘'}
+  ],
+  algorithm:[
+    {id:'algo_theory',label:'算法理论',desc:'机器学习/统计/深度学习原理'},
+    {id:'algo_case',label:'业务建模',desc:'真实业务场景下的模型落地'},
+    {id:'sql_code',label:'SQL/代码实操',desc:'数据提取与处理逻辑'}
+  ],
+  product:[
+    {id:'prod_case',label:'案例分析(Case)',desc:'商业拆解与需求分析'},
+    {id:'prod_design',label:'功能设计',desc:'从0到1设计一个产品功能'},
+    {id:'prod_data',label:'数据指标拆解',desc:'漏斗分析、A/B测试与增长'}
+  ],
+  operation:[
+    {id:'op_plan',label:'活动策划',desc:'拉新促活方案设计与复盘'},
+    {id:'op_content',label:'内容敏感度',desc:'爆款拆解与内容矩阵'},
+    {id:'op_case',label:'运营案例',desc:'某产品日活下降怎么排查'}
+  ],
+  design:[
+    {id:'design_portfolio',label:'作品集深挖',desc:'设计思路与业务落地'},
+    {id:'design_fast',label:'现场快题',desc:'限时设计挑战'}
+  ],
+  business:[
+    {id:'sales_roleplay',label:'情景模拟',desc:'客户谈判、处理客诉'},
+    {id:'bd_case',label:'商务拓展',desc:'找合作切入点与方案'}
+  ],
+  support:[
+    {id:'func_scenario',label:'职能场景题',desc:'如：开除不听话的员工、预算削减'},
+    {id:'func_pro',label:'专业实操',desc:'如：合同审核、财报分析'}
+  ]
+};
+/* 排序索引：通用在前，各大类专属按 JOB_CATEGORIES 顺序；仅用于 S.types 排序 */
+var TYPE_ORDER={};
+(function(){
+  var i=0;
+  GENERAL_TYPES.forEach(function(t){TYPE_ORDER[t.id]=i++});
+  JOB_CATEGORIES.forEach(function(c){
+    (SPECIFIC_TYPES[c.id]||[]).forEach(function(t){TYPE_ORDER[t.id]=i++});
+  });
+})();
+var TYPE_ICONS={self_intro:'🙋',behavior:'🗣️',hr_round:'🤝',reverse_q:'❓',
+  tech_basic:'📚',tech_sys:'🏗️',tech_algo:'⌨️',tech_proj:'🔍',
+  algo_theory:'🧠',algo_case:'🧪',sql_code:'🗄️',
+  prod_case:'🧩',prod_design:'✏️',prod_data:'📊',
+  op_plan:'📈',op_content:'✍️',op_case:'🧭',
+  design_portfolio:'🎨',design_fast:'⏱️',
+  sales_roleplay:'🎭',bd_case:'💼',
+  func_scenario:'🗂️',func_pro:'🧾'};
 
-/* 悬停浮出插画 */
-var ttPop=document.getElementById('ttPop'),ttArt=document.getElementById('ttArt'),
-    ttT=document.getElementById('ttT'),ttD=document.getElementById('ttD');
-function showTypeTip(btn,o){
-  ttArt.innerHTML=TYPE_ART[o.k]||'';
-  ttT.innerHTML=esc(o.t)+'<i>'+o.en+'</i>';
-  ttD.textContent=o.d;
-  ttPop.classList.add('show');ttPop.setAttribute('aria-hidden','false');
-  $$('#typeOpts .chip').forEach(function(x){x.classList.toggle('tt-on',x===btn)});
-  var r=btn.getBoundingClientRect(),w=272,h=ttPop.offsetHeight||250;
-  var left=Math.round(r.left+r.width/2-w/2);
-  left=Math.max(10,Math.min(left,window.innerWidth-w-10));
-  var top=Math.round(r.top-h-14);
-  if(top<10)top=Math.round(r.bottom+14);
-  ttPop.style.left=left+'px';ttPop.style.top=top+'px';
+/* 直接读源数据：推荐组 = 当前大类专属，通用组 = GENERAL_TYPES */
+function recommendTypes(catId){
+  return catId?(SPECIFIC_TYPES[catId]||[]):[];
 }
-function hideTypeTip(){
-  ttPop.classList.remove('show');ttPop.setAttribute('aria-hidden','true');
-  $$('#typeOpts .chip').forEach(function(x){x.classList.remove('tt-on')});
+function availableTypes(catId){
+  return catId?GENERAL_TYPES.concat(SPECIFIC_TYPES[catId]||[]):GENERAL_TYPES.slice();
 }
-$$('#typeOpts .chip').forEach(function(b){
-  var o=TYPE_OPTS.filter(function(x){return x.k===b.dataset.k})[0];
-  if(!o)return;
-  b.addEventListener('mouseenter',function(){showTypeTip(b,o)});
-  b.addEventListener('mouseleave',hideTypeTip);
-  b.addEventListener('focus',function(){showTypeTip(b,o)});
-  b.addEventListener('blur',hideTypeTip);
-  b.onclick=function(){S.type=b.dataset.k;$$('#typeOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)});hideTypeTip()};
-});
-window.addEventListener('scroll',hideTypeTip,{passive:true});
-window.addEventListener('resize',hideTypeTip);
+function sortTypes(){
+  S.types.sort(function(a,b){return (TYPE_ORDER[a]||0)-(TYPE_ORDER[b]||0)});
+}
+
+/* 渲染：选中态完全由 S.types 集合驱动 */
+function typeCardHtml(t){
+  var on=S.types.indexOf(t.id)>=0;
+  return '<button type="button" class="type-card'+(on?' on':'')+'" data-k="'+t.id+'" aria-pressed="'+(on?'true':'false')+'">'+
+    '<span class="tc-ic">'+(TYPE_ICONS[t.id]||'📌')+'</span>'+
+    '<span class="tc-body"><b>'+esc(t.label)+'</b><i>'+esc(t.desc)+'</i></span>'+
+    '<span class="tc-check" aria-hidden="true">✓</span></button>';
+}
+function renderTypes(){
+  var rec=recommendTypes(selectedCategory),
+      uni=GENERAL_TYPES,
+      cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0];
+  document.getElementById('typeRec').innerHTML=rec.map(typeCardHtml).join('');
+  document.getElementById('typeUni').innerHTML=uni.map(typeCardHtml).join('');
+  document.getElementById('typeRecTip').textContent=cat?'按「'+cat.label+'」推荐':'';
+  var empty=document.getElementById('typeRecEmpty');
+  empty.textContent=cat?'该大类暂无专属题型，先选下方通用必考即可开始。':'先在上一步选择目标岗位大类，这里会推荐专属题型。';
+  empty.style.display=rec.length?'none':'block';
+  $$('#typeRec .type-card,#typeUni .type-card').forEach(function(b){
+    b.onclick=function(){toggleType(b.dataset.k)};
+  });
+}
+
+/* 多选切换 */
+function toggleType(id){
+  var i=S.types.indexOf(id);
+  if(i>=0)S.types.splice(i,1);else S.types.push(id);
+  sortTypes();renderTypes();renderSummary();
+}
 
 /* 难度偏向 */
 var lvOpts=document.getElementById('lvOpts');
 lvOpts.innerHTML=['不限','初级','中级','高级'].map(function(t,i){return '<button class="chip'+(i===0?' on':'')+'" data-n="'+(i-1)+'">'+t+'</button>'}).join('');
 $$('#lvOpts .chip').forEach(function(b){b.onclick=function(){S.lv=+b.dataset.n;$$('#lvOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+
+/* 压力模式开关 */
+var stressToggle=document.getElementById('stressToggle');
+if(stressToggle){
+  stressToggle.onclick=function(){
+    S.stressMode=!S.stressMode;
+    if(S.stressMode){
+      stressToggle.classList.add('on');
+      stressToggle.textContent='已开启';
+      stressToggle.style.background='rgba(251,113,133,.2)';
+      stressToggle.style.borderColor='#fb7185';
+      stressToggle.style.color='#fff';
+      stressToggle.style.boxShadow='0 0 0 3px rgba(251,113,133,.15)';
+    }else{
+      stressToggle.classList.remove('on');
+      stressToggle.textContent='关闭';
+      stressToggle.style.background='';
+      stressToggle.style.borderColor='';
+      stressToggle.style.color='';
+      stressToggle.style.boxShadow='';
+    }
+  };
+}
 
 /* 作答方式：经典文字 / 动画互动文字 / 摄像头语音 */
 var MODE_OPTS=[
@@ -844,39 +1279,96 @@ modePicks.innerHTML=MODE_OPTS.map(function(o){
 $$('#modePicks .m-pick').forEach(function(b){b.onclick=function(){
   S.mode=b.dataset.k;userSet('ans_mode',S.mode);
   $$('#modePicks .m-pick').forEach(function(x){x.classList.toggle('on',x===b)});
+  renderSummary();
 }});
 
-/* Tips 随机 3 条渲染 */
-var TIPS_POOL=[
- '自我介绍建议用"我是谁→我有什么→为什么适合"三段式，控制在 1-2 分钟',
- '讲项目时一定要说"你负责的部分"，面试官能分辨集体 vs 个人贡献',
- '被问到"优缺点"时，缺点选真实但不致命的，然后给出具体改进动作',
- '技术面深挖项目时，用"现象→定位→根因→解决→验证"链路讲清楚',
- '数据分析题先对齐口径，再讲方法，最后落到业务价值',
- '产品题用"用户-场景-价值"框架拆，别光说功能',
- '行为面试用 STAR 法则：情境→任务→行动→结果',
- '反问环节别问薪资，优先问业务方向、团队分工、新人培养',
- '紧张很正常，把面试当聊天，开口前深呼吸 3 秒',
- '语音识别识别错了别怕，手动改一下就行',
- '复盘报告里的教练点评很重要，别看完就关掉',
- '每日签到 + 面试训练，坚持 2 周效果肉眼可见'
-];
-function renderTips(){
-  var pick=shuffle(TIPS_POOL).slice(0,3);
-  document.getElementById('tipBox').innerHTML=pick.map(function(t,i){return (i>0?'<br>':'')+(i+1)+'. '+esc(t)}).join('');
-}
 function renderPreview(sc){
   var pool=QUESTIONS.filter(function(q){return q.scene===sc}).slice(0,3);
   document.getElementById('scPreview').innerHTML=
     '<div class="sp-card" style="grid-column:1/-1;font-size:11px;color:var(--ink3);margin-bottom:-2px">'+SCENES[sc].name+' 前 3 道预览：</div>'+
     pool.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+SCENE_COLOR[q.scene]+'">'+LV_NAME[q.lv]+' · '+SCENES[q.scene].name+'</div>'+esc(q.q)+'</div>'}).join('');
 }
-renderTips();renderPreview(S.scene);
+renderPreview(S.scene);
 
-/* URL 场景参数 */
+/* URL 场景参数：把旧 scene 参数映射回大类（job/general 不预选） */
+var SCENE_TO_CAT={tech:'tech',data:'algorithm',product:'product'};
 var qs=new URLSearchParams(location.search);
 if(qs.get('scene')&&SCENES[qs.get('scene')]){S.scene=qs.get('scene');
-  $$('#scOpts .sc-pick').forEach(function(x){x.classList.toggle('on',x.dataset.k===S.scene)});renderPreview(S.scene)}
+  var catId=SCENE_TO_CAT[S.scene];
+  if(catId){selectedCategory=catId;renderJobCats();renderJobSubs();}
+  renderPreview(S.scene)}
+
+var STEPS=4,currentStep=1;
+var typesSynced=false,typesSyncCat=null; /* 记录上次同步的大类，避免重复覆盖用户选择 */
+
+/* 默认选中 + 切大类重置：
+   首次进入或大类变化时清空旧选择，默认勾选「推荐第一项 + 通用第一项」；
+   大类未变（如从 Step 3 返回）直接保留用户手动勾选 */
+function syncTypesForCategory(){
+  if(typesSynced&&typesSyncCat===selectedCategory)return;
+  S.types=[];
+  var rec=recommendTypes(selectedCategory);
+  if(rec.length)S.types.push(rec[0].id);       /* 推荐组第一项 */
+  if(GENERAL_TYPES.length)S.types.push(GENERAL_TYPES[0].id); /* 通用组第一项 */
+  sortTypes();
+  typesSynced=true;typesSyncCat=selectedCategory;
+  renderTypes();renderSummary();
+}
+
+/* Step 4 汇总卡片：随前 3 步选择实时刷新（题型支持多选） */
+function renderSummary(){
+  var box=document.getElementById('wzSummary');
+  if(!box)return;
+  var cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0],
+      tps=availableTypes(selectedCategory).filter(function(o){return S.types.indexOf(o.id)>=0}),
+      md=MODE_OPTS.filter(function(o){return o.k===S.mode})[0]||{};
+  var jobTxt=cat?cat.icon+' '+cat.label+' · '+(selectedSubJob||'不限方向'):'未选择';
+  var typeTxt=tps.length?tps.map(function(o){return o.label}).join('、'):'未选择';
+  box.innerHTML='<div class="ws-h">📋 本次面试设置</div>'+
+    '<div class="ws-row"><span class="ws-k">目标岗位</span><span class="ws-v">'+esc(jobTxt)+'</span></div>'+
+    '<div class="ws-row"><span class="ws-k">面试题型</span><span class="ws-v">'+esc(typeTxt)+'</span></div>'+
+    '<div class="ws-row"><span class="ws-k">作答方式</span><span class="ws-v">'+esc((md.ic?md.ic+' ':'')+(md.t||'未选择'))+'</span></div>';
+}
+
+/* 条件渲染：只显示当前 Step 的面板，并同步进度条 / 底部按钮 */
+function setStep(n,noScroll){
+  currentStep=Math.max(1,Math.min(STEPS,n));
+  $$('#wzPanels .wz-panel').forEach(function(p){
+    p.classList.toggle('on',+p.dataset.step===currentStep);
+  });
+  $$('#wzBar .wz-step').forEach(function(s){
+    var k=+s.dataset.step;
+    s.classList.toggle('on',k===currentStep);
+    s.classList.toggle('done',k<currentStep);
+    if(k===currentStep)s.setAttribute('aria-current','step');else s.removeAttribute('aria-current');
+  });
+  $$('#wzBar .wz-line').forEach(function(l,i){l.classList.toggle('done',i<currentStep-1)});
+  var prev=document.getElementById('wzPrev'),next=document.getElementById('wzNext');
+  prev.classList.toggle('hide',currentStep===1);
+  next.textContent=currentStep===STEPS?'🚀 进入面试间 →':'下一步 →';
+  next.classList.toggle('final',currentStep===STEPS);
+  document.getElementById('wzCount').textContent='第 '+currentStep+' 步 / 共 4 步';
+  if(currentStep===STEPS)renderSummary();
+  if(!noScroll){
+    var card=document.querySelector('#vSetup .setup');
+    if(card)window.scrollTo({top:Math.max(0,card.getBoundingClientRect().top+window.pageYOffset-78),behavior:'smooth'});
+  }
+}
+
+document.getElementById('wzPrev').onclick=function(){
+  if(currentStep>1)setStep(currentStep-1);
+};
+document.getElementById('wzNext').onclick=function(){
+  if(currentStep<STEPS){
+    /* 进入 Step 2 前同步一次：首次进入默认选中推荐第一项 */
+    if(currentStep===1)syncTypesForCategory();
+    setStep(currentStep+1);
+  }else{
+    startInterview();
+  }
+};
+syncTypesForCategory();
+setStep(1,true);
 
 /* 进入会话前的准备：摄像头语音模式需先拿到摄像头/麦克风并确认语音识别可用 */
 function enterSession(done){
@@ -929,7 +1421,7 @@ function bindCamTracks(){
 /* 热身按钮 */
 document.getElementById('warmBtn').onclick=function(){
   if(!canUseFeature())return;
-  var pool=buildPool(S.scene,S.type,S.lv);
+  var pool=buildPool(S.scene,S.types,S.lv);
   S.qs=[pool[Math.floor(Math.random()*pool.length)]];
   S.idx=0;S.recs=[];S.warmup=true;S.sec=999;
   enterSession(function(){
@@ -956,32 +1448,81 @@ function beginWarmView(){
   }
 }
 
-function show(id){$$('.view').forEach(function(v){v.classList.remove('on')});document.getElementById(id).classList.add('on');scrollTo(0,0)}
-
-function buildPool(scene,type,lv){
-  var pool=QUESTIONS.slice();
-  // 类型筛选
-  if(type==='tech'){pool=pool.filter(function(q){return q.scene==='tech'||q.scene==='data'});if(pool.length<3)pool=QUESTIONS.filter(function(q){return q.scene===scene})}
-  else if(type==='hr'){pool=pool.filter(function(q){return q.scene==='job'||q.scene==='general'})}
-  else if(type==='pressure'){// 压力面：选 lv2/3 且偏短的题
-    pool=pool.filter(function(q){return q.lv>=2&&(q.q.length<40||q.lv===3)});if(pool.length<3)pool=QUESTIONS.filter(function(q){return q.scene===scene})}
-  else{// general：按场景
-    pool=pool.filter(function(q){return q.scene===scene})}
-  // 难度筛选
-  if(lv>=1)pool=pool.filter(function(q){return q.lv>=lv});
-  else if(lv===-1)pool=pool.filter(function(q){return q.lv===1});
-  return pool;
+function show(id){
+  $$('.view').forEach(function(v){v.classList.remove('on')});
+  document.getElementById(id).classList.add('on');
+  var wa=document.getElementById('wzActions');
+  if(wa)wa.classList.toggle('on',id==='vSetup'); /* 底部向导操作栏只在设置页显示 */
+  scrollTo(0,0);
 }
-document.getElementById('startBtn').onclick=function(){
+
+/* 题型 → 题库场景映射规则 */
+function buildPool(scene,types,lv){
+  var picked=[];
+
+  // 1. 根据选中的题型，映射到对应的题库场景
+  if(types&&types.length){
+    types.forEach(function(tId){
+      // 通用题型：从 job 和 general 场景找
+      if(['self_intro','behavior','hr_round','reverse_q'].indexOf(tId)>=0){
+        QUESTIONS.forEach(function(q){
+          if((q.scene==='job'||q.scene==='general')&&picked.indexOf(q)<0)picked.push(q);
+        });
+        return;
+      }
+      // 专属题型：查找它属于哪个大类，并映射到 JOB_SCENE
+      var targetCat=null;
+      for(var cat in SPECIFIC_TYPES){
+        if(SPECIFIC_TYPES[cat].some(function(st){return st.id===tId})){
+          targetCat=cat;break;
+        }
+      }
+      var targetScene=JOB_SCENE[targetCat]||scene;
+      // 特殊处理某些题型
+      if(tId==='sql_code')targetScene='data';
+      if(tId==='design_portfolio')targetScene='general';
+      QUESTIONS.forEach(function(q){
+        if(q.scene===targetScene&&picked.indexOf(q)<0)picked.push(q);
+      });
+    });
+  }
+
+  // 2. 兜底：如果没匹配到题，按当前大类场景兜底
+  if(!picked.length){
+    picked=QUESTIONS.filter(function(q){return q.scene===scene});
+  }
+  // 3. 如果题目太少，强行补题
+  if(picked.length<3){
+    QUESTIONS.forEach(function(q){if(q.scene===scene&&picked.indexOf(q)<0)picked.push(q)});
+  }
+  // 4. 难度过滤
+  var pre=picked.slice();
+  if(lv>=1)picked=picked.filter(function(q){return q.lv>=lv});
+  else if(lv===-1)picked=picked.filter(function(q){return q.lv===1});
+  if(!picked.length)picked=pre; // 难度过滤后为空则回退
+  // 5. 压力模式抽题策略：如果有高级题，优先抽高级题
+  if(S.stressMode){
+    var highLv=picked.filter(function(q){return q.lv===3});
+    if(highLv.length>=S.count){
+      picked=highLv; // 全部抽高难度
+    }else if(highLv.length>0){
+      // 保证高难度题优先排前面，后续会被随机打乱
+      picked=highLv.concat(picked.filter(function(q){return q.lv!==3}));
+    }
+  }
+  return picked;
+}
+/* 进入面试间：沿用原「开始」按钮逻辑，供向导 Step 4 的下一步按钮调用 */
+function startInterview(){
   if(!canUseFeature())return;
-  var pool=buildPool(S.scene,S.type,S.lv);
+  var pool=buildPool(S.scene,S.types,S.lv);
   S.qs=shuffle(pool).slice(0,Math.min(S.count,pool.length));
   S.idx=0;S.recs=[];S.t0=Date.now();
   enterSession(function(){
-    toast((S.type==='pressure'?'压力面来了，稳住！':'面试开始，深呼吸，加油！'),'ok');
+    toast('面试开始，深呼吸，加油！','ok');
     nextQ();
   });
-};
+}
 
 var VR={stream:null,mr:null,chunks:[],on:false,timer:null,maxSec:0,remain:0,elapsed:0,autoStopped:false};
 var vrecBtn=document.getElementById('vrecBtn'),vrecBox=document.getElementById('vrecBox'),vrecPrev=document.getElementById('vrecPrev');
@@ -1276,7 +1817,13 @@ function renderFb(q,rec){
   }show('vFb');
 }
 
-function typeName(){var m={general:'综合面试',tech:'技术面',hr:'HR 面',pressure:'压力面'};return m[S.type]||'综合面试'}
+function typeName(){
+  /* 复盘 / 历史记录：从源数据反查当前选中题型名称 */
+  var all=GENERAL_TYPES.slice();
+  JOB_CATEGORIES.forEach(function(c){all=all.concat(SPECIFIC_TYPES[c.id]||[])});
+  var tps=all.filter(function(t){return S.types.indexOf(t.id)>=0});
+  return tps.length?tps.map(function(t){return t.label}).join('、'):'综合面试';
+}
 
 function enterRate(){
   stopCam&&stopCam();
@@ -1348,21 +1895,7 @@ function requestAiReview(){
       return t?{text:t,badge:'云端大模型'}:{text:localReview(),badge:'本地估算'};
     })['catch'](function(){return {text:localReview(),badge:'本地估算'}});
   }
-  var st=storeGet('ivsim_settings',{})||{};
-  if(!st.aiKey)return Promise.resolve({text:localReview(),badge:'本地估算'});
-  var ep=aiEndpoint(st.aiProv||'dashscope');
-  return fetch(ep.url,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+st.aiKey},
-    body:JSON.stringify({model:ep.model,messages:[{role:'system',content:sys},{role:'user',content:prompt}],temperature:.7})
-  }).then(function(resp){
-    if(!resp.ok)return {text:localReview(),badge:'本地估算（接口 '+resp.status+'）'};
-    return resp.json().then(function(d){
-      var t=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
-      var name=st.aiProv==='openai'?'GPT':st.aiProv==='deepseek'?'DeepSeek':'通义千问';
-      return t?{text:t,badge:name}:{text:localReview(),badge:'本地估算'};
-    });
-  })['catch'](function(){return {text:localReview(),badge:'本地估算（请求失败）'}});
+  return Promise.resolve({text:localReview(),badge:'本地估算'});
 }
 document.getElementById('aiReviewBtn').onclick=function(){
   var btn=this,box=document.getElementById('aiReviewBox');
@@ -1549,7 +2082,7 @@ ttsBtn.onclick=function(){
   if(ttsOn){stopSpeak();ttsBtn.textContent='📢 朗读题目';return}
   var qText=lastQ||document.getElementById('qText').textContent||'';
   if(!qText){toast('还没有题目可以朗读','warn');return}
-  speakTTS(qText);ttsBtn.textContent='⏹ 停止朗读';
+  speakTTS(qText,voiceOpt(S.scene));ttsBtn.textContent='⏹ 停止朗读';
   ttsUttr.onend=function(){ttsBtn.textContent='📢 朗读题目'};
 };
 
@@ -1568,7 +2101,10 @@ var animCtrls=document.getElementById('animCtrls');
 var camCtrls=document.getElementById('camCtrls');
 var usRow=document.getElementById('usRow');
 var sceneStage=document.getElementById('sceneStage');
+var sceneFigure=document.getElementById('sceneFigure');
 var sceneImg=document.getElementById('sceneImg');
+var sceneHeadImg=document.getElementById('sceneHeadImg');
+var sceneJawImg=document.getElementById('sceneJawImg');
 var sceneNameEl=document.getElementById('sceneName');
 var ivNameEl=document.getElementById('ivName');
 var ivName2El=document.getElementById('ivName2');
@@ -1598,24 +2134,93 @@ var camHint=document.getElementById('camHint');
 var camSubmit=document.getElementById('camSubmit');
 var vrecLimitSel=document.getElementById('vrecLimit');
 
-/* 岗位 ↔ 场景图：设置页选哪个岗位，动画互动就进哪个房间 */
+/* 岗位 ↔ 场景图：设置页选哪个岗位，动画互动就进哪个房间。
+   face 是该图里人物的脸/下颌百分比坐标（用于只让人物动），voice 是该岗位面试官的音色。 */
 var SCENE_META={
-  job:{img:'assets/scenes/job.svg',room:'求职实习 · HR 办公室',iv:'HR 面试官',role:'校园招聘 · 实习岗'},
-  tech:{img:'assets/scenes/tech.svg',room:'技术开发 · 高端会议室',iv:'技术面试官',role:'技术面 · 项目深挖'},
-  data:{img:'assets/scenes/data.svg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面'},
-  product:{img:'assets/scenes/product.svg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗'},
-  general:{img:'assets/scenes/general.svg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面'}
+  job:{img:'assets/scenes/job.svg',room:'求职实习 · HR 办公室',iv:'HR 面试官',role:'校园招聘 · 实习岗',
+    face:{x:50,y:24.5,rx:10.4,ry:12.6,mouth:29.8,jrx:4.8,jry:2.4,neck:37,zoom:1.24},
+    voice:{gender:'f',pitch:1.1,rate:.97,prefer:['xiaoxiao','晓晓','xiaoyi','晓伊','huihui','yaoyao','慧慧','瑶瑶']}},
+  tech:{img:'assets/scenes/tech.svg',room:'技术开发 · 高端会议室',iv:'技术面试官',role:'技术面 · 项目深挖',
+    face:{x:50,y:22.5,rx:9.4,ry:16.8,mouth:32.2,jrx:4.4,jry:2.6,neck:42.5,zoom:1.15},
+    voice:{gender:'m',pitch:.9,rate:.95,prefer:['yunxi','云希','yunjian','云健','yunyang','云扬','kangkang','康康']}},
+  data:{img:'assets/scenes/data.svg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面',
+    face:{x:50.5,y:25,rx:9.6,ry:17,mouth:35.8,jrx:5,jry:2.7,neck:45,zoom:1.2},
+    voice:{gender:'m',pitch:.82,rate:.88,prefer:['yunjian','云健','kangkang','康康','yunyang','云扬','yunxi','云希']}},
+  product:{img:'assets/scenes/product.svg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗',
+    face:{x:50.5,y:27,rx:9,ry:15,mouth:35.8,jrx:4.4,jry:2.3,neck:44,zoom:1.22},
+    voice:{gender:'m',pitch:1.04,rate:1.05,prefer:['yunyang','云扬','yunxi','云希','yunjian','云健','kangkang','康康']}},
+  general:{img:'assets/scenes/general.svg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面',
+    face:{x:51.5,y:20.3,rx:8.4,ry:14,mouth:26.6,jrx:4.2,jry:2.1,neck:35,zoom:1.18},
+    voice:{gender:'m',pitch:.95,rate:.9,prefer:['yunxia','云夏','yunjian','云健','yunyang','云扬','kangkang','康康']}}
 };
 function preloadScene(k){var m=SCENE_META[k];if(m){var im=new Image();im.src=m.img}}
 function renderScene(){
   var m=SCENE_META[S.scene]||SCENE_META.general;
+  var f=m.face||{};
   if(sceneImg&&sceneImg.getAttribute('data-scene')!==S.scene){
     sceneImg.src=m.img;sceneImg.alt=m.room;sceneImg.setAttribute('data-scene',S.scene);
+    if(sceneHeadImg)sceneHeadImg.src=m.img;
+    if(sceneJawImg)sceneJawImg.src=m.img;
+  }
+  if(sceneFigure){
+    sceneFigure.style.setProperty('--hx',(f.x||50)+'%');
+    sceneFigure.style.setProperty('--hy',(f.y||24)+'%');
+    sceneFigure.style.setProperty('--hrx',(f.rx||10)+'%');
+    sceneFigure.style.setProperty('--hry',(f.ry||13)+'%');
+    sceneFigure.style.setProperty('--necky',(f.neck||38)+'%');
+    sceneFigure.style.setProperty('--jy',(f.mouth||32)+'%');
+    sceneFigure.style.setProperty('--jrx',(f.jrx||6)+'%');
+    sceneFigure.style.setProperty('--jry',(f.jry||4.4)+'%');
+    sceneFigure.style.setProperty('--zoom',f.zoom||1.18);
   }
   if(sceneNameEl)sceneNameEl.textContent=m.room;
   if(ivNameEl)ivNameEl.textContent=m.iv;
   if(ivName2El)ivName2El.textContent=m.iv;
   if(ivRoleEl)ivRoleEl.textContent=m.role;
+}
+
+var jobVoicePick={};
+function zhVoiceList(){
+  if(!canTTS())return [];
+  var vs=window.speechSynthesis.getVoices()||[];
+  var zh=vs.filter(function(v){return /zh|cmn|chinese/i.test((v.lang||'')+' '+(v.name||''))});
+  return zh.length?zh:vs;
+}
+function voiceGender(v){
+  var n=(v.name||'').toLowerCase();
+  if(/xiaoxiao|晓晓|xiaoyi|晓伊|huihui|慧慧|yaoyao|瑶瑶|xiaomo|晓墨|xiaohan|晓涵|xiaoxuan|晓萱|xiaorui|晓睿|xiaoshuang|晓双|yating|亚婷|xiaobei|晓北|xiaoni|晓妮|xiaoyu|晓雨|xiaoman|晓曼|xiaojia|晓佳|xiaozhen|晓臻|female|女/i.test(n))return 'f';
+  if(/yunxi|云希|yunjian|云健|yunyang|云扬|yunkai|云凯|yunye|云野|yunxia|云夏|yunlong|云龙|yunzhe|云哲|kangkang|康康|male|男/i.test(n))return 'm';
+  return '';
+}
+function pickJobVoice(key){
+  if(jobVoicePick[key])return jobVoicePick[key];
+  var m=SCENE_META[key]||SCENE_META.general,vc=m.voice||{},list=zhVoiceList(),v=null,i;
+  for(i=0;i<(vc.prefer||[]).length&&!v;i++){
+    v=list.filter(function(x){return (x.name||'').toLowerCase().indexOf(vc.prefer[i])>=0})[0]||null;
+  }
+  if(!v&&vc.gender)v=list.filter(function(x){return voiceGender(x)===vc.gender})[0]||null;
+  if(!v)v=list[0]||null;
+  if(v){
+    /* 尽量不与已用岗位撞同一个发音人 */
+    var taken={};
+    Object.keys(jobVoicePick).forEach(function(k){if(jobVoicePick[k])taken[jobVoicePick[k].voiceURI]=1});
+    if(taken[v.voiceURI]){
+      var alt=list.filter(function(x){return !taken[x.voiceURI]&&(!vc.gender||voiceGender(x)===vc.gender)})[0];
+      if(alt)v=alt;
+    }
+    jobVoicePick[key]=v;
+  }
+  return v;
+}
+function voiceOpt(key){
+  var vc=(SCENE_META[key]||SCENE_META.general).voice||{};
+  var o={pitch:vc.pitch,rate:vc.rate};
+  var v=pickJobVoice(key);
+  if(v)o.voice=v;
+  return o;
+}
+if(canTTS()){
+  window.speechSynthesis.onvoiceschanged=function(){jobVoicePick={}};
 }
 
 var typeTimer=null;
@@ -1680,7 +2285,7 @@ function aiAsk(q){
   function tryReady(){if(tDone&&sDone)ready()}
   typeBubble('Q'+(S.idx+1)+' · '+q.q,function(){tDone=true;tryReady()});
   if(ttsEnabled()&&canTTS()){
-    speakTTS(q.q);
+    speakTTS(q.q,voiceOpt(S.scene));
     ttsUttr.onend=function(){ttsOn=false;sDone=true;tryReady()};
     ttsUttr.onerror=function(){ttsOn=false;sDone=true;tryReady()};
     /* 兜底：个别浏览器 TTS 不回调 onend，20 秒后强制进入作答状态 */
@@ -1695,7 +2300,7 @@ animTtsBtn.onclick=function(){
   if(!canUseFeature())return;
   if(!canTTS()){toast('浏览器不支持朗读（SpeechSynthesis）','warn');return}
   stopSpeak();aiState('speaking');
-  speakTTS(lastQ);
+  speakTTS(lastQ,voiceOpt(S.scene));
   animTtsBtn.textContent='🔊 朗读中…';
   ttsUttr.onend=function(){
     ttsOn=false;animTtsBtn.textContent='📢 重听题目';
