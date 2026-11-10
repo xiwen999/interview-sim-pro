@@ -1164,13 +1164,13 @@ function miniPop(title,desc){
   m.addEventListener('click',function(e){if(e.target===m){m.classList.remove('show');setTimeout(function(){m.remove()},200)}});
 }
 
-function openFeedback(){
+function openFeedback(defaultMsg){
   var u=getUser()||{};
   var m=openMask(
     '<div class="m-head"><div><h3>📮 反馈给官方</h3><div class="m-sub">遇到问题或有建议？直接发给官方（off），我们会尽快处理</div></div><button class="m-x" id="fbX">✕</button></div>'+
     '<label class="f-lab" for="fbName">你的称呼<span class="req">*</span></label><input class="f-in" id="fbName" placeholder="怎么称呼你" value="'+esc(u.name||'')+'">'+
     '<label class="f-lab" for="fbContact">联系方式<span class="req">*</span></label><input class="f-in" id="fbContact" placeholder="QQ / 邮箱 / 手机号，方便官方回复你">'+
-    '<label class="f-lab" for="fbMsg">问题或建议<span class="req">*</span></label><textarea class="f-ta" id="fbMsg" placeholder="描述你遇到的问题、想增加的功能、或想对官方说的话…"></textarea>'+
+    '<label class="f-lab" for="fbMsg">问题或建议<span class="req">*</span></label><textarea class="f-ta" id="fbMsg" placeholder="描述你遇到的问题、想增加的功能、或想对官方说的话…">'+esc(defaultMsg||'')+'</textarea>'+
     '<button class="btn pri" id="fbSend" style="width:100%;margin-top:18px">发送给官方</button>');
   $('#fbX').onclick=closeMask;
   $('#fbSend').onclick=function(){
@@ -1420,6 +1420,14 @@ function openSettings(){
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+        '<div style="font-weight:700;font-size:14px">🤖 AI 大模型</div>'+
+        '<span id="stAiStat" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-bottom:10px">接入 DeepSeek / 通义 / 智谱 / Kimi 等 OpenAI 兼容接口，面试官追问、评分、简历解析即可用上真实大模型；不配置也能跑本地智能模拟。密钥仅存本机浏览器。</div>'+
+      '<button class="btn gho sm" id="stAiCfg">⚙️ 配置 AI 模型</button>'+
+    '</div>'+
+    '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
         '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
         '<span id="dsStatus" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
       '</div>'+
@@ -1452,6 +1460,16 @@ function openSettings(){
     ['ivsim_userdata','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
     closeMask();toast('本地数据已清空','ok');
   };
+
+  /* AI 大模型配置入口：状态行 + 打开配置弹层 */
+  function paintAiStat(){
+    var s=$('#stAiStat');if(!s)return;
+    var on=typeof CLOUD!=='undefined'&&CLOUD.isConfigured&&CLOUD.isConfigured();
+    s.textContent=on?'已接入 · 真实模型':'本地模拟';
+    s.style.color=on?'#7EE7A7':'var(--ink3)';
+  }
+  paintAiStat();
+  $('#stAiCfg').onclick=function(){ if(typeof openAiSettings==='function'){ closeMask(); openAiSettings(); } };
 
   /* 桌面助手设置 */
   var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
@@ -1503,6 +1521,90 @@ function settingRow(title,desc,btnClass,btnId,btnText){
   return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)">'+
     '<div><div style="font-weight:700;font-size:14px">'+title+'</div><div style="font-size:12px;color:var(--ink3);margin-top:3px">'+desc+'</div></div>'+
     '<button class="'+btnClass+'" id="'+btnId+'">'+btnText+'</button></div>';
+}
+
+function openAiSettings(){
+  var hasCloud=typeof CLOUD!=='undefined';
+  var cfg=hasCloud?CLOUD.getCfg():{};
+  var inpStyle='width:100%;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);font-size:13px;outline:none';
+  var labStyle='display:block;font-size:12px;color:var(--ink3);margin:10px 0 5px;font-weight:600';
+  var presets=hasCloud?CLOUD.PRESETS:[];
+  var body=
+    '<div class="m-head"><div><h3>🤖 AI 大模型配置</h3><div class="m-sub">OpenAI 兼容接口 · 密钥仅保存在本地浏览器</div></div><button class="m-x" id="aiX">✕</button></div>'+
+    '<div id="aiStatLine" style="font-size:12.5px;padding:8px 12px;border-radius:10px;margin-bottom:6px"></div>'+
+    '<div style="font-size:12px;color:var(--ink3);margin-bottom:6px">快速预设（点击自动填充地址与模型）：</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+
+      presets.map(function(p){return '<button class="chip" data-preset="'+esc(p.id)+'">'+esc(p.name)+'</button>'}).join('')+
+    '</div>'+
+    '<label style="'+labStyle+'">接口地址 (Base URL)</label>'+
+    '<input id="aiBase" style="'+inpStyle+'" placeholder="https://api.deepseek.com/v1" value="'+esc(cfg.baseURL||'')+'">'+
+    '<label style="'+labStyle+'">API Key</label>'+
+    '<input id="aiKey" type="password" style="'+inpStyle+'" placeholder="sk-..." value="'+esc(cfg.apiKey||'')+'" autocomplete="off">'+
+    '<label style="'+labStyle+'">模型名 (Model)</label>'+
+    '<input id="aiModel" style="'+inpStyle+'" placeholder="deepseek-chat" value="'+esc(cfg.model||'')+'">'+
+    '<label style="'+labStyle+'">采样温度 (0-2，默认 0.7)</label>'+
+    '<input id="aiTemp" type="number" min="0" max="2" step="0.1" style="'+inpStyle+'" value="'+(cfg.temperature==null?'0.7':cfg.temperature)+'">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:10px 12px;background:rgba(108,140,255,.08);border:1px solid rgba(108,140,255,.3);border-radius:10px">'+
+      '<div><div style="font-size:13px;font-weight:700">启用真实大模型</div><div style="font-size:11.5px;color:var(--ink3)">关闭后强制使用本地智能模拟</div></div>'+
+      '<button class="chip" id="aiEnable">'+(cfg.enabled===false?'已关闭':'已开启')+'</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-top:16px">'+
+      '<button class="btn gho" id="aiTest" style="flex:1">🔌 测试连接</button>'+
+      '<button class="btn pri" id="aiSave" style="flex:1">💾 保存</button>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">支持 DeepSeek / 通义千问(兼容模式) / 智谱 GLM / Kimi / OpenAI 等任意 OpenAI 兼容接口。密钥不会上传，仅在你的浏览器本地调用。</div>';
+  var m=openMask(body);
+  $('#aiX').onclick=closeMask;
+  var enabled=cfg.enabled!==false;
+  function paintStat(){
+    var line=$('#aiStatLine');if(!line)return;
+    if(!hasCloud){line.textContent='⚠️ cloud.js 未加载';line.style.background='rgba(251,113,133,.12)';line.style.color='#fb7185';return}
+    if(CLOUD.isConfigured()){line.textContent='✅ 已接入：'+esc(cfg.model)+' @ '+esc(cfg.baseURL);line.style.background='rgba(126,231,167,.12)';line.style.color='#7EE7A7';}
+    else{line.textContent='⚪ 当前未配置，将使用本地智能模拟（不影响演示）';line.style.background='rgba(255,255,255,.05)';line.style.color='var(--ink3)';}
+  }
+  paintStat();
+  $$('button[data-preset]',m).forEach(function(b){b.onclick=function(){
+    var p=presets.filter(function(x){return x.id===b.dataset.preset})[0];if(!p)return;
+    if(p.base){$('#aiBase').value=p.base}
+    if(p.model){$('#aiModel').value=p.model}
+    $('#aiTemp').value=p.temp;
+    toast('已填充 '+p.name+' 预设，请填入 API Key','ok');
+  }});
+  $('#aiEnable').onclick=function(){enabled=!enabled;this.textContent=enabled?'已开启':'已关闭';this.className='chip '+(enabled?'on':'')};
+  function readCfg(){
+    return{baseURL:$('#aiBase').value.trim(),apiKey:$('#aiKey').value.trim(),model:$('#aiModel').value.trim(),
+      temperature:Math.max(0,Math.min(2,parseFloat($('#aiTemp').value)||0.7)),enabled:enabled};
+  }
+  function refreshMainStat(){
+    var s=$('#stAiStat');if(!s)return;
+    var on=hasCloud&&CLOUD.isConfigured();
+    s.textContent=on?'已接入 · 真实模型':'本地模拟';s.style.color=on?'#7EE7A7':'var(--ink3)';
+  }
+  $('#aiSave').onclick=function(){
+    if(!hasCloud){toast('cloud.js 未加载','warn');return}
+    var c=readCfg();
+    if(c.enabled&&(!c.baseURL||!c.apiKey||!c.model)){toast('启用时需填写地址、Key 和模型','warn');return}
+    CLOUD.setCfg(c);cfg=c;paintStat();refreshMainStat();toast('AI 配置已保存','ok');
+  };
+  $('#aiTest').onclick=function(){
+    if(!hasCloud){toast('cloud.js 未加载','warn');return}
+    var btn=this;if(btn.disabled)return;
+    var c=readCfg();
+    if(!c.baseURL||!c.apiKey||!c.model){toast('请先填写地址、Key 和模型','warn');return}
+    btn.disabled=true;var old=btn.textContent;btn.textContent='测试中…';
+    /* 测试时强制视为已启用，用当前表单值试连（不改变用户的启用开关选择） */
+    CLOUD.setCfg(Object.assign({},c,{enabled:true}));
+    var done=false;
+    var to=setTimeout(function(){if(done)return;done=true;btn.disabled=false;btn.textContent=old;toast('测试超时（15s），请检查地址与网络','warn')},15000);
+    CLOUD.aiText('你是连通性测试助手，只回复两个字：收到。',[{role:'user',content:'请回复：收到'}]).then(function(t){
+      if(done)return;done=true;clearTimeout(to);btn.disabled=false;btn.textContent=old;
+      var ok=!!t&&/收到|ok|success|你好/i.test(t);
+      toast(ok?('✅ 连接成功，模型回复：'+String(t).slice(0,30)):('⚠️ 返回异常：'+String(t).slice(0,30)),ok?'ok':'warn');
+    })['catch'](function(e){
+      if(done)return;done=true;clearTimeout(to);btn.disabled=false;btn.textContent=old;
+      toast('❌ 连接失败：'+((e&&(e.msg||'HTTP '+e.http))||'网络错误'),'warn');
+    });
+  };
 }
 
 /* AGENT_RULES 延迟到成就/签到定义完毕后初始化，见下方 */
@@ -2088,6 +2190,8 @@ var THEME_DARK={
 };
 function applyTheme(){
   var st=storeGet('ivsim_settings',{});var isDark=st.theme!=='light';
+  /* html.light 供 <head> 首帧防闪烁脚本与本函数共用；body.light 驱动详细样式 */
+  document.documentElement.classList.toggle('light',!isDark);
   document.body.classList.toggle('light',!isDark);
   var T=isDark?THEME_DARK:THEME_LIGHT,r=document.documentElement.style;
   for(var k in T)r.setProperty(k,T[k]);

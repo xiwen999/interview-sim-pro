@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>个人中心 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261104b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <style>
 /* 卡片语言 = rgba(255,255,255,.055→.02) 的白色玻璃渐变；背景用完全同源的白色光感，不带彩色色相 */
 body{background:
@@ -21,8 +24,7 @@ body{background:
 .fp-shell::after{content:"";position:absolute;right:-90px;top:-90px;width:360px;height:360px;
   border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(255,255,255,.055),rgba(255,255,255,.02) 46%,transparent 70%)}
-/* 浅色模式适配 */
-body.light{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 42%,#eff4ff 100%)}
+/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{background:linear-gradient(180deg,rgba(37,99,235,.028),transparent 34%,transparent 74%,rgba(37,99,235,.016))}
 body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.5),rgba(255,255,255,.12) 46%,transparent 70%)}
 .pc-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -325,6 +327,7 @@ body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
           <button class="vtab on" data-s="videos">🎬 我的视频</button>
           <button class="vtab" data-s="data">📊 我的数据</button>
           <button class="vtab" data-s="fav">⭐ 我的收藏 <span class="mg-dot" id="favDot" style="display:none"></span></button>
+          <button class="vtab" data-s="weak">🎯 薄弱点本 <span class="mg-dot" id="weakDot" style="display:none"></span></button>
           <button class="vtab" data-s="set">⚙️ 账号设置</button>
         </div>
         <div id="pane"></div>
@@ -333,7 +336,8 @@ body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
   </div>
 </div>
 
-<script src="shared.js?v=20261104b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('videos',true))throw new Error('login required');
 
@@ -480,6 +484,7 @@ function renderSec(){
     pane=host;
     if(SEC==='data')renderData();
     else if(SEC==='fav')renderFav();
+    else if(SEC==='weak')renderWeak();
     else renderSet();
   }
 }
@@ -798,6 +803,45 @@ function renderFav(){
         userSet('favs',list);toast('已取消收藏','warn');renderFav();return;
       }
       location.href='bank.html';
+    };
+  });
+}
+
+function getWeakPoints(){
+  var list=userGet('weak_points',[]);
+  return Object.prototype.toString.call(list)==='[object Array]'?list:[];
+}
+function renderWeak(){
+  var list=getWeakPoints();
+  var dot=document.getElementById('weakDot');
+  if(dot){dot.textContent=list.length||'';dot.style.display=list.length?'inline-block':'none'}
+  if(!list.length){
+    pane.innerHTML=emptyHtml('🎯','还没有沉淀的薄弱点。<br>完成一场面试后，在复盘页点击薄弱知识点即可加入这里');
+    return;
+  }
+  var h='<div class="myc-fav">';
+  list.forEach(function(w,i){
+    h+='<div class="f" data-w="'+esc(w)+'">'+
+      '<div class="ft">🎯 '+esc(w)+'</div>'+
+      '<div class="fm">'+
+        '<button class="btn gho sm" data-practice="'+esc(w)+'" style="margin-left:auto;padding:3px 9px;font-size:var(--fs-xs)">去题库搜练</button>'+
+        '<button class="btn gho sm" data-delweak="'+i+'" style="padding:3px 9px;font-size:var(--fs-xs)">移除</button>'+
+      '</div>'+
+    '</div>';
+  });
+  h+='</div><div class="mg-tip">💡 薄弱点来自每场面试的 AI 复盘，点击「去题库搜练」可在题库中搜索相关题目针对性强化；数据保存在本机浏览器。</div>';
+  pane.innerHTML=h;
+  $$('#pane .myc-fav .f').forEach(function(el){
+    el.onclick=function(e){
+      if(e.target&&e.target.dataset){
+        if(e.target.dataset.delweak!==undefined){
+          var arr=getWeakPoints();arr.splice(parseInt(e.target.dataset.delweak,10),1);
+          userSet('weak_points',arr);toast('已移除','warn');renderWeak();return;
+        }
+        if(e.target.dataset.practice){
+          location.href='bank.html?kw='+encodeURIComponent(e.target.dataset.practice);return;
+        }
+      }
     };
   });
 }

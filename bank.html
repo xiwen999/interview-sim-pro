@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>浏览题库 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261104b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <style>
 body{background:
   radial-gradient(ellipse 80% 50% at 20% -10%,rgba(138,189,255,.12),transparent),
@@ -22,10 +25,35 @@ body{background:
 .fp-shell::after{content:"📚";position:absolute;right:-20px;top:-30px;font-size:180px;opacity:.03;
   transform:rotate(15deg);pointer-events:none;filter:grayscale(.3)}
 @media (max-width:1024px){.fp-shell::after{font-size:120px;right:-10px;top:-20px}}
-/* 浅色模式适配 */
-body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{opacity:.25}
 body.light .fp-shell::after{opacity:.02}
+/* 题库大卡片与页面背景融合：去掉壳体的底色 / 描边 / 投影，让极光背景连续铺满 */
+body.light .fp-shell{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+body.light .fp-shell::before{display:none}
+/* 壳体透明后，题目卡成为唯一的“卡片层”：蓝 → 薄荷的对角渐变呼应页面极光 */
+body.light .q-item{
+  background:
+    linear-gradient(135deg,rgba(108,140,255,.10) 0%,rgba(255,255,255,0) 48%,rgba(45,212,191,.10) 100%),
+    linear-gradient(180deg,#fcfdff 0%,#f4f7fd 100%) !important;
+  border-color:rgba(15,23,42,.11);
+  box-shadow:var(--surface-sh);
+}
+body.light .q-item:hover{border-color:rgba(108,140,255,.38)}
+/* 展开态：渐变稍微加深，提示“这张卡正在被阅读” */
+body.light .q-item.open{
+  background:
+    linear-gradient(135deg,rgba(108,140,255,.15) 0%,rgba(255,255,255,.35) 46%,rgba(45,212,191,.12) 100%),
+    linear-gradient(180deg,#fbfdff 0%,#f2f6fd 100%) !important;
+  border-color:rgba(108,140,255,.30);
+  box-shadow:0 12px 30px -20px rgba(37,99,235,.45),inset 0 1px 0 #fff;
+}
 /* 筛选按钮：对齐 interview 设置页选项风格（JS 仍用 .chip/.on，仅改视觉） */
 .filters .chip{padding:10px 16px;border-radius:13px;font-size:var(--fs-base);font-weight:600;color:var(--ink2);
   background:var(--card);border:1.5px solid var(--line);
@@ -75,6 +103,90 @@ body.light .fp-shell::after{opacity:.02}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* 核心 Tab：🎤 面试题库 / 📝 笔试题库 分段切换（搜索框下方，最醒目） */
+.bk-tabs{display:flex;gap:6px;padding:5px;margin:2px 0 14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;
+  width:fit-content;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.bk-tabs button{display:inline-flex;align-items:center;gap:7px;padding:9px 22px;border-radius:10px;
+  font-size:var(--fs-base);font-weight:700;color:var(--ink3);background:transparent;border:none;cursor:pointer;transition:.18s}
+.bk-tabs button:hover{color:var(--ink)}
+.bk-tabs button.on{color:#fff;background:linear-gradient(135deg,#2dd4bf 0%,#4f6ef0 60%,#6C8CFF 100%);
+  box-shadow:0 6px 18px rgba(79,110,240,.45),inset 0 0 0 1px rgba(255,255,255,.18)}
+
+/* 筛选分栏：用竖线 | 分组（场景 | 难度/收藏），视线瞬间找到维度 */
+.filters-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filters-bar .filters{margin-top:0}
+.fg-sep{width:1px;height:22px;background:var(--line2);opacity:.55;flex:none}
+@media(max-width:560px){.fg-sep{display:none}.filters-bar{gap:6px}}
+
+/* 右上角帮助图标 (?)：hover 才显示使用指南，不占黄金位置 */
+.bk-help{width:34px;height:34px;border-radius:50%;flex:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;
+  color:var(--ink3);background:rgba(255,255,255,.04);border:1px solid var(--line);transition:.18s;position:relative}
+.bk-help:hover,.bk-help:focus{color:var(--ink);border-color:var(--acc);background:rgba(108,140,255,.12);outline:none}
+.bk-help::after{content:"先按目标场景筛选 → 看题先自己口述/作答思路 → 再展开对照考察点与参考要点，差距就是提升点。";
+  position:absolute;right:0;top:calc(100% + 8px);width:268px;padding:10px 12px;border-radius:10px;
+  font-size:var(--fs-xs);font-weight:500;line-height:1.65;color:var(--ink2);text-align:left;
+  background:rgba(13,20,38,.97);border:1px solid var(--line2);
+  box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;visibility:hidden;transform:translateY(-4px);transition:.18s;z-index:90;pointer-events:none}
+.bk-help:hover::after,.bk-help:focus::after{opacity:1;visibility:visible;transform:translateY(0)}
+body.light .bk-help::after{background:#ffffff;color:#334155}
+
+/* 列表行最左侧：极小题型图标（🎤 面试 / 📝 笔试），一眼区分 */
+.q-item .qi-h .qtype-ic{flex:none;font-size:14px;width:26px;height:26px;border-radius:8px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.05);border:1px solid var(--line)}
+
+/* 练这道 / 看解析：蓝色微光边框次要按钮，hover 变亮，增加点击欲望 */
+.qi-practice{background:rgba(108,140,255,.10);border:1px solid rgba(108,140,255,.5);color:#dbe4ff;
+  box-shadow:0 4px 14px -6px rgba(108,140,255,.45);transition:.18s}
+.qi-practice:hover{background:rgba(108,140,255,.22);border-color:rgba(108,140,255,.9);color:#fff;
+  box-shadow:0 0 12px rgba(108,140,255,.45),0 6px 18px -6px rgba(108,140,255,.6);transform:translateY(-1px)}
+
+/* 行内题型小标签（单选/多选/判断/填空/简答），略小于场景标签 */
+.qtype-tag{font-size:var(--fs-2xs)!important;padding:3px 9px!important;border-radius:7px!important;font-weight:700}
+
+/* 收起态内联选项：选择题不展开也能看到 A/B/C/D，缩进对齐题干 */
+.qi-opts{margin:0 20px 14px 48px;display:grid;gap:7px}
+.qi-opts .opt{display:flex;align-items:flex-start;gap:9px;padding:8px 12px;border-radius:9px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:default;transition:.18s}
+.qi-opts .opt:hover{background:rgba(255,255,255,.06);border-color:var(--line2)}
+.qi-opts .opt-k{flex:none;width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:var(--fs-xs);font-weight:800;color:var(--ink2);background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.qi-opts .opt-t{flex:1;min-width:0;font-size:var(--fs-sm);color:var(--ink2);line-height:1.65;padding-top:2px}
+
+/* 正确项：收起态不透露答案，展开（.open）后才高亮为绿色 + 打勾 */
+.qi-opts .opt.is-ans{position:relative}
+.q-item.open .qi-opts .opt.is-ans{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.6);color:#e8fff5}
+.q-item.open .qi-opts .opt.is-ans .opt-t{color:#c8f7e5}
+.q-item.open .qi-opts .opt.is-ans .opt-k{background:linear-gradient(135deg,#34D399,#10B981);color:#06281d;border-color:transparent}
+.q-item.open .qi-opts .opt.is-ans::after{content:"✓";color:#34D399;font-weight:900;margin-left:auto;padding-top:1px}
+
+/* 展开区：笔试正确答案色块（醒目） + 解析排版 */
+.wr-ans{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:11px;margin-bottom:4px;
+  background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(16,185,129,.08));
+  border:1px solid rgba(52,211,153,.45);box-shadow:0 8px 22px -10px rgba(16,185,129,.5)}
+.wr-ans .wr-ans-lab{font-size:var(--fs-sm);font-weight:800;color:#6ee7b7;flex:none}
+.wr-ans .wr-ans-key{font-size:var(--fs-lg);font-weight:900;color:#34D399;letter-spacing:1px}
+.wr-point{font-size:var(--fs-sm);color:var(--ink2);line-height:1.75}
+.ans-box{margin-top:8px}
+.ans-box p{font-size:var(--fs-sm);color:var(--ink2);line-height:1.8;margin:0 0 7px;padding-left:17px;position:relative}
+.ans-box p::before{content:"▸";position:absolute;left:0;color:#34D399}
+
+/* 窄屏：内联选项缩进减小，避免题干区过窄 */
+@media(max-width:480px){.qi-opts{margin:0 14px 12px 14px}}
+
+/* 浅色模式适配 */
+body.light .qi-opts .opt{background:#f8fafc;border-color:#e2e8f0}
+body.light .qi-opts .opt-k{background:#eef2ff;color:#4338ca;border-color:#e0e7ff}
+body.light .qi-opts .opt-t{color:#334155}
+body.light .q-item.open .qi-opts .opt.is-ans{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.55)}
+body.light .q-item.open .qi-opts .opt.is-ans .opt-t{color:#065f46}
+body.light .wr-ans{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.04));border-color:rgba(16,185,129,.4)}
+body.light .wr-ans .wr-ans-lab{color:#047857}
+body.light .wr-ans .wr-ans-key{color:#059669}
+body.light .ans-box p{color:#334155}
 </style>
 </head>
 <body>
@@ -87,39 +199,99 @@ body.light .fp-shell::after{opacity:.02}
         <h1>浏览题库</h1>
         <p class="fp-sub">按场景与难度筛选高频真题，展开查看考察点、作答技巧与参考要点；遇到好题点 ⭐ 收藏。</p>
       </div>
-      <div class="fp-acts"><button class="btn pri sm" onclick="location.href='interview.html'">🎤 去练一场</button></div>
-    </div>
-    <div class="fp-tip">
-      <span class="fp-tip-ic">💡</span>
-      <div style="flex:1">
-        <div class="fp-tip-t">怎么用题库最高效？</div>
-        <div class="fp-tip-d">先按目标场景筛选 → 看题先自己口述思路 → 再展开对照考察点与参考要点，差距就是提升点。</div>
+      <div class="fp-acts">
+        <button type="button" class="bk-help" id="bkHelp" aria-label="使用指南" tabindex="0">?</button>
+        <button class="btn pri sm" onclick="location.href='interview.html'">🎤 去练一场</button>
       </div>
     </div>
     <div class="toolbar">
-      <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 留存…" aria-label="搜索题目关键词"></div>
-      <div class="filters" id="scFilter"></div>
-      <div class="filters" style="margin-top:8px" id="lvFilter"></div>
+      <div class="search-box"><span id="srchIc"></span><input id="kw" placeholder="搜索题目关键词，如：自我介绍 / 数据倾斜 / 两数之和…" aria-label="搜索题目关键词"></div>
+      <div class="bk-tabs" id="bkTabs" role="tablist"></div>
+      <div class="filters-bar">
+        <div class="filters" id="scFilter"></div>
+        <span class="fg-sep" aria-hidden="true"></span>
+        <div class="filters" id="lvFilter"></div>
+      </div>
     </div>
     <div class="count-line" id="cntLine"></div>
     <div id="list" class="d1"></div>
   </div>
 </div>
 
-<script src="shared.js?v=20261104b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('bank',true))throw new Error('login required');
 /* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
 seedStars('bkStars1',700,1,60);seedStars('bkStars2',200,2,120);seedStars('bkStars3',100,3,180);
 document.getElementById('srchIc').innerHTML=ICONS.search;
 
-var F={scene:'all',lv:0,kw:'',fav:false};
+var WRITTEN_SCENES = {
+  fe:{id:'fe',name:'前端笔试',desc:'HTML / CSS / JavaScript 基础与高频笔试题'},
+  algo:{id:'algo',name:'算法笔试',desc:'数据结构 / 算法 / 复杂度 高频笔试题'},
+  xingce:{id:'xingce',name:'行测 / 综合',desc:'言语理解 / 数量关系 / 逻辑推理 行测题'}
+};
+var WRITTEN_COLOR = {fe:'#60A5FA',algo:'#34D399',xingce:'#F472B6'};
+/* 笔试题型：单选 / 多选 / 判断 / 填空 / 简答，配一个识别色做行内小标签 */
+var WR_QTYPE = {
+  single:{name:'单选',color:'#60A5FA'},
+  multiple:{name:'多选',color:'#F472B6'},
+  judge:{name:'判断',color:'#FBBF24'},
+  fill:{name:'填空',color:'#34D399'},
+  short:{name:'简答',color:'#A78BFA'}
+};
+var WRITTEN_QUESTIONS = [
+  {id:'wfe1',scene:'fe',lv:1,qtype:'single',q:'关于 CSS 盒模型，下列说法正确的是？',options:[{k:'A',t:'标准盒模型（content-box）的 width 包含 padding 和 border'},{k:'B',t:'IE 盒模型（border-box）的 width 包含 content、padding 和 border'},{k:'C',t:'margin 会影响元素自身的背景色显示范围'},{k:'D',t:'box-sizing 的默认值是 border-box'}],answer:'B',point:'考察 CSS 盒模型与 box-sizing 的理解。',tips:['从 content/padding/border/margin 四层讲起','对比 width 包含范围的差异','提到 box-sizing:border-box 的常见用法'],ans:['标准盒模型（content-box）：width 只包含 content，padding 和 border 会额外撑大元素。','IE 盒模型（border-box）：width 包含 content + padding + border，布局更可控，常全局设置 *{box-sizing:border-box}。','margin 是盒模型最外层，不影响元素自身背景，只影响与其他元素的间距；box-sizing 默认值是 content-box。']},
+  {id:'wfe2',scene:'fe',lv:2,qtype:'single',q:'关于 JavaScript 事件循环，下列执行顺序正确的是？',options:[{k:'A',t:'同步代码 → 取一个宏任务 → 清空所有微任务'},{k:'B',t:'同步代码 → 清空所有微任务 → 取一个宏任务 → 再清空微任务'},{k:'C',t:'微任务全部执行完才开始执行同步代码'},{k:'D',t:'setTimeout 的回调属于微任务'}],answer:'B',point:'考察 JS 异步机制，前端高频题。',tips:['先讲调用栈与任务队列','区分宏/微任务及执行顺序','举 setTimeout + Promise 的例子'],ans:['JS 单线程，通过事件循环处理异步：调用栈先执行同步代码，异步任务完成后进入任务队列。','宏任务：setTimeout、setInterval、I/O、UI 渲染；微任务：Promise.then、MutationObserver、queueMicrotask。','顺序：同步代码 → 清空所有微任务 → 取一个宏任务执行 → 再清空微任务，循环往复。']},
+  {id:'wfe3',scene:'fe',lv:2,qtype:'short',q:'什么是闭包（closure）？请举一个实际应用场景。',answer:'闭包 = 函数与其词法作用域的组合，外层函数执行完后内部函数仍可访问外层变量。',point:'考察作用域与闭包，前端核心概念。',tips:['定义：函数与其词法作用域的组合','说明能访问外层函数变量','举防抖/节流或模块化例子'],ans:['闭包是函数与其词法作用域的组合，外层函数执行完后，内部函数仍能访问外层变量。','应用：防抖/节流用闭包保存定时器 id；函数柯里化；模块化封装私有变量。','注意：闭包持有外层变量引用，滥用可能导致内存泄漏。']},
+  {id:'wfe4',scene:'fe',lv:1,qtype:'short',q:'HTML5 新增了哪些常用语义化标签？为什么要用语义化标签？',answer:'header/nav/main/section/article/aside/footer 等；利于 SEO 与屏幕阅读器理解。',point:'考察 HTML 基础与可访问性意识。',tips:['列举 header/nav/main/section/article/aside/footer','说明对 SEO 和读屏器的好处','对比 div 的无语义问题'],ans:['常用语义化标签：<header>、<nav>、<main>、<section>、<article>、<aside>、<footer>、<figure> 等。','好处：结构清晰利于 SEO；便于读屏器等辅助技术理解页面；代码可读性更好。']},
+  {id:'wfe5',scene:'fe',lv:3,qtype:'short',q:'请解释浏览器输入 URL 到页面渲染的完整过程。',answer:'DNS 解析 → TCP 连接 → HTTP 请求/响应 → 构建 DOM/CSSOM → 渲染树 → 布局绘制 → 合成。',point:'考察网络与渲染原理，前端综合题。',tips:['按 DNS→TCP→HTTP→解析→渲染 链路讲','提到关键渲染路径','不要漏掉回流与重绘'],ans:['1) DNS 解析域名到 IP；2) 建立 TCP 连接（三次握手）；3) 发送 HTTP 请求，服务器返回 HTML；4) 解析 HTML 构建 DOM，解析 CSS 构建 CSSOM；5) 合并为渲染树，布局（回流）与绘制；6) 合成图层显示。']},
+  {id:'wfe6',scene:'fe',lv:2,qtype:'single',q:'关于列表渲染中 key 的作用，下列说法错误的是？',options:[{k:'A',t:'key 是虚拟 DOM 节点的唯一标识，用于 diff 对比'},{k:'B',t:'没有 key 时可能按位置复用错误的节点状态'},{k:'C',t:'用数组下标 index 当 key 永远是最安全的做法'},{k:'D',t:'应使用稳定且唯一的 id 作为 key'}],answer:'C',point:'考察虚拟 DOM diff 算法理解。',tips:['key 是节点的唯一标识','对比有无 key 时 diff 的差异','提醒不要用 index 当 key'],ans:['key 是虚拟 DOM 节点的唯一标识，用于 diff 算法高效对比新旧节点，判断哪些可复用、哪些需增删。','没有 key 时按位置对比，可能复用错误的节点状态（如输入框内容错位）。','用数组 index 当 key 并不安全：列表顺序变化时 index 会变，可能导致错误复用，应使用稳定唯一的 id。']},
+  {id:'wal1',scene:'algo',lv:1,qtype:'short',q:'实现一个函数，判断一个字符串是否为回文串。',answer:'左右双指针从两端向中间逼近，跳过非字母数字、忽略大小写比较；时间 O(n)，空间 O(1)。',point:'考察字符串处理与双指针基础。',tips:['考虑过滤非字母数字、忽略大小写','双指针从两端向中间逼近','时间复杂度 O(n)'],ans:['用左右双指针指向首尾，跳过非字母数字字符，比较两端（忽略大小写），相等则向中间移动直到相遇。','时间复杂度 O(n)，空间复杂度 O(1)。注意大小写归一化与字符过滤。']},
+  {id:'wal2',scene:'algo',lv:2,qtype:'single',q:'两数之和问题（返回两数下标），用哈希表优化后的时间复杂度是？',options:[{k:'A',t:'O(n²)'},{k:'B',t:'O(n log n)'},{k:'C',t:'O(n)'},{k:'D',t:'O(log n)'}],answer:'C',point:'考察哈希表优化，LeetCode 第一题。',tips:['暴力 O(n²)，用哈希表降到 O(n)','遍历查 map 中是否已有 target-nums[i]','边遍历边存，一次完成'],ans:['用哈希表记录已遍历数字及下标：遍历到 nums[i] 时算 need = target - nums[i]，若 map 已有 need 则返回 [map[need], i]，否则存入 nums[i]。','只遍历一遍数组，每次哈希查询 O(1)，故时间复杂度 O(n)，空间复杂度 O(n)。']},
+  {id:'wal3',scene:'algo',lv:2,qtype:'single',q:'二分查找的时间复杂度是？',options:[{k:'A',t:'O(n)'},{k:'B',t:'O(n²)'},{k:'C',t:'O(log n)'},{k:'D',t:'O(1)'}],answer:'C',point:'考察算法分析基础。',tips:['随输入规模 n 增长的趋势','大 O 表示法取最高阶、忽略常数','每次比较后搜索区间减半'],ans:['二分查找每次比较都把搜索区间缩小一半，递推式 T(n)=T(n/2)+O(1)，故时间复杂度为 O(log n)。']},
+  {id:'wal4',scene:'algo',lv:2,qtype:'single',q:'下列排序算法中，属于稳定排序的是？',options:[{k:'A',t:'快速排序'},{k:'B',t:'堆排序'},{k:'C',t:'选择排序'},{k:'D',t:'归并排序'}],answer:'D',point:'考察排序算法基础。',tips:['列各排序的复杂度','稳定=相等元素相对顺序不变','快排不稳定，归并/冒泡/插入稳定'],ans:['稳定排序指相等元素排序后相对顺序不变。冒泡、插入、归并是稳定排序；选择、快排、堆排不稳定。']},
+  {id:'wal5',scene:'algo',lv:3,qtype:'short',q:'如何反转一个单链表？写出递归与迭代两种思路。',answer:'迭代用三指针 pre/cur/next 逐步翻转；递归到尾节点后回溯翻转指针；注意空链表与单节点边界。',point:'考察链表操作，高频题。',tips:['迭代：三指针 pre/cur/next 翻转','递归：先到尾再回溯翻转','注意空链表和单节点边界'],ans:['迭代：用 pre、cur、next 三指针，循环保存 next，将 cur.next 指向 pre，再 pre=cur、cur=next 直到 cur 为空。','递归：递归到最后一个节点作新头，回溯时 head.next.next = head，head.next = null。注意空链表/单节点直接返回。']},
+  {id:'wal6',scene:'algo',lv:3,qtype:'single',q:'中序遍历一棵二叉搜索树，得到的序列是？',options:[{k:'A',t:'随机顺序'},{k:'B',t:'降序序列'},{k:'C',t:'升序序列'},{k:'D',t:'层序序列'}],answer:'C',point:'考察二叉树遍历基础。',tips:['前序：根→左→右','中序：左→根→右','二叉搜索树左小右大'],ans:['中序遍历顺序为 左子树 → 根 → 右子树；二叉搜索树满足左 < 根 < 右，因此中序遍历得到升序序列。']},
+  {id:'wx1',scene:'xingce',lv:1,qtype:'single',q:'言语理解：选择最恰当的词语填空——"他的讲话内容空洞，毫无新意，实在令人 ____。"',options:[{k:'A',t:'乏味'},{k:'B',t:'兴奋'},{k:'C',t:'动容'},{k:'D',t:'振奋'}],answer:'A',point:'考察词语辨析与语境理解。',tips:['分析语境为负面评价','辨析选项语义轻重与搭配','"乏味"最贴合'],ans:['语境是对讲话的负面评价，"乏味"指缺乏趣味，与"内容空洞、毫无新意"最匹配；其余三个均为正面或积极情绪，与语境矛盾。']},
+  {id:'wx2',scene:'xingce',lv:2,qtype:'single',q:'数量关系：一项工程甲单独做 12 天完成，乙单独做 18 天完成，两人合作几天完成？',options:[{k:'A',t:'6 天'},{k:'B',t:'7.2 天'},{k:'C',t:'9 天'},{k:'D',t:'15 天'}],answer:'B',point:'考察工程问题，设总工程量为 1。',tips:['甲效率 1/12，乙效率 1/18','合作效率相加','总量 1 除以合作效率'],ans:['设总工程量为 1，合作效率 = 1/12 + 1/18 = 5/36，合作时间 = 1 ÷ (5/36) = 7.2 天。']},
+  {id:'wx3',scene:'xingce',lv:2,qtype:'judge',q:'逻辑推理：所有玫瑰都是花，有些花很快凋谢，所以有些玫瑰很快凋谢。这个推理是否正确？',options:[{k:'A',t:'正确'},{k:'B',t:'错误'}],answer:'B',point:'考察三段论逻辑。',tips:['分析中项"花"是否周延','"有些花"推不出"有些玫瑰"','犯中项不周延错误'],ans:['不正确。三段论中项"花"在两个前提中都不周延，无法建立玫瑰与"很快凋谢"的必然联系，犯了"中项不周延"的逻辑错误。']},
+  {id:'wx4',scene:'xingce',lv:1,qtype:'single',q:'资料分析：某公司今年营收 1200 万，同比增长 20%，去年营收是多少？',options:[{k:'A',t:'960 万'},{k:'B',t:'1000 万'},{k:'C',t:'1080 万'},{k:'D',t:'1440 万'}],answer:'B',point:'考察基期量计算。',tips:['基期 = 现期 ÷ (1+增长率)','1200 ÷ 1.2','结果 1000 万'],ans:['基期量 = 现期量 ÷ (1+增长率) = 1200 ÷ 1.2 = 1000 万。']},
+  {id:'wx5',scene:'xingce',lv:3,qtype:'single',q:'数字推理：找规律——2, 6, 12, 20, 30, ( ? )',options:[{k:'A',t:'36'},{k:'B',t:'40'},{k:'C',t:'42'},{k:'D',t:'44'}],answer:'C',point:'考察数字推理。',tips:['相邻差：4,6,8,10','差是公差 2 的等差','下一个差 12，填 42'],ans:['相邻差依次为 4、6、8、10，是公差 2 的等差数列，下一个差为 12，括号填 30+12 = 42。']},
+  {id:'wx6',scene:'xingce',lv:2,qtype:'single',q:'定义判断："鲶鱼效应"指引入强者激活群体，下列哪项最能体现该效应？',options:[{k:'A',t:'公司给全体员工统一涨薪 5%'},{k:'B',t:'团队引入一名业绩顶尖的新人，老员工紧迫感增强、整体效率提升'},{k:'C',t:'部门取消考勤制度'},{k:'D',t:'公司更换了办公场地'}],answer:'B',point:'考察定义理解与应用。',tips:['抓核心：引入强者→激活群体','逐项对照核心','选符合外部刺激激活内部的'],ans:['紧扣核心：通过引入外部强者/竞争刺激原有群体变活跃。B 项"引入顶尖新人→老员工紧迫感增强、效率提升"完全符合；其余选项均不涉及"引入强者激活群体"。']}
+];
 
-/* 场景筛选 */
-var scF=document.getElementById('scFilter');
-scF.innerHTML='<button class="chip on" data-k="all">全部场景</button>'+Object.keys(SCENES).map(function(k){
-  return '<button class="chip" data-k="'+k+'"><span style="width:8px;height:8px;border-radius:50%;background:'+SCENE_COLOR[k]+'"></span>'+SCENES[k].name+'</button>'}).join('');
-$$('#scFilter .chip').forEach(function(b){b.onclick=function(){F.scene=b.dataset.k;$$('#scFilter .chip').forEach(function(x){x.classList.toggle('on',x===b)});render()}});
+/* Tab 注册表：面试 / 笔试 各自的场景、配色、题目（单一数据源，render 从 activeBank 取） */
+var BANK_TABS = {
+  iv:{icon:'🎤',name:'面试题库',scenes:SCENES,color:SCENE_COLOR,list:QUESTIONS},
+  wr:{icon:'📝',name:'笔试题库',scenes:WRITTEN_SCENES,color:WRITTEN_COLOR,list:WRITTEN_QUESTIONS}
+};
+function activeBank(){return BANK_TABS[F.type]||BANK_TABS.iv}
+
+var F={type:'iv',scene:'all',lv:0,kw:'',fav:false};
+
+/* 核心 Tab + 场景筛选（随当前 Tab 联动重建：面试→5 大场景，笔试→前端/算法/行测） */
+function renderTabs(){
+  var box=document.getElementById('bkTabs');
+  box.innerHTML=Object.keys(BANK_TABS).map(function(k){
+    var t=BANK_TABS[k];
+    return '<button type="button" class="bk-tab'+(k===F.type?' on':'')+'" data-k="'+k+'" role="tab">'+t.icon+' '+t.name+'</button>';
+  }).join('');
+  $$('#bkTabs .bk-tab').forEach(function(b){b.onclick=function(){
+    if(b.dataset.k===F.type)return;
+    F.type=b.dataset.k;F.scene='all';
+    $$('#bkTabs .bk-tab').forEach(function(x){x.classList.toggle('on',x===b)});
+    renderScenes();render();
+  }});
+}
+function renderScenes(){
+  var bank=activeBank();
+  var scF=document.getElementById('scFilter');
+  scF.innerHTML='<button class="chip on" data-k="all">全部场景</button>'+Object.keys(bank.scenes).map(function(k){
+    return '<button class="chip" data-k="'+k+'"><span style="width:8px;height:8px;border-radius:50%;background:'+bank.color[k]+'"></span>'+bank.scenes[k].name+'</button>'}).join('');
+  $$('#scFilter .chip').forEach(function(b){b.onclick=function(){F.scene=b.dataset.k;$$('#scFilter .chip').forEach(function(x){x.classList.toggle('on',x===b)});render()}});
+}
+renderTabs();renderScenes();
 
 /* 难度筛选 */
 var lvF=document.getElementById('lvFilter');
@@ -136,39 +308,85 @@ document.getElementById('kw').addEventListener('input',function(){
   kwTimer=setTimeout(function(){F.kw=v;render()},200); /* 200ms debounce，避免每敲一个字就全量重渲染 */
 });
 
+/* 支持从 URL 带入搜索词/场景（薄弱点本「去题库搜练」、首页跳转等），自动填充并筛选 */
+(function(){
+  try{
+    var p=new URLSearchParams(location.search);
+    var kw=p.get('kw');if(kw){F.kw=kw;document.getElementById('kw').value=kw}
+    var sc=p.get('scene');if(sc&&SCENES[sc]){
+      F.scene=sc;
+      $$('#scFilter .chip').forEach(function(x){x.classList.toggle('on',x.dataset.k===sc)});
+    }
+  }catch(e){}
+})();
+
 function render(){
-  var favs=getFavs();
-  var list=QUESTIONS.filter(function(q){
+  var bank=activeBank();
+  var isWr=F.type==='wr';
+  var favCnt=bank.list.filter(function(q){return isFav(q.id)}).length;
+  var list=bank.list.filter(function(q){
     if(F.scene!=='all'&&q.scene!==F.scene)return false;
     if(F.lv&&q.lv!==F.lv)return false;
     if(F.kw&&q.q.toLowerCase().indexOf(F.kw.toLowerCase())<0)return false;
     if(F.fav&&!isFav(q.id))return false;
     return true;
   });
-  document.getElementById('cntLine').textContent='共 '+list.length+' 道题 · 已收藏 '+favs.length+' 道';
+  document.getElementById('cntLine').textContent='共 '+list.length+' 道题 · 已收藏 '+favCnt+' 道';
   if(!list.length){document.getElementById('list').innerHTML='<div class="empty"><span class="e-ic">🔍</span>'+(F.fav?'还没有收藏的题目，点 ⭐ 收藏喜欢的题':'没有匹配的题目，换个关键词或筛选条件试试')+'</div>';return}
   document.getElementById('list').innerHTML=list.map(function(q,i){
     var favIcon=isFav(q.id)?'⭐':'☆';
+    var practiceBtn=isWr
+      ? '<button class="qi-practice" data-wr="1">看解析 →</button>'
+      : '<button class="qi-practice" data-s="'+q.scene+'">练这道 →</button>';
+    /* 题型小标签（笔试：单选/多选/判断/填空/简答） */
+    var qtTag='';
+    if(isWr){var qt=WR_QTYPE[q.qtype]||WR_QTYPE.short;qtTag='<span class="tag qtype-tag" style="background:'+qt.color+'22;color:'+qt.color+';flex:none">'+qt.name+'</span>'}
+    /* 收起态内联展示选项（笔试选择题：不展开也能看到 A/B/C/D） */
+    var optsHtml='';
+    if(isWr&&q.options&&q.options.length){
+      var isAns=function(k){return Array.isArray(q.answer)?q.answer.indexOf(k)>=0:q.answer===k};
+      optsHtml='<div class="qi-opts">'+q.options.map(function(o){
+        return '<div class="opt'+(isAns(o.k)?' is-ans':'')+'" data-k="'+o.k+'"><span class="opt-k">'+o.k+'</span><span class="opt-t">'+esc(o.t)+'</span></div>';
+      }).join('')+'</div>';
+    }
+    /* 展开区：笔试用「正确答案 + 解析」语义；面试保持「考察点/技巧/参考要点」 */
+    var bodyHtml;
+    if(isWr){
+      var ansKey=Array.isArray(q.answer)?q.answer.join('、'):q.answer;
+      bodyHtml='<div class="wr-ans"><span class="wr-ans-lab">✅ 正确答案</span><span class="wr-ans-key">'+esc(ansKey)+'</span></div>'+
+        '<h5>💡 解析</h5>'+
+        '<div class="wr-point">'+esc(q.point)+'</div>'+
+        (q.tips&&q.tips.length?'<ul class="tip">'+q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>':'')+
+        (q.ans&&q.ans.length?'<div class="ans-box">'+q.ans.map(function(a){return '<p>'+esc(a)+'</p>'}).join('')+'</div>':'');
+    }else{
+      bodyHtml='<h5>🎯 考察点</h5><div style="font-size:13px;color:var(--ink2);line-height:1.7">'+esc(q.point)+'</div>'+
+        '<h5>💡 作答技巧</h5><ul class="tip">'+q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'+
+        '<h5>✅ 参考要点</h5><ul class="ans">'+q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('')+'</ul>';
+    }
     return '<div class="q-item" data-id="'+q.id+'">'+
       '<div class="qi-h">'+
-        '<span class="tag" style="background:'+SCENE_COLOR[q.scene]+'22;color:'+SCENE_COLOR[q.scene]+';flex:none">'+SCENES[q.scene].name+'</span>'+
+        '<span class="qtype-ic" title="'+(isWr?'笔试题':'面试题')+'">'+bank.icon+'</span>'+
+        '<span class="tag" style="background:'+bank.color[q.scene]+'22;color:'+bank.color[q.scene]+';flex:none">'+bank.scenes[q.scene].name+'</span>'+
+        qtTag+
         '<span class="qt">'+esc(q.q)+'</span>'+
         '<button class="qi-fav txA" data-id="'+q.id+'" title="收藏/取消" style="font-size:16px;padding:6px 8px;border-radius:8px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);cursor:pointer">'+favIcon+'</button>'+
         '<span class="tag txB2" style="background:rgba(108,140,255,.13);flex:none">'+LV_NAME[q.lv]+'</span>'+
-        '<button class="qi-practice" data-s="'+q.scene+'">练这道 →</button>'+
+        practiceBtn+
         '<span class="chev">'+ICONS.chev+'</span>'+
       '</div>'+
-      '<div class="qi-b">'+
-        '<h5>🎯 考察点</h5><div style="font-size:13px;color:var(--ink2);line-height:1.7">'+esc(q.point)+'</div>'+
-        '<h5>💡 作答技巧</h5><ul class="tip">'+q.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'+
-        '<h5>✅ 参考要点</h5><ul class="ans">'+q.ans.map(function(a){return '<li>'+esc(a)+'</li>'}).join('')+'</ul>'+
-      '</div></div>';
+      optsHtml+
+      '<div class="qi-b">'+bodyHtml+'</div></div>';
   }).join('');
   $$('#list .qi-h').forEach(function(h){h.addEventListener('click',function(e){
     if(e.target.classList.contains('qi-practice')||e.target.classList.contains('qi-fav'))return;
     h.parentNode.classList.toggle('open')})});
-  /* 练题 / 收藏属于功能，游客需先登录（看题、搜题、展开要点照常开放） */
-  $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){e.stopPropagation();if(!canUseFeature())return;location.href='interview.html?scene='+b.dataset.s}});
+  /* 点击选项不触发展开（仅阅读题干与选项）；看解析/收藏属于功能，游客需先登录 */
+  $$('#list .qi-opts').forEach(function(o){o.addEventListener('click',function(e){e.stopPropagation()})});
+  $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){
+    e.stopPropagation();
+    if(b.dataset.wr){b.closest('.q-item').classList.toggle('open');return}   /* 笔试：直接展开解析 */
+    if(!canUseFeature())return;location.href='interview.html?scene='+b.dataset.s
+  }});
   $$('#list .qi-fav').forEach(function(b){b.onclick=function(e){e.stopPropagation();if(!canUseFeature())return;toggleFav(b.dataset.id);render()}});
 }
 render();

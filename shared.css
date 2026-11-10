@@ -26,6 +26,19 @@
   --g-wide:clamp(240px,26vw,320px);
   --g-opt:clamp(80px,8vw,110px);
 }
+/* ---- 首帧防闪烁：各页 <head> 内联脚本会在首次绘制前把已保存的主题挂到
+   <html class="light">，这里先为浅色定好底色与核心变量（值镜像 THEME_LIGHT），
+   避免切页 / 刷新时先闪一下深色默认底 #0a1020。卡片等细节仍由 body.light
+   （shared.js applyTheme 执行后）接管；applyTheme 会在 <html> 写内联变量，
+   优先级高于本 class 规则，二者不冲突。 */
+html.light{
+  --bgA:#ffffff;--bgB:#eef3ff;--bgC:#f6f8ff;
+  --ink:#0f172a;--ink2:#37435e;--ink3:#57637d;
+  --acc:#2563eb;--acc2:#0d9488;--warn:#b45309;
+  --card:#ffffff;--card2:#f2f5fb;
+  --line:rgba(15,23,42,.14);--line2:rgba(15,23,42,.26);--hair:rgba(15,23,42,.12);
+}
+html.light body{background:#ffffff !important;color:#0f172a !important}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%}
 body{
@@ -436,30 +449,45 @@ body.light{
   --card:rgba(15,23,42,.035); --card2:rgba(15,23,42,.06);
   --line:rgba(15,23,42,.18); --line2:rgba(15,23,42,.3);
   --hair:rgba(15,23,42,.12);
+  /* 卡片表面：比纯白低 3%~4% 的雾面蓝白，避免在白底页面上“发光” */
+  --surface:linear-gradient(180deg,#fcfdff 0%,#f4f7fd 100%);
+  --surface-bd:rgba(15,23,42,.10);
+  --surface-sh:0 10px 26px -18px rgba(15,23,42,.30),inset 0 1px 0 #fff;
   background:#ffffff !important;
   color:#0f172a !important;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   text-rendering:optimizeLegibility;
 }
-/* 背景：白底 + 极淡冷色渐变，保留一点层次但不发灰 */
+/* 层次由下至上：冷白纸底 → 三团低饱和极光（蓝紫 / 薄荷 / 暖沙）
+   → 中心点阵 → 边缘柔化暗角，整体保持明度，卡片仍是纯白主角。 */
 body.light .bg-fx{
-  background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%) !important;
+  /* 4. 边缘暗角：把视线收拢到内容区，避免大面积纯白"飘" */
+  background:
+  radial-gradient(140% 110% at 50% 42%, transparent 56%, rgba(15,23,42,.045) 100%),
+  /* 3. 底部暖沙：中和蓝调的冷感，落笔接近脚踝 */
+  radial-gradient(1300px 820px at 52% 104%, rgba(244,162,97,.13), transparent 66%),
+  /* 2. 右上薄荷：与品牌青呼应 */
+  radial-gradient(920px 580px at 94% 3%, rgba(13,148,136,.08), transparent 60%),
+  /* 1. 左上蓝紫：主光源，和深色主题的极光同源 */
+  radial-gradient(1150px 700px at 6% -8%, rgba(37,99,235,.10), transparent 62%),
+  /* 0. 纸底：白下浅蓝，给页面一个轻微的重心 */
+  linear-gradient(180deg, #ffffff 0%, #fdfeff 32%, #f8fbff 66%, #eef4fb 100%) !important;
 }
-body.light .bg-fx .blob{opacity:.14;mix-blend-mode:normal;filter:blur(120px)}
-body.light .bg-fx .grid{opacity:.05;
-  background-image:linear-gradient(rgba(15,23,42,.5) 1px,transparent 1px),
-  linear-gradient(90deg,rgba(15,23,42,.5) 1px,transparent 1px)}
+/* 三团极光：大半径 + 高模糊，只留下颜色氛围，不出现边界 */
+body.light .bg-fx .blob{opacity:.62;mix-blend-mode:normal;filter:blur(150px)}
+body.light .bg-fx .b1{background:#c3d4ff;top:-26%;left:-16%}
+body.light .bg-fx .b2{background:#b8ede0;bottom:-30%;right:-18%}
+body.light .bg-fx .b3{background:#ffdedcc0;top:36%;left:48%;width:38vmax;height:38vmax}
+/* 细点阵：比方格更细腻，中心可见、四周淡出，形成聚焦焦虚。 */
+body.light .bg-fx .grid{opacity:.55;
+  background-image:radial-gradient(rgba(15,23,42,.26) 1px,transparent 1.2px);
+  background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(ellipse 82% 92% at 50% 46%,#000 10%,rgba(0,0,0,.42) 60%,transparent 94%);
+  mask-image:radial-gradient(ellipse 82% 92% at 50% 46%,#000 10%,rgba(0,0,0,.42) 60%,transparent 94%)}
 body.light .starlayer{display:none !important}
 
 body.light .card,
-body.light .modal,
-body.light .agent-panel,
-body.light .agent-head,
-body.light .mini-pop,
-body.light .quick-bar-btn,
-body.light .fp-shell,
-body.light .fp-panel,
 body.light .vcard,
 body.light .q-item,
 body.light .up-card,
@@ -469,7 +497,6 @@ body.light .myc-hero,
 body.light .myc-card,
 body.light .myc-rows,
 body.light .myc-abtn,
-body.light .myc-fav .f,
 body.light .myc-gate,
 body.light .pf-block,
 body.light .pf-badge,
@@ -482,6 +509,20 @@ body.light .flip-f,
 body.light .persona-result,
 body.light .ch-day,
 body.light .ch-day-mini{
+  background:var(--surface) !important;
+  border-color:var(--surface-bd) !important;
+  color:var(--ink) !important;
+  box-shadow:var(--surface-sh);
+}
+/* 弹窗 / 悬浮层保持纯白：卡片 < 控件 < 弹窗 的三级层次 */
+body.light .modal,
+body.light .agent-panel,
+body.light .agent-head,
+body.light .mini-pop,
+body.light .quick-bar-btn,
+body.light .fp-shell,
+body.light .fp-panel,
+body.light .myc-fav .f{
   background:#ffffff !important;
   border-color:rgba(15,23,42,.18) !important;
   color:var(--ink) !important;
@@ -606,23 +647,28 @@ body.light .btn.link{border-bottom-color:rgba(15,23,42,.2) !important;color:#334
 body.light .btn.link:hover{color:#1d4ed8 !important;border-bottom-color:#0f766e !important}
 body.light .cell,body.light .fortune-box,body.light .quick-ans,body.light .pq,
 body.light .meme-card{
-  background:#ffffff !important;
-  box-shadow:0 6px 20px rgba(15,23,42,.06) !important;color:var(--ink) !important}
+  background:var(--surface) !important;
+  border-color:var(--surface-bd) !important;
+  box-shadow:var(--surface-sh) !important;color:var(--ink) !important}
 
+body.light .rv-item,body.light .sc-preview .sp-card,
+body.light .setup-why div,body.light .m-pick,body.light .sc-pick{
+  background:var(--surface) !important;border-color:var(--surface-bd) !important;color:#0f172a !important;
+}
 body.light .prog{background:#e9eef7 !important}
-body.light .ans-ta,body.light .my-ans,body.light .rv-item,body.light .sc-preview .sp-card,
-body.light .setup-why div,body.light .m-pick,body.light .sc-pick,body.light .ai-mute,body.light .ai-state,
+body.light .ans-ta,body.light .my-ans,body.light .ai-mute,body.light .ai-state,
 body.light .search-box,body.light .lg-chips,body.light .lg-chips span,body.light .lg-tabs,
 body.light .lg-cap-r,body.light .pf-custom-colors,body.light .up-drop{
   background:#ffffff !important;border-color:rgba(15,23,42,.14) !important;color:#0f172a !important;
 }
 body.light .rv-item .ri-h:hover,body.light .cell:hover,body.light .sc-panel:hover{background:#f4f7fc !important}
-body.light .tag-pill,body.light .mod,body.light .layer,body.light .pq button.popt,
+body.light .tag-pill,body.light .mod,body.light .layer,
 body.light .res-reveal,
 body.light .fortune-box,body.light .quick-q,body.light .quick-ans,body.light .meme-card,
 body.light .flip-b,body.light .persona-result,body.light .closing,body.light .fp-tip{
-  background:#ffffff !important;border-color:rgba(15,23,42,.14) !important;
+  background:var(--surface) !important;border-color:var(--surface-bd) !important;
 }
+body.light .pq button.popt{background:#ffffff !important;border-color:rgba(15,23,42,.14) !important}
 body.light .pq button.popt:hover{background:rgba(37,99,235,.1) !important;border-color:rgba(37,99,235,.45) !important;color:#1d4ed8 !important}
 body.light .ai-state{color:#37435e !important}
 body.light .m-pick.on,body.light .sc-pick.on,body.light .up-drop:hover,body.light .up-drop.has{

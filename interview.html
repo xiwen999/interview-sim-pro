@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261105b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
@@ -19,6 +22,21 @@
 .setup{padding:clamp(20px,2.2vw,34px)}
 .opt-row{margin-top:20px}
 .opt-row .o-lab{font-size:var(--fs-base);font-weight:700;color:var(--ink2);margin-bottom:10px}
+/* 简历输入区块（P1：简历驱动个性化出题） */
+.resume-block{margin-top:8px;padding:16px 18px;background:rgba(108,140,255,.06);border:1px solid rgba(108,140,255,.28);border-radius:16px}
+.rb-head{margin-bottom:10px}
+.rb-title{font-size:var(--fs-base);font-weight:800;color:var(--ink)}
+.rb-sub{font-size:var(--fs-xs);color:var(--ink3);margin-top:4px;line-height:1.6}
+.resume-ta{width:100%;min-height:96px;max-height:220px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:var(--fs-sm);line-height:1.7;color:var(--ink);outline:none;resize:vertical}
+.resume-ta:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(108,140,255,.15)}
+.rb-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rb-tools .btn{font-size:var(--fs-xs)}
+.rb-status{font-size:var(--fs-xs);color:var(--ink3)}
+.rb-preview{margin-top:10px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px dashed var(--line2);border-radius:10px;font-size:var(--fs-xs);color:var(--ink2);line-height:1.7;max-height:180px;overflow:auto}
+.rb-preview b{color:var(--acc2)}
+/* 导出报告按钮 */
+.rv-export{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ai-perq{font-size:var(--fs-xs);color:var(--ink2);margin-top:6px;padding:8px 10px;background:rgba(108,140,255,.08);border-radius:8px;border-left:2px solid var(--acc)}
 .opts{display:flex;gap:9px;flex-wrap:wrap}
 .opts .chip,.opts .sc-pick{flex:1 1 auto;min-width:0;justify-content:center}
 /* 场景名较长，给 2 列起步的更宽轨道，避免文字溢出胶囊 */
@@ -493,7 +511,21 @@
 .job-sub.on{border-color:var(--acc);background:rgba(108,140,255,.16);color:#fff;
   box-shadow:0 0 0 3px rgba(108,140,255,.12)}
 .job-sub-tip{margin-top:12px}
-body.light .job-cat,body.light .job-sub{background:#ffffff;border-color:rgba(15,23,42,.14);color:#0f172a}
+.job-missing{margin-top:28px;padding:16px 20px;border-radius:14px;
+  background:rgba(108,140,255,.06);border:1px dashed rgba(108,140,255,.35);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  animation:panelIn .4s ease-out both}
+.job-missing .jm-text{font-size:var(--fs-sm);color:var(--ink2);line-height:1.6;
+  display:flex;flex-direction:column;gap:4px}
+.job-missing .jm-text b{color:var(--ink);font-size:var(--fs-base);display:flex;align-items:center;gap:6px}
+.job-missing .jm-btn{font-size:var(--fs-sm);font-weight:700;color:var(--acc2);
+  background:rgba(65,224,200,.12);border:1px solid rgba(65,224,200,.35);
+  padding:8px 16px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.job-missing .jm-btn:hover{background:rgba(65,224,200,.22);color:#fff;transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(65,224,200,.2)}
+body.light .job-missing{background:rgba(37,99,235,.05);border-color:rgba(37,99,235,.3)}
+body.light .job-missing .jm-btn:hover{color:#0f766e}
+body.light .job-cat,body.light .job-sub{background:var(--surface);border-color:var(--surface-bd);color:#0f172a}
 body.light .job-cat:hover,body.light .job-sub:hover{border-color:rgba(37,99,235,.5);color:#1d4ed8}
 body.light .job-cat.on,body.light .job-sub.on{background:rgba(37,99,235,.12);border-color:#2563eb;color:#1d4ed8}
 
@@ -727,13 +759,16 @@ body.light .tg-tip,body.light .tg-empty{background:rgba(15,23,42,.04);
 #wzCount{letter-spacing:.4px}
 
 /* 浅色模式适配 */
-body.light #vSetup .setup{border-color:rgba(15,23,42,.1);
+body.light #vSetup .setup{border-color:rgba(15,23,42,.1) !important;
+  /* 与题库题卡同一套「蓝 → 薄荷」对角渐变，呼应页面极光背景
+     （需 !important：该卡片同时带 .card，会被共享层的 --surface 覆盖） */
   background:
-    radial-gradient(900px 420px at 6% -14%,rgba(37,99,235,.1),transparent 64%),
-    radial-gradient(720px 400px at 98% -6%,rgba(15,118,110,.07),transparent 66%),
-    linear-gradient(180deg,#ffffff,#f7f9ff);
+    radial-gradient(900px 420px at 4% -14%,rgba(37,99,235,.13),transparent 64%),
+    radial-gradient(760px 420px at 100% -6%,rgba(45,212,191,.12),transparent 66%),
+    linear-gradient(135deg,rgba(108,140,255,.15) 0%,rgba(255,255,255,0) 50%,rgba(45,212,191,.14) 100%),
+    linear-gradient(180deg,#fcfdff,#f3f7fd) !important;
   box-shadow:0 30px 70px -34px rgba(15,23,42,.25),0 8px 20px rgba(15,23,42,.06),
-    inset 0 1px 0 #ffffff}
+    inset 0 1px 0 #ffffff !important}
 body.light #vSetup .setup h1{color:#0f172a;text-shadow:none}
 body.light #vSetup .setup-sub{color:#475569}
 body.light #vSetup .wz-dot{background:#fff;border-color:rgba(15,23,42,.16);
@@ -757,15 +792,408 @@ body.light #vSetup .wz-sum{border-color:rgba(37,99,235,.24);
   box-shadow:0 16px 36px -24px rgba(15,23,42,.28),inset 0 1px 0 #ffffff}
 body.light #vSetup .wz-sum .ws-v{color:#0f172a}
 body.light #vSetup .wz-sum .ws-row{border-top-color:rgba(15,23,42,.1)}
-body.light #vSetup .sc-preview .sp-card{background:linear-gradient(180deg,#ffffff,#f8fafc);
-  border-color:rgba(15,23,42,.1)}
+body.light #vSetup .sc-preview .sp-card{background:var(--surface);
+  border-color:var(--surface-bd)}
 body.light #vSetup .warmup{background:linear-gradient(120deg,rgba(180,83,9,.06),#ffffff);
   border-color:rgba(180,83,9,.18)}
 body.light #wzActions .wz-actions-in{background:linear-gradient(180deg,#ffffff,#f5f8ff);
   border-color:rgba(15,23,42,.13);
   box-shadow:0 22px 52px -18px rgba(15,23,42,.22),inset 0 1px 0 #ffffff}
 
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(clamp(200px,18vw,260px),1fr));gap:14px}
+.cat-card{position:relative;text-align:left;padding:16px 16px 14px;border-radius:16px;border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:8px}
+.cat-card:hover{border-color:rgba(108,140,255,.45);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.cat-card .cc-top{display:flex;align-items:center;gap:9px}
+.cat-card .cc-ic{font-size:24px;line-height:1;filter:grayscale(.3);transition:.18s}
+.cat-card .cc-top b{font-size:var(--fs-md);font-weight:800;color:var(--ink)}
+.cat-card .cc-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);
+  display:grid;place-items:center;font-size:12px;color:transparent;font-weight:800}
+.cat-card .cc-point{font-size:var(--fs-sm);color:#cdd8ff;line-height:1.6;font-weight:600}
+.cat-card .cc-samples{display:flex;gap:6px;flex-wrap:wrap}
+.cat-card .cc-chip{font-size:var(--fs-2xs);padding:3px 9px;border-radius:99px;background:rgba(108,140,255,.12);
+  border:1px solid rgba(108,140,255,.28);color:#cdd8ff}
+.cat-card.on{border-color:rgba(140,166,255,.9);background:linear-gradient(140deg,rgba(108,140,255,.22),rgba(65,224,200,.1));
+  box-shadow:0 10px 26px -10px rgba(108,140,255,.5)}
+.cat-card.on .cc-ic{filter:none;transform:scale(1.08)}
+.cat-card.on .cc-check{background:rgba(65,224,200,.92);border-color:transparent;color:#fff}
+.cat-card.on .cc-point{color:#eaf0ff}
+/* 题量分配展示盒（放大、醒目） */
+.dist-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 16px;border-radius:14px;
+  background:linear-gradient(120deg,rgba(108,140,255,.12),rgba(65,224,200,.07));border:1px solid rgba(108,140,255,.3)}
+.dist-box .db-total{font-size:var(--fs-lg);font-weight:900;color:#fff;display:flex;align-items:baseline;gap:5px}
+.dist-box .db-total small{font-size:var(--fs-2xs);color:var(--ink3);font-weight:600}
+.dist-box .db-cats{display:flex;flex-wrap:wrap;gap:7px;align-items:center;flex:1}
+.dist-box .db-cat{font-size:var(--fs-xs);padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.06);
+  border:1px solid var(--line2);color:var(--ink)}
+.dist-box .db-cat b{color:#9ee5d8;font-weight:800}
+@media (max-width:706px){.cat-grid{grid-template-columns:1fr}}
+body.light .cat-card{background:linear-gradient(180deg,#ffffff,#f7f9ff);border-color:rgba(15,23,42,.1)}
+body.light .cat-card:hover{border-color:rgba(37,99,235,.5)}
+body.light .cat-card .cc-point{color:#1d4ed8}
+body.light .cat-card .cc-chip{background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.22);color:#1d4ed8}
+body.light .cat-card.on{background:linear-gradient(140deg,rgba(37,99,235,.14),rgba(15,118,110,.08));border-color:rgba(37,99,235,.7)}
+body.light .cat-card.on .cc-point{color:#0f172a}
+body.light .dist-box{background:linear-gradient(120deg,rgba(37,99,235,.08),rgba(15,118,110,.05));border-color:rgba(37,99,235,.24)}
+body.light .dist-box .db-cat{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.1);color:#0f172a}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 数字 / 英文用科技感字体，与中文区分 */
+.num{font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,-apple-system,sans-serif;
+  font-variant-numeric:tabular-nums;letter-spacing:.3px}
+
+/* Step4 容器：默认单列，宽屏左 7 / 右 3 */
+#vSetup .wz-final{grid-template-columns:minmax(0,1fr);gap:20px}
+@media(min-width:1024px){
+  #vSetup .wz-final{grid-template-columns:minmax(0,7fr) minmax(0,3fr);
+    gap:0 clamp(20px,2.4vw,44px);align-items:start}
+}
+/* 右侧 sticky 仪表盘 */
+#vSetup .wz-side{position:sticky;top:16px;gap:16px}
+@media(max-width:1023px){#vSetup .wz-side{position:static}}
+
+/* 配置卡片（左列三张）：玻璃拟态 + 极细描边，统一 8px 栅格 */
+.cfg-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;padding:18px 20px;backdrop-filter:blur(10px);
+  box-shadow:0 8px 26px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
+  display:flex;flex-direction:column;gap:16px;margin-bottom:16px}
+.cfg-card:last-child{margin-bottom:0}
+.cfg-h{display:flex;align-items:center;gap:10px;cursor:default;list-style:none}
+.cfg-h::-webkit-details-marker{display:none}
+.cfg-no{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;
+  font-size:var(--fs-sm);font-weight:800;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.cfg-title{font-size:var(--fs-base);font-weight:800;color:var(--ink)}
+.cfg-tag{font-size:var(--fs-2xs);font-weight:600;color:var(--ink3);padding:2px 8px;border-radius:99px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.acc-ic{margin-left:auto;color:var(--ink3);transition:.25s;font-size:var(--fs-sm);font-weight:800}
+details[open] .acc-ic{transform:rotate(180deg)}
+.acc-body{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+/* 高级模式：头部可点击暗示 + 「可选」标签高亮，引导用户展开 */
+.cfg-card.acc>.cfg-h{cursor:pointer;border-radius:10px;margin:0 -6px;padding:4px 6px;transition:background .18s,color .18s}
+.cfg-card.acc>.cfg-h:hover{background:rgba(108,140,255,.10)}
+.cfg-card.acc>.cfg-h:hover .acc-ic{color:var(--acc);transform:translateY(1px)}
+details.cfg-card.acc[open]>.cfg-h:hover .acc-ic{transform:rotate(180deg) translateY(1px)}
+.cfg-tag.opt{color:#e6efff;background:rgba(108,140,255,.18);border-color:rgba(108,140,255,.6);
+  box-shadow:0 0 0 1px rgba(108,140,255,.18),0 2px 10px rgba(108,140,255,.22);
+  animation:tagPulse 2.6s ease-in-out infinite}
+.cfg-sub{font-size:var(--fs-2xs);color:var(--ink3);font-weight:500}
+details.cfg-card.acc[open] .cfg-sub{opacity:.55}
+@keyframes tagPulse{0%,100%{box-shadow:0 0 0 1px rgba(108,140,255,.18),0 2px 10px rgba(108,140,255,.22)}
+  50%{box-shadow:0 0 0 1px rgba(108,140,255,.35),0 2px 14px rgba(108,140,255,.38)}}
+
+/* Card1：拖拽上传区 */
+.dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:26px 16px;border:1.5px dashed var(--line2);border-radius:14px;
+  background:rgba(255,255,255,.025);cursor:pointer;text-align:center;transition:.2s}
+.dropzone:hover,.dropzone.drag{border-color:var(--acc);background:rgba(108,140,255,.08)}
+.dropzone.drag{border-color:var(--acc2);background:rgba(65,224,200,.1)}
+.dropzone .dz-ic{font-size:28px;line-height:1}
+.dropzone .dz-t{font-size:var(--fs-sm);font-weight:700;color:var(--ink2)}
+.dropzone .dz-s{font-size:var(--fs-2xs);color:var(--ink3)}
+/* 解析成功卡片 */
+.rb-preview.ok{border-style:solid;border-color:rgba(65,224,200,.45);background:rgba(65,224,200,.08)}
+.rb-preview.ok b{color:var(--acc2)}
+
+/* Card2：面试策略 — 行布局（左标签 右控件） */
+.strat-row{display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:center}
+.strat-k{font-size:var(--fs-sm);font-weight:700;color:var(--ink3)}
+@media(max-width:560px){.strat-row{grid-template-columns:1fr;gap:8px}}
+
+/* 题量分配：左侧大字总数 + 右侧纯文本配比（去胶囊降噪） */
+.dist-box{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;
+  padding:0;background:transparent;border:0;box-shadow:none}
+.dist-box .db-left{display:flex;align-items:baseline;gap:6px}
+.dist-box .db-num{font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif;
+  font-size:clamp(26px,3vw,34px);font-weight:900;line-height:1;
+  background:linear-gradient(135deg,#fff,#9ec5ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dist-box .db-unit{font-size:var(--fs-xs);color:var(--ink3);font-weight:600}
+.dist-box .db-right{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;flex:1;min-width:200px}
+.dist-box .db-right b{color:var(--acc2);font-weight:800;
+  font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif}
+
+/* 分段控制器（每题限时 / 难度偏向） */
+.seg{display:flex;gap:0;background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:12px;padding:4px;width:fit-content;max-width:100%}
+.seg .chip{flex:1 1 0;min-width:0;border-radius:9px;background:transparent;border:1px solid transparent;
+  color:var(--ink3);font-weight:600;padding:9px 14px;box-shadow:none;transition:.18s;white-space:nowrap}
+.seg .chip:hover{color:var(--ink)}
+.seg .chip.on{color:#fff;background:linear-gradient(135deg,var(--acc),#4f6ef0);
+  border-color:transparent;box-shadow:0 4px 14px rgba(108,140,255,.45),inset 0 0 0 1px rgba(255,255,255,.12)}
+
+/* Card3：开关行 */
+.sw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.025)}
+.sw-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sw-info b{font-size:var(--fs-sm);color:var(--ink);font-weight:700}
+.sw-info span{font-size:var(--fs-2xs);color:var(--ink3)}
+/* Switch 开关 */
+.switch{flex:none;position:relative;width:46px;height:26px;border-radius:99px;border:1px solid var(--line2);
+  background:rgba(255,255,255,.08);cursor:pointer;padding:0;transition:.22s}
+.switch .sw-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+  background:#cbd5e1;transition:.22s;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.switch.on{background:linear-gradient(135deg,var(--danger),#fb7185);border-color:transparent;
+  box-shadow:0 0 0 3px rgba(251,113,133,.18)}
+.switch.on .sw-knob{left:22px;background:#fff}
+
+.dash{background:linear-gradient(160deg,rgba(108,140,255,.12),rgba(65,224,200,.06));
+  border:1px solid rgba(108,140,255,.28);border-radius:18px;padding:18px;
+  backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.06);
+  display:flex;flex-direction:column;gap:16px}
+.dash-top{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.dash-top .dt-ic{font-size:26px;line-height:1}
+.dash-top .dt-k{font-size:var(--fs-2xs);color:var(--ink3);font-weight:600}
+.dash-top .dt-v{font-size:var(--fs-base);color:var(--ink);font-weight:800;margin-top:2px}
+.dash-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dm{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border-radius:12px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);text-align:center;transition:.2s}
+.dm .dm-ic{font-size:18px;line-height:1}
+.dm .dm-v{font-size:var(--fs-sm);font-weight:800;color:var(--ink);
+  font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif}
+.dm .dm-v .dm-u{font-size:var(--fs-2xs);color:var(--ink3);font-weight:600;margin-left:2px}
+.dm .dm-l{font-size:var(--fs-2xs);color:var(--ink3)}
+.dm.on{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.4)}
+.dm.on .dm-v{color:#fda4af}
+/* 配比条形图 */
+.dash-dist{display:flex;flex-direction:column;gap:8px}
+.dd-h{font-size:var(--fs-xs);font-weight:700;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dd-h b{color:#fff}
+.dd-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;
+  background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.dd-seg{height:100%;display:block}
+.dd-legend{display:flex;flex-wrap:wrap;gap:6px 12px}
+.dd-leg{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-2xs);color:var(--ink3)}
+.dd-leg i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.dash-meta{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+.dash-meta>div{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--fs-xs)}
+.dash-meta b{color:var(--ink);font-weight:700}
+/* AI 推荐预览折叠 */
+.dash-fold{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:12px 14px}
+.dash-fold>summary{cursor:pointer;font-size:var(--fs-sm);font-weight:700;color:var(--ink2);list-style:none;
+  display:flex;align-items:center;gap:8px}
+.dash-fold>summary::-webkit-details-marker{display:none}
+.dash-fold .df-t{flex:none}
+.dash-fold .df-cnt{flex:none;font-size:var(--fs-2xs);font-weight:600;color:var(--acc2);
+  padding:1px 8px;border-radius:99px;background:rgba(65,224,200,.12);border:1px solid rgba(65,224,200,.35);white-space:nowrap}
+.dash-fold .df-ic{margin-left:auto;color:var(--ink3);font-weight:800;transition:transform .25s,color .18s}
+.dash-fold>summary:hover .df-ic{color:var(--acc)}
+.dash-fold[open] .df-ic{transform:rotate(180deg)}
+.dash-fold .sc-preview{grid-template-columns:1fr;gap:8px;margin-top:10px}
+.dash-fold .sp-card{padding:10px 12px}
+.dash-fold .sp-hint{grid-column:1/-1;font-size:11px;color:var(--ink3);line-height:1.6;margin-bottom:-2px}
+.dash-fold .sp-hint b{color:var(--acc2);font-weight:800}
+
+/* 底部操作栏增强：通栏毛玻璃 + 主 CTA 发光 */
+.wz-actions-in{max-width:clamp(860px,80vw,1320px)}
+#wzNext.final{background:linear-gradient(135deg,#2dd4bf 0%,#4f6ef0 60%,#6C8CFF 100%);
+  box-shadow:0 10px 28px rgba(79,110,240,.5),inset 0 0 0 1px rgba(255,255,255,.18);
+  font-weight:800;letter-spacing:.5px;transition:.18s}
+#wzNext.final:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* 浅色模式适配 */
+body.light .cfg-card{background:rgba(255,255,255,.85);border-color:rgba(15,23,42,.1);
+  box-shadow:0 8px 26px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.6)}
+body.light .cfg-title,body.light .dash-top .dt-v,body.light .sw-info b{color:#0f172a}
+body.light .strat-k,body.light .sw-info span,body.light .cfg-tag{color:#475569}
+body.light .dropzone{background:rgba(37,99,235,.03);border-color:rgba(37,99,235,.25)}
+body.light .dropzone:hover{background:rgba(37,99,235,.07)}
+body.light .seg{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.1)}
+body.light .seg .chip{color:#475569}
+body.light .seg .chip.on{color:#fff}
+body.light .sw-row{background:rgba(15,23,42,.03)}
+body.light .switch{background:rgba(15,23,42,.08);border-color:rgba(15,23,42,.18)}
+body.light .switch.on{background:linear-gradient(135deg,#be123c,#fb7185)}
+body.light .dash{background:linear-gradient(160deg,rgba(37,99,235,.08),rgba(15,118,110,.05));
+  border-color:rgba(37,99,235,.25)}
+body.light .dm{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.08)}
+body.light .dm .dm-v{color:#0f172a}
+body.light .dm.on{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.35)}
+body.light .dm.on .dm-v{color:#be123c}
+body.light .dd-h,body.light .dash-fold>summary{color:#1d4ed8}
+body.light .dash-fold{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.08)}
+body.light .cfg-tag.opt{color:#1d4ed8;background:rgba(37,99,235,.10);border-color:rgba(37,99,235,.45);
+  box-shadow:0 0 0 1px rgba(37,99,235,.15),0 2px 10px rgba(37,99,235,.18)}
+body.light .cfg-sub{color:#64748b}
+body.light .cfg-card.acc>.cfg-h:hover{background:rgba(37,99,235,.06)}
+body.light .dash-fold .df-cnt{color:#0f766e;background:rgba(13,148,136,.10);border-color:rgba(13,148,136,.35)}
+body.light .dash-fold .df-ic{color:#64748b}
+body.light .dash-fold .sp-hint{color:#64748b}
+body.light .dash-fold .sp-hint b{color:#0f766e}
+
+/* 通用基底：大类卡 / 作答卡 共用描边与过渡 */
+#vSetup .job-cat,
+#vSetup .m-pick{position:relative;border-radius:12px !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  background:rgba(255,255,255,.02) !important;
+  transition:border-color .18s,background .18s,box-shadow .18s,opacity .18s,transform .18s,filter .18s}
+
+#vSetup .job-cats{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:14px}
+#vSetup .job-cat{padding:18px 14px;min-height:64px;font-size:var(--fs-base);font-weight:700}
+#vSetup .job-cat .jc-ic{font-size:24px;line-height:1}
+@media(max-width:760px){#vSetup .job-cats{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+@media(max-width:420px){#vSetup .job-cats{grid-template-columns:1fr !important}}
+/* 细分方向旁的内联小灰字提示（替代单独成行的说明） */
+#vSetup .job-sub-hint{font-size:var(--fs-2xs);font-weight:500;color:var(--ink3);opacity:.75}
+
+#vSetup .job-cat.on,
+#vSetup .m-pick.on{border-color:rgba(108,140,255,.95) !important;
+  background:linear-gradient(140deg,rgba(108,140,255,.20),rgba(79,110,240,.08) 70%,rgba(65,224,200,.06)) !important;
+  box-shadow:0 0 0 3px rgba(108,140,255,.16),0 16px 34px -16px rgba(79,110,240,.7),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;opacity:1 !important}
+#vSetup .job-cat.on::after,
+#vSetup .m-pick.on::after{content:'✓';position:absolute;top:10px;right:10px;
+  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:#06101f;line-height:1;
+  background:linear-gradient(135deg,#41E0C8,#6C8CFF);
+  box-shadow:0 4px 12px rgba(65,224,200,.55)}
+
+#vSetup .job-cats:has(.on) .job-cat:not(.on),
+#vSetup .cat-grid:has(.on) .cat-card:not(.on),
+#vSetup .m-picks:has(.on) .m-pick:not(.on){opacity:.55;filter:saturate(.7)}
+
+#vSetup .cat-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:14px}
+@media(max-width:760px){#vSetup .cat-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+@media(max-width:460px){#vSetup .cat-grid{grid-template-columns:1fr !important}}
+#vSetup .cat-card{position:relative;border-radius:12px !important;padding:24px !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  background:rgba(255,255,255,.02) !important;
+  box-shadow:0 6px 18px -10px rgba(0,0,0,.5) !important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  text-align:center;min-height:140px;
+  transition:border-color .18s,background .18s,box-shadow .18s,opacity .18s,transform .18s}
+#vSetup .cat-card .cc-top{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+#vSetup .cat-card .cc-ic{font-size:40px;line-height:1;filter:none}
+#vSetup .cat-card .cc-top b{font-size:var(--fs-md);font-weight:800;color:var(--ink)}
+/* 瘦身兜底：考察说明 / 示例标签隐藏（JS 渲染已同步移除） */
+#vSetup .cat-card .cc-point,#vSetup .cat-card .cc-samples{display:none !important}
+/* 勾选框：右上角实心对勾 */
+#vSetup .cat-card .cc-check{position:absolute;top:10px;right:10px;margin:0;
+  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:transparent;line-height:1;
+  border:1.5px solid rgba(255,255,255,.25);background:transparent}
+#vSetup .cat-card.on{border-color:rgba(108,140,255,.95) !important;
+  background:linear-gradient(140deg,rgba(108,140,255,.20),rgba(79,110,240,.08) 70%,rgba(65,224,200,.06)) !important;
+  box-shadow:0 0 0 3px rgba(108,140,255,.16),0 16px 34px -16px rgba(79,110,240,.7) !important;opacity:1 !important}
+#vSetup .cat-card.on .cc-check{background:linear-gradient(135deg,#41E0C8,#6C8CFF);
+  border-color:transparent;color:#06101f;box-shadow:0 4px 12px rgba(65,224,200,.55)}
+#vSetup .cat-card.on .cc-ic{transform:scale(1.05)}
+
+#vSetup .scene-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+@media(max-width:640px){#vSetup .scene-grid{grid-template-columns:1fr !important}}
+#vSetup .scene-card{display:flex !important;flex-direction:column !important;align-items:stretch !important;
+  justify-content:flex-start !important;text-align:left !important;min-height:92px !important;
+  padding:18px 18px 16px !important;gap:0 !important}
+#vSetup .scene-card .cc-top{display:flex !important;flex-direction:row !important;align-items:flex-start !important;
+  gap:10px !important;width:100% !important;text-align:left !important}
+#vSetup .scene-card .cc-ic{font-size:28px !important;line-height:1 !important;filter:none !important;margin-top:2px}
+#vSetup .scene-card .cc-top>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+#vSetup .scene-card .sc-name{font-size:16px;font-weight:800;color:var(--ink);line-height:1.3}
+#vSetup .scene-card .sc-desc{font-size:12px;color:var(--ink3);font-weight:400;line-height:1.5}
+#vSetup .scene-card.on .sc-desc{color:var(--ink2)}
+/* 仪表盘：场景展示条（替代原六大题型配比条，反映用户在 Step 2 的选择） */
+.dd-scene{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;
+  background:rgba(108,140,255,.08);border:1px solid rgba(108,140,255,.25)}
+.dd-scene .ds-ic{font-size:18px}
+.dd-scene .ds-name{font-weight:800;color:var(--ink);font-size:var(--fs-sm)}
+.dd-scene .ds-desc{font-size:var(--fs-2xs);color:var(--ink3);font-weight:500}
+
+#vSetup .m-picks{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:16px}
+@media(max-width:760px){#vSetup .m-picks{grid-template-columns:1fr !important}}
+#vSetup .m-pick{min-height:240px;padding:24px !important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+#vSetup .m-pick .mp-ic{font-size:52px;line-height:1;margin-bottom:4px}
+#vSetup .m-pick .mp-t{font-size:var(--fs-md);font-weight:800;color:var(--ink);margin:0}
+#vSetup .m-pick .mp-d{font-size:var(--fs-xs);color:var(--ink3);line-height:1.6;margin:0;max-width:220px}
+
+#wzActions #wzNext{background:linear-gradient(135deg,#2dd4bf 0%,#4f6ef0 60%,#6C8CFF 100%) !important;
+  color:#fff !important;border:none !important;font-weight:800;letter-spacing:.4px;
+  box-shadow:0 10px 28px rgba(79,110,240,.5),inset 0 0 0 1px rgba(255,255,255,.18) !important;transition:.18s}
+#wzActions #wzNext:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#wzActions #wzNext.final{box-shadow:0 12px 32px rgba(45,212,191,.5),0 8px 26px rgba(79,110,240,.55),
+  inset 0 0 0 1px rgba(255,255,255,.2) !important}
+#wzActions #wzPrev{background:transparent !important;
+  border:1px solid rgba(255,255,255,.28) !important;color:var(--ink2) !important;
+  box-shadow:none !important;backdrop-filter:none}
+#wzActions #wzPrev:hover{border-color:rgba(108,140,255,.7);color:var(--ink);background:rgba(108,140,255,.08)}
+
+body.light #vSetup .job-cat,
+body.light #vSetup .cat-card,
+body.light #vSetup .m-pick{border-color:var(--surface-bd) !important;background:var(--surface) !important}
+body.light #vSetup .job-cat.on,
+body.light #vSetup .cat-card.on,
+body.light #vSetup .m-pick.on{background:linear-gradient(140deg,rgba(37,99,235,.14),rgba(15,118,110,.07)) !important;
+  border-color:rgba(37,99,235,.7) !important}
+body.light #vSetup .scene-card{background:var(--surface) !important;border-color:var(--surface-bd) !important}
+body.light #vSetup .scene-card.on{background:linear-gradient(140deg,rgba(37,99,235,.14),rgba(15,118,110,.08)) !important;border-color:rgba(37,99,235,.7) !important}
+body.light #vSetup .scene-card .sc-name{color:#0f172a}
+body.light #vSetup .scene-card .sc-desc{color:#64748b}
+body.light #vSetup .scene-card.on .sc-desc{color:#1e293b}
+body.light .dd-scene{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.22)}
+body.light .dd-scene .ds-name{color:#0f172a}
+body.light .dd-scene .ds-desc{color:#64748b}
+body.light #wzActions #wzPrev{border-color:rgba(15,23,42,.25) !important;color:#334155 !important}
+
+#vSetup .setup{max-width:1400px;width:100%;margin-left:auto;margin-right:auto}
+#vSetup .job-cats{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:14px}
+#vSetup .scene-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:14px}
+@media(max-width:1100px){#vSetup .scene-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+@media(max-width:760px){
+  #vSetup .job-cats{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  #vSetup .scene-grid{grid-template-columns:1fr !important}
+}
+@media(max-width:420px){#vSetup .job-cats{grid-template-columns:1fr !important}}
+
+#vSetup .job-cat{padding:16px 14px;min-height:76px;gap:10px;justify-content:center}
+#vSetup .job-cat .jc-main{display:flex;flex-direction:column;gap:3px;min-width:0;text-align:left}
+#vSetup .job-cat .jc-t{font-size:var(--fs-base);font-weight:800;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vSetup .job-cat .jc-subs{font-size:var(--fs-2xs);font-weight:500;color:var(--ink3);line-height:1.45;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.light #vSetup .job-cat .jc-subs{color:#64748b}
+
+#vSetup .scene-card{min-height:140px !important;padding:22px 24px !important;justify-content:center !important;gap:12px !important}
+#vSetup .scene-card .cc-top{gap:14px !important;align-items:center !important}
+#vSetup .scene-card .cc-ic{font-size:32px !important;margin-top:0 !important}
+#vSetup .scene-card .sc-name{font-size:var(--fs-md) !important}
+#vSetup .scene-card .sc-desc{font-size:var(--fs-sm) !important;line-height:1.65}
+
+#vSetup .m-pick .badge{position:absolute;top:12px;right:12px;font-size:var(--fs-2xs);font-weight:800;
+  letter-spacing:.3px;padding:3px 9px;border-radius:99px;color:#06101f;
+  background:linear-gradient(135deg,#41E0C8,#9BE7FF);box-shadow:0 6px 16px rgba(65,224,200,.35)}
+#vSetup .m-pick.on::after{left:12px;right:auto} /* 勾选让位给右上角角标 */
+#vSetup .m-pick .mp-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+#vSetup .m-pick .mp-tags span{font-size:var(--fs-2xs);font-weight:600;color:var(--ink3);
+  padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+body.light #vSetup .m-pick .mp-tags span{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.12);color:#64748b}
+
+.dropzone .fake-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.dropzone .fake-tags span{font-size:var(--fs-2xs);color:var(--ink3);
+  padding:3px 9px;border-radius:7px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.03)}
+body.light .dropzone .fake-tags span{border-color:rgba(15,23,42,.16);background:rgba(15,23,42,.03);color:#64748b}
+
+.dist-box{display:flex;flex-direction:column;gap:9px;align-items:stretch;flex-wrap:nowrap}
+.dist-box .db-left{display:flex;align-items:baseline;gap:6px}
+.dist-box .db-bar{display:flex;gap:2px;height:14px;border-radius:99px;overflow:hidden;
+  background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.dist-box .db-seg{display:block;height:100%;min-width:6px;border-radius:2px;transition:flex .3s}
+.dist-box .db-legend{display:flex;flex-wrap:wrap;gap:6px 12px}
+.dist-box .db-leg{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-2xs);color:var(--ink3)}
+.dist-box .db-leg i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+.dist-box .db-leg b{color:var(--ink2);font-weight:800;
+  font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif}
+body.light .dist-box .db-bar{background:rgba(15,23,42,.06);border-color:rgba(15,23,42,.12)}
+body.light .dist-box .db-leg{color:#64748b}
+body.light .dist-box .db-leg b{color:#0f172a}
+
+#vSetup .dash-metrics .dm{position:relative;padding:12px 8px;
+  background:linear-gradient(160deg,rgba(108,140,255,.16),rgba(65,224,200,.05));
+  border-color:rgba(108,140,255,.24);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 18px -12px rgba(0,0,0,.6)}
+#vSetup .dash-metrics .dm::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 58%)}
+body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#f1f5fd);
+  border-color:rgba(37,99,235,.18);box-shadow:inset 0 1px 0 #ffffff,0 6px 16px -12px rgba(15,23,42,.4)}
 </style>
 </head>
 <body>
@@ -794,64 +1222,105 @@ body.light #wzActions .wz-actions-in{background:linear-gradient(180deg,#ffffff,#
           <section class="wz-panel on" data-step="1">
             <div class="opt-row"><div class="o-lab">① 选择目标岗位大类</div><div class="job-cats" id="jobCats"></div></div>
             <div class="job-sub-wrap" id="jobSubWrap">
-              <div class="o-lab job-sub-lab">选择细分方向<span class="js-opt">可选</span></div>
+              <div class="o-lab job-sub-lab">选择细分方向<span class="js-opt">可选</span><span class="job-sub-hint">不选则按该大类通用方向出题</span></div>
               <div class="job-subs" id="jobSubs"></div>
-              <p class="wz-note job-sub-tip">不选细分方向时，按该大类的通用方向出题。</p>
+            </div>
+            <!-- 没找到想要的岗位？引导反馈给官方 -->
+            <div class="job-missing" id="jobMissingBox">
+              <div class="jm-text">
+                <b>💡 没有找到你的目标岗位？</b>
+                <span>我们的题库正在持续扩充中。你可以先选择相近的大类进行练习，或者告诉我们你的需求。</span>
+              </div>
+              <button type="button" class="jm-btn" id="jobMissingBtn">📩 反馈给官方</button>
             </div>
           </section>
 
-          <!-- Step 2：面试题型（分组多选） -->
+          <!-- Step 2：面试场景与形式（决定 AI 面试官的提问风格；底层六大题型默认全选，仅用于抽题与评分） -->
           <section class="wz-panel" data-step="2">
-            <div class="type-groups">
-              <div class="tg">
-                <div class="tg-h">✨ 为你推荐<span class="tg-tip" id="typeRecTip"></span></div>
-                <div class="type-cards" id="typeRec"></div>
-                <div class="tg-empty" id="typeRecEmpty"></div>
-              </div>
-              <div class="tg">
-                <div class="tg-h">📦 通用必考<span class="tg-tip">任何岗位都适用</span></div>
-                <div class="type-cards" id="typeUni"></div>
-              </div>
-            </div>
-            <p class="wz-note">可多选，选中的题型会影响抽题范围；系统已按你上一步选择的岗位大类给出推荐，可继续增减。</p>
+            <div class="o-lab" style="margin-bottom:12px">② 选择面试场景与形式<span class="js-opt" style="margin-left:6px">决定 AI 面试官的提问风格</span></div>
+            <div class="cat-grid scene-grid" id="sceneGrid"></div>
           </section>
 
           <!-- Step 3：作答方式 -->
           <section class="wz-panel" data-step="3">
             <div class="opt-row"><div class="o-lab">③ 选择作答方式</div><div class="m-picks" id="modePicks"></div></div>
-            <p class="wz-note">经典文字：专注打字作答；动画互动：AI 面试官动画提问并朗读；摄像头语音：模拟真实视频面试（推荐 Chrome）。</p>
           </section>
 
-          <!-- Step 4：规则与确认 -->
+          <!-- Step 4：规则与确认（7:3 布局：左配置 / 右实时仪表盘） -->
           <section class="wz-panel" data-step="4">
             <div class="wz-final">
+              <!-- 左列：三张高内聚卡片 -->
               <div class="wz-rules">
-                <div class="opt-row"><div class="o-lab">④ 题目数量</div><div class="opts" id="cntOpts"></div></div>
-                <div class="opt-row"><div class="o-lab">⑤ 每题限时</div><div class="opts" id="secOpts"></div></div>
-                <div class="opt-row"><div class="o-lab">⑥ 难度偏向</div><div class="opts" id="lvOpts"></div></div>
-                <!-- 压力模式开关：仅在 Step 4 展示 -->
-                <div class="opt-row" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding:14px 18px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.3);border-radius:14px">
-                  <div>
-                    <div style="font-size:var(--fs-base);font-weight:800;color:#fb7185">🔥 开启压力模式</div>
-                    <div style="font-size:var(--fs-xs);color:var(--ink3);margin-top:4px">AI 将进行打断、质疑、连环追问</div>
+                <!-- Card 1：简历导入（弱化视觉，拖拽为主） -->
+                <div class="cfg-card">
+                  <div class="cfg-h"><span class="cfg-no">1</span><span class="cfg-title">📄 简历与背景</span><span class="cfg-tag">可选</span></div>
+                  <label class="dropzone" for="resumeFile">
+                    <span class="dz-ic">📎</span>
+                    <span class="dz-t">点击或拖拽简历 (.txt / .md) 至此</span>
+                    <span class="dz-s">AI 解析技能栈与项目经历，定制出题与追问</span>
+                    <div class="fake-tags"><span>技能栈</span><span>项目经验</span><span>等待解析...</span></div>
+                    <input type="file" id="resumeFile" accept=".txt,.md,.text,text/plain,text/markdown" hidden>
+                  </label>
+                  <div class="rb-tools">
+                    <button type="button" class="btn gho sm" id="resumeManual">手动粘贴文本</button>
+                    <button type="button" class="btn gho sm" id="resumeParse">✨ 解析预览</button>
+                    <span class="rb-status" id="resumeStatus"></span>
                   </div>
-                  <button type="button" class="chip" id="stressToggle" style="border-radius:99px;padding:8px 18px;font-weight:700">关闭</button>
+                  <textarea id="resumeTa" class="resume-ta" style="display:none" placeholder="把简历正文粘贴到这里：教育背景 / 技能栈 / 项目经历 / 实习与竞赛… 越具体，AI 出题越有针对性。"></textarea>
+                  <div class="rb-preview ok" id="resumePreview" style="display:none"></div>
                 </div>
-              </div>
-              <div class="wz-side">
-                <div class="wz-sum" id="wzSummary"></div>
-                <div class="sc-preview" id="scPreview"></div>
-              </div>
-            </div>
 
-            <div class="warmup">
-              <span class="w-ic">🔥</span>
-              <div class="w-body">
-                <b>热身模式：</b>不计时快速答 1 道题，直接看参考要点和技巧，适合刚登录先找找状态。
+                <!-- Card 2：面试策略（题量 + 限时 + 难度，强关联合并） -->
+                <div class="cfg-card">
+                  <div class="cfg-h"><span class="cfg-no">2</span><span class="cfg-title">⚙️ 面试策略</span></div>
+                  <div class="strat-row">
+                    <div class="strat-k">题量分配</div>
+                    <div class="dist-box" id="distBox"></div>
+                  </div>
+                  <div class="strat-row">
+                    <div class="strat-k">每题限时</div>
+                    <div class="seg" id="secOpts"></div>
+                  </div>
+                  <div class="strat-row">
+                    <div class="strat-k">难度偏向</div>
+                    <div class="seg" id="lvOpts"></div>
+                  </div>
+                </div>
+
+                <!-- Card 3：高级模式（手风琴折叠，默认收起） -->
+                <details class="cfg-card acc" id="advCard">
+                  <summary class="cfg-h">
+                    <span class="cfg-no">3</span><span class="cfg-title">🚀 高级模式</span><span class="cfg-tag opt">可选</span><span class="cfg-sub">含压力 / 热身模式</span>
+                    <span class="acc-ic">▾ 展开</span>
+                  </summary>
+                  <div class="acc-body">
+                    <div class="sw-row">
+                      <div class="sw-info"><b>压力模式</b><span>AI 将进行打断、质疑与连环追问</span></div>
+                      <button type="button" class="switch" id="stressToggle" role="switch" aria-checked="false"><span class="sw-knob"></span></button>
+                    </div>
+                    <div class="sw-row">
+                      <div class="sw-info"><b>热身模式</b><span>不计时快速答 1 题，直接看参考要点，适合先找状态</span></div>
+                      <button type="button" class="btn gho sm" id="warmBtn">⚡ 快速答一题</button>
+                    </div>
+                  </div>
+                </details>
+
+                <p class="wz-foot">流程：连续答完全部题目 → 统一打分 → AI 评价 → 复盘报告<br>超时会自动提交当前作答 · 语音识别推荐 Chrome 浏览器</p>
               </div>
-              <button class="btn gho sm" id="warmBtn">⚡ 快速答一题</button>
+
+              <!-- 右列：实时反馈仪表盘（sticky） -->
+              <aside class="wz-side">
+                <div class="dash" id="wzSummary"></div>
+                <details class="dash-fold" open>
+                  <summary>
+                    <span class="df-t">💡 AI 推荐开场题</span>
+                    <span class="df-cnt" id="scPoolCnt">题库 0 题 · 本场约 0 题</span>
+                    <span class="df-ic">▾</span>
+                  </summary>
+                  <div class="sc-preview" id="scPreview"></div>
+                </details>
+              </aside>
             </div>
-            <div class="wz-foot">流程：连续答完全部题目 → 统一打分 → AI 评价 → 复盘报告<br>超时会自动提交当前作答 · 语音识别推荐 Chrome 浏览器</div>
           </section>
         </div>
       </div>
@@ -1040,12 +1509,15 @@ body.light #wzActions .wz-actions-in{background:linear-gradient(180deg,#ffffff,#
         <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px">
           <canvas id="rvRadar" width="240" height="240" style="max-width:100%"></canvas>
           <div>
-            <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（按回答长度 + 要点覆盖估算）</div>
+            <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（AI 结构化评分，5 分制）</div>
             <div id="radarDesc" style="font-size:12px;color:var(--ink2);line-height:1.8"></div>
           </div>
         </div>
         <div class="coach" id="rvCoach"></div>
-        <h4 style="font-size:14px;font-weight:800;margin-bottom:12px">逐题回顾</h4>
+        <div id="rvSuggest" style="margin:14px 0"></div>
+        <div id="rvWeak" style="margin-bottom:16px"></div>
+        <div class="rv-export" id="rvExport"></div>
+        <h4 style="font-size:14px;font-weight:800;margin-bottom:12px">逐题回顾 <span style="font-size:11px;color:var(--ink3);font-weight:500">（含 AI 逐题点评）</span></h4>
         <div id="rvList"></div>
         <div id="rvVideoBox" style="display:none;align-items:center;gap:12px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.34);border-radius:14px;padding:14px 16px;margin-top:18px">
           <span style="font-size:22px">🎬</span>
@@ -1063,12 +1535,13 @@ body.light #wzActions .wz-actions-in{background:linear-gradient(180deg,#ffffff,#
   </div>
 </div>
 
-<script src="shared.js?v=20261105b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('interview',true))throw new Error('login required');
 
 var RING_LEN=175.9;
-var S={scene:'job',count:5,sec:90,types:[],lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null,stressMode:false};
+var S={scene:'job',count:5,sec:90,types:[],lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null,stressMode:false,sceneMode:'campus',resume:'',resumeSummary:''};
 
 var JOB_CATEGORIES=[
   {id:'tech',label:'研发 / 技术',icon:'💻',subs:['后端开发','前端开发','客户端','测试开发','运维/DevOps','安全工程师']},
@@ -1079,6 +1552,26 @@ var JOB_CATEGORIES=[
   {id:'business',label:'业务 / 销售',icon:'🤝',subs:['大客户销售','渠道销售','商务拓展(BD)','客户成功']},
   {id:'support',label:'职能 / 支撑',icon:'🏢',subs:['人力资源(HR)','财务/审计','法务/合规','供应链/物流','行政/战略']}
 ];
+/* ---- 面试场景与形式（用户在 Step 2 选择；决定 AI 面试官的提问风格与评分侧重） ----
+   注意：与 S.scene（岗位方向，决定题库）不同，sceneMode 只影响面试风格/提示词。
+   底层抽题与评分仍由六大题型（Q_CATEGORIES / S.types）驱动，此处不影响。 */
+var INTERVIEW_SCENES=[
+  {id:'campus',  icon:'🎓', name:'校招 / 实习',   desc:'侧重基础、潜力与培养价值'},
+  {id:'social',  icon:'💼', name:'社招 / 跳槽',   desc:'侧重项目深挖与业务落地'},
+  {id:'pressure',icon:'🛡️', name:'压力测试面',     desc:'打断、质疑、连环追问'},
+  {id:'behavior',icon:'🗣️', name:'行为面试 (STAR)',desc:'深挖过往经历与真实场景'},
+  {id:'hr',      icon:'🤝', name:'HR 综合面',     desc:'动机、稳定性、职业规划'},
+  {id:'scenario',icon:'🧩', name:'情景模拟面',     desc:'假设突发情况，考察应变'}
+];
+/* 各场景对应的 AI 系统提示词增量（拼到面试官人格之后） */
+var SCENE_PROMPTS={
+  campus:  '当前是校园招聘/实习面试。你更看重候选人的基础潜力、学习能力与态度，问题可以偏基础和潜力评估，不要过度苛求资深经验。',
+  social:  '当前是社会招聘/跳槽面试。你更看重候选人的过往业务成果与项目落地能力，提问要深入、直指结果与个人贡献，避免基础寒暄。',
+  pressure:'当前是【压力面试】环节。请保持犀利、快节奏；如果候选人回答空泛、偏短或回避，要立刻打断、质疑或连环追问，语气可以更强硬。',
+  behavior:'当前是【行为面试】环节。不要问假设性问题，只问候选人过去真实发生过的事，用 STAR 法则（背景/任务/行动/结果）深挖细节。',
+  hr:      '当前是【HR 综合面】。重点关注求职动机、稳定性、价值观、团队协作以及职业规划，语气温和但有判断力。',
+  scenario:'当前是【情景模拟】。请直接给候选人抛出一个真实的工作场景（如客户投诉、项目延期、资源冲突），问“你会怎么做”，重点考察应变与处理思路。'
+};
 /* 大类 → 原有抽题场景（使用现有题库场景，无专属场景的走合理兜底） */
 var JOB_SCENE={tech:'tech',algorithm:'data',product:'product',operation:'product',
   design:'general',business:'general',support:'general'};
@@ -1088,8 +1581,12 @@ var jobCats=document.getElementById('jobCats'),jobSubWrap=document.getElementByI
 
 function renderJobCats(){
   jobCats.innerHTML=JOB_CATEGORIES.map(function(c){
+    /* 卡面第二行：取前三个细分方向，如「后端开发 / 前端开发 / 客户端」 */
+    var subs=(c.subs||[]).slice(0,3).join(' / ');
     return '<button type="button" class="job-cat'+(c.id===selectedCategory?' on':'')+'" data-k="'+c.id+'">'+
-      '<span class="jc-ic">'+c.icon+'</span>'+esc(c.label)+'</button>';
+      '<span class="jc-ic">'+c.icon+'</span>'+
+      '<span class="jc-main"><span class="jc-t">'+esc(c.label)+'</span>'+
+      (subs?'<span class="jc-subs">'+esc(subs)+'</span>':'')+'</span></button>';
   }).join('');
   $$('#jobCats .job-cat').forEach(function(b){b.onclick=function(){selectJobCategory(b.dataset.k)}});
 }
@@ -1125,13 +1622,20 @@ function selectJobCategory(id){
   renderSummary();
 }
 renderJobCats();renderJobSubs();
-var cntOpts=document.getElementById('cntOpts');
-cntOpts.innerHTML=[3,5,8].map(function(n){return '<button class="chip'+(n===5?' on':'')+'" data-n="'+n+'">'+n+' 题</button>'}).join('');
-$$('#cntOpts .chip').forEach(function(b){b.onclick=function(){S.count=+b.dataset.n;$$('#cntOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+/* 绑定“未找到目标岗位”的反馈按钮：预填当前所选大类，引导用户反馈需求岗位 */
+var jobMissingBtn=document.getElementById('jobMissingBtn');
+if(jobMissingBtn){jobMissingBtn.onclick=function(){
+  var cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0];
+  var defaultMsg=cat
+    ? '我希望增加【'+cat.label+'】大类下更多细分岗位的模拟面试，比如：'
+    : '我希望增加以下岗位的模拟面试：';
+  openFeedback(defaultMsg);
+}}
+/* 题量不再手动选择，由 AI / 推荐配比自动分配（见 planDistribution） */
 var secOpts=document.getElementById('secOpts');
 secOpts.innerHTML=[[60,'60 秒 · 快答'],[90,'90 秒 · 标准'],[120,'120 秒 · 充分']].map(function(p){
   return '<button class="chip'+(p[0]===90?' on':'')+'" data-n="'+p[0]+'">'+p[1]+'</button>'}).join('');
-$$('#secOpts .chip').forEach(function(b){b.onclick=function(){S.sec=+b.dataset.n;$$('#secOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+$$('#secOpts .chip').forEach(function(b){b.onclick=function(){S.sec=+b.dataset.n;$$('#secOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)});renderSummary();}});
 
 /* 面试题型：通用字典 + 各大类专属字典 */
 var GENERAL_TYPES=[
@@ -1193,6 +1697,26 @@ var TYPE_ICONS={self_intro:'🙋',behavior:'🗣️',hr_round:'🤝',reverse_q:'
   sales_roleplay:'🎭',bd_case:'💼',
   func_scenario:'🗂️',func_pro:'🧾'};
 
+var Q_CATEGORIES=[
+  {id:'self',   name:'自我认知类',   icon:'🙋', point:'是否了解自己、是否真实',    samples:['自我介绍','优缺点'],             weight:2},
+  {id:'fit',    name:'岗位匹配类',   icon:'🎯', point:'是否适合岗位、是否做过功课',samples:['为什么选我们','对岗位理解'],    weight:1},
+  {id:'ability',name:'能力类',       icon:'💪', point:'是否能胜任工作',            samples:['项目经历','挑战案例'],          weight:2},
+  {id:'stable', name:'稳定性类',     icon:'📈', point:'是否能长期发展',            samples:['离职原因','职业规划'],          weight:1},
+  {id:'stress', name:'压力与沟通类', icon:'🔥', point:'抗压、协作、冲突处理',     samples:['挫折经历','团队合作'],          weight:1},
+  {id:'culture',name:'文化匹配类',   icon:'🤝', point:'是否能融入团队',            samples:['理想工作环境','加班态度'],      weight:1}
+];
+/* 题库题目 → 六大题型映射（按题目 id）；缺省归能力类 */
+var Q_CAT_MAP={
+ j1:'self',j2:'ability',j3:'fit',j4:'self',j5:'ability',j6:'stress',j7:'culture',j8:'stable',j9:'culture',j10:'stable',
+ t1:'self',t2:'ability',t3:'ability',t4:'ability',t5:'ability',t6:'ability',t7:'ability',t8:'ability',t9:'ability',t10:'ability',
+ d1:'self',d2:'ability',d3:'ability',d4:'ability',d5:'ability',d6:'ability',d7:'stress',d8:'ability',d9:'ability',d10:'ability',
+ p1:'self',p2:'fit',p3:'ability',p4:'ability',p5:'ability',p6:'ability',p7:'ability',p8:'stress',p9:'ability',p10:'self',
+ c1:'self',c2:'self',c3:'self',c4:'stable',c5:'stress',c6:'stress',c7:'stable',c8:'fit',c9:'self',c10:'culture'
+};
+function catOf(q){return Q_CAT_MAP[q.id]||'ability'}
+/* 六大题型配色（右侧仪表盘配比条形图 / 图例用） */
+var CAT_COLOR={self:'#6C8CFF',fit:'#41E0C8',ability:'#A78BFA',stable:'#FBBF24',stress:'#FB7185',culture:'#60A5FA'};
+
 /* 直接读源数据：推荐组 = 当前大类专属，通用组 = GENERAL_TYPES */
 function recommendTypes(catId){
   return catId?(SPECIFIC_TYPES[catId]||[]):[];
@@ -1201,30 +1725,39 @@ function availableTypes(catId){
   return catId?GENERAL_TYPES.concat(SPECIFIC_TYPES[catId]||[]):GENERAL_TYPES.slice();
 }
 function sortTypes(){
-  S.types.sort(function(a,b){return (TYPE_ORDER[a]||0)-(TYPE_ORDER[b]||0)});
+  var order={};Q_CATEGORIES.forEach(function(c,i){order[c.id]=i});
+  S.types.sort(function(a,b){return (order[a]==null?99:order[a])-(order[b]==null?99:order[b])});
 }
 
-/* 渲染：选中态完全由 S.types 集合驱动 */
-function typeCardHtml(t){
-  var on=S.types.indexOf(t.id)>=0;
-  return '<button type="button" class="type-card'+(on?' on':'')+'" data-k="'+t.id+'" aria-pressed="'+(on?'true':'false')+'">'+
-    '<span class="tc-ic">'+(TYPE_ICONS[t.id]||'📌')+'</span>'+
-    '<span class="tc-body"><b>'+esc(t.label)+'</b><i>'+esc(t.desc)+'</i></span>'+
-    '<span class="tc-check" aria-hidden="true">✓</span></button>';
+/* 渲染：六大题型卡，选中态由 S.types 驱动 */
+function catCardHtml(c){
+  var on=S.types.indexOf(c.id)>=0;
+  return '<button type="button" class="cat-card'+(on?' on':'')+'" data-k="'+c.id+'" aria-pressed="'+(on?'true':'false')+'">'+
+    '<span class="cc-check">✓</span>'+
+    '<div class="cc-top"><span class="cc-ic">'+c.icon+'</span><b>'+esc(c.name)+'</b></div></button>';
 }
+/* Step 2：渲染「面试场景与形式」卡片（单选）。
+   底层六大题型仍由 syncTypesForCategory 默认全选，这里不再让用户手动选题型。 */
 function renderTypes(){
-  var rec=recommendTypes(selectedCategory),
-      uni=GENERAL_TYPES,
-      cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0];
-  document.getElementById('typeRec').innerHTML=rec.map(typeCardHtml).join('');
-  document.getElementById('typeUni').innerHTML=uni.map(typeCardHtml).join('');
-  document.getElementById('typeRecTip').textContent=cat?'按「'+cat.label+'」推荐':'';
-  var empty=document.getElementById('typeRecEmpty');
-  empty.textContent=cat?'该大类暂无专属题型，先选下方通用必考即可开始。':'先在上一步选择目标岗位大类，这里会推荐专属题型。';
-  empty.style.display=rec.length?'none':'block';
-  $$('#typeRec .type-card,#typeUni .type-card').forEach(function(b){
-    b.onclick=function(){toggleType(b.dataset.k)};
-  });
+  var grid=document.getElementById('sceneGrid');
+  if(!grid)return;
+  grid.innerHTML=INTERVIEW_SCENES.map(function(sc){
+    var on=S.sceneMode===sc.id?' on':'';
+    return '<button type="button" class="cat-card scene-card'+on+'" data-k="'+sc.id+'" aria-pressed="'+(on?'true':'false')+'">'+
+      '<span class="cc-check">✓</span>'+
+      '<div class="cc-top">'+
+        '<span class="cc-ic">'+sc.icon+'</span>'+
+        '<div><b class="sc-name">'+esc(sc.name)+'</b><span class="sc-desc">'+esc(sc.desc)+'</span></div>'+
+      '</div></button>';
+  }).join('');
+  $$('#sceneGrid .scene-card').forEach(function(b){b.onclick=function(){
+    S.sceneMode=b.dataset.k;
+    /* 联动：选择压力面 → 自动开启高级设置里的压力模式；选其他场景 → 关闭 */
+    S.stressMode=(S.sceneMode==='pressure');
+    var st=document.getElementById('stressToggle');
+    if(st){st.classList.toggle('on',S.stressMode);st.setAttribute('aria-checked',S.stressMode?'true':'false')}
+    renderTypes();renderSummary();
+  }});
 }
 
 /* 多选切换 */
@@ -1237,28 +1770,16 @@ function toggleType(id){
 /* 难度偏向 */
 var lvOpts=document.getElementById('lvOpts');
 lvOpts.innerHTML=['不限','初级','中级','高级'].map(function(t,i){return '<button class="chip'+(i===0?' on':'')+'" data-n="'+(i-1)+'">'+t+'</button>'}).join('');
-$$('#lvOpts .chip').forEach(function(b){b.onclick=function(){S.lv=+b.dataset.n;$$('#lvOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)})}});
+$$('#lvOpts .chip').forEach(function(b){b.onclick=function(){S.lv=+b.dataset.n;$$('#lvOpts .chip').forEach(function(x){x.classList.toggle('on',x===b)});renderSummary();}});
 
-/* 压力模式开关 */
+/* 压力模式开关（Switch 控件：仅切换 class / aria，样式交给 CSS，状态同步到右侧仪表盘） */
 var stressToggle=document.getElementById('stressToggle');
 if(stressToggle){
   stressToggle.onclick=function(){
     S.stressMode=!S.stressMode;
-    if(S.stressMode){
-      stressToggle.classList.add('on');
-      stressToggle.textContent='已开启';
-      stressToggle.style.background='rgba(251,113,133,.2)';
-      stressToggle.style.borderColor='#fb7185';
-      stressToggle.style.color='#fff';
-      stressToggle.style.boxShadow='0 0 0 3px rgba(251,113,133,.15)';
-    }else{
-      stressToggle.classList.remove('on');
-      stressToggle.textContent='关闭';
-      stressToggle.style.background='';
-      stressToggle.style.borderColor='';
-      stressToggle.style.color='';
-      stressToggle.style.boxShadow='';
-    }
+    stressToggle.classList.toggle('on',S.stressMode);
+    stressToggle.setAttribute('aria-checked',S.stressMode?'true':'false');
+    renderSummary();
   };
 }
 
@@ -1272,9 +1793,15 @@ var savedMode=userGet('ans_mode','text');
 if(!MODE_OPTS.some(function(m){return m.k===savedMode}))savedMode='text';
 S.mode=savedMode;
 var modePicks=document.getElementById('modePicks');
+/* 卡面补充信息：右上推荐角标 + 底部功能标签，避免三张大卡留白过多 */
+var MODE_BADGE={anim:'✨ 推荐'};
+var MODE_TAGS={text:['专注模式','无需露脸'],anim:['AI 伴读','实时转写'],cam:['视频模拟','语音识别']};
 modePicks.innerHTML=MODE_OPTS.map(function(o){
+  var tags=(MODE_TAGS[o.k]||[]).map(function(t){return '<span>'+esc(t)+'</span>'}).join('');
   return '<button type="button" class="m-pick'+(o.k===S.mode?' on':'')+'" data-k="'+o.k+'">'+
-    '<div class="mp-ic">'+o.ic+'</div><div class="mp-t">'+o.t+'</div><div class="mp-d">'+o.d+'</div></button>';
+    (MODE_BADGE[o.k]?'<span class="badge">'+MODE_BADGE[o.k]+'</span>':'')+
+    '<div class="mp-ic">'+o.ic+'</div><div class="mp-t">'+o.t+'</div><div class="mp-d">'+o.d+'</div>'+
+    (tags?'<div class="mp-tags">'+tags+'</div>':'')+'</button>';
 }).join('');
 $$('#modePicks .m-pick').forEach(function(b){b.onclick=function(){
   S.mode=b.dataset.k;userSet('ans_mode',S.mode);
@@ -1283,10 +1810,17 @@ $$('#modePicks .m-pick').forEach(function(b){b.onclick=function(){
 }});
 
 function renderPreview(sc){
-  var pool=QUESTIONS.filter(function(q){return q.scene===sc}).slice(0,3);
+  var scenePool=QUESTIONS.filter(function(q){return q.scene===sc});
+  var preview=scenePool.slice(0,3);
+  var plan=planDistribution();
+  /* 展示全题库总量：AI 会按题型从所选方向 + 通用 + 其他方向兜底抽题，
+     可用题量远大于本场抽取的题数，避免用户误以为只有十几题 */
+  var totalBank=QUESTIONS.length;
+  var cnt=document.getElementById('scPoolCnt');
+  if(cnt)cnt.textContent='题库 '+totalBank+' 题 · 本场约 '+plan.total+' 题';
   document.getElementById('scPreview').innerHTML=
-    '<div class="sp-card" style="grid-column:1/-1;font-size:11px;color:var(--ink3);margin-bottom:-2px">'+SCENES[sc].name+' 前 3 道预览：</div>'+
-    pool.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+SCENE_COLOR[q.scene]+'">'+LV_NAME[q.lv]+' · '+SCENES[q.scene].name+'</div>'+esc(q.q)+'</div>'}).join('');
+    '<div class="sp-card sp-hint">'+SCENES[sc].name+' · 全题库共 <b>'+totalBank+'</b> 题可抽取（AI 会从本方向 + 通用 + 其他方向按题型兜底），本场面试约 <b>'+plan.total+'</b> 题，以下预览前 3 道开场题：</div>'+
+    preview.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+SCENE_COLOR[q.scene]+'">'+LV_NAME[q.lv]+' · '+SCENES[q.scene].name+'</div>'+esc(q.q)+'</div>'}).join('');
 }
 renderPreview(S.scene);
 
@@ -1306,10 +1840,8 @@ var typesSynced=false,typesSyncCat=null; /* 记录上次同步的大类，避免
    大类未变（如从 Step 3 返回）直接保留用户手动勾选 */
 function syncTypesForCategory(){
   if(typesSynced&&typesSyncCat===selectedCategory)return;
-  S.types=[];
-  var rec=recommendTypes(selectedCategory);
-  if(rec.length)S.types.push(rec[0].id);       /* 推荐组第一项 */
-  if(GENERAL_TYPES.length)S.types.push(GENERAL_TYPES[0].id); /* 通用组第一项 */
+  /* 默认全选六大题型：保证每个维度都被考察到，支撑最后的能力统计 */
+  S.types=Q_CATEGORIES.map(function(c){return c.id});
   sortTypes();
   typesSynced=true;typesSyncCat=selectedCategory;
   renderTypes();renderSummary();
@@ -1317,17 +1849,60 @@ function syncTypesForCategory(){
 
 /* Step 4 汇总卡片：随前 3 步选择实时刷新（题型支持多选） */
 function renderSummary(){
-  var box=document.getElementById('wzSummary');
-  if(!box)return;
+  var plan=planDistribution();
   var cat=JOB_CATEGORIES.filter(function(c){return c.id===selectedCategory})[0],
-      tps=availableTypes(selectedCategory).filter(function(o){return S.types.indexOf(o.id)>=0}),
+      tps=Q_CATEGORIES.filter(function(c){return S.types.indexOf(c.id)>=0}),
       md=MODE_OPTS.filter(function(o){return o.k===S.mode})[0]||{};
   var jobTxt=cat?cat.icon+' '+cat.label+' · '+(selectedSubJob||'不限方向'):'未选择';
-  var typeTxt=tps.length?tps.map(function(o){return o.label}).join('、'):'未选择';
-  box.innerHTML='<div class="ws-h">📋 本次面试设置</div>'+
-    '<div class="ws-row"><span class="ws-k">目标岗位</span><span class="ws-v">'+esc(jobTxt)+'</span></div>'+
-    '<div class="ws-row"><span class="ws-k">面试题型</span><span class="ws-v">'+esc(typeTxt)+'</span></div>'+
-    '<div class="ws-row"><span class="ws-k">作答方式</span><span class="ws-v">'+esc((md.ic?md.ic+' ':'')+(md.t||'未选择'))+'</span></div>';
+  var curScene=INTERVIEW_SCENES.filter(function(s){return s.id===S.sceneMode})[0]||INTERVIEW_SCENES[0];
+  function short(n){return n.replace('类','')}
+  /* 左：面试策略卡 — 大字总数 + 当前面试场景（六大题型配比已下沉为底层抽题/评分算法，不再向用户展示） */
+  var db=document.getElementById('distBox');
+  if(db){
+    /* 按题型题量生成横向堆叠进度条：每段颜色对应 CAT_COLOR，段宽 = 该题型题数 */
+    var used=Q_CATEGORIES.filter(function(c){return plan.counts[c.id]});
+    db.innerHTML='<div class="db-left"><span class="db-num">'+plan.total+'</span><span class="db-unit">题 · 由 AI 自动分配</span></div>'+
+      '<div class="db-bar">'+used.map(function(c){
+        return '<span class="db-seg" style="flex:'+plan.counts[c.id]+';background:'+CAT_COLOR[c.id]+
+          '" title="'+esc(c.name)+' '+plan.counts[c.id]+' 题"></span>';
+      }).join('')+'</div>'+
+      '<div class="db-legend">'+used.map(function(c){
+        return '<span class="db-leg"><i style="background:'+CAT_COLOR[c.id]+'"></i>'+
+          esc(c.name.replace('类',''))+' <b>'+plan.counts[c.id]+'</b></span>';
+      }).join('')+'</div>';
+  }
+  /* 右：实时反馈仪表盘 */
+  var box=document.getElementById('wzSummary');
+  if(box){
+    var secNum=S.sec===60?60:S.sec===120?120:90;
+    var lvChip=document.querySelector('#lvOpts .chip.on');
+    var lvName=lvChip?lvChip.textContent.trim():'不限';
+    var stressOn=!!S.stressMode;
+    box.innerHTML=
+      '<div class="dash-top">'+
+        '<span class="dt-ic">💼</span>'+
+        '<div><div class="dt-k">目标岗位</div><div class="dt-v">'+esc(jobTxt)+'</div></div>'+
+      '</div>'+
+      '<div class="dash-metrics">'+
+        '<div class="dm"><span class="dm-ic">🕒</span><div class="dm-v">'+secNum+'<span class="dm-u">秒/题</span></div><div class="dm-l">限时</div></div>'+
+        '<div class="dm"><span class="dm-ic">📊</span><div class="dm-v">'+esc(lvName)+'</div><div class="dm-l">难度</div></div>'+
+        '<div class="dm'+(stressOn?' on':'')+'"><span class="dm-ic">🔥</span><div class="dm-v">'+(stressOn?'已开启':'未开启')+'</div><div class="dm-l">压力模式</div></div>'+
+      '</div>'+
+      '<div class="dash-dist">'+
+        '<div class="dd-h">面试场景 · 共 <b class="num">'+plan.total+'</b> 题</div>'+
+        '<div class="dd-scene">'+
+          '<span class="ds-ic">'+curScene.icon+'</span>'+
+          '<span class="ds-name">'+esc(curScene.name)+'</span>'+
+          '<span class="ds-desc">'+esc(curScene.desc)+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="dash-meta">'+
+        '<div><span class="dm-l">作答方式</span><b>'+esc((md.ic?md.ic+' ':'')+(md.t||'未选择'))+'</b></div>'+
+        '<div><span class="dm-l">简历定制</span><b>'+((S.resume&&S.resume.trim())?'✅ 已附简历':'⚪ 通用题库')+'</b></div>'+
+        '<div><span class="dm-l">AI 引擎</span><b>'+(AI_ON()?'☁️ 真实大模型':'🧠 本地模拟')+'</b>'+
+          ' <button type="button" onclick="typeof openAiSettings===\'function\'&&openAiSettings()" style="margin-left:6px;padding:2px 10px;font-size:11px;border-radius:8px;background:rgba(108,140,255,.15);border:1px solid rgba(108,140,255,.4);color:var(--acc2);cursor:pointer">配置</button></div>'+
+      '</div>';
+  }
 }
 
 /* 条件渲染：只显示当前 Step 的面板，并同步进度条 / 底部按钮 */
@@ -1369,6 +1944,69 @@ document.getElementById('wzNext').onclick=function(){
 };
 syncTypesForCategory();
 setStep(1,true);
+
+(function(){
+  var ta=document.getElementById('resumeTa');
+  if(!ta)return;
+  var status=document.getElementById('resumeStatus');
+  var preview=document.getElementById('resumePreview');
+  var draft=userGet('resume_draft','');
+  if(draft){ ta.value=draft; S.resume=draft; renderSummary(); }
+  ta.addEventListener('input',function(){ S.resume=this.value; userSet('resume_draft',this.value); renderSummary(); });
+  var file=document.getElementById('resumeFile');
+  if(file){
+    file.addEventListener('change',function(){
+      var f=this.files&&this.files[0]; if(!f)return;
+      if(f.size>300*1024){toast('文件过大，请粘贴文本或用小于 300KB 的 .txt/.md','warn');return}
+      var reader=new FileReader();
+      reader.onload=function(){ S.resume=String(reader.result||''); ta.value=S.resume; userSet('resume_draft',S.resume); if(status)status.textContent='已导入：'+f.name; renderSummary(); };
+      reader.onerror=function(){toast('读取文件失败','warn')};
+      reader.readAsText(f);
+      this.value='';
+    });
+  }
+  var parseBtn=document.getElementById('resumeParse');
+  if(parseBtn){
+    parseBtn.onclick=function(){
+      var txt=(S.resume||'').trim();
+      if(!txt){toast('请先粘贴或上传简历文本','warn');return}
+      parseBtn.disabled=true; var old=parseBtn.textContent; parseBtn.textContent='解析中…';
+      if(status)status.textContent=AI_ON()?'AI 正在解析…':'正在本地解析…';
+      parseResume(txt).then(function(p){
+        S.resumeSummary=buildResumeSummary(p);
+        if(preview){
+          preview.style.display='block';
+          preview.innerHTML='<b>✅ 识别结果</b><br><b>技能：</b>'+(p.skills.length?esc(p.skills.join('、')):'未识别到')+
+            '<br><b>项目：</b>'+(p.projects.length?p.projects.map(function(x){return '· '+esc(x)}).join('<br>'):'未识别到')+
+            '<br><b>摘要：</b>'+esc(p.summary);
+        }
+        if(status)status.textContent='已识别 '+p.skills.length+' 项技能、'+p.projects.length+' 段项目，进入面试后将据此定制题目与追问';
+        renderSummary();
+      })['catch'](function(){ if(status)status.textContent='解析失败，将按通用方式出题'; })
+      .then(function(){ parseBtn.disabled=false; parseBtn.textContent=old; });
+    };
+  }
+  /* 手动粘贴文本：展开 / 收起文本框 */
+  var manualBtn=document.getElementById('resumeManual');
+  if(manualBtn){
+    manualBtn.onclick=function(){
+      var show=ta.style.display==='none'||!ta.style.display;
+      ta.style.display=show?'block':'none';
+      manualBtn.textContent=show?'收起文本输入':'手动粘贴文本';
+      if(show){setTimeout(function(){ta.focus()},50)}
+    };
+  }
+  /* dropzone 拖拽上传：复用 file input 的 change 解析逻辑 */
+  var dz=document.querySelector('.dropzone');
+  if(dz&&typeof file!=='undefined'&&file){
+    ['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag')})});
+    ['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('drag')})});
+    dz.addEventListener('drop',function(e){
+      var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f)return;
+      try{var dt=new DataTransfer();dt.items.add(f);file.files=dt.files;file.dispatchEvent(new Event('change'))}catch(err){}
+    });
+  }
+})();
 
 /* 进入会话前的准备：摄像头语音模式需先拿到摄像头/麦克风并确认语音识别可用 */
 function enterSession(done){
@@ -1456,72 +2094,129 @@ function show(id){
   scrollTo(0,0);
 }
 
-/* 题型 → 题库场景映射规则 */
-function buildPool(scene,types,lv){
-  var picked=[];
-
-  // 1. 根据选中的题型，映射到对应的题库场景
-  if(types&&types.length){
-    types.forEach(function(tId){
-      // 通用题型：从 job 和 general 场景找
-      if(['self_intro','behavior','hr_round','reverse_q'].indexOf(tId)>=0){
-        QUESTIONS.forEach(function(q){
-          if((q.scene==='job'||q.scene==='general')&&picked.indexOf(q)<0)picked.push(q);
-        });
-        return;
-      }
-      // 专属题型：查找它属于哪个大类，并映射到 JOB_SCENE
-      var targetCat=null;
-      for(var cat in SPECIFIC_TYPES){
-        if(SPECIFIC_TYPES[cat].some(function(st){return st.id===tId})){
-          targetCat=cat;break;
-        }
-      }
-      var targetScene=JOB_SCENE[targetCat]||scene;
-      // 特殊处理某些题型
-      if(tId==='sql_code')targetScene='data';
-      if(tId==='design_portfolio')targetScene='general';
-      QUESTIONS.forEach(function(q){
-        if(q.scene===targetScene&&picked.indexOf(q)<0)picked.push(q);
-      });
-    });
+/* 题量分配：AI 配置时由大模型分配，否则按推荐配比；保证六大题型覆盖、题量充足 */
+function planDistribution(){
+  var sel=Q_CATEGORIES.filter(function(c){return S.types.indexOf(c.id)>=0});
+  if(!sel.length)sel=Q_CATEGORIES.slice();
+  var hasResume=!!(S.resume&&S.resume.trim());
+  /* 题量不能太少——要支撑最后多维度能力统计与综合评价：每类至少 2 题，默认 12 题 */
+  var perCat=2;
+  var total=sel.length*perCat;
+  var target=hasResume?12:(S.stressMode?12:12);
+  if(total<target)total=target;
+  if(total>14)total=14;
+  var counts={};
+  sel.forEach(function(c){counts[c.id]=perCat});
+  var cur=sel.length*perCat;
+  /* 多余题量按权重追加，权重逐步衰减避免集中在同一类 */
+  var w={};sel.forEach(function(c){w[c.id]=c.weight||1});
+  while(cur<total){
+    var best=null,bw=0;
+    sel.forEach(function(c){if(w[c.id]>bw){bw=w[c.id];best=c}});
+    if(!best)break;
+    counts[best.id]=(counts[best.id]||0)+1;cur++;
+    w[best.id]=w[best.id]*0.5;
   }
-
-  // 2. 兜底：如果没匹配到题，按当前大类场景兜底
-  if(!picked.length){
-    picked=QUESTIONS.filter(function(q){return q.scene===scene});
-  }
-  // 3. 如果题目太少，强行补题
-  if(picked.length<3){
-    QUESTIONS.forEach(function(q){if(q.scene===scene&&picked.indexOf(q)<0)picked.push(q)});
-  }
-  // 4. 难度过滤
-  var pre=picked.slice();
-  if(lv>=1)picked=picked.filter(function(q){return q.lv>=lv});
-  else if(lv===-1)picked=picked.filter(function(q){return q.lv===1});
-  if(!picked.length)picked=pre; // 难度过滤后为空则回退
-  // 5. 压力模式抽题策略：如果有高级题，优先抽高级题
-  if(S.stressMode){
-    var highLv=picked.filter(function(q){return q.lv===3});
-    if(highLv.length>=S.count){
-      picked=highLv; // 全部抽高难度
-    }else if(highLv.length>0){
-      // 保证高难度题优先排前面，后续会被随机打乱
-      picked=highLv.concat(picked.filter(function(q){return q.lv!==3}));
+  return {total:total,counts:counts};
+}
+function validatePlan(j,sel){
+  if(!j||typeof j!=='object')return null;
+  var total=+j.total; if(!(total>=8&&total<=14))return null;
+  var counts=j.counts||{},c2={},sum=0;
+  for(var i=0;i<sel.length;i++){var c=sel[i];var n=+counts[c.id];if(!(n>=2))return null;c2[c.id]=n;sum+=n;}
+  if(sum!==total)return null;
+  return {total:total,counts:c2};
+}
+function aiPlanDistribution(localPlan){
+  if(!(typeof CLOUD!=='undefined'&&CLOUD.isCloud&&CLOUD.isCloud()))return Promise.resolve(localPlan);
+  var sel=Q_CATEGORIES.filter(function(c){return S.types.indexOf(c.id)>=0});
+  if(!sel.length)return Promise.resolve(localPlan);
+  var cats=sel.map(function(c){return c.id+':'+c.name+'（'+c.point+'）'}).join('；');
+  var sc=INTERVIEW_SCENES.filter(function(s){return s.id===S.sceneMode})[0]||INTERVIEW_SCENES[0];
+  var prompt='你是面试编排官。为这次模拟面试分配各题型题量与总题数。\n'+
+    '岗位：'+((SCENES[S.scene]&&SCENES[S.scene].name)||'综合')+(selectedSubJob?' · '+selectedSubJob:'')+'\n'+
+    '面试场景：'+sc.name+' — '+(SCENE_PROMPTS[S.sceneMode]||SCENE_PROMPTS.campus)+'\n'+
+    '按面试先后顺序的题型：'+cats+'\n'+
+    '附简历：'+(S.resume&&S.resume.trim()?'是':'否')+'；压力模式：'+(S.stressMode?'是':'否')+
+    '；难度：'+(['不限','初级','中级','高级'][S.lv+1]||'不限')+'\n'+
+    '要求：总题数 10~14，每个题型至少 2 题，题量要够支撑最后多维度能力统计与综合评价。严格只输出 JSON：{"total":12,"counts":{"self":2,"fit":2,"ability":2,"stable":2,"stress":2,"culture":2}}';
+  return CLOUD.aiJson('你是面试编排官，只输出 JSON。',[{role:'user',content:prompt}]).then(function(j){
+    return validatePlan(j,sel)||localPlan;
+  })['catch'](function(){return localPlan});
+}
+/* 题型 → 题库场景映射规则（新版：按六大题型分类、按面试先后顺序抽题） */
+function buildPool(plan){
+  var result=[];
+  var sel=Q_CATEGORIES.filter(function(c){return (plan.counts[c.id]||0)>0});
+  sel.forEach(function(cat){
+    var need=plan.counts[cat.id]||0;
+    var same=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene===S.scene});
+    var gen=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene==='general'});
+    var other=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene!==S.scene&&q.scene!=='general'});
+    var full=same.concat(gen,other);       /* 未过滤难度的完整题池，用于保底与强制开场题 */
+    var pool=full.slice();
+    if(S.lv>=1)pool=pool.filter(function(q){return q.lv>=S.lv});
+    else if(S.lv===-1)pool=pool.filter(function(q){return q.lv===1});
+    if(!pool.length)pool=full.slice();
+    if(S.stressMode){
+      var hi=pool.filter(function(q){return q.lv===3});
+      if(hi.length)pool=hi.concat(pool.filter(function(q){return q.lv!==3}));
     }
-  }
-  return picked;
+    var picked=[];
+    /* 自我认知类：强制把「自我介绍」放在第一题，符合真实面试“先破冰自我介绍”的开场逻辑 */
+    if(cat.id==='self'){
+      for(var k=0;k<full.length;k++){if(full[k].q.indexOf('自我介绍')>=0){picked.push(full[k]);break}}
+    }
+    var rest=pool.filter(function(q){return picked.indexOf(q)<0});
+    picked=picked.concat(shuffle(rest).slice(0,need-picked.length));
+    if(picked.length<need){full.filter(function(q){return picked.indexOf(q)<0}).forEach(function(q){if(picked.length<need)picked.push(q)})}
+    picked.forEach(function(q){result.push(q)});
+  });
+  return result;
+}
+function ensureIntroFirst(){
+  if(!S.qs||!S.qs.length)return;
+  for(var i=0;i<S.qs.length;i++){if(/自我介绍/.test(S.qs[i].q)){if(i>0){var q=S.qs.splice(i,1)[0];S.qs.unshift(q)}break}}
 }
 /* 进入面试间：沿用原「开始」按钮逻辑，供向导 Step 4 的下一步按钮调用 */
+/* startInterview 改为异步：若附了简历，先解析简历 → 生成定制题 → 注入题池最前；
+   未附简历则直接走通用题库。整个过程有本地兜底，不会卡死。 */
+var _starting=false;
 function startInterview(){
-  if(!canUseFeature())return;
-  var pool=buildPool(S.scene,S.types,S.lv);
-  S.qs=shuffle(pool).slice(0,Math.min(S.count,pool.length));
-  S.idx=0;S.recs=[];S.t0=Date.now();
-  enterSession(function(){
-    toast('面试开始，深呼吸，加油！','ok');
-    nextQ();
-  });
+  if(!canUseFeature()||_starting)return;
+  _starting=true;
+  var btn=document.getElementById('wzNext');
+  if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='准备中…'}
+  var localPlan=planDistribution();
+  function resetBtn(){ var b=document.getElementById('wzNext'); if(b&&b.dataset.oldText){b.disabled=false;b.textContent=b.dataset.oldText} }
+  function go(){
+    _starting=false;resetBtn();
+    enterSession(function(){ toast('面试开始，深呼吸，加油！','ok'); nextQ(); });
+  }
+  function withPlan(plan){
+    S.plan=plan;S.count=plan.total;
+    S.qs=buildPool(plan).slice(0,plan.total);
+    ensureIntroFirst();
+    S.idx=0;S.recs=[];S.t0=Date.now();S.resumeSummary='';window.__lastScore=null;
+    var resume=(S.resume||'').trim();
+    if(!resume){ go(); return; }
+    toast('AI 正在解析你的简历并定制题目…','ok');
+    parseResume(resume).then(function(parsed){
+      S.resumeSummary=buildResumeSummary(parsed);
+      return genResumeQuestions(parsed,S.scene,2);
+    }).then(function(rqs){
+      if(rqs&&rqs.length){
+        /* 简历定制题放在自我介绍之后，替换尾部等额题目，保持总题数不变 */
+        var intro=S.qs.length?[S.qs[0]]:[];
+        var body=S.qs.slice(1);
+        S.qs=intro.concat(rqs).concat(body).slice(0,plan.total);
+        ensureIntroFirst();
+        toast('已基于你的简历生成 '+rqs.length+' 道定制深挖题','ok');
+      }
+      go();
+    })['catch'](function(){ go(); });
+  }
+  aiPlanDistribution(localPlan).then(withPlan);
 }
 
 var VR={stream:null,mr:null,chunks:[],on:false,timer:null,maxSec:0,remain:0,elapsed:0,autoStopped:false};
@@ -1770,13 +2465,20 @@ function submit(){
   aiState('thinking');
   setTimeout(function(){aiRespond(last)},520);
 }
-/* 面试官听完之后的短回应，让问答像真的在来回交流 */
+/* 面试官听完之后的短回应：基于考生刚答的内容实时生成（肯定 / 追问 / 施压），
+   未配置 AI 时走本地模拟，也比旧的随机套话更贴合回答内容。 */
 function aiRespond(last){
-  aiState('speaking');
-  var line=last?'好的，今天的面试就到这里，辛苦了。':pickAck();
-  typeBubble(line,function(){
-    setTimeout(function(){finishTurn(last)},last?900:520);
-  });
+  aiState('thinking');
+  function speakLine(line){
+    aiState('speaking');
+    typeBubble(line,function(){
+      if(ttsEnabled()&&canTTS()){ speakTTS(line,voiceOpt(S.scene)); }
+      setTimeout(function(){finishTurn(last)},last?900:520);
+    });
+  }
+  if(last){ speakLine('好的，今天的面试就到这里，辛苦了，感谢你的作答。'); return; }
+  var q=S.qs[S.idx], ans=S.recs.length?S.recs[S.recs.length-1].ans:'';
+  getInterviewerReply(q,ans).then(speakLine);
 }
 function pickAck(){
   var lines=['好的，我记下了，我们看下一题。','嗯，这个思路我清楚了，继续下一题。','收到，我先记录下来，我们继续。','了解，那我们进入下一题。'];
@@ -1818,11 +2520,9 @@ function renderFb(q,rec){
 }
 
 function typeName(){
-  /* 复盘 / 历史记录：从源数据反查当前选中题型名称 */
-  var all=GENERAL_TYPES.slice();
-  JOB_CATEGORIES.forEach(function(c){all=all.concat(SPECIFIC_TYPES[c.id]||[])});
-  var tps=all.filter(function(t){return S.types.indexOf(t.id)>=0});
-  return tps.length?tps.map(function(t){return t.label}).join('、'):'综合面试';
+  /* 复盘 / 历史记录：反查当前选中的六大题型名称 */
+  var tps=Q_CATEGORIES.filter(function(c){return S.types.indexOf(c.id)>=0});
+  return tps.length?tps.map(function(c){return c.name}).join('、'):'综合面试';
 }
 
 function enterRate(){
@@ -1849,11 +2549,215 @@ function enterRate(){
 }
 /* updRateProgress 已移除：不再需要用户自评分 */
 
+/* AI_ON 用函数声明（完全提升），确保脚本初始化阶段 renderSummary 即可安全调用 */
+function AI_ON(){ return typeof CLOUD!=='undefined'&&CLOUD.isCloud&&CLOUD.isCloud(); }
+
+/* 面试官角色人格（强约束 System Prompt）——对应策略点「让面试官有身份」 */
+var IV_PERSONA={
+  job:    {sys:'你是校招/实习方向的 HR 面试官，语气专业、温和但有判断力，重点考察表达、动机、稳定性与人岗匹配。回答简短有力，每次只说一两句；会在候选人回答空泛时追问具体细节。禁止闲聊、禁止给出正确答案、禁止脱离面试场景。'},
+  tech:   {sys:'你是资深技术面试官（后端/大数据方向），语气严谨，重点考察技术深度、项目真实度、系统设计与排错能力。候选人回答模糊时追问技术选型原因、数据规模、踩过的坑。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  data:   {sys:'你是数据分析方向的资深面试官，关注分析思维、SQL 基本功、指标体系与业务落地。会追问口径、验证方法与业务含义。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  product:{sys:'你是产品/运营方向的面试官，关注用户思维、方案设计、案例拆解与执行力。会追问目标定义、用户场景与效果衡量。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  general:{sys:'你是 STAR 行为面试官，关注过往经历的真实度、抗压、协作与复盘。会用 STAR 结构追问细节（背景/任务/行动/结果）。每次只说一两句；禁止闲聊、禁止直接给答案。'}
+};
+function personaSys(scene){ return (IV_PERSONA[scene]||IV_PERSONA.general).sys; }
+
+/* 把解析后的简历拼成一段「面试官记忆」，注入后续 Prompt */
+function buildResumeSummary(p){
+  if(!p)return '';
+  var parts=[];
+  if(p.summary)parts.push('摘要：'+p.summary);
+  if(p.skills&&p.skills.length)parts.push('技能：'+p.skills.join('、'));
+  if(p.projects&&p.projects.length)parts.push('项目经历：'+p.projects.join('；'));
+  return parts.join(' | ');
+}
+
+var TECH_WORDS=['Python','Java','C++','C#','Go','Rust','JavaScript','TypeScript','HTML','CSS','Vue','React','Node','Spring','SpringBoot','MyBatis','MySQL','Redis','MongoDB','Kafka','Hadoop','Hive','Spark','Flink','HBase','Elasticsearch','Linux','Docker','Kubernetes','Git','机器学习','深度学习','TensorFlow','PyTorch','Pandas','NumPy','Scikit','SQL','Excel','Tableau','数据分析','数据挖掘','推荐系统','NLP','计算机视觉','嵌入式','单片机','STM32','FPGA','操作系统','计算机网络','数据结构','算法'];
+function mockParseResume(text){
+  text=String(text||'');
+  var skills=[];
+  TECH_WORDS.forEach(function(w){ if(text.toLowerCase().indexOf(w.toLowerCase())>=0&&skills.indexOf(w)<0)skills.push(w); });
+  if(!skills.length){
+    var m=text.match(/[\u4e00-\u9fa5A-Za-z+#]{2,8}(开发|分析|设计|运维|测试|算法|数据|网络|系统)/g);
+    if(m)m.forEach(function(x){if(skills.indexOf(x)<0)skills.push(x)});
+  }
+  var projects=[];
+  text.split(/\n|。|；/).map(function(s){return s.trim()}).forEach(function(l){
+    if(l.length>=6&&l.length<=60&&/(项目|系统|平台|设计|开发|实现|搭建|竞赛|比赛|实习|负责)/.test(l)&&projects.length<4)projects.push(l);
+  });
+  var summary=text.replace(/\s+/g,' ').slice(0,80);
+  return {skills:skills.slice(0,12),projects:projects.slice(0,3),summary:summary};
+}
+function normalizeResume(j,text){
+  j=j||{};
+  var skills=Array.isArray(j.skills)?j.skills.filter(Boolean).slice(0,12):[];
+  var projects=Array.isArray(j.projects)?j.projects.map(function(p){return typeof p==='string'?p:((p&&(p.name||p.title||p.desc))||'')}).filter(Boolean).slice(0,3):[];
+  var summary=String(j.summary||'').slice(0,120)||String(text||'').replace(/\s+/g,' ').slice(0,80);
+  if((!skills.length||!projects.length)){ var mk=mockParseResume(text); if(!skills.length)skills=mk.skills; if(!projects.length)projects=mk.projects; }
+  return {skills:skills,projects:projects,summary:summary};
+}
+function parseResume(text){
+  text=String(text||'').trim();
+  if(!text)return Promise.resolve({skills:[],projects:[],summary:''});
+  var sys='你是简历解析助手。从给定简历文本提取：技能栈(skills，字符串数组)、项目经历(projects，字符串数组，每项一句话)、80字内候选人摘要(summary)。严格只输出 JSON：{"skills":[],"projects":[],"summary":""}';
+  if(AI_ON()){
+    return CLOUD.aiJson(sys,[{role:'user',content:'简历文本：\n'+text}]).then(function(j){return normalizeResume(j,text)})
+      ['catch'](function(){return mockParseResume(text)});
+  }
+  return Promise.resolve(mockParseResume(text));
+}
+
+function mockResumeQuestions(resume,scene,count){
+  var qs=[];
+  (resume.projects||[]).forEach(function(p){
+    if(qs.length>=count)return;
+    qs.push({q:'你简历里提到「'+p.slice(0,24)+'」，请详细讲讲你在其中负责的部分，以及遇到的最大难点是什么、怎么解决的？',
+      point:'考察项目真实度、个人贡献与问题排查能力，是最容易被追问的环节。',
+      tips:['用 STAR：背景→任务→行动→结果','明确说"你负责的部分"而非"我们"','准备好被追问数据规模、选型原因、踩过的坑'],
+      ans:['先一句话交代项目背景与目标。','我负责的是 XX 模块，具体做了 XX。','最大难点是 XX，我通过 XX 定位到根因，用 XX 方案解决，最终 XX。']});
+  });
+  (resume.skills||[]).forEach(function(s){
+    if(qs.length>=count)return;
+    qs.push({q:'简历提到你掌握 '+s+'，能说说它主要解决什么问题吗？你在项目里是怎么用的？',
+      point:'判断是真用过还是只写在简历上，考察技术认知深度。',
+      tips:['说清"解决什么问题、为什么用它"','结合一个真实场景讲选型','别只背定义'],
+      ans:['我理解 '+s+' 主要用来解决 XX 问题。','在 XX 项目里我用它做了 XX，当时选它是因为 XX。','过程中遇到的坑是 XX，我是这样处理的：XX。']});
+  });
+  if(!qs.length){
+    qs.push({q:'请挑一段你最有代表性的经历，讲讲背景、你做了什么、最终结果如何。',
+      point:'考察表达概括与经历真实度。',tips:['控制在 1-2 分钟','按"背景→行动→结果"讲','结尾落到收获'],
+      ans:['我最有代表性的经历是 XX。','背景是 XX，我负责 XX，做了 XX。','最终取得了 XX 结果，我从中收获了 XX。']});
+  }
+  return qs.slice(0,count);
+}
+function normalizeResumeQuestions(arr,resume,scene,count){
+  if(!Array.isArray(arr)||!arr.length)return mockResumeQuestions(resume,scene,count);
+  return arr.slice(0,count).map(function(q,i){
+    q=q||{};
+    return { id:'r'+(i+1), scene:scene, lv:2,
+      q:String(q.q||q.question||'').trim()||'请结合你的简历做自我介绍。',
+      point:String(q.point||q.examine||'考察经历真实度与表达逻辑。').trim(),
+      tips:Array.isArray(q.tips)?q.tips.slice(0,4):['用 STAR 结构讲清楚背景、行动与结果'],
+      ans:Array.isArray(q.ans)?q.ans.slice(0,4):(Array.isArray(q.reference)?q.reference.slice(0,4):['结合自身经历展开，给出具体细节与数据']) };
+  });
+}
+function genResumeQuestions(resume,scene,count){
+  count=Math.max(1,count||2);
+  if(AI_ON()){
+    var sys='你是资深面试官。基于候选人简历生成 '+count+' 道针对其技能/项目的深挖面试题，必须贴合简历，严禁通用题。严格输出 JSON 数组，每个元素含 q(题目)、point(考察点)、tips(技巧数组)、ans(参考要点数组)：[{"q":"","point":"","tips":[],"ans":[]}]';
+    var user='岗位方向：'+((SCENES[scene]&&SCENES[scene].name)||'综合')+'\n'+buildResumeSummary(resume);
+    return CLOUD.aiJson(sys,[{role:'user',content:user}]).then(function(j){
+      var arr=Array.isArray(j)?j:(j.questions||j.list||j.data||[]);
+      return normalizeResumeQuestions(arr,resume,scene,count);
+    })['catch'](function(){return mockResumeQuestions(resume,scene,count)});
+  }
+  return Promise.resolve(mockResumeQuestions(resume,scene,count));
+}
+
+function mockInterviewerReply(q,ans,resumeSummary,stress){
+  var len=String(ans||'').replace(/\s/g,'').length;
+  if(stress&&len<40)return '等等，你刚才说得比较笼统，能给一个具体的数据或实际场景吗？比如规模、耗时、最终结果。';
+  if(stress&&len<80)return '我注意到你提到了这个点，但没有展开。你当时具体是怎么做的？别只讲结论。';
+  if(len<25)return '这题你还没怎么展开，能再说说你的思路吗？哪怕先给个框架也行。';
+  if(len<55)return '框架有了，但内容偏薄。你刚才提到的那一点，能补一个具体例子吗？';
+  if(len<100)return '基本答到点上了。有个地方我想再确认一下——你当时为什么这么选，而不是别的方案？';
+  var pool=['好，这个回答比较完整，我们看下一题。','嗯，思路清晰，继续下一题。','收到，这个点我记下了，继续。'];
+  if(resumeSummary)pool.push('结合你简历里的经历，这块你确实做过，我们继续。');
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function getInterviewerReply(q,ans){
+  var summary=S.resumeSummary||'';
+  var stress=!!S.stressMode;
+  var scenePrompt=SCENE_PROMPTS[S.sceneMode]||SCENE_PROMPTS.campus;
+  var sys=personaSys(S.scene)+'\n'+scenePrompt+(summary?('\n以下是候选人简历摘要，你已读过并会据此追问：'+summary):'')+
+    (stress?'\n当前是【压力面试模式】：若候选人回答空泛、偏短或回避，要主动质疑、连环追问，语气可以更犀利；若回答扎实则简短肯定后推进。':'\n若回答完整则简短肯定后推进；若回答空泛则追问一个具体细节。')+
+    '\n你刚听完候选人对这道题的回答，请给出一句简短回应（30字以内），可以是肯定、追问或施压，不要复述题目，不要给答案。';
+  var user='题目：'+(q&&q.q)+'\n候选人回答：'+(ans||'（未作答）');
+  if(AI_ON()){
+    return CLOUD.aiText(sys,[{role:'user',content:user}]).then(function(t){
+      return (t||'').trim()||mockInterviewerReply(q,ans,summary,stress);
+    })['catch'](function(){return mockInterviewerReply(q,ans,summary,stress)});
+  }
+  return Promise.resolve(mockInterviewerReply(q,ans,summary,stress));
+}
+
+var SCORING_DIMS=['知识覆盖','表达流畅度','思考结构','时间管理','应变抗压'];
+function buildScoringPrompt(){
+  var recsTxt=S.recs.map(function(r,i){
+    return '【第'+(i+1)+'题】'+r.q.q+'\n考察点：'+(r.q.point||'')+'\n候选人作答：'+(r.ans||'（未作答）');
+  }).join('\n\n');
+  var sc=INTERVIEW_SCENES.filter(function(s){return s.id===S.sceneMode})[0]||INTERVIEW_SCENES[0];
+  return '这是一次'+((SCENES[S.scene]&&SCENES[S.scene].name)||'综合')+'方向的'+typeName()+'模拟面试，面试场景：【'+sc.name+'】，共 '+S.recs.length+' 道题。'+
+    '\n评分侧重：'+(SCENE_PROMPTS[S.sceneMode]||SCENE_PROMPTS.campus)+
+    (S.resumeSummary?('\n候选人简历摘要：'+S.resumeSummary):'')+
+    '\n\n你是独立评审官（与提问的面试官隔离，保证客观）。请严格输出 JSON，不要输出任何其它文字：\n'+
+    '{"dims":{"知识覆盖":0,"表达流畅度":0,"思考结构":0,"时间管理":0,"应变抗压":0},"overall":"总体评价","perQuestion":[{"index":0,"score":0,"comment":"一句话点评","suggestion":"一句话改进建议"}],"suggestions":["建议1"],"weakPoints":["薄弱点1"],"level":0}\n'+
+    '评分标准：0=未作答/极差，3=合格，5=优秀。分数要客观，不要全部给满分。perQuestion 数组长度必须等于 '+S.recs.length+'，index 从 0 开始。\n\n面试记录：\n'+recsTxt;
+}
+function clamp5(v){ v=parseFloat(v); if(isNaN(v))return 0; return Math.max(0,Math.min(5,Math.round(v*10)/10)); }
+function localScoring(){
+  var total=S.recs.length||1;
+  var lens=S.recs.map(function(r){return String(r.ans||'').replace(/\s/g,'').length});
+  var avg=Math.round(lens.reduce(function(a,b){return a+b},0)/total);
+  var level=avg>=100?5:avg>=70?4:avg>=45?3:avg>=20?2:1;
+  var dims={'知识覆盖':clamp5(level),'表达流畅度':clamp5(2+avg/40),'思考结构':clamp5(level*0.9),
+    '时间管理':clamp5(S.sec===60?4:S.sec===120?3:3.5),'应变抗压':clamp5(level*0.8+(total>=5?0.5:0))};
+  return {
+    dims:dims, level:level,
+    overall:(level>=5?'整体表现优秀：回答内容充实，要点覆盖全面，表达有说服力。':
+      level>=4?'整体表现良好：主要要点基本答到，个别题目还缺一个落地案例或量化数据。':
+      level>=3?'处在"有思路但不完整"的阶段：建议先搭好答题框架，再往里填细节。':
+      '目前还比较生疏：最重要的是先开口把结构讲出来，内容可以后面慢慢补。')+' 本场平均作答 '+avg+' 字。',
+    perQuestion:S.recs.map(function(r,i){
+      var l=lens[i];
+      return {index:i, score:clamp5(l>=100?5:l>=60?4:l>=30?3:l>=10?2:1),
+        comment:l>=100?'答得不错，内容充实，要点抓得准。':l>=60?'基本答到点上，但还缺一个能撑住说服力的例子或数据。':l>=30?'框架有了但内容偏薄，建议对照参考要点把关键词补进去。':'这道基本没展开，先把答题框架背熟再回来练。',
+        suggestion:l>=80?'保持，下次注意别展开太散，每段拉回题目本身。':'加一个具体案例或数据，说服力会明显提升。'};
+    }),
+    suggestions: lens.some(function(l){return l<30})?
+      ['部分题目作答偏短，对照参考要点重新讲一遍并录音回听。','统一用 STAR / 总-分-总 结构，先给结论再补论据。','每道题尽量补一个具体案例或量化数据，避免空泛。']:
+      ['回答内容较充实，注意控制节奏，别展开太散。','把优势题目整理成自己的素材库，面试时能更快调用。','继续练习压力场景下的即时反应。'],
+    weakPoints:[]
+  };
+}
+/* 校验模型输出：维度齐全 + 逐题数对齐才采纳，否则回退本地估算（安全边界） */
+function normalizeScoring(j){
+  if(!j||typeof j!=='object')return null;
+  var dims={};
+  for(var di=0;di<SCORING_DIMS.length;di++){ var d=SCORING_DIMS[di]; dims[d]=clamp5(j.dims&&j.dims[d]); }
+  if(!Array.isArray(j.perQuestion)||j.perQuestion.length!==S.recs.length)return null;
+  var perQ=[];
+  for(var i=0;i<S.recs.length;i++){
+    var item=j.perQuestion[i]||{};
+    perQ.push({index:i, score:clamp5(item.score),
+      comment:String(item.comment||'').slice(0,120)||'—',
+      suggestion:String(item.suggestion||'').slice(0,120)||''});
+  }
+  return {
+    dims:dims, level:clamp5(j.level),
+    overall:String(j.overall||'').slice(0,400)||'AI 未给出总体评价。',
+    perQuestion:perQ,
+    suggestions:Array.isArray(j.suggestions)?j.suggestions.filter(Boolean).slice(0,4).map(function(s){return String(s).slice(0,120)}):[],
+    weakPoints:Array.isArray(j.weakPoints)?j.weakPoints.filter(Boolean).slice(0,6).map(function(s){return String(s).slice(0,40)}):[]
+  };
+}
+function requestAiScoring(){
+  if(AI_ON()){
+    return CLOUD.aiJson('你是客观独立的面试评审官，只输出 JSON。',[{role:'user',content:buildScoringPrompt()}]).then(function(j){
+      var n=normalizeScoring(j);
+      return n||localScoring();
+    })['catch'](function(){return localScoring()});
+  }
+  return Promise.resolve(localScoring());
+}
+
 function buildReviewPrompt(){
   var lines=S.recs.map(function(r,i){
     return '【第'+(i+1)+'题】'+r.q.q+'\n我的作答：'+r.ans+'\n参考要点：'+r.q.ans.join('；');
   }).join('\n\n');
-  return '这是一次'+SCENES[S.scene].name+'方向的'+typeName()+'模拟面试，共 '+S.qs.length+' 道题。\n\n'+lines+
+  var sc=INTERVIEW_SCENES.filter(function(s){return s.id===S.sceneMode})[0]||INTERVIEW_SCENES[0];
+  return '这是一次'+SCENES[S.scene].name+'方向的'+typeName()+'模拟面试，面试场景：【'+sc.name+'】，共 '+S.qs.length+' 道题。\n'+
+    (SCENE_PROMPTS[S.sceneMode]||SCENE_PROMPTS.campus)+'\n\n'+lines+
     '\n\n请作为有 10 年经验的资深面试官给出评价：\n'+
     '1) 总体评价：3-4 句话，先肯定亮点，再点出最核心的问题；\n'+
     '2) 逐题点评：每题一句话，说清亮点和不足；\n'+
@@ -1904,6 +2808,9 @@ document.getElementById('aiReviewBtn').onclick=function(){
   box.style.display='block';
   box.innerHTML='<div class="ai-h">🤖 AI 评价</div>'+
     '<div class="ai-loading">正在分析你的 '+S.recs.length+' 道作答，请稍候…</div>';
+  /* 并行跑独立评审官的结构化评分（JSON），供复盘页雷达图与逐题点评使用；
+     与文字点评互相隔离，符合"LLM 不控制流程、输出经校验才采纳"的安全边界 */
+  requestAiScoring().then(function(sc){window.__lastScore=sc});
   requestAiReview().then(function(res){
     window.__lastAiReview=res.text||'';
     box.innerHTML='<div class="ai-h">🤖 AI 评价<span class="ai-badge">'+esc(res.badge)+'</span></div>'+
@@ -1931,51 +2838,86 @@ function finish(){
     '<div class="card"><div class="v">'+avgAnsLen+'</div><div class="l">平均作答字数</div></div>'+
     '<div class="card"><div class="v">'+fmtSec(used)+'</div><div class="l">本场用时</div></div>'+
     '<div class="card"><div class="v">'+st.times+'</div><div class="l">累计场次</div></div>';
-  var cm;
-  if(level>=5)cm='🏆 教练点评：回答内容充实、覆盖全面，表达也清晰。接下来可以挑战更高难度题，并练习控制节奏。';
-  else if(level>=4)cm='👍 教练点评：基础扎实，大部分要点都能答到。建议再补一个具体案例或量化数据，说服力会更强。';
-  else if(level>=3)cm='💪 教练点评：已经有思路了，但完整度还不够。建议对照参考要点逐题梳理框架，用"总-分-总"结构表达。';
-  else cm='🌱 教练点评：别灰心，起步阶段最重要是开口。先去题库把高频题的答题框架读熟，再来练一场，进步会非常明显。';
+  var sc=window.__lastScore||localScoring();
+  level=sc.level||1;
+  var cm=sc.overall||('教练点评：本场完成 '+total+' 题。');
+  cm+='（'+(AI_ON()?'AI 评审官打分':'本地智能估算 · 配置大模型后评价更准确')+'）';
   document.getElementById('rvCoach').textContent=cm;
 
-  /* 雷达图：5 维度能力评估（无自评分，用作答字数代理知识覆盖与思考结构） */
-  var dims=['知识覆盖','表达流畅度','思考结构','时间管理','情绪抗压'];
-  var dimsVals=[
-    level,                               // 知识覆盖 = 作答字数估算
-    Math.min(5,2+(avgAnsLen/40)),        // 表达流畅度 = 回答长度
-    Math.min(5,Math.max(0,Number((level*0.9+(totalAnsLen>total*200?0.3:0)).toFixed(1)))), // 思考结构
-    Math.min(5,2.5+(S.sec===60?1:S.sec===120?0:0.5)),       // 时间管理
-    Math.min(5,Math.max(0,Number((level*0.8+(total>=5?0.5:0)).toFixed(1))))              // 情绪抗压
-  ];
+  /* 雷达图：5 维度，用 sc.dims 真实分数（替代原字数假数据） */
+  var dims=SCORING_DIMS.slice();
+  var dimsVals=dims.map(function(d){return sc.dims[d]||0});
   drawRadar(document.getElementById('rvRadar'),dims,dimsVals,{w:240,h:240,max:5});
-  var radarDescs=[
-    '知识覆盖：平均 '+avgAnsLen+' 字 → '+(level>=4?'覆盖较强':'可提升，建议多说关键点')+';',
-    '表达流畅度：平均 '+avgAnsLen+' 字回答 → '+(avgAnsLen>=80?'内容充实':avgAnsLen>=40?'基本够':'偏短，建议展开 3 个要点')+';',
-    '思考结构：字数估算 → '+(level>=4?'框架感不错':'建议用"总-分-总"结构明确表达')+';',
-    '时间管理：限时 '+S.sec+'s/题 → '+(S.sec<=60?'快答模式':'标准模式')+';',
-    '情绪抗压：'+(total>=5?'多题稳定发挥，心态 OK':'题目少，下次可以多练几道')+'。'
-  ];
-  document.getElementById('radarDesc').innerHTML=radarDescs.map(function(s){return '· '+s}).join('<br>');
+  var radarDescs=dims.map(function(d,i){
+    var v=dimsVals[i];
+    var sug=sc.perQuestion&&sc.perQuestion[i]&&sc.perQuestion[i].suggestion;
+    return d+'：'+v+' 分 → '+(v>=4?'表现优秀':v>=3?'基本合格':'有待加强')+(sug?'（'+sug+'）':'');
+  });
+  /* 各题型（六大维度）表现统计：按题目类别聚合逐题得分 */
+  var catSum={},catCnt={};
+  S.recs.forEach(function(r,i){
+    var ct=catOf(r.q),pq=sc.perQuestion&&sc.perQuestion[i];
+    if(pq){catSum[ct]=(catSum[ct]||0)+pq.score;catCnt[ct]=(catCnt[ct]||0)+1;}
+  });
+  var catLines=Q_CATEGORIES.filter(function(c){return catCnt[c.id]}).map(function(c){
+    var avg=(catSum[c.id]/catCnt[c.id]).toFixed(1);
+    return c.icon+' '+c.name+'：'+avg+' 分（'+catCnt[c.id]+' 题）'+(avg>=4?' 优秀':avg>=3?' 合格':' 待加强');
+  });
+  document.getElementById('radarDesc').innerHTML=
+    radarDescs.map(function(s){return '· '+esc(s)}).join('<br>')+
+    (catLines.length?('<br><br><b style="color:var(--acc2)">各题型表现：</b><br>'+catLines.map(function(s){return '· '+esc(s)}).join('<br>')):'');
+
+  /* AI 改进建议 */
+  var sugEl=document.getElementById('rvSuggest');
+  if(sugEl){
+    sugEl.innerHTML='<div style="font-size:13px;font-weight:800;margin-bottom:8px">💡 改进建议</div>'+
+      (sc.suggestions&&sc.suggestions.length?
+        sc.suggestions.map(function(s){return '<div style="font-size:12.5px;color:var(--ink2);line-height:1.8;padding:3px 0">· '+esc(s)+'</div>'}).join(''):
+        '<div style="font-size:12px;color:var(--ink3)">（配置大模型后可获得个性化改进建议）</div>');
+  }
+  /* 薄弱知识点：标签云，一键沉淀到薄弱点本 */
+  var weakEl=document.getElementById('rvWeak');
+  if(weakEl){
+    var weak=(sc.weakPoints&&sc.weakPoints.length)?sc.weakPoints:
+      S.recs.map(function(r,i){var pq=sc.perQuestion&&sc.perQuestion[i];return(pq&&pq.score<3)?r.q.q.slice(0,16):null}).filter(Boolean);
+    if(weak.length){
+      weakEl.innerHTML='<div style="font-size:13px;font-weight:800;margin-bottom:8px">🎯 薄弱点（点击加入错题本）</div>'+
+        weak.map(function(w){return '<button class="chip weak-chip" data-w="'+esc(w)+'">'+esc(w)+'</button>'}).join(' ');
+      $$('#rvWeak .weak-chip').forEach(function(b){b.onclick=function(){addWeakPoint(b.dataset.w);b.textContent='✓ 已收藏';b.disabled=true}});
+    } else weakEl.innerHTML='';
+  }
+  /* 导出报告 */
+  var expEl=document.getElementById('rvExport');
+  if(expEl){
+    expEl.innerHTML='<button class="btn gho" id="rvExportBtn">📄 导出 / 打印报告</button>'+
+      '<span style="font-size:11px;color:var(--ink3);align-self:center">含评分、雷达图、逐题点评，可另存为 PDF</span>';
+    var eb=document.getElementById('rvExportBtn');
+    if(eb)eb.onclick=function(){exportReport(sc)};
+  }
 
   /* 场次数记录，供全场景判断成就 */
   var stat=userGet('stat',{times:0,questions:0,scoreSum:0,scenes:{}});
   stat.scenes=stat.scenes||{};
   stat.scenes[S.scene]=(stat.scenes[S.scene]||0)+1;
+  stat.scoreSum+=Math.round(level*10);
   userSet('stat',stat);tryUnlockAll();
   /* 同步到管理后台数据集（管理员可在后台看到这场练习） */
   try{
-    var sc=0,n=0;S.recs.forEach(function(r){if(r.score>0){sc+=r.score;n++}});
     AdminDB.addSession({
       ts:Date.now(),type:typeName(),scene:S.scene,count:total,
-      avg:n?Math.round(sc/n*10)/10:level,used:used,ansLen:avgAnsLen,
-      ai:(window.__lastAiReview||'').slice(0,120)
+      avg:level,used:used,ansLen:avgAnsLen,
+      ai:(window.__lastAiReview||sc.overall||'').slice(0,120)
     });
   }catch(e){}
+  /* 逐题回顾：原"我的作答 + 参考要点"之上，追加 AI 逐题点评与改进 */
   document.getElementById('rvList').innerHTML=S.recs.map(function(r,i){
+    var pq=sc.perQuestion&&sc.perQuestion[i];
+    var aiBlock=pq?('<div class="ai-perq"><b style="color:var(--acc2)">AI 点评（'+pq.score+'分）：</b>'+esc(pq.comment)+
+      (pq.suggestion?('<br><b style="color:var(--acc2)">改进：</b>'+esc(pq.suggestion)):'')+'</div>'):'';
     return '<div class="rv-item"><div class="ri-h" data-i="'+i+'">'+
       '<span style="color:'+SCENE_COLOR[r.q.scene]+';flex:none">Q'+(i+1)+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.q.q)+'</span>'+
       '<span class="chev">'+ICONS.chev+'</span></div>'+
-      '<div class="ri-b"><b style="color:var(--acc2)">我的作答：</b>'+esc(r.ans)+'<br><b style="color:var(--acc2)">参考要点：</b>'+r.q.ans.map(function(a){return '· '+esc(a)}).join('<br>')+'</div></div>';
+      '<div class="ri-b">'+aiBlock+'<b style="color:var(--acc2)">我的作答：</b>'+esc(r.ans)+'<br><b style="color:var(--acc2)">参考要点：</b>'+r.q.ans.map(function(a){return '· '+esc(a)}).join('<br>')+'</div></div>';
   }).join('');
   $$('#rvList .ri-h').forEach(function(h){h.onclick=function(){h.parentNode.classList.toggle('open')}});
   document.getElementById('progBar').style.width='100%';
@@ -1984,6 +2926,53 @@ function finish(){
   setTimeout(renderReviewVideoBox,1500);  /* 回放落盘是异步的，稍后再校正一次文案 */
   setTimeout(renderReviewVideoBox,4000);
 }
+
+/* 薄弱点沉淀：存到用户级 weak_points，个人中心可查看（错题本闭环） */
+function addWeakPoint(text){
+  if(!text)return;
+  try{
+    var list=userGet('weak_points',[])||[];
+    if(Object.prototype.toString.call(list)!=='[object Array]')list=[];
+    if(list.indexOf(text)<0){list.unshift(text);userSet('weak_points',list.slice(0,60))}
+    toast('🎯 已加入错题本（个人中心 · 薄弱点可查看）','ok');
+  }catch(e){ toast('保存失败','warn'); }
+}
+
+/* 导出报告：新窗口打开可打印的 HTML，含评分、雷达图、逐题点评，可另存为 PDF */
+function exportReport(sc){
+  try{
+    var cv=document.getElementById('rvRadar');
+    var img=cv?cv.toDataURL('image/png'):'';
+    var dimsHtml=SCORING_DIMS.map(function(d){return '<li>'+esc(d)+'：'+(sc.dims[d]||0)+' / 5</li>'}).join('');
+    var _cs={},_cc={};
+    S.recs.forEach(function(r,i){var ct=catOf(r.q),pq=sc.perQuestion&&sc.perQuestion[i];if(pq){_cs[ct]=(_cs[ct]||0)+pq.score;_cc[ct]=(_cc[ct]||0)+1;}});
+    var catHtml=Q_CATEGORIES.filter(function(c){return _cc[c.id]}).map(function(c){var a=(_cs[c.id]/_cc[c.id]).toFixed(1);return '<li>'+esc(c.name)+'：'+a+' / 5（'+_cc[c.id]+' 题）</li>'}).join('');
+    var perQ=S.recs.map(function(r,i){
+      var p=sc.perQuestion&&sc.perQuestion[i];
+      return '<h4>Q'+(i+1)+' '+esc(r.q.q)+'</h4>'+
+        '<p><b>我的作答：</b>'+esc(r.ans)+'</p>'+
+        (p?('<p><b>AI 点评（'+p.score+'分）：</b>'+esc(p.comment)+(p.suggestion?'<br><b>改进：</b>'+esc(p.suggestion):'')+'</p>'):'')+
+        '<p><b>参考要点：</b>'+r.q.ans.map(function(a){return '· '+esc(a)}).join('<br>')+'</p>';
+    }).join('');
+    var html='<!doctype html><html><head><meta charset="utf-8"><title>模拟面试复盘报告</title>'+
+      '<style>body{font-family:-apple-system,"Microsoft YaHei",sans-serif;max-width:800px;margin:30px auto;padding:0 22px;color:#222;line-height:1.7}h1{font-size:22px}h2{font-size:16px;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:26px}h4{margin:18px 0 4px}.meta{color:#666;font-size:13px}.radar{text-align:center;margin:14px 0}.radar img{max-width:260px}li{margin:4px 0}.weak{background:#fff5f5;border:1px solid #fecaca;padding:10px;border-radius:8px;margin:10px 0}.chip{display:inline-block;background:#eef2ff;color:#4338ca;padding:3px 10px;border-radius:999px;margin:3px;font-size:12px}@media print{.no-print{display:none}}</style></head><body>'+
+      '<h1>📊 模拟面试复盘报告</h1>'+
+      '<div class="meta">岗位：'+esc((SCENES[S.scene]&&SCENES[S.scene].name)||'')+' · 题型：'+esc(typeName())+' · 题数：'+S.recs.length+' · 生成时间：'+new Date().toLocaleString()+' · 评分来源：'+(AI_ON()?'AI 评审官':'本地估算')+'</div>'+
+      '<h2>能力雷达</h2><div class="radar">'+(img?'<img src="'+img+'">':'（无图）')+'</div><ul>'+dimsHtml+'</ul>'+
+      (catHtml?'<h2>各题型表现</h2><ul>'+catHtml+'</ul>':'')+
+      '<h2>总体评价</h2><p>'+esc(sc.overall||'')+'</p>'+
+      (sc.suggestions&&sc.suggestions.length?'<h2>改进建议</h2><ul>'+sc.suggestions.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>':'')+
+      (sc.weakPoints&&sc.weakPoints.length?'<h2>薄弱点</h2><div class="weak">'+sc.weakPoints.map(function(w){return '<span class="chip">'+esc(w)+'</span>'}).join('')+'</div>':'')+
+      '<h2>逐题回顾</h2>'+perQ+
+      '<div class="no-print" style="margin-top:30px;text-align:center"><button onclick="window.print()" style="padding:10px 24px;font-size:14px;cursor:pointer">🖨️ 打印 / 另存为 PDF</button></div>'+
+      '</body></html>';
+    var w=window.open('','_blank');
+    if(!w){toast('请允许浏览器弹出窗口以导出报告','warn');return}
+    w.document.open();w.document.write(html);w.document.close();
+    toast('报告已在新窗口打开，可打印或另存为 PDF','ok');
+  }catch(e){ toast('导出失败：'+(e&&e.message||e),'warn'); }
+}
+
 /* 复盘页的回放入口：摄像头作答时明确告诉用户回放去哪看 */
 function renderReviewVideoBox(){
   var box=document.getElementById('rvVideoBox');if(!box)return;

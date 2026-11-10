@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>观摩大厅 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261104b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <style>
 body{background:
   radial-gradient(ellipse 70% 45% at 30% -5%,rgba(244,114,182,.1),transparent),
@@ -22,8 +25,7 @@ body{background:
 .fp-shell::after{content:"🎬";position:absolute;right:-25px;top:-35px;font-size:190px;opacity:.028;
   transform:rotate(-12deg);pointer-events:none;filter:grayscale(.2)}
 @media (max-width:1024px){.fp-shell::after{font-size:130px;right:-15px;top:-25px}}
-/* 浅色模式适配 */
-body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{opacity:.22}
 body.light .fp-shell::after{opacity:.018}
 /* 统计行 */
@@ -90,7 +92,8 @@ body.light .fp-shell::after{opacity:.018}
   </div>
 </div>
 
-<script src="shared.js?v=20261104b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('square',true))throw new Error('login required');
 /* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */

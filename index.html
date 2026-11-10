@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" style="--bgA: #1b2a6b; --bgB: #0e4d5c; --bgC: #3b1d5d; --ink: #eef2ff; --ink2: #aab4d8; --ink3: #7c86ad;"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>首页 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261105b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <!-- 字体走本地系统字栈（Manrope/Noto Serif SC/JetBrains Mono 已装则用，未装回退系统中西文衬线/等宽），
      不再从 Google Fonts 同步加载：该域名在国内网络下不稳定，渲染阻塞会直接拖住首屏。 -->
 <style>
@@ -271,6 +274,10 @@ a{color:var(--acc);text-decoration:none}
 /* 收尾 */
 .closing{margin-top:clamp(56px,7vw,92px);padding-top:clamp(36px,5vw,56px);
   border-top:1px solid var(--hair);display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
+/* 浅色：首页收尾区不做硬切纯白，改透明融入极光背景，与深色模式/上方 hero 一致；
+   仅作用于首页（内联样式晚于 shared.css 加载，同特异性 + !important 覆盖全站白名单）。
+   relax.html 的 .closing 是渐变卡片，保持 shared.css 原有白卡样式不变。 */
+body.light .closing{background:transparent !important;border-top-color:rgba(15,23,42,.12) !important}
 .closing h2{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3.4vw,40px);line-height:1.35;letter-spacing:1px;color:var(--ink)}
 .closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .closing .hero-actions{margin-left:auto}
@@ -353,7 +360,8 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
   </footer>
 </div>
 
-<script src="shared.js?v=20261105b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('home',true))throw new Error('login required');
 

@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>轻松一下 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261104b">
+<link rel="stylesheet" href="shared.css?v=20261110a">
 <style>
 body{background:
   radial-gradient(ellipse 75% 50% at 25% -8%,rgba(94,234,212,.11),transparent),
@@ -22,8 +25,7 @@ body{background:
 .fp-shell::after{content:"🍀";position:absolute;right:-22px;top:-32px;font-size:185px;opacity:.032;
   transform:rotate(20deg);pointer-events:none;filter:grayscale(.15)}
 @media (max-width:1024px){.fp-shell::after{font-size:125px;right:-12px;top:-22px}}
-/* 浅色模式适配 */
-body.light{background:linear-gradient(180deg,#ffffff 0%,#fcfdff 38%,#f5f8ff 100%)}
+/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{opacity:.28}
 body.light .fp-shell::after{opacity:.022}
 :root{
@@ -32,56 +34,77 @@ body.light .fp-shell::after{opacity:.022}
 }
 ::selection{background:rgba(108,140,255,.4)}
 
+.fp-shell,.mask,.mini-mask,.toast-box{
+  --fs-3xs:clamp(11px,calc(2px + .68vw),13px);
+  --fs-2xs:clamp(12px,calc(2px + .78vw),14px);
+  --fs-xs:clamp(13px,calc(1px + .95vw),15px);
+  --fs-sm:clamp(14px,calc(2px + .95vw),16.5px);
+  --fs-base:clamp(15px,calc(3px + .95vw),18.5px);
+  --fs-md:clamp(15.5px,calc(2.5px + .95vw),18.5px);
+  --fs-lg:clamp(17px,calc(3px + .95vw),20px);
+  --fs-xl:clamp(19px,calc(3.5px + .95vw),22px);
+  --fs-2xl:clamp(21px,calc(4px + 1.1vw),27px);
+}
+.fp-head h1{font-size:clamp(28px,2.8vw,38px)!important}
+
 .play-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:14px}
-.gc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:15px;border-radius:16px;
+.gc{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:7px;min-width:0;
+  padding:13px 17px 14px 15px;border-radius:16px;
   background:rgba(255,255,255,.03);border:1px solid var(--hair);transition:border-color .2s,background .25s,box-shadow .25s}
 .gc:hover{border-color:rgba(108,140,255,.35);background:rgba(108,140,255,.05);box-shadow:0 14px 30px rgba(0,0,0,.24)}
-.gc-h{display:flex;align-items:center;gap:8px;font-size:var(--fs-base);font-weight:800;color:var(--ink);min-width:0}
+/* 弱化底纹：右上氛围光 + 右下大号图标水印，填补空白但不抢内容 */
+.gc::before{content:"";position:absolute;right:-24%;top:-58%;width:72%;height:118%;pointer-events:none;
+  background:radial-gradient(circle,rgba(108,140,255,.16),transparent 68%)}
+.gc::after{content:attr(data-ic);position:absolute;right:2px;bottom:-18px;font-size:64px;line-height:1;pointer-events:none;
+  opacity:.07;transform:rotate(-9deg);filter:grayscale(.35)}
+.gc>*{position:relative;z-index:1}
+.gc-h{display:flex;align-items:center;gap:8px;font-size:var(--fs-lg);font-weight:800;line-height:1.35;color:var(--ink);min-width:0}
 .gc-h .gc-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gc-en{margin-left:auto;font-size:var(--fs-3xs);color:var(--ink3);letter-spacing:1px;font-weight:400}
-.gc-prev{height:96px;display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden}
-.gc-act{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap}
-.gc-act .btn{padding:6px 11px;font-size:var(--fs-xs);border-radius:9px}
+.gc-en{margin-left:auto;margin-right:2px;flex:none;font-size:var(--fs-2xs);color:var(--ink3);letter-spacing:1.4px;font-weight:600}
+.gc-prev{flex:1;min-height:84px;display:flex;align-items:center;min-width:0}
+.gc-prev>*{width:100%}
+.gc-act{margin-top:1px;display:flex;gap:8px;flex-wrap:wrap}
+.gc-act .btn{flex:1 1 0;min-width:0;padding:9px 14px;font-size:var(--fs-md)!important;border-radius:10px}
 
 /* 签面（运势 / 人格共用） */
-.pv{height:96px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);
-  display:flex;flex-direction:column;justify-content:center;gap:5px;overflow:hidden}
-.pv-m{font-size:var(--fs-3xs);color:var(--ink3);letter-spacing:.8px}
-.pv-t{font-size:var(--fs-xs);color:var(--ink2);line-height:1.6;
+.pv{height:auto;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+  display:flex;flex-direction:column;justify-content:center;gap:6px;overflow:hidden}
+.pv-m{font-size:var(--fs-2xs);color:var(--ink3);letter-spacing:.9px}
+.pv-t{font-size:var(--fs-sm);color:var(--ink2);line-height:1.85;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 
 /* 快答卡面预览 */
-.gc .quick-q{font-size:var(--fs-xs);line-height:1.62;padding:9px 11px;border-radius:12px;color:#dbeafe;
+.gc .quick-q{font-size:var(--fs-sm);line-height:1.8;padding:11px 13px;border-radius:12px;color:#dbeafe;
   background:rgba(108,140,255,.08);border:1px dashed rgba(108,140,255,.35);
   display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 
 /* 翻卡卡面预览 */
-.gc .flip-wrap{height:96px;perspective:800px}
-.gc .flip-card{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;cursor:pointer;border-radius:12px}
+.gc .flip-wrap{align-self:stretch;height:auto;min-height:84px;perspective:800px}
+.gc .flip-card{position:relative;width:100%;height:100%;min-height:84px;transition:transform .6s;transform-style:preserve-3d;cursor:pointer;border-radius:12px}
 .gc .flip-card.flipped{transform:rotateY(180deg)}
-.gc .flip-face{position:absolute;inset:0;border-radius:12px;padding:10px 11px;backface-visibility:hidden;
+.gc .flip-face{position:absolute;inset:0;border-radius:12px;padding:11px 13px;backface-visibility:hidden;
   display:flex;flex-direction:column;justify-content:center}
 .gc .flip-f{background:rgba(255,255,255,.04);border:1px solid var(--line)}
-.gc .flip-f .fc-tag{font-size:var(--fs-3xs);color:var(--ink3);margin-bottom:5px;letter-spacing:1.2px}
-.gc .flip-f .fc-ic{font-size:15px;margin-bottom:4px}
-.gc .flip-f .fc-line{font-size:var(--fs-xs);line-height:1.55;color:#cdd8ff}
+.gc .flip-f .fc-tag{font-size:var(--fs-2xs);color:var(--ink3);margin-bottom:6px;letter-spacing:1.3px}
+.gc .flip-f .fc-ic{font-size:17px;margin-bottom:4px}
+.gc .flip-f .fc-line{font-size:var(--fs-sm);line-height:1.7;color:#cdd8ff}
 .gc .flip-b{background:linear-gradient(135deg,rgba(65,224,200,.12),rgba(108,140,255,.12));
   border:1px solid rgba(65,224,200,.34);transform:rotateY(180deg)}
-.gc .flip-b .fc-tip{font-size:var(--fs-2xs);line-height:1.55;color:#bfdbfe;
+.gc .flip-b .fc-tip{font-size:var(--fs-sm);line-height:1.7;color:#bfdbfe;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.gc .flip-b .fc-q{font-size:var(--fs-3xs);color:var(--ink3);margin-top:4px;
+.gc .flip-b .fc-q{font-size:var(--fs-2xs);color:var(--ink3);margin-top:5px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 梗卡面预览 */
-.gc .meme-card{height:96px;padding:9px 11px;border-radius:12px;overflow:hidden;
+.gc .meme-card{height:auto;padding:11px 13px;border-radius:12px;overflow:hidden;
   background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.35)}
-.gc .meme-card .m-t{font-size:var(--fs-xs);font-weight:800;color:#a5b4fc;margin-bottom:3px;
+.gc .meme-card .m-t{font-size:var(--fs-md);font-weight:800;color:#a5b4fc;margin-bottom:5px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gc .meme-card .m-d{font-size:var(--fs-2xs);color:var(--ink2);line-height:1.55;
+.gc .meme-card .m-d{font-size:var(--fs-sm);color:var(--ink2);line-height:1.75;
   display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 
 /* 小游戏战果预览 */
-.gm-prev{font-size:var(--fs-xs);line-height:1.65;color:var(--ink2);padding:10px 12px;border-radius:12px;
+.gm-prev{font-size:var(--fs-sm);line-height:1.8;color:var(--ink2);padding:11px 13px;border-radius:12px;
   background:rgba(108,140,255,.07);border:1px dashed rgba(108,140,255,.32);
   display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 
@@ -105,7 +128,10 @@ body.light .fp-shell::after{opacity:.022}
 @media (max-width:480px){
   .play-grid{grid-template-columns:1fr}
   .gc-prev,.pv,.gc .meme-card{height:auto;min-height:84px}
+  .gc::after{font-size:54px;bottom:-14px}
+  .closing{padding:20px}
   .closing .hero-actions{margin-left:0;width:100%}
+  .closing .btn{flex:1 1 auto}
 }
 @media (pointer:coarse){
   .gc-act .btn,.popt,.fx-line,.rv-ans,.dec-opt{min-height:44px}
@@ -114,19 +140,27 @@ body.light .fp-shell::after{opacity:.022}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
-body.light .gc,body.light .pv{background:#fff;box-shadow:0 6px 20px rgba(15,23,42,.06)}
-body.light .gc:hover{background:#f6f8fc}
+body.light .gc{background:var(--surface);border-color:var(--surface-bd);box-shadow:var(--surface-sh)}
+/* 卡内预览框保持纯白，与卡片形成内浅外深的层次 */
+body.light .pv{background:#fff;border-color:rgba(15,23,42,.10)}
+body.light .gc:hover{background:linear-gradient(180deg,#f9fbff 0%,#eef3fb 100%)}
+body.light .gc::before{background:radial-gradient(circle,rgba(37,99,235,.09),transparent 68%)}
+body.light .gc::after{opacity:.05}
 body.light .gc .quick-q,body.light .gm-prev{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.3);color:#1e3a8a}
 body.light .gc .flip-f .fc-line{color:#33415c}
+body.light .closing-sub{color:#475569}
 
 /* 收尾 */
-.closing{margin-top:26px;padding:22px 24px;border-radius:16px;
+.closing{margin-top:26px;padding:22px 26px;border-radius:16px;
   background:linear-gradient(135deg,rgba(108,140,255,.1),rgba(65,224,200,.06));
   border:1px solid rgba(108,140,255,.28);
-  display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-.closing h2{font-weight:800;font-size:var(--fs-xl);line-height:1.5;letter-spacing:.5px;color:var(--ink)}
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.closing-txt{flex:1 1 340px;min-width:0}
+.closing h2{font-weight:800;font-size:var(--fs-2xl)!important;line-height:1.45;letter-spacing:.5px;color:var(--ink)}
 .closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.closing-sub{font-size:var(--fs-sm)!important;line-height:1.9;color:var(--ink3);margin-top:9px;max-width:640px}
 .closing .hero-actions{margin-left:auto;display:flex;gap:12px;flex-wrap:wrap}
+.closing .btn{padding:11px 20px;font-size:var(--fs-md)!important;border-radius:12px}
 footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--hair);
   display:flex;gap:14px;flex-wrap:wrap;font-size:var(--fs-2xs);
   color:var(--ink3);letter-spacing:1px;line-height:1.9}
@@ -208,7 +242,7 @@ footer .fr{margin-left:auto;text-align:right}
     </div>
     <div class="play-grid d1">
       <!-- 1 今日运势 -->
-      <div class="gc">
+      <div class="gc" data-ic="🔮">
         <div class="gc-h"><span class="gc-t">🔮 今日运势</span><span class="gc-en">FORTUNE</span></div>
         <div class="gc-prev">
           <div class="pv" id="fortunePrev">
@@ -220,7 +254,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 2 随机快答 -->
-      <div class="gc">
+      <div class="gc" data-ic="⚡">
         <div class="gc-h"><span class="gc-t">⚡ 随机快答</span><span class="gc-en">QUICK</span></div>
         <div class="gc-prev">
           <div class="quick-q" id="quickQ">点「换一题」随机抽一道真题，先自己口述 60 秒，再看要点对照。</div>
@@ -232,7 +266,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 3 知识翻卡 -->
-      <div class="gc">
+      <div class="gc" data-ic="🃏">
         <div class="gc-h"><span class="gc-t">🃏 知识翻卡</span><span class="gc-en">FLIP</span></div>
         <div class="gc-prev">
           <div class="flip-wrap"><div class="flip-card" id="flipCard">
@@ -244,7 +278,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 4 面试人格 -->
-      <div class="gc">
+      <div class="gc" data-ic="🎭">
         <div class="gc-h"><span class="gc-t">🎭 面试人格</span><span class="gc-en">PERSONA</span></div>
         <div class="gc-prev">
           <div class="pv" id="personaPrev">
@@ -256,7 +290,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 5 梗百科 -->
-      <div class="gc">
+      <div class="gc" data-ic="📖">
         <div class="gc-h"><span class="gc-t">📖 梗百科</span><span class="gc-en">MEME</span></div>
         <div class="gc-prev">
           <div class="meme-card"><div class="m-t" id="mTitle">“抓手”</div><div class="m-d" id="mDesc">“找个抓手”= 找个切入点/着力点。互联网圈高频。</div></div>
@@ -265,7 +299,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 6 面试找茬 -->
-      <div class="gc">
+      <div class="gc" data-ic="🔍">
         <div class="gc-h"><span class="gc-t">🔍 面试找茬</span><span class="gc-en">FIND</span></div>
         <div class="gc-prev">
           <div class="gm-prev" id="fxPrev">60 秒在一段自述里挑出 3 处雷点，点错扣 5 秒。</div>
@@ -274,7 +308,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 7 你来当面试官 -->
-      <div class="gc">
+      <div class="gc" data-ic="🎤">
         <div class="gc-h"><span class="gc-t">🎤 你来当面试官</span><span class="gc-en">REVERSE</span></div>
         <div class="gc-prev">
           <div class="gm-prev" id="rvPrev">同一道题，三种回答，其中只有一份必须淘汰。</div>
@@ -283,7 +317,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 8 HR 潜台词 -->
-      <div class="gc">
+      <div class="gc" data-ic="🗣️">
         <div class="gc-h"><span class="gc-t">🗣️ HR 潜台词</span><span class="gc-en">DECODER</span></div>
         <div class="gc-prev">
           <div class="gm-prev" id="decPrev">八句黑话听出真实含义，连对越多分越高。</div>
@@ -292,7 +326,7 @@ footer .fr{margin-left:auto;text-align:right}
       </div>
 
       <!-- 9 薪资谈判 -->
-      <div class="gc">
+      <div class="gc" data-ic="💰">
         <div class="gc-h"><span class="gc-t">💰 薪资谈判</span><span class="gc-en">NEGOTIATE</span></div>
         <div class="gc-prev">
           <div class="gm-prev" id="negPrev">HR 开价 18K，你期望 22K，四轮博弈，目标 20K 以上且不翻脸。</div>
@@ -303,7 +337,10 @@ footer .fr{margin-left:auto;text-align:right}
 
   <!-- 收尾 -->
   <div class="closing d2">
-    <h2>放松完了，<em>回来真练一场。</em></h2>
+    <div class="closing-txt">
+      <h2>放松完了，<em>回来真练一场。</em></h2>
+      <p class="closing-sub">上面 9 个小玩法只是热身。真正拉开差距的，是坐下来完整走一遍流程：自我介绍、追问、复盘，一次 15 分钟，比刷十条技巧更管用。</p>
+    </div>
     <div class="hero-actions">
       <button class="btn pri" onclick="location.href='interview.html'">🎤 开始模拟面试</button>
       <button class="btn gho" onclick="location.href='bank.html'">去题库逛逛 →</button>
@@ -318,7 +355,8 @@ footer .fr{margin-left:auto;text-align:right}
   </div>
 </div>
 
-<script src="shared.js?v=20261104b"></script>
+<script src="shared.js?v=20261109a"></script>
+<script src="cloud.js?v=20261107a"></script>
 <script>
 if(!initPage('relax',true))throw new Error('login required');
 /* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
@@ -356,7 +394,7 @@ document.getElementById('quickBtn').onclick=function(){
   curQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
   document.getElementById('quickQ').innerHTML=
     '<b style="color:'+SCENE_COLOR[curQ.scene]+'">['+SCENES[curQ.scene].name+' · '+LV_NAME[curQ.lv]+']</b> '+esc(curQ.q)+
-    '<div style="font-size:10px;color:var(--ink3);margin-top:6px;letter-spacing:1px">60s 口述 · 已练 '+quickCnt+' 次</div>';
+    '<div style="font-size:var(--fs-2xs);color:var(--ink3);margin-top:6px;letter-spacing:1px">60s 口述 · 已练 '+quickCnt+' 次</div>';
   quickCnt++;userSet('quick_cnt',quickCnt);
   if(quickCnt>=10)setTimeout(function(){tryUnlockAll()},100);
 };
@@ -366,10 +404,10 @@ document.getElementById('quickShow').onclick=function(){
   if(!curQ)return;
   var html='<div class="m-head"><div><h3>⚡ 随机快答 · 参考要点</h3><div class="m-sub">'+esc(SCENES[curQ.scene].name+' · '+LV_NAME[curQ.lv])+'</div></div><button class="m-x" id="qsX">✕</button></div>'+
     '<div class="dec-quote">'+esc(curQ.q)+'</div>'+
-    '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px">考察点</div>'+
+    '<div style="font-size:var(--fs-xs);color:var(--ink3);margin-bottom:8px;letter-spacing:1px">考察点</div>'+
     '<div class="res-reveal">'+esc(curQ.point)+'</div>'+
-    '<div style="font-size:11.5px;color:var(--ink3);margin:14px 0 8px;letter-spacing:1px">参考要点</div>'+
-    '<div style="font-size:12.5px;line-height:1.9;color:var(--ink2);margin-bottom:14px">'+
+    '<div style="font-size:var(--fs-xs);color:var(--ink3);margin:14px 0 8px;letter-spacing:1px">参考要点</div>'+
+    '<div style="font-size:var(--fs-sm);line-height:1.9;color:var(--ink2);margin-bottom:14px">'+
       curQ.ans.map(function(x,i){return '<div>'+(i+1)+'. '+esc(x)+'</div>'}).join('')+'</div>'+
     '<div class="cell-act"><button class="btn pri sm" id="qsNext">🎲 换一题</button><button class="btn gho sm" id="qsClose">收下经验</button></div>';
   var m=openMask(html);
@@ -426,7 +464,7 @@ document.getElementById('memeBtn').onclick=gateLogin(renderMeme);
       if(idx>=PERSONA_QS.length){finish();return}
       var q=PERSONA_QS[idx];
       area.innerHTML=
-        '<div style="font-size:10px;color:var(--ink3);margin-bottom:8px;letter-spacing:1px">Q'+(idx+1)+' / '+PERSONA_QS.length+'</div>'+
+        '<div style="font-size:var(--fs-2xs);color:var(--ink3);margin-bottom:8px;letter-spacing:1px">Q'+(idx+1)+' / '+PERSONA_QS.length+'</div>'+
         '<div class="pq"><div class="pq-q">'+esc(q.q)+'</div><div class="pq-opts">'+
           q.opts.map(function(o,i){return '<button type="button" class="popt" data-v="'+o.v+'">'+String.fromCharCode(65+i)+'. '+esc(o.t)+'</button>'}).join('')+
         '</div></div>'+
@@ -567,7 +605,7 @@ var RV_CASES=[
     c.a.forEach(function(x,i){if(x.v==='reject')rej=i});
     var html='<div class="m-head"><div><h3>🎤 你来当面试官</h3><div class="m-sub">三份回答里只有一份必须淘汰</div></div><button class="m-x" id="rvX">✕</button></div>'+
       '<div class="dec-quote">面试官：'+esc(c.q)+'</div>'+
-      '<div style="font-size:11.5px;color:var(--ink3);margin-bottom:10px">点选你认为最该淘汰的那一份：</div>'+
+      '<div style="font-size:var(--fs-xs);color:var(--ink3);margin-bottom:10px">点选你认为最该淘汰的那一份：</div>'+
       '<div id="rvList">'+c.a.map(function(x,i){
         return '<button type="button" class="rv-ans" data-i="'+i+'"><b>'+esc(x.n)+'</b><br>“'+esc(x.t)+'”</button>';
       }).join('')+'</div><div id="rvEnd"></div>';
@@ -651,7 +689,7 @@ var DEC_POOL=[
       document.getElementById('decOpts').innerHTML='';
       document.getElementById('decQ').textContent='翻译结束';
       document.getElementById('decEnd').innerHTML='<div class="res-reveal">得分 <b>'+score+'</b> · 最高连击 '+maxStreak+' · '+title+'</div>'+
-        '<div style="font-size:11.5px;color:var(--ink3);line-height:1.8;margin-bottom:10px">提醒：潜台词只是概率判断，真遇到这些话，直接追问一句“具体能说说是怎样的节奏吗”，比猜更稳。</div>'+
+        '<div style="font-size:var(--fs-xs);color:var(--ink3);line-height:1.8;margin-bottom:10px">提醒：潜台词只是概率判断，真遇到这些话，直接追问一句“具体能说说是怎样的节奏吗”，比猜更稳。</div>'+
         '<div class="cell-act"><button class="btn pri sm" id="decAgain">🔁 再来一轮</button><button class="btn gho sm" id="decClose">收下经验</button></div>';
       document.getElementById('decAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
       document.getElementById('decClose').onclick=closeMask;
@@ -735,7 +773,7 @@ var NEG_ROUNDS=[
         '<div class="neg-k"><div class="l">诚意值</div><div class="v">'+Math.round(gw)+'</div></div>'+
         '<div class="neg-k"><div class="l">期望</div><div class="v">22K</div></div></div>'+
         '<div class="res-reveal">'+verdict+'</div>'+
-        '<div style="font-size:11.5px;color:var(--ink3);line-height:1.8;margin-bottom:10px">复盘：谈判里最容易犯的错是“只报数字不给理由”。先讲你能解决什么问题，再谈钱，对方才有台阶往上加。</div>'+
+        '<div style="font-size:var(--fs-xs);color:var(--ink3);line-height:1.8;margin-bottom:10px">复盘：谈判里最容易犯的错是“只报数字不给理由”。先讲你能解决什么问题，再谈钱，对方才有台阶往上加。</div>'+
         '<div class="cell-act"><button class="btn pri sm" id="negAgain">🔁 再谈一次</button><button class="btn gho sm" id="negClose">收下经验</button></div>';
       document.getElementById('negAgain').onclick=function(){closeMask();setTimeout(function(){btn.onclick()},80)};
       document.getElementById('negClose').onclick=closeMask;
