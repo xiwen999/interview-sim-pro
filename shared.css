@@ -87,7 +87,15 @@ body.no-motion .bg-fx .blob,body.no-motion *{animation:none!important;transition
 
 .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;
   padding:14px clamp(16px,4vw,44px);
-  background:rgba(8,13,29,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  background:transparent;backdrop-filter:none;border-bottom:1px solid transparent;
+  transition:background .28s ease,border-color .28s ease,box-shadow .28s ease}
+/* 深色模式：首屏透明，滚过 20px 后淡入磨砂（.scrolled 由 shared.js 添加） */
+.nav.scrolled{
+  background:rgba(8,13,29,.72);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  backdrop-filter:blur(14px) saturate(1.2);
+  border-bottom-color:var(--line);
+  box-shadow:0 10px 30px -26px rgba(0,0,0,.75)}
 .nav .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:var(--fs-xl);letter-spacing:.5px;
   cursor:pointer}
 .nav .logo .lg-ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;transition:.2s;
@@ -309,6 +317,10 @@ body.light select#stProv{background:#ffffff !important;color:#0f172a !important;
   cursor:grab;touch-action:none;user-select:none}
 .agent-fab:hover{filter:brightness(1.08);box-shadow:0 14px 36px rgba(108,140,255,.6)}
 .agent-fab.dragging{cursor:grabbing;filter:brightness(1.12)}
+/* 呼吸光环：让 AI 助手入口更醒目（::after 独立动画，不与拖拽 transform 冲突） */
+.agent-fab::after{content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:2px solid rgba(108,140,255,.55);animation:fabping 2.4s ease-out infinite;pointer-events:none}
+@keyframes fabping{0%{transform:scale(1);opacity:.85}70%{transform:scale(1.4);opacity:0}100%{transform:scale(1.4);opacity:0}}
 .agent-fab svg{width:27px;height:27px;stroke:#fff}
 .agent-fab .dot{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;
   background:#fb7185;border:2px solid #0b1020}
@@ -346,6 +358,9 @@ body.light select#stProv{background:#ffffff !important;color:#0f172a !important;
 .agent-input button{width:40px;height:40px;border-radius:11px;flex:none;
   background:linear-gradient(135deg,var(--acc),#4f6ef0);display:grid;place-items:center}
 .agent-input button svg{width:17px;height:17px;stroke:#fff}
+/* RAG 答题模式开关（📚）：默认低调样式，开启时由 JS 高亮 */
+.agent-input #agRag{width:34px;font-size:16px;background:rgba(255,255,255,.07);cursor:pointer;transition:.2s;user-select:none}
+.agent-input #agRag:hover{background:rgba(255,255,255,.13)}
 .agent-foot{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:6px 14px 10px;border-top:1px solid var(--line);flex:none;background:rgba(15,21,42,.6)}
 .agent-foot button:hover{color:var(--acc2)!important}
 .typing{display:flex;gap:4px;align-items:center}
@@ -541,13 +556,29 @@ body.light .vbadge.approved{color:#0f766e !important;background:rgba(13,148,136,
 body.light .vbadge.rejected{color:#be123c !important;background:rgba(190,18,60,.1)}
 body.light .mg-hd,body.light .myc-row{border-color:rgba(15,23,42,.1) !important}
 
+/* 默认：完全透明无边界，首屏与极光背景融为一体 */
 body.light .nav{
-  background:rgba(255,255,255,.94) !important;
-  border-color:rgba(15,23,42,.09) !important;
-  box-shadow:0 2px 16px rgba(15,23,42,.06);
+  background:transparent !important;
+  border-bottom-color:transparent !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  transition:background .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+/* 滚动超过 20px（.scrolled 由 shared.js 添加）：淡入磨砂玻璃，保证长页可读 */
+body.light .nav.scrolled{
+  background:rgba(255,255,255,.62) !important;
+  border-bottom-color:rgba(15,23,42,.07) !important;
+  box-shadow:0 10px 30px -26px rgba(15,23,42,.45);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  backdrop-filter:blur(18px) saturate(1.5);
 }
 body.light .nav .logo{color:#0f172a !important}
-body.light .icbtn,body.light .nav-acct .acct-btn{background:#ffffff !important;border-color:rgba(15,23,42,.14) !important}
+body.light .icbtn,body.light .nav-acct .acct-btn{
+  background:rgba(255,255,255,.58) !important;
+  border-color:rgba(15,23,42,.12) !important;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+body.light .nav.scrolled .icbtn,body.light .nav.scrolled .nav-acct .acct-btn{background:rgba(255,255,255,.8) !important}
 body.light .nav-acct .acct-menu-in{background:#ffffff !important;border-color:rgba(15,23,42,.14) !important;
   box-shadow:0 18px 44px rgba(15,23,42,.16)}
 body.light .nav-acct .acct-who{border-bottom-color:rgba(15,23,42,.1) !important;color:#57637d !important}

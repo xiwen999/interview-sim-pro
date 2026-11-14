@@ -1,33 +1,33 @@
 (function (global) {
   'use strict';
 
-  var CFG_KEY = 'ivsim_ai_cfg';
+  /* 服务器 AI 状态缓存：null=未知（乐观视为可用），false=未配置/不可用 */
+  var _status = { enabled: null, model: '' };
 
-  /* 常见厂商的 OpenAI 兼容端点预设，方便配置时一键填充 */
-  var PRESETS = [
-    { id: 'deepseek', name: 'DeepSeek', base: 'https://api.deepseek.com/v1', model: 'deepseek-chat', temp: 0.7 },
-    { id: 'qwen', name: '通义千问(兼容)', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus', temp: 0.7 },
-    { id: 'glm', name: '智谱 GLM', base: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash', temp: 0.7 },
-    { id: 'moonshot', name: '月之暗面 Kimi', base: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k', temp: 0.7 },
-    { id: 'openai', name: 'OpenAI', base: 'https://api.openai.com/v1', model: 'gpt-4o-mini', temp: 0.7 },
-    { id: 'custom', name: '自定义(兼容)', base: '', model: '', temp: 0.7 }
-  ];
+  function getToken() {
+    /* 与 shared.js 的 API.token() 同源：ivsim_token 经 JSON.stringify 存储 */
+    try {
+      var v = localStorage.getItem('ivsim_token');
+      if (!v) return null;
+      try { return JSON.parse(v) || null; } catch (e) { return v; }
+    } catch (e) { return null; }
+  }
 
-  function getCfg() {
-    try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch (e) { return {}; }
+  /* 拉取服务器 AI 状态（各页加载本文件时自动调用一次） */
+  function refreshStatus() {
+    return fetch('/api/ai/status').then(function (r) { return r.json(); }).then(function (j) {
+      _status.enabled = !!(j && j.enabled);
+      _status.model = (j && j.model) || '';
+      return _status.enabled;
+    })['catch'](function () { _status.enabled = false; return false; });
   }
-  function setCfg(c) {
-    try { localStorage.setItem(CFG_KEY, JSON.stringify(c || {})); } catch (e) {}
-  }
-  function clearCfg() { try { localStorage.removeItem(CFG_KEY); } catch (e) {} }
+  try { refreshStatus(); } catch (e) {}
 
-  /* 已配置且可用：enabled 未关闭 + 三段信息齐全 */
-  function isConfigured() {
-    var c = getCfg();
-    return c.enabled !== false && !!(c.apiKey && c.baseURL && c.model);
-  }
+  /* 已配置且可能可用：状态未知时乐观返回 true（真不可用时调用方自行回退本地模拟） */
+  function isConfigured() { return _status.enabled !== false; }
   /* 兼容 interview.html 现有调用约定：CLOUD.isCloud() */
   function isCloud() { return isConfigured(); }
+  function serverModel() { return _status.model || ''; }
 
   function buildMessages(sys, messages) {
     var msgs = [];
@@ -38,55 +38,42 @@
     return msgs;
   }
 
-  function reqHeaders(c) {
-    var h = { 'Content-Type': 'application/json' };
-    if (c.apiKey) h['Authorization'] = 'Bearer ' + c.apiKey;
-    return h;
-  }
-
-  /* 原始请求：返回 fetch Response（调用方按需 json / stream）；失败 reject */
+  /* 原始请求：POST /api/ai/chat（需登录，后端转发并限速）；失败 reject */
   function rawChat(messages, opts) {
     opts = opts || {};
-    var c = getCfg();
-    if (!isConfigured()) return Promise.reject({ noConfig: true });
-    var url = String(c.baseURL).replace(/\/+$/, '') + '/chat/completions';
-    var body = {
-      model: c.model,
-      messages: messages,
-      stream: !!opts.stream,
-      temperature: (typeof c.temperature === 'number') ? c.temperature : 0.7
-    };
-    if (opts.json) {
-      /* 要求模型返回 JSON：OpenAI 系列支持 response_format；
-         不支持的厂商会忽略该字段，调用方仍需 extractJson 容错。 */
-      try { body.response_format = { type: 'json_object' }; } catch (e) {}
-    }
-    return fetch(url, { method: 'POST', headers: reqHeaders(c), body: JSON.stringify(body) })
+    var headers = { 'Content-Type': 'application/json' };
+    var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    var body = { messages: messages, stream: !!opts.stream };
+    if (opts.json) body.json = true; /* 后端据此向上游带 response_format */
+    return fetch('/api/ai/chat', { method: 'POST', headers: headers, body: JSON.stringify(body) })
       .then(function (r) {
         if (!r.ok) {
-          return r.text().then(function (t) { throw { http: r.status, msg: t }; }, function () { throw { http: r.status }; });
+          return r.json()['catch'](function () { return {}; }).then(function (j) {
+            throw { http: r.status, msg: (j && j.msg) || ('HTTP ' + r.status), aiDisabled: !!(j && j.aiDisabled), noConfig: !!(j && j.aiDisabled) };
+          });
         }
         return r;
       });
   }
 
-  /* 非流式：返回完整文本 */
+  /* 非流式：后端返回 { ok:true, text }，返回完整文本 */
   function aiText(sys, messages) {
     return rawChat(buildMessages(sys, messages), {}).then(function (r) { return r.json(); })
       .then(function (j) {
-        var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+        var t = j && j.ok && j.text;
         if (!t) throw { empty: true };
         return String(t);
       });
   }
 
-  /* 流式：onToken(delta, fullSoFar) 在每片到达时回调；resolve 完整文本 */
+  /* 流式：后端按 SSE 逐字转发上游增量；onToken(delta, fullSoFar)；resolve 完整文本 */
   function aiStream(sys, messages, onToken) {
     return rawChat(buildMessages(sys, messages), { stream: true }).then(function (r) {
       if (!r.body || !r.body.getReader) {
         /* 浏览器不支持流式读取，降级为整包文本 */
         return r.json().then(function (j) {
-          var t = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+          var t = (j && j.ok && j.text) || '';
           if (onToken && t) onToken(t, t);
           return t;
         });
@@ -129,28 +116,126 @@
     try { return JSON.parse(t); } catch (e) { return null; }
   }
 
-  /* 强制 JSON：先尝试带 response_format 的请求，再 extractJson；
+  /* 强制 JSON：请求带 json 标记（后端转 response_format），再 extractJson；
      解析失败 reject({badJson:true, text})，由调用方决定是否回退本地。 */
   function aiJson(sys, messages) {
     return rawChat(buildMessages(sys, messages), { json: true }).then(function (r) { return r.json(); })
       .then(function (j) {
-        var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+        var t = (j && j.ok && j.text) || '';
         var obj = extractJson(t);
         if (!obj) throw { badJson: true, text: t || '' };
         return obj;
       });
   }
 
+  /* AI 训练教练 Agent：服务端跑 Function Calling 工具循环，返回 { ok, text, steps } */
+  function aiAgent(messages) {
+    var headers = { 'Content-Type': 'application/json' };
+    var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    return fetch('/api/ai/agent', { method: 'POST', headers: headers, body: JSON.stringify({ messages: messages }) })
+      .then(function (r) {
+        if (!r.ok) {
+          return r.json()['catch'](function () { return {}; }).then(function (j) {
+            throw { http: r.status, msg: (j && j.msg) || ('HTTP ' + r.status), aiDisabled: !!(j && j.aiDisabled), noConfig: !!(j && j.aiDisabled), safety: !!(j && j.safety) };
+          });
+        }
+        return r.json();
+      })
+      .then(function (j) {
+        if (j && j.ok && j.text) return { text: String(j.text), steps: (j.steps || []).map(String) };
+        throw { empty: true };
+      });
+  }
+
+  /* Agent 流式版（思考过程可视化 + 正文逐字流式）：SSE 事件流——
+     {type:'step'} 工具步骤 / {type:'think'} 思考链增量 / {type:'delta'} 正文增量
+     / {type:'reset'} 清空已显示正文 / {type:'done'} 最终全文。
+     onStep(label) 工具步骤；onDelta(t, full) 正文增量；onThink(t) 思考链增量。
+     resolve { text, steps } */
+  function aiAgentStream(messages, onStep, onDelta, onThink) {
+    var headers = { 'Content-Type': 'application/json' };
+    var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    return fetch('/api/ai/agent', { method: 'POST', headers: headers, body: JSON.stringify({ messages: messages, stream: true }) })
+      .then(function (r) {
+        if (!r.ok) {
+          return r.json()['catch'](function () { return {}; }).then(function (j) {
+            throw { http: r.status, msg: (j && j.msg) || ('HTTP ' + r.status), aiDisabled: !!(j && j.aiDisabled), safety: !!(j && j.safety) };
+          });
+        }
+        if (!r.body || !r.body.getReader) return r.json().then(function (j) {
+          return { text: (j && j.ok && j.text) || '', steps: (j && j.steps) || [] };
+        });
+        var reader = r.body.getReader(), dec = new TextDecoder(), buf = '', steps = [], full = '';
+        function pump() {
+          return reader.read().then(function (ch) {
+            if (ch.done) return { text: full, steps: steps, empty: !full };
+            buf += dec.decode(ch.value, { stream: true });
+            var parts = buf.split('\n\n'); buf = parts.pop() || '';
+            var done = null;
+            for (var i = 0; i < parts.length; i++) {
+              var line = parts[i].trim();
+              if (line.indexOf('data:') !== 0) continue;
+              try {
+                var ev = JSON.parse(line.slice(5).trim());
+                if (ev.type === 'step') { steps.push(ev.tool); if (onStep) onStep(ev.label || ev.tool, ev.tool); }
+                else if (ev.type === 'think') { if (onThink) onThink(String(ev.t || '')); }
+                else if (ev.type === 'delta') { full += String(ev.t || ''); if (onDelta) onDelta(String(ev.t || ''), full); }
+                else if (ev.type === 'reset') { full = ''; if (onDelta) onDelta(null, ''); }
+                else if (ev.type === 'done') done = { text: String(ev.text || full || ''), steps: (ev.steps || steps).map(String) };
+                else if (ev.type === 'error') throw { http: 502, msg: ev.msg || 'AI 服务异常' };
+              } catch (e) { if (e && e.http) throw e; }
+            }
+            if (done) return done;
+            return pump();
+          });
+        }
+        return pump();
+      })
+      .then(function (res) {
+        if (res && res.text) return res;
+        throw { empty: true };
+      });
+  }
+
+  /* 真 RAG 检索增强答题：服务端 TF-IDF 检索题库 Top-3 → 注入提示词 → 生成回答。
+     返回 { text, sources:[{q,scene,lv,score}] } */
+  function aiAsk(question, history) {
+    var headers = { 'Content-Type': 'application/json' };
+    var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    return fetch('/api/ai/ask', {
+      method: 'POST', headers: headers,
+      body: JSON.stringify({ question: question, messages: (history || []).slice(-4) })
+    }).then(function (r) {
+      if (!r.ok) {
+        return r.json()['catch'](function () { return {}; }).then(function (j) {
+          throw { http: r.status, msg: (j && j.msg) || ('HTTP ' + r.status), aiDisabled: !!(j && j.aiDisabled), safety: !!(j && j.safety) };
+        });
+      }
+      return r.json();
+    }).then(function (j) {
+      if (j && j.ok && j.text) {
+        return { text: String(j.text), sources: (j.sources || []).map(function (s) {
+          return { q: String(s.q || ''), scene: String(s.scene || ''), lv: Number(s.lv) || 1, score: Number(s.score) || 0 };
+        }) };
+      }
+      throw { empty: true };
+    });
+  }
+
   var CLOUD = {
-    PRESETS: PRESETS,
-    getCfg: getCfg,
-    setCfg: setCfg,
-    clearCfg: clearCfg,
     isConfigured: isConfigured,
     isCloud: isCloud,
+    serverModel: serverModel,
+    refreshStatus: refreshStatus,
     aiText: aiText,
     aiStream: aiStream,
     aiJson: aiJson,
+    aiAgent: aiAgent,
+    aiAgentStream: aiAgentStream,
+    aiAsk: aiAsk,
     extractJson: extractJson
   };
 

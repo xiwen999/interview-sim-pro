@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+(function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
+if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
+<title>反转面试 · 模拟面试训练营 Pro</title>
+<link rel="stylesheet" href="shared.css?v=20261113a">
+<style>
+body{background:
+  radial-gradient(ellipse 70% 45% at 30% -5%,rgba(167,139,250,.10),transparent),
+  radial-gradient(ellipse 55% 40% at 85% 15%,rgba(65,224,200,.08),transparent),
+  #0a1020}
+.rv-wrap{max-width:min(1500px,96vw);margin:0 auto;padding:clamp(14px,2.5vw,32px) clamp(12px,2.5vw,32px) 60px}
+.rv-head{display:flex;align-items:center;gap:14px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px dashed var(--line)}
+.rv-head .big{font-size:36px}
+.rv-head h1{font-size:clamp(22px,2.8vw,30px);font-weight:900;margin:0}
+.rv-head p{font-size:var(--fs-base);color:var(--ink3);margin:2px 0 0}
+.opt-grid{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 6px}
+.opt-grid .chip{cursor:pointer;border:1px solid var(--line);padding:11px 20px;border-radius:14px;font-size:var(--fs-base);
+  background:rgba(255,255,255,.04);transition:.18s;user-select:none}
+.opt-grid .chip:hover{border-color:var(--acc)}
+.opt-grid .chip.on{background:rgba(108,140,255,.18);border-color:rgba(108,140,255,.6);font-weight:700}
+/* 反转面试三张卡：与模拟面试页同款——渐变面 + 22px 大圆角 + 多层柔和阴影，加大内边距 */
+#vPrep,#vLive,#vDone{padding:clamp(22px,2.6vw,34px) clamp(22px,2.8vw,38px);
+  border-radius:22px;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)) var(--card);
+  box-shadow:0 26px 64px -26px rgba(0,0,0,.7),0 5px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.07)}
+/* 候选人卡 */
+.cand{display:flex;gap:16px;align-items:center;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.3);
+  border-radius:18px;padding:16px 22px;margin-bottom:14px}
+.cand .cv{width:60px;height:60px;border-radius:50%;background:rgba(167,139,250,.2);display:grid;place-items:center;font-size:30px;flex:none}
+.cand .cn{font-weight:800;font-size:var(--fs-lg)}
+.cand .cb{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;margin-top:2px}
+/* 对话流 */
+.rn-chat{display:flex;flex-direction:column;gap:12px;min-height:300px;max-height:56vh;overflow-y:auto;padding:8px 4px;margin:10px 0}
+.rn-msg{max-width:82%;padding:12px 17px;border-radius:15px;font-size:var(--fs-base);line-height:1.8}
+.rn-msg.me{align-self:flex-end;background:rgba(108,140,255,.2);border-bottom-right-radius:4px}
+.rn-msg.ai{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--line);border-bottom-left-radius:4px}
+.rn-msg .who{font-size:11.5px;opacity:.65;margin-bottom:3px}
+.rn-turn{align-self:center;font-size:11.5px;color:var(--ink3);background:rgba(255,255,255,.04);padding:3px 12px;border-radius:10px}
+/* 追问技巧条 */
+.rn-tips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.rn-tips .chip{font-size:12px;padding:5px 12px;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.3);color:var(--ink2)}
+/* 提问输入 */
+.rn-input{display:flex;gap:10px}
+.rn-input input{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:13px;padding:13px 16px;
+  font-size:var(--fs-base);color:var(--ink);outline:none}
+.rn-input input:focus{border-color:var(--acc)}
+.rn-input button{flex:none;height:46px;min-width:52px;border-radius:13px;display:grid;place-items:center;font-size:16px;cursor:pointer}
+.rn-input .mic{background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.rn-input .mic.rec{background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.6);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.55}}
+/* 报告 */
+.rn-bar{margin:8px 0}
+.rn-bar .bl{display:flex;justify-content:space-between;font-size:var(--fs-xs);margin-bottom:4px}
+.rn-bar .bt{height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.rn-bar .bt i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8ABDFF,#41E0C8);transition:width .8s}
+.rn-note{border-left:3px solid rgba(108,140,255,.5);padding:8px 12px;margin:8px 0;font-size:var(--fs-xs);color:var(--ink2);
+  background:rgba(255,255,255,.04);border-radius:0 10px 10px 0;line-height:1.7}
+.rn-total{font-size:clamp(28px,4vw,40px);font-weight:900;background:linear-gradient(90deg,#8ABDFF,#41E0C8);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+</style>
+</head>
+<body>
+<div class="rv-wrap" id="main">
+  <!-- 准备页（大标题放白框内，与模拟面试一致） -->
+  <div class="card rv rise" id="vPrep">
+    <div class="rv-head">
+      <span class="big">🔄</span>
+      <div>
+        <h1>角色反转面试</h1>
+        <p>你来当面试官，AI 扮演候选人（内置刻意缺陷，考验你的追问与控场）</p>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:800;margin-bottom:4px">① 选择考察场景</div>
+    <div class="opt-grid" id="rnScenes"></div>
+    <div style="font-size:13px;font-weight:800;margin:14px 0 4px">② 选择候选人强度</div>
+    <div class="opt-grid" id="rnDepths"></div>
+    <button class="btn pri" id="rnStartBtn" style="width:100%;margin-top:22px">🎬 开始反转面试</button>
+  </div>
+
+  <!-- 面试中 -->
+  <div class="card rv rise" id="vLive" style="display:none">
+    <div class="cand">
+      <div class="cv" id="cdAv">🧑</div>
+      <div style="flex:1;min-width:0">
+        <div class="cn" id="cdName">候选人</div>
+        <div class="cb" id="cdBg"></div>
+      </div>
+      <span class="chip" style="font-size:11px;flex:none" id="cdTurn">0 问</span>
+    </div>
+    <div class="rn-tips" id="rnTips"></div>
+    <div class="rn-chat" id="rnChat"></div>
+    <div class="rn-input">
+      <input id="rnIn" placeholder="向候选人提问…" maxlength="200">
+      <button class="mic" id="rnMic" title="语音提问" style="display:none">🎙</button>
+      <button class="btn pri" id="rnSend">提问</button>
+      <button class="btn gho" id="rnEnd" title="结束并生成评分报告">结束打分</button>
+    </div>
+  </div>
+
+  <!-- 报告 -->
+  <div class="card rv rise" id="vDone" style="display:none">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="rn-total" id="rdTotal">--/20</div>
+      <div style="flex:1;min-width:220px;font-size:var(--fs-sm);color:var(--ink2);line-height:1.8" id="rdSummary"></div>
+    </div>
+    <div style="margin-top:14px" id="rdBars"></div>
+    <div style="font-size:13px;font-weight:800;margin:16px 0 4px">🔍 逐问点评</div>
+    <div id="rdNotes"></div>
+    <div style="font-size:13px;font-weight:800;margin:16px 0 4px">💡 提问能力改进建议</div>
+    <div id="rdSug" style="font-size:var(--fs-sm);color:var(--ink2);line-height:2"></div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button class="btn gho" style="flex:1" onclick="location.href='interview.html'">回模拟面试</button>
+      <button class="btn pri" style="flex:1" onclick="location.reload()">再来一场</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js?v=20261114b"></script>
+<script src="cloud.js?v=20261114b"></script>
+<script>
+initPage('reverse');
+
+var RN_SCENES=[{id:'job',n:'💼 求职实习'},{id:'tech',n:'💻 技术开发'},{id:'data',n:'📊 数据分析'},{id:'product',n:'🚀 产品运营'},{id:'general',n:'🤝 通用行为'}];
+var RN_DEPTHS=[{id:'basic',n:'🌱 基础候选人（缺陷明显）'},{id:'pro',n:'⚡ 进阶候选人（缺陷隐蔽）'},{id:'stress',n:'🔥 压力候选人（会反问施压）'}];
+var RN_SCENE_NAME={job:'求职实习',tech:'技术开发',data:'数据分析',product:'产品运营',general:'通用行为'};
+var RN_TIPS=['请具体讲讲项目的背景','这个数据是怎么得出的？','有没有实际落地的例子？','结果如何衡量？','如果再让你做一次会怎么改进？','你刚才说的 XX 具体指什么？'];
+
+var sceneSel='job',depthSel='pro';
+function renderOpts(){
+  document.getElementById('rnScenes').innerHTML=RN_SCENES.map(function(s){
+    return '<span class="chip'+(s.id===sceneSel?' on':'')+'" data-s="'+s.id+'">'+s.n+'</span>'}).join('');
+  document.getElementById('rnDepths').innerHTML=RN_DEPTHS.map(function(d){
+    return '<span class="chip'+(d.id===depthSel?' on':'')+'" data-d="'+d.id+'">'+d.n+'</span>'}).join('');
+  document.querySelectorAll('#rnScenes .chip').forEach(function(c){c.onclick=function(){sceneSel=c.dataset.s;renderOpts()}});
+  document.querySelectorAll('#rnDepths .chip').forEach(function(c){c.onclick=function(){depthSel=c.dataset.d;renderOpts()}});
+}
+renderOpts();
+
+/* 面试会话状态 */
+var RN={persona:null,t0:0,recs:[],hist:[],on:false};
+function aiReady(){try{return typeof CLOUD!=='undefined'&&CLOUD.isConfigured()}catch(e){return false}}
+function show(id){['vPrep','vLive','vDone'].forEach(function(v){document.getElementById(v).style.display=v===id?'block':'none'})}
+
+function localPersona(){
+  var pool=[
+    {name:'李晓阳',avatar:'🧑‍💻',background:'2 年相关经验，主导过一个中等规模项目，跳槽动机是寻求更大平台',style:'表达流畅但关键数据模糊',flaws:['项目数据说不清来源和口径','回答偏理论、缺少具体案例','被追问时倾向于绕开问题']},
+    {name:'王诗雨',avatar:'👩‍💼',background:'应届毕业生，实习经历 2 段，对岗位理解来自课程和自媒体',style:'态度积极、用词华丽',flaws:['实习成果夸大、经不起细节追问','把团队成果说成个人业绩','对岗位日常工作缺乏真实认知']},
+    {name:'陈默',avatar:'🧔',background:'5 年经验的资深候选人，技术扎实但表达习惯跳跃',style:'话少、直接、偶尔反问面试官',flaws:['回答过于简短、需要面试官持续追问','对职业规划含糊其辞','被问到短板时会防御性反驳']}
+  ];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function rnStart(){
+  if(RN.on)return;
+  show('vLive');
+  var chat=document.getElementById('rnChat');
+  chat.innerHTML='<div class="rn-msg ai"><div class="who">系统</div><span class="typing"><i></i><i></i><i></i></span> 正在生成候选人档案…</div>';
+  RN={persona:null,t0:Date.now(),recs:[],hist:[],on:true};
+  document.getElementById('rnTips').innerHTML='💡 追问技巧：'+RN_TIPS.map(function(t){return '<span class="chip">'+esc(t)+'</span>'}).join('');
+  document.getElementById('cdTurn').textContent='0 问';
+  var depthName=(RN_DEPTHS.filter(function(d){return d.id===depthSel})[0]||{}).n||'';
+  function applyPersona(p){
+    RN.persona=p;
+    document.getElementById('cdAv').textContent=p.avatar||'🧑';
+    document.getElementById('cdName').textContent=p.name+'（'+depthName.replace(/^[^ ]+ /,'')+'）';
+    document.getElementById('cdBg').textContent=p.background;
+    chat.innerHTML='';
+    rnPush('您好，我是'+p.name+'，很高兴参加今天的面试。'+(p.style?('（'+p.style+'）'):''),false,'候选人');
+    rnPush('你可以开始提问了——试试先用「请介绍一下你做过最有挑战的项目」开场。',true,'提示');
+  }
+  if(aiReady()&&typeof CLOUD.aiJson==='function'){
+    CLOUD.aiJson(
+      '你是面试系统。为"角色反转面试"生成一位虚拟候选人档案。返回严格 JSON：{"name":"中文姓名","avatar":"一个emoji","background":"80字内的候选人背景介绍（年限/经历/求职动机）","style":"一句话表达风格","flaws":["刻意埋入的回答缺陷1","缺陷2","缺陷3"]}。缺陷要真实可信，例如：项目数据含糊、成果夸大、回答理论化缺实例、被追问时绕开问题、对岗位认知肤浅。缺陷共 2-3 个。',
+      [{role:'user',content:'请生成一位应聘「'+RN_SCENE_NAME[sceneSel]+'」岗位的候选人，强度要求：'+depthName+'。只返回 JSON。'}]
+    ).then(function(p){
+      if(!p||!p.name||!p.background||!p.flaws||!p.flaws.length)throw {};
+      applyPersona(p);
+    })['catch'](function(){applyPersona(localPersona())});
+  } else {
+    setTimeout(function(){applyPersona(localPersona())},400);
+  }
+}
+document.getElementById('rnStartBtn').onclick=rnStart;
+
+function rnPush(text,me,who){
+  var chat=document.getElementById('rnChat');
+  var d=document.createElement('div');d.className='rn-msg '+(me?'me':'ai');
+  d.innerHTML='<div class="who">'+esc(who||(me?'面试官（你）':(RN.persona?RN.persona.name:'候选人')))+':</div>'+String(text).replace(/\n/g,'<br>');
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d;
+}
+
+function personaSys(){
+  var p=RN.persona;
+  return '你正在参加"角色反转面试"：用户是面试官，你扮演候选人「'+p.name+'」。背景：'+p.background+'。表达风格：'+p.style+
+    '\n【扮演铁律】1) 永远以候选人第一人称回答，绝不承认自己是 AI，绝不给面试官建议；'+
+    '\n2) 你被刻意埋入这些回答缺陷（不要主动坦白，要在相关话题中自然暴露）：'+(p.flaws||[]).join('；')+
+    '\n3) 单次回答 80-150 字；面试官追问时可以逐步补充，但不要一次把细节全说完；'+
+    '\n4) '+(depthSel==='stress'?'当面试官超过 3 问都没有深挖细节时，你可以礼貌地反问一句施压（如"您觉得这个方向哪里有问题呢？"）。':'保持礼貌配合，但回答质量受缺陷影响。')+
+    '\n只用中文。';
+}
+function rnAsk(q){
+  if(!RN.on||!q)return;
+  RN.recs.push(q);
+  document.getElementById('cdTurn').textContent=RN.recs.length+' 问';
+  rnPush(q,true,'面试官（你）');
+  var ld=rnPush('<span class="typing"><i></i><i></i><i></i></span>',false,RN.persona?RN.persona.name:'候选人');
+  RN.hist.push({role:'user',content:q});
+  function fail(){
+    ld.remove();
+    rnPush('（候选人信号不太好…AI 暂时不可用，请稍后再试或结束打分）',false,'系统');
+  }
+  if(aiReady()&&typeof CLOUD.aiText==='function'){
+    CLOUD.aiText(personaSys(),RN.hist.slice(-12)).then(function(t){
+      ld.remove();
+      RN.hist.push({role:'assistant',content:t});
+      rnPush(t,false);
+    })['catch'](fail);
+  } else fail();
+}
+document.getElementById('rnSend').onclick=function(){var v=document.getElementById('rnIn').value.trim();if(!v)return;document.getElementById('rnIn').value='';rnAsk(v)};
+document.getElementById('rnIn').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){var v=this.value.trim();if(!v)return;this.value='';rnAsk(v)}});
+
+(function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return;
+  var mic=document.getElementById('rnMic');mic.style.display='grid';
+  var rec=null,recOn=false;
+  mic.onclick=function(){
+    if(recOn){rec&&rec.stop();return}
+    try{
+      rec=new SR();rec.lang='zh-CN';rec.interimResults=true;rec.continuous=false;
+      var base='';
+      rec.onstart=function(){recOn=true;mic.classList.add('rec')};
+      rec.onend=function(){recOn=false;mic.classList.remove('rec')};
+      rec.onerror=function(){recOn=false;mic.classList.remove('rec')};
+      rec.onresult=function(e){
+        var t='';
+        for(var i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
+        document.getElementById('rnIn').value=base+t;
+        if(e.results[e.results.length-1].isFinal)base='';
+      };
+      base=document.getElementById('rnIn').value;
+      rec.start();
+    }catch(e){toast('麦克风不可用','warn')}
+  };
+})();
+
+function localScore(){
+  var star=0,probe=0;
+  var starKw=['背景','目标','怎么','如何','为什么','过程','角色'],probeKw=['数据','多少','具体','例子','案例','结果','衡量','来源','落地'];
+  RN.recs.forEach(function(q){
+    if(starKw.some(function(k){return q.indexOf(k)>=0}))star++;
+    if(probeKw.some(function(k){return q.indexOf(k)>=0}))probe++;
+  });
+  function clip(n,max){return Math.min(max,Math.round(n*1.5*10)/10)}
+  var d={starFollow:clip(star,5),probe:clip(probe,5),control:clip(Math.min(RN.recs.length,4),5),closure:RN.recs.length>=3?3:1.5};
+  var total=d.starFollow+d.probe+d.control+d.closure;
+  return {starFollow:d.starFollow,probe:d.probe,control:d.control,closure:d.closure,
+    total:Math.round(total*10)/10+'/20',
+    summary:'（本地估算）你共提出 '+RN.recs.length+' 个问题。'+(probe>=2?'能要数据要案例，追问意识不错。':'追问偏少，候选人含糊作答时要继续深挖。')+(RN.recs.length<3?' 建议至少完成 3-5 个递进问题再收尾。':''),
+    notes:RN.recs.slice(0,5).map(function(q){return {q:q,comment:probeKw.some(function(k){return q.indexOf(k)>=0})?'好问题：带数据/结果导向':'偏开放，可再聚焦到具体细节'}}),
+    suggestions:['用 STAR 顺序追问：背景→任务→行动→结果','听到含糊回答不要换话题，先要数据或案例','结束前让候选人做自我总结，考察自省能力']};
+}
+function rnEnd(){
+  if(!RN.on)return;
+  if(!RN.recs.length){toast('你还没有提问，先问至少 1 个问题','warn');return}
+  RN.on=false;
+  show('vDone');
+  document.getElementById('rdTotal').textContent='评分中…';
+  document.getElementById('rdBars').innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+  document.getElementById('rdNotes').innerHTML='';document.getElementById('rdSug').textContent='';
+  var transcript='完整面试记录（用户=面试官，AI=候选人）：\n'+RN.recs.map(function(q,i){
+    return '面试官 Q'+(i+1)+'：'+q+'\n候选人：'+((RN.hist[i*2+1]&&RN.hist[i*2+1].content)||'（略）')}).join('\n\n');
+  function render(sc){
+    sc=sc||localScore();
+    var dims=[['starFollow','STAR 追问覆盖',sc.starFollow],['probe','追问与深挖',sc.probe],['control','控场与节奏',sc.control],['closure','收尾与总结',sc.closure]];
+    document.getElementById('rdTotal').textContent=sc.total;
+    document.getElementById('rdSummary').textContent=sc.summary||'';
+    document.getElementById('rdBars').innerHTML=dims.map(function(d){
+      var v=Math.max(0,Math.min(5,Number(d[2])||0));
+      return '<div class="rn-bar"><div class="bl"><span>'+d[1]+'</span><b>'+v.toFixed(1)+'</b></div><div class="bt"><i style="width:'+(v/5*100)+'%"></i></div></div>';
+    }).join('');
+    document.getElementById('rdNotes').innerHTML=(sc.notes||[]).map(function(n){
+      return '<div class="rn-note"><b style="color:var(--ink)">问：'+esc(String(n.q).slice(0,60))+'</b><br>'+esc(n.comment||'')+'</div>'}).join('')||'<div style="font-size:12px;color:var(--ink3)">（无逐问点评）</div>';
+    document.getElementById('rdSug').innerHTML=(sc.suggestions||[]).map(function(s){return '· '+esc(s)}).join('<br>')||'—';
+    /* 云端存档：type=反转面试，avg 换算 5 分制 */
+    var total=parseFloat(sc.total)||0;
+    try{
+      apiCall('/api/interviews',{method:'POST',silent:true,body:{
+        type:'反转面试',scene:sceneSel,count:RN.recs.length,
+        avg:Math.round(total/20*5*10)/10,used:Math.round((Date.now()-RN.t0)/1000),ansLen:0,ai:'role-reverse'
+      }})['catch'](function(){});
+    }catch(e){}
+  }
+  if(aiReady()&&typeof CLOUD.aiJson==='function'){
+    var sSys='你是面试官能力评估专家。以下是"角色反转面试"的完整记录：用户是面试官，AI 扮演候选人（候选人被刻意埋入缺陷，如数据含糊、成果夸大、理论化）。请评估【面试官（用户）】的提问质量，返回严格 JSON：'+
+      '{"starFollow":0-5,"probe":0-5,"control":0-5,"closure":0-5,"total":"x.x/20","summary":"总评 60 字内","notes":[{"q":"用户的关键问题","comment":"该问题点评 30 字内"}],"suggestions":["改进建议 2-4 条"]}。'+
+      '维度说明：starFollow=是否覆盖背景/任务/行动/结果；probe=是否质疑含糊回答、要数据要案例；control=问题逻辑递进、不跑题；closure=是否让候选人总结或反问。';
+    CLOUD.aiJson(sSys,[{role:'user',content:transcript}]).then(render)['catch'](function(){render(localScore())});
+  } else {
+    setTimeout(function(){render(localScore())},300);
+  }
+}
+document.getElementById('rnEnd').onclick=rnEnd;
+</script>
+</body>
+</html>

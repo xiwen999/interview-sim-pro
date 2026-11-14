@@ -1,13 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>个人中心 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261110a">
+<link rel="stylesheet" href="shared.css?v=20261110n">
 <style>
 /* 卡片语言 = rgba(255,255,255,.055→.02) 的白色玻璃渐变；背景用完全同源的白色光感，不带彩色色相 */
 body{background:
@@ -24,7 +24,17 @@ body{background:
 .fp-shell::after{content:"";position:absolute;right:-90px;top:-90px;width:360px;height:360px;
   border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(255,255,255,.055),rgba(255,255,255,.02) 46%,transparent 70%)}
-/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
+/* 浅色模式适配 */
+body.light{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 42%,#eff4ff 100%)}
+/* 与题库一致：壳体贴平，让极光背景连续铺满整页 */
+body.light .fp-shell{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+body.light .fp-shell::before{display:none}
 body.light .fp-wrap::before{background:linear-gradient(180deg,rgba(37,99,235,.028),transparent 34%,transparent 74%,rgba(37,99,235,.016))}
 body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.5),rgba(255,255,255,.12) 46%,transparent 70%)}
 .pc-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -42,8 +52,19 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .vcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.25s;cursor:pointer;
   box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .vcard:hover{transform:translateY(-4px);border-color:rgba(108,140,255,.4);box-shadow:0 16px 36px rgba(0,0,0,.35),0 0 0 1px rgba(108,140,255,.15)}
-.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative}
-.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
+.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative;overflow:hidden}
+.vthumb .vph{line-height:1;transition:opacity .3s}
+.vthumb.has-poster .vph{opacity:0}
+/* 封面：视频随机一帧，图片就位后淡入（未取到画面时保留图标兜底） */
+.vthumb img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s;display:block;pointer-events:none;z-index:1}
+.vthumb img.vposter.on{opacity:1}
+.vthumb::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:linear-gradient(180deg,transparent 55%,rgba(6,10,22,.55))}
+.vthumb.has-poster::after{opacity:1}
+.vthumb.is-loading::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.06) 45%,transparent 70%);animation:vshim 1.3s linear infinite}
+@keyframes vshim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s;z-index:2}
 .vcard:hover .vplay{opacity:1}
 .vthumb .vplay span{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4f6ef0,#6C8CFF);display:grid;place-items:center;font-size:20px;color:#fff;box-shadow:0 8px 24px rgba(79,110,240,.5)}
 .vbody{padding:12px 14px}
@@ -80,7 +101,11 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .mg-row:last-child{border-bottom:0}
 .mg-row:hover{background:rgba(108,140,255,.05)}
 .mg-th{width:52px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:17px;
-  background:linear-gradient(135deg,rgba(60,80,160,.55),rgba(50,40,110,.5));cursor:pointer}
+  background:linear-gradient(135deg,rgba(60,80,160,.55),rgba(40,32,96,.5));cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--line)}
+.mg-th .vph{line-height:1}
+.mg-th img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s;z-index:1}
+.mg-th img.vposter.on{opacity:1}
+.mg-th.has-poster .vph{opacity:0}
 .mg-ti{font-size:var(--fs-base);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .mg-mt{font-size:var(--fs-xs);color:var(--ink3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
 .mg-reason{margin-top:5px;font-size:var(--fs-xs);color:#fda4af;line-height:1.6;background:rgba(251,113,133,.08);
@@ -336,10 +361,9 @@ body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
   </div>
 </div>
 
-<script src="shared.js?v=20261109a"></script>
-<script src="cloud.js?v=20261107a"></script>
+<script src="shared.js?v=20261114b"></script>
 <script>
-if(!initPage('videos',true))throw new Error('login required');
+initPage('videos');
 
 var SEC=(location.hash||'').replace('#','')||'videos';
 var TAB='mine';
@@ -380,7 +404,7 @@ function renderGate(){
       '<button class="btn pri" id="gLogin">🔑 登录 / 注册</button>'+
       '<button class="btn gho" id="gQuick">🎭 游客快速登录</button>'+
     '</div>'+
-    '<div class="gn">🔒 数据只保存在本机浏览器，登录不会上传任何信息。<br>游客身份只能浏览公开内容（首页、题库、观摩大厅），个人中心需要登录后才解锁。</div>'+
+    '<div class="gn">🔒 注册无需真实手机号，仅用于模拟训练；训练记录云端保存，可跨设备同步。<br>游客身份只能浏览公开内容（首页、题库、观摩大厅），个人中心需要登录后才解锁。</div>'+
     '<div class="gback"><a href="index.html">← 先随便逛逛</a></div>'+
   '</div>';
   document.getElementById('gLogin').onclick=function(){openLoginModal()};
@@ -492,11 +516,18 @@ function renderSec(){
 function fmtTime(ts){var d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function fmtDate(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function badge(st){return st==='pending'?'<span class="vbadge pending">⏳ 审核中</span>':st==='rejected'?'<span class="vbadge rejected">✕ 未通过</span>':'<span class="vbadge approved">✓ 已通过</span>'}
-function sceneTag(sc){var s=SCENES[sc];return s?'<span class="tag" style="background:'+SCENE_COLOR[sc]+'22;color:'+SCENE_COLOR[sc]+'">'+s.name+'</span>':''}
+/* 与题库/观摩大厅同源的双轴标签（岗位 + 面试类型），旧 scene 自动映射 */
+function sceneTag(sc){
+  var v={scene:sc}, r=ROLE_MAP[roleOf(v)], rd=ROUND_MAP[roundOf(v)], out='';
+  if(r)out+='<span class="tag" style="background:'+r.color+'22;color:'+r.color+'">'+r.name+'</span>';
+  if(rd)out+='<span class="tag" style="background:'+rd.color+'22;color:'+rd.color+'">'+rd.name+'</span>';
+  return out;
+}
 
 function vCard(v,actions){
+  var ic=v.src==='interview'?'🎤':'📹';
   return '<div class="vcard" data-id="'+v.id+'">'+
-    '<div class="vthumb">'+(v.src==='interview'?'🎤':'📹')+'<div class="vplay"><span>▶</span></div></div>'+
+    '<div class="vthumb"><span class="vph">'+ic+'</span><img class="vposter" alt="" data-vposter="'+v.id+'"><div class="vplay"><span>▶</span></div></div>'+
     '<div class="vbody">'+
       '<div class="vtitle">'+esc(v.title)+'</div>'+
       '<div class="vmeta">'+stBadge(stOf(v))+sceneTag(v.scene)+'<span>'+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
@@ -544,6 +575,8 @@ function render(){
     renderManage();
   }
   bindCards();
+  /* 封面：用视频里的随机一帧替换图标 */
+  hydrateVideoPosters(pane);
 }
 
 function renderManage(){
@@ -566,7 +599,7 @@ function renderManage(){
   mine.forEach(function(v){
     var s=stOf(v);
     h+='<div class="mg-row" data-id="'+v.id+'">'+
-      '<div class="mg-th" data-act="play">'+(v.src==='interview'?'🎤':'📹')+'</div>'+
+      '<div class="mg-th" data-act="play"><span class="vph">'+(v.src==='interview'?'🎤':'📹')+'</span><img class="vposter" alt="" data-vposter="'+v.id+'"></div>'+
       '<div class="mg-info"><div class="mg-ti" data-act="play">'+esc(v.title)+'</div>'+
         '<div class="mg-mt">'+sceneTag(v.scene)+
         '<span>'+(v.src==='interview'?'🎤 面试录制':'📹 上传投稿')+'</span>'+
@@ -589,9 +622,11 @@ function renderManage(){
       '</div>'+
     '</div>';
   });
-  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「观摩大厅」；<b>未通过</b> 会给出理由，你可以修改后重新投稿。视频文件只保存在本机浏览器，删除后不可恢复。</div>';
+  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「观摩大厅」供所有用户观看；<b>未通过</b> 会给出理由，你可以修改后重新投稿。已投稿的视频文件会上传到服务器。</div>';
   pane.innerHTML=h;
   bindManage();
+  /* 管理列表的小封面同样取视频随机一帧 */
+  hydrateVideoPosters(pane);
 }
 function bindManage(){
   $$('#pane .mg-row').forEach(function(row){
@@ -604,14 +639,18 @@ function bindManage(){
         if(a==='play')return playVideo(id);
         if(a==='share'){
           updateVideoMeta(id,{shared:true,status:'pending',reason:''});
+          syncVideoMeta(id);
+          getVideoBlob(id).then(function(b){if(b)uploadVideoFile(id,b)});
           playSound('checkin');toast('已投稿，等待管理员审核','ok');render();return;
         }
         if(a==='undo'){
           updateVideoMeta(id,{shared:false,status:'private'});
+          syncVideoMeta(id);
           playSound('click');toast('已撤回，视频恢复为仅本机可见','ok');render();return;
         }
         if(a==='down'){
           updateVideoMeta(id,{shared:false,status:'private'});
+          syncVideoMeta(id);
           playSound('click');toast('已从观摩大厅撤下','ok');render();return;
         }
         if(a==='rename'){
@@ -620,10 +659,11 @@ function bindManage(){
           if(t==null)return;
           t=String(t).trim().slice(0,30);
           if(!t){toast('标题不能为空','warn');return}
-          updateVideoMeta(id,{title:t});toast('标题已更新','ok');render();return;
+          updateVideoMeta(id,{title:t});syncVideoMeta(id);toast('标题已更新','ok');render();return;
         }
         if(a==='del'){
           if(!confirm('删除后视频文件将从本机移除，且不可恢复，确定删除？'))return;
+          deleteVideoRemote(id);
           removeVideo(id).then(function(){toast('已删除','ok');render();renderHero()});
         }
       };
@@ -637,7 +677,10 @@ function bindCards(){
     c.querySelector('.vthumb').onclick=function(){playVideo(id)};
     var share=c.querySelector('.act-share');
     if(share)share.onclick=function(e){e.stopPropagation();
-      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到观摩大厅','ok');render();renderHero();
+      updateVideoMeta(id,{shared:true,status:'pending'});
+      syncVideoMeta(id);
+      getVideoBlob(id).then(function(b){if(b)uploadVideoFile(id,b)});
+      playSound('click');toast('已投稿，等待审核通过后展示到观摩大厅','ok');render();renderHero();
     };
     var del=c.querySelector('.act-del');
     if(del)del.onclick=function(e){e.stopPropagation();
@@ -648,26 +691,30 @@ function bindCards(){
 
 function playVideo(id){
   getVideoBlob(id).then(function(blob){
-    if(!blob){toast('视频文件不存在（可能已清理）','warn');return}
-    var url=URL.createObjectURL(blob);
     var v=getVideos().filter(function(x){return x.id===id})[0]||{};
+    var src=null;
+    if(blob){src=URL.createObjectURL(blob)}
+    else{src='/api/videos/file/'+encodeURIComponent(id)} /* 本机没有文件时尝试服务器（其他设备投稿的视频） */
     var m=openMask('<div class="m-head"><div><h3>'+esc(v.title||'视频回放')+'</h3><div class="m-sub">'+esc(v.owner||'')+' · '+fmtTime(v.ts||Date.now())+'</div></div><button class="m-x" id="vpX">✕</button></div>'+
-      '<video src="'+url+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
+      '<video id="vpEl" src="'+src+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
     m.querySelector('#vpX').onclick=function(){closeMask()};
-    m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(url)},300)});
+    m.querySelector('#vpEl').onerror=function(){
+      closeMask();toast('视频文件不存在（仅保存于投稿者的设备，尚未上传服务器）','warn');
+    };
+    if(blob)m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(src)},300)});
   });
 }
 
 function renderUpload(){
   var scOpts=SCENE_KEYS.map(function(k){return '<option value="'+k+'">'+SCENES[k].name+'</option>'}).join('');
   pane.innerHTML='<div class="up-card rise">'+
-    '<div class="up-drop" id="upDrop"><span class="big">📹</span><span id="upDropTxt">点击选择本地视频文件（mp4 / webm，建议 &lt; 200MB）</span><input type="file" id="upFile" accept="video/*" style="display:none"></div>'+
+    '<div class="up-drop" id="upDrop"><span class="big">📹</span><span id="upDropTxt">点击选择本地视频文件（mp4 / webm，建议 &lt; 500MB）</span><input type="file" id="upFile" accept="video/*" style="display:none"></div>'+
     '<div class="f-lab">视频标题 <span style="color:var(--danger)">*</span></div>'+
     '<input class="f-in" id="upTitle" maxlength="30" placeholder="比如：我的产品经理自我介绍实录">'+
     '<div class="f-lab" style="margin-top:12px">所属场景</div>'+
     '<select class="f-in" id="upScene">'+scOpts+'</select>'+
     '<button class="btn pri" id="upBtn" style="width:100%;margin-top:16px">提交审核</button>'+
-    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「观摩大厅」，其他用户才能看到。视频文件仅保存在本机浏览器（IndexedDB），不会上传到服务器。</div>'+
+    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「观摩大厅」，其他用户即可观看。视频文件会自动上传到服务器（≤500MB），同时保留一份在本机浏览器。</div>'+
   '</div>';
   var file=null;
   var drop=document.getElementById('upDrop'),fi=document.getElementById('upFile');
@@ -681,13 +728,15 @@ function renderUpload(){
     var title=document.getElementById('upTitle').value.trim();
     var scene=document.getElementById('upScene').value;
     if(!file){toast('请先选择视频文件','warn');return}
-    if(file.size>200*1048576){toast('文件超过 200MB，请压缩后再传','warn');return}
+    if(file.size>500*1048576){toast('文件超过 500MB，请压缩后再传','warn');return}
     if(!title){toast('请填写视频标题','warn');return}
     var id='v_'+Date.now();
     saveVideoBlob(id,file).then(function(){
       addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'pending',ts:Date.now(),src:'upload',shared:true});
       /* 同步到管理后台数据集，管理员可在「视频审核」中处理 */
       try{AdminDB.addVideo({id:id,title:title,scene:scene,status:'pending',ts:Date.now(),dur:0})}catch(e){}
+      /* 视频文件上传到服务器（尽力而为）：审核通过后其他用户可在观摩大厅播放 */
+      uploadVideoFile(id,file).then(function(ok){ if(!ok)console.warn('[videos] 文件上传失败，仅本机可播放'); });
       playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到观摩大厅','ok');
       TAB='mine';renderSec();renderHero();
     }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
@@ -884,7 +933,7 @@ function renderSet(){
         '<div class="b-field"><label>性别</label><select id="fGender" class="b-inp">'+genHtml+'</select></div>'+
         '<div class="b-field"><label>生日</label><input class="b-inp" id="fBd" value="'+esc(u.birthday||'')+'" placeholder="如 2000-01-01"></div>'+
       '</div>'+
-      '<div class="b-savebar"><button class="b-save" id="editSave">💾 保存资料</button><span>所有数据仅保存在本机浏览器</span></div>'+
+      '<div class="b-savebar"><button class="b-save" id="editSave">💾 保存资料</button><span>资料云端保存 · 跨设备同步</span></div>'+
     '</div>'+
     /* 退出登录 */
     '<div class="b-scard b-danger">'+
@@ -938,12 +987,13 @@ function renderSet(){
     else document.getElementById('sigErr').textContent='';
     if(err)return;
     var btn=this;
-    /* 资料只保存在本机浏览器，无需模拟网络请求，直接写入 */
+    /* 资料保存：本地即时生效，同时经 /api/profile 同步云端 */
     var nu=getUser()||{};
     nu.name=name;nu.avatar=editState.avatar;
     nu.signature=sigVal;nu.gender=document.getElementById('fGender').value;
     nu.birthday=document.getElementById('fBd').value.trim();
     storeSet('ivsim_user',nu);
+    try{syncProfile()}catch(e){}
     refreshNavAvatar();renderHero();
     btn.disabled=true;btn.innerHTML='✅ 已保存';
     toast('资料已保存','ok');
@@ -967,6 +1017,9 @@ function boot(){
   $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
   renderHero();
   renderSec();
+  /* 与服务器对齐审核状态：管理员在后台通过 / 拒绝后，本机状态与理由自动更新 */
+  syncVideoStatusFromServer().then(function(ch){if(ch){renderHero();renderSec()}});
+  reuploadLocalVideoFiles(); /* 已通过审核的视频若服务器缺文件，自动补传 */
 }
 boot();
 /* 登录成功后（登录弹窗里登录 / 注册 / 游客快速登录）自动解锁个人中心 */

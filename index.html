@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" style="--bgA: #1b2a6b; --bgB: #0e4d5c; --bgC: #3b1d5d; --ink: #eef2ff; --ink2: #aab4d8; --ink3: #7c86ad;"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>首页 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261110a">
+<link rel="stylesheet" href="shared.css?v=20261110n">
 <!-- 字体走本地系统字栈（Manrope/Noto Serif SC/JetBrains Mono 已装则用，未装回退系统中西文衬线/等宽），
      不再从 Google Fonts 同步加载：该域名在国内网络下不稳定，渲染阻塞会直接拖住首屏。 -->
 <style>
@@ -274,13 +274,11 @@ a{color:var(--acc);text-decoration:none}
 /* 收尾 */
 .closing{margin-top:clamp(56px,7vw,92px);padding-top:clamp(36px,5vw,56px);
   border-top:1px solid var(--hair);display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
-/* 浅色：首页收尾区不做硬切纯白，改透明融入极光背景，与深色模式/上方 hero 一致；
-   仅作用于首页（内联样式晚于 shared.css 加载，同特异性 + !important 覆盖全站白名单）。
-   relax.html 的 .closing 是渐变卡片，保持 shared.css 原有白卡样式不变。 */
-body.light .closing{background:transparent !important;border-top-color:rgba(15,23,42,.12) !important}
 .closing h2{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3.4vw,40px);line-height:1.35;letter-spacing:1px;color:var(--ink)}
 .closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .closing .hero-actions{margin-left:auto}
+/* 浅色：首页收尾区不做硬切纯白，改透明融入极光背景，与深色模式/上方 hero 一致 */
+body.light .closing{background:transparent !important;border-top-color:rgba(15,23,42,.12) !important}
 footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--hair);
   display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;
   color:var(--ink3);letter-spacing:1px;line-height:1.9}
@@ -302,7 +300,7 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body><div class="nav"><a class="logo" href="index.html" title="返回首页"><span class="lg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"></path></svg></span>模拟面试训练营 Pro</a><div class="links"><a href="interview.html" class="">模拟面试</a><a href="bank.html" class="">题库</a><a href="square.html" class="">观摩大厅</a><a href="product.html" class="">产品蓝图</a><a href="videos.html" class="">个人中心</a><a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a></div><button class="icbtn" id="navFeedback" title="反馈给官方"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="icbtn" id="navSettings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87c.26.63.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.03z"></path></svg></button><div class="nav-acct" id="navAcct"><button class="acct-btn" id="navAcctBtn" title="登录 / 注册"><span class="avatar" id="navMeAvatar">🦊</span><span class="acct-txt">登录</span><span class="acct-arrow">▾</span></button><div class="acct-menu" id="navAcctMenu"><div class="acct-menu-in"><div class="acct-who">当前：<b>游客</b></div><button type="button" data-act="switch">🔄 登录 / 注册</button></div></div></div></div>
+<body><div class="nav"><a class="logo" href="index.html" title="返回首页"><span class="lg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"></path></svg></span>模拟面试训练营 Pro</a><div class="links"><a href="interview.html" class="">模拟面试</a><a href="bank.html" class="">题库</a><a href="square.html" class="">观摩大厅</a><a href="videos.html" class="">个人中心</a><a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a></div><button class="icbtn" id="navFeedback" title="反馈给官方"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="icbtn" id="navSettings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87c.26.63.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.03z"></path></svg></button><div class="nav-acct" id="navAcct"><button class="acct-btn" id="navAcctBtn" title="登录 / 注册"><span class="avatar" id="navMeAvatar">🦊</span><span class="acct-txt">登录</span><span class="acct-arrow">▾</span></button><div class="acct-menu" id="navAcctMenu"><div class="acct-menu-in"><div class="acct-who">当前：<b>游客</b></div><button type="button" data-act="switch">🔄 登录 / 注册</button></div></div></div></div>
 <div class="wrap">
 
   <!-- ===== Hero ===== -->
@@ -319,9 +317,9 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
       <div class="ht-right">
         <span class="ht-label">DATA SET</span>
         <div class="ht-stats">
-          <div class="ht-stat"><span class="hsk">题量</span><span class="hsv">50</span></div>
-          <div class="ht-stat"><span class="hsk">场景</span><span class="hsv">5</span></div>
-          <div class="ht-stat"><span class="hsk">存档</span><span class="hsv">LOCAL</span></div>
+          <div class="ht-stat"><span class="hsk">题量</span><span class="hsv" id="statQ">…</span></div>
+          <div class="ht-stat"><span class="hsk">场景</span><span class="hsv" id="statS">…</span></div>
+          <div class="ht-stat"><span class="hsk">存档</span><span class="hsv">CLOUD</span></div>
         </div>
       </div>
     </div>
@@ -329,7 +327,7 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
       <span class="hl">把每一次练习</span>
       <span class="hl">做成<em>面试现场</em></span>
     </h1>
-    <p class="lead">随机抽题、限时作答、语音转写、复盘报告，50 道高频真题覆盖 5 大面试场景；<br>练累了就去「轻松一下」抽支签、翻张卡，让每一次练习都算数 —— 上场之前，先把底气练足。</p>
+    <p class="lead">随机抽题、限时作答、语音转写、复盘报告，<span id="statQ2">…</span> 道高频真题覆盖 <span id="statS2">…</span> 大面试场景；<br>练累了就去「轻松一下」抽支签、翻张卡，让每一次练习都算数 —— 上场之前，先把底气练足。</p>
     <div class="feature-tags">
       <span class="ftag">岗位定制</span>
       <span class="ftag">超严标准</span>
@@ -337,7 +335,7 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
     </div>
     <div class="hero-actions">
       <button class="btn pri lg hero-cta" onclick="goInterview()">
-        <span class="cta-ic">🎙</span>开始模拟面试<span class="cta-badge">75</span>
+        <span class="cta-ic">🎙</span>开始模拟面试<span class="cta-badge" id="ctaBadge">…</span>
       </button>
     </div>
     <button class="cd-pill" id="heroCd" title="点击设置面试日期"></button>
@@ -349,21 +347,31 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
     <h2>上场之前，<br><em>把底气练足。</em></h2>
     <div class="hero-actions">
       <button class="btn pri lg" onclick="location.href='bank.html'">浏览题库 →</button>
-      <button class="btn link" onclick="location.href='product.html'">了解产品蓝图 →</button>
     </div>
   </div>
 
   <footer>
     <span>模拟面试训练营 PRO · v5.0</span>
-    <span>数据仅保存在本地浏览器</span>
+    <span>训练数据云端保存 · 跨设备同步</span>
     <span class="fr">反馈给官方 → 右下角 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg> 按钮</span>
   </footer>
 </div>
 
-<script src="shared.js?v=20261109a"></script>
-<script src="cloud.js?v=20261107a"></script>
+<script src="shared.js?v=20261114b"></script>
+<script src="cloud.js?v=20261114b"></script>
 <script>
-if(!initPage('home',true))throw new Error('login required');
+initPage('home');
+
+/* 营销数字动态取真实值（内置题库为准，后端题库加载完成后自动更新） */
+function fillStats(n,sc){
+  ['statQ','statQ2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=n;});
+  ['statS','statS2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=sc;});
+  var cb=document.getElementById('ctaBadge');if(cb)cb.textContent=n;
+}
+try{fillStats(QUESTIONS.length,Object.keys(SCENES).length)}catch(e){}
+window.addEventListener('ivsim:questions',function(){
+  try{fillStats(QUESTIONS.length,Object.keys(SCENES).length)}catch(e){}
+});
 
 /* 开始模拟面试属于功能，游客需先登录 */
 function goInterview(){
@@ -376,4 +384,4 @@ var heroCd=document.getElementById('heroCd');
 if(heroCd)heroCd.onclick=function(){openCountdownModal()};
 </script>
 
-<div class="toast-box"></div><button class="agent-fab" title="面试小助手"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"></rect><path d="M12 8V4M8 4h8"></path><circle cx="9" cy="13" r="1.2" fill="currentColor"></circle><circle cx="15" cy="13" r="1.2" fill="currentColor"></circle><path d="M9.5 16.5h5"></path></svg><span class="dot"></span></button><div class="agent-panel"><div class="agent-head"><div class="a-av">🤖</div><div style="flex:1"><div class="a-nm">AI 面试助手</div><div class="a-st" id="agStatus">在线 · 随时待命</div></div><button class="m-x" id="agX">✕</button></div><div class="agent-body" id="agBody"><div class="msg bot">嗨～我是 AI 面试助手 🤖 可以问我：怎么开始模拟面试、题库怎么用、语音作答、自评标准、复盘报告等问题。</div></div><div class="agent-quick"><button data-q="怎么开始模拟面试？">怎么开始</button><button data-q="题库在哪里？">题库</button><button data-q="怎么用语音作答？">语音作答</button><button data-q="面试紧张怎么办？">缓解紧张</button></div><div class="agent-input"><input id="agIn" placeholder="输入你的问题…" maxlength="200"><button id="agSend" title="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button></div><div class="agent-foot"><span id="agCtx" style="font-size:10.5px;color:var(--ink3)">对话记录: 0</span><button id="agReset" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">🔄 重置对话</button></div></div><div class="qbar"><div class="qbar-wrap"><button class="qbar-btn" data-k="me" title="个人中心（登录后可用）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-7 8-7s8 3 8 7"></path></svg><span class="qbar-lock">🔒</span></button><button class="qbar-btn" data-k="mail" title="反馈给官方（off）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="qbar-btn" data-k="checkin" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></button><button class="qbar-btn" data-k="ach" title="成就墙"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"></path></svg></button></div></div></body></html>
+<div class="toast-box"></div><button class="agent-fab" title="面试小助手"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"></rect><path d="M12 8V4M8 4h8"></path><circle cx="9" cy="13" r="1.2" fill="currentColor"></circle><circle cx="15" cy="13" r="1.2" fill="currentColor"></circle><path d="M9.5 16.5h5"></path></svg><span class="dot"></span></button><div class="agent-panel"><div class="agent-head"><div class="a-av">🤖</div><div style="flex:1"><div class="a-nm">AI 面试助手</div><div class="a-st" id="agStatus">在线 · 模拟模式</div></div><button class="m-x" id="agX">✕</button></div><div class="agent-body" id="agBody"><div class="msg bot">嗨～我是 AI 面试助手 🤖 能回答面试技巧、了解各页面玩法；服务器已接入真实大模型，直接把问题抛给我吧。</div></div><div class="agent-quick"><button data-q="怎么开始模拟面试？">怎么开始</button><button data-q="题库在哪里？">题库</button><button data-q="怎么用语音作答？">语音作答</button><button data-q="面试紧张怎么办？">缓解紧张</button></div><div class="agent-input"><input id="agIn" placeholder="输入你的问题…（可问大模型）" maxlength="200"><button id="agSend" title="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button></div><div class="agent-foot"><span id="agCtx" style="font-size:10.5px;color:var(--ink3)">对话记录: 0</span><button id="agReset" style="font-size:10.5px;color:var(--ink3);background:none;border:none;cursor:pointer">🔄 重置对话</button></div></div><div class="qbar"><div class="qbar-wrap"><button class="qbar-btn" data-k="me" title="个人中心（登录后可用）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-7 8-7s8 3 8 7"></path></svg><span class="qbar-lock">🔒</span></button><button class="qbar-btn" data-k="mail" title="反馈给官方（off）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="qbar-btn" data-k="checkin" title="每日签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></button><button class="qbar-btn" data-k="ach" title="成就墙"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"></path></svg></button></div></div></body></html>

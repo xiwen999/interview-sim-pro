@@ -7,7 +7,7 @@
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>观摩大厅 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261110a">
+<link rel="stylesheet" href="shared.css?v=20261110n">
 <style>
 body{background:
   radial-gradient(ellipse 70% 45% at 30% -5%,rgba(244,114,182,.1),transparent),
@@ -28,6 +28,15 @@ body{background:
 /* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{opacity:.22}
 body.light .fp-shell::after{opacity:.018}
+/* 与题库一致：壳体贴平，让极光背景连续铺满整页 */
+body.light .fp-shell{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+body.light .fp-shell::before{display:none}
 /* 统计行 */
 .sq-stats{display:flex;gap:clamp(16px,2.2vw,26px);margin:2px 0 0 clamp(0px,1.4vw,18px);flex:none;flex-wrap:wrap}
 .sq-stat .n{font-size:var(--fs-2xl);font-weight:900;color:var(--ink)}
@@ -35,7 +44,9 @@ body.light .fp-shell::after{opacity:.018}
 @media (max-width:768px){.sq-stats{margin:12px 0 0}}
 
 /* 场景筛选：对齐设置页选项 */
-.sq-filter{display:flex;gap:8px;margin:20px 0 16px;flex-wrap:wrap}
+.sq-filter{display:flex;gap:8px;margin:20px 0 16px;flex-wrap:wrap;align-items:center}
+.sq-filter+.sq-filter{margin-top:-6px}
+.sq-lab{font-size:var(--fs-xs);color:var(--ink3);margin:0 4px 0 2px}
 .sq-chip{padding:10px 16px;border-radius:13px;background:var(--card);border:1.5px solid var(--line);font-size:var(--fs-base);font-weight:600;color:var(--ink2);cursor:pointer;transition:.18s;
   box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
 .sq-chip:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
@@ -46,8 +57,17 @@ body.light .fp-shell::after{opacity:.018}
 .sq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--g-wide),1fr));gap:16px}
 .vcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;cursor:pointer}
 .vcard:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 14px 34px rgba(0,0,0,.35)}
-.vthumb{height:140px;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative}
-.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
+.vthumb{height:140px;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative;overflow:hidden}
+.vthumb .vph{line-height:1;transition:opacity .3s}
+.vthumb.has-poster .vph{opacity:0}
+/* 封面：视频随机一帧，图片就位后淡入（未取到画面时保留图标兜底） */
+.vthumb img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s;display:block;pointer-events:none;z-index:1}
+.vthumb img.vposter.on{opacity:1}
+.vthumb::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 55%,rgba(6,10,22,.55));opacity:0;transition:opacity .4s;pointer-events:none}
+.vthumb.has-poster::after{opacity:1}
+.vthumb.is-loading::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.06) 45%,transparent 70%);animation:vshim 1.3s linear infinite;pointer-events:none}
+@keyframes vshim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s;z-index:2}
 .vcard:hover .vplay{opacity:1}
 .vthumb .vplay span{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#4f6ef0,#6C8CFF);display:grid;place-items:center;font-size:20px;color:#fff;box-shadow:0 8px 24px rgba(79,110,240,.5)}
 .vbody{padding:12px 14px}
@@ -88,80 +108,43 @@ body.light .fp-shell::after{opacity:.018}
     </div>
 
     <div class="sq-filter" id="scFilter"></div>
+    <div class="sq-filter" id="rdFilter"></div>
     <div id="list"></div>
   </div>
 </div>
 
-<script src="shared.js?v=20261109a"></script>
-<script src="cloud.js?v=20261107a"></script>
+<script src="shared.js?v=20261114b"></script>
+<script src="cloud.js?v=20261114b"></script>
 <script>
-if(!initPage('square',true))throw new Error('login required');
+initPage('square');
 /* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
 seedStars('sqStars1',700,1,60);seedStars('sqStars2',200,2,120);seedStars('sqStars3',100,3,180);
 
-var DEMO_VIDEOS=[
-  {emoji:'🎯',title:'自我介绍满分示范：三段式表达法',scene:'job',owner:'金牌讲师 Linda'},
-  {emoji:'💡',title:'项目难点怎么讲？STAR 法则实战',scene:'job',owner:'资深面试官 老周'},
-  {emoji:'📊',title:'数据分析题：先对齐口径再拆指标',scene:'data',owner:'数据总监 Kevin'},
-  {emoji:'🛠️',title:'技术深挖应对：现象→根因→验证',scene:'tech',owner:'架构师 阿澈'},
-  {emoji:'🧩',title:'产品设计题：用户-场景-价值框架',scene:'product',owner:'产品专家 Mia'},
-  {emoji:'💪',title:'压力面自救：被质疑时稳住节奏',scene:'general',owner:'HR 总监 Grace'}
-];
-function genDemoClip(meta){
-  return new Promise(function(res){
-    var c=document.createElement('canvas');c.width=640;c.height=360;
-    var g=c.getContext('2d');
-    var mr;
-    try{mr=new MediaRecorder(c.captureStream(30))}catch(e){res(null);return}
-    var chunks=[];
-    mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
-    mr.onstop=function(){res(new Blob(chunks,{type:mr.mimeType||'video/webm'}))};
-    var t0=performance.now(),DUR=3000;
-    var col=SCENE_COLOR[meta.scene]||'#6C8CFF';
-    (function frame(){
-      var t=(performance.now()-t0)/DUR;
-      var grd=g.createLinearGradient(0,0,640,360);
-      grd.addColorStop(0,'#0d1428');grd.addColorStop(1,'#151d3a');
-      g.fillStyle=grd;g.fillRect(0,0,640,360);
-      g.globalAlpha=.12+.08*Math.sin(t*Math.PI*4);
-      g.fillStyle=col;g.beginPath();g.arc(320,150,90+10*Math.sin(t*Math.PI*2),0,7);g.fill();
-      g.globalAlpha=1;
-      g.font='64px serif';g.textAlign='center';g.fillText(meta.emoji,320,180);
-      g.fillStyle='#fff';g.font='bold 25px sans-serif';
-      g.fillText(meta.title.slice(0,18),320,278);
-      g.fillStyle='rgba(255,255,255,.6)';g.font='15px sans-serif';
-      g.fillText('官方示例 · '+SCENES[meta.scene].name+' · '+meta.owner,320,310);
-      g.fillStyle='rgba(255,255,255,.15)';g.fillRect(0,350,640,10);
-      g.fillStyle=col;g.fillRect(0,350,640*Math.min(t,1),10);
-      if(t<1)requestAnimationFrame(frame);else mr.stop();
-    })();
-    mr.start();
-  });
-}
-function seedDemos(){
-  toast('首次访问：正在生成官方示例视频，约几秒钟…','ok');
-  Promise.all(DEMO_VIDEOS.map(function(d,i){
-    var id='demo_'+i;
-    return genDemoClip(d).then(function(blob){
-      if(!blob)return;
-      return saveVideoBlob(id,blob).then(function(){
-        addVideoMeta({id:id,title:d.title,scene:d.scene,owner:d.owner,status:'approved',ts:Date.now()-(DEMO_VIDEOS.length-i)*86400000,src:'demo',shared:true,demo:true});
-      });
-    });
-  })).then(function(){render();playSound('unlock');toast('官方示例视频已就绪，点击卡片播放','ok')});
-}
-
-var SCENE_F='all';
+var ROLE_F='all', ROUND_F='all';
 function fmtTime(ts){var d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()}
-function sceneTag(sc){var s=SCENES[sc];return s?'<span class="tag" style="background:'+SCENE_COLOR[sc]+'22;color:'+SCENE_COLOR[sc]+'">'+s.name+'</span>':''}
+/* 与题库同一套双轴标签：岗位 + 面试类型 */
+function axisTags(v){
+  var r=ROLE_MAP[roleOf(v)], rd=ROUND_MAP[roundOf(v)], out='';
+  if(r)out+='<span class="tag" style="background:'+r.color+'22;color:'+r.color+'">'+r.icon+' '+r.name+'</span>';
+  if(rd)out+='<span class="tag" style="background:'+rd.color+'22;color:'+rd.color+'">'+rd.icon+' '+rd.name+'</span>';
+  return out;
+}
 
-/* 场景筛选条 */
-var sf=document.getElementById('scFilter');
-sf.innerHTML='<button class="sq-chip on" data-k="all">全部</button>'+Object.keys(SCENES).map(function(k){
-  return '<button class="sq-chip" data-k="'+k+'">'+SCENES[k].name+'</button>'}).join('');
-$$('#scFilter .sq-chip').forEach(function(b){b.onclick=function(){
-  SCENE_F=b.dataset.k;$$('#scFilter .sq-chip').forEach(function(x){x.classList.toggle('on',x===b)});render();
-}});
+/* 双轴筛选条：岗位 × 面试类型 */
+function renderFilters(){
+  var sf=document.getElementById('scFilter'), rf=document.getElementById('rdFilter');
+  sf.innerHTML='<span class="sq-lab">岗位</span><button class="sq-chip'+(ROLE_F==='all'?' on':'')+'" data-k="all">全部岗位</button>'+
+    ROLES.map(function(r){return '<button class="sq-chip'+(ROLE_F===r.id?' on':'')+'" data-k="'+r.id+'">'+r.icon+' '+r.name+'</button>'}).join('');
+  $$('#scFilter .sq-chip').forEach(function(b){b.onclick=function(){
+    ROLE_F=b.dataset.k;$$('#scFilter .sq-chip').forEach(function(x){x.classList.toggle('on',x===b)});render();
+  }});
+  rf.innerHTML='<span class="sq-lab">类型</span><button class="sq-chip'+(ROUND_F==='all'?' on':'')+'" data-k="all">全部类型</button>'+
+    ROUNDS.map(function(r){return '<button class="sq-chip'+(ROUND_F===r.id?' on':'')+'" data-k="'+r.id+'">'+r.icon+' '+r.name+'</button>'}).join('');
+  $$('#rdFilter .sq-chip').forEach(function(b){b.onclick=function(){
+    ROUND_F=b.dataset.k;$$('#rdFilter .sq-chip').forEach(function(x){x.classList.toggle('on',x===b)});render();
+  }});
+}
+renderFilters();
 
 document.getElementById('goUp').onclick=function(){location.href='videos.html#videos'};
 
@@ -175,35 +158,84 @@ function render(){
   document.getElementById('stUser').textContent=Object.keys(owners).length;
   document.getElementById('stMine').textContent=all.filter(function(v){return (uid&&v.ownerUid)?v.ownerUid===uid:v.owner===me}).length;
   /* 列表 */
-  var list=SCENE_F==='all'?all:all.filter(function(v){return v.scene===SCENE_F});
+  var list=all.filter(function(v){
+    if(ROLE_F!=='all'&&roleOf(v)!==ROLE_F)return false;
+    if(ROUND_F!=='all'&&roundOf(v)!==ROUND_F)return false;
+    return true;
+  });
   document.getElementById('list').innerHTML=list.length?('<div class="sq-grid">'+list.map(function(v){
+    var ic=v.demo?'🎓':v.src==='interview'?'🎤':v.src==='server'&&!v.hasFile?'📼':'📹';
     return '<div class="vcard" data-id="'+v.id+'">'+
-      '<div class="vthumb">'+(v.demo?'🎓':v.src==='interview'?'🎤':'📹')+'<div class="vplay"><span>▶</span></div></div>'+
+      '<div class="vthumb"><span class="vph">'+ic+'</span><img class="vposter" alt="" data-vposter="'+v.id+'"><div class="vplay"><span>▶</span></div></div>'+
       '<div class="vbody">'+
         '<div class="vtitle">'+esc(v.title)+'</div>'+
-        '<div class="vmeta">'+sceneTag(v.scene)+'<span class="vowner">'+(v.demo?'🎓':'👤')+' '+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
+        '<div class="vmeta">'+axisTags(v)+'<span class="vowner">'+(v.demo?'🎓':'👤')+' '+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
       '</div></div>';
-  }).join('')+'</div>'):'<div class="vempty"><div class="big">🌐</div>这个分类还没有公开视频<br>上传作品并通过审核后，就会出现在这里</div>';
+  }).join('')+'</div>'):'<div class="vempty"><div class="big">🌐</div>这个筛选下还没有公开视频<br>换个岗位或类型，或上传作品通过审核后就会出现在这里</div>';
   /* 播放 */
   $$('#list .vcard').forEach(function(c){
     c.onclick=function(){playVideo(c.dataset.id)};
   });
+  /* 封面：用视频里的随机一帧替换图标（命中缓存则瞬间显示） */
+  hydrateVideoPosters(document.getElementById('list'));
 }
 
 function playVideo(id){
   getVideoBlob(id).then(function(blob){
-    if(!blob){toast('视频文件不存在（可能已清理）','warn');return}
-    var url=URL.createObjectURL(blob);
     var v=getVideos().filter(function(x){return x.id===id})[0]||{};
+    var src=null;
+    if(blob){src=URL.createObjectURL(blob)}
+    else{src='/api/videos/file/'+encodeURIComponent(id)} /* 别人投稿的视频：文件在服务器上 */
     var m=openMask('<div class="m-head"><div><h3>'+esc(v.title||'视频回放')+'</h3><div class="m-sub">👤 '+esc(v.owner||'')+' · '+fmtTime(v.ts||Date.now())+'</div></div><button class="m-x" id="vpX">✕</button></div>'+
-      '<video src="'+url+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
+      '<video id="vpEl" src="'+src+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
     m.querySelector('#vpX').onclick=function(){closeMask()};
-    m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(url)},300)});
+    m.querySelector('#vpEl').onerror=function(){
+      closeMask();toast('该视频文件尚未上传到服务器，仅投稿者本机可播放','warn');
+    };
+    if(blob)m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(src)},300)});
   });
 }
 
-var hasDemo=getVideos().some(function(v){return v.demo});
-if(!hasDemo){seedDemos()}else{render()}
+/* ---- 从服务器拉取审核通过的视频，合并进本机列表（其他用户的投稿也能看到） ----
+ * 大厅以服务器为唯一事实来源：管理员删除/拒绝的视频立即从大厅消失；
+ * 自己投稿的审核状态由 syncOwnVideoStatuses 同步（shared.js） */
+function mergeHall(hall){
+  var local=getVideos(),byId={},changed=false;
+  local.forEach(function(v,i){byId[v.id]=i});
+  var hallIds={};
+  hall.forEach(function(sv){
+    hallIds[sv.id]=1;
+    var v=local[byId[sv.id]];
+    if(v){
+      /* 本机已有（可能是自己的投稿）：审核状态以服务器为准，作者名同步为服务器上的昵称 */
+      if(v.status!=='approved'||!v.shared||v.owner!==sv.owner){
+        v.status='approved';v.shared=true;v.owner=sv.owner;v.ownerUid=sv.ownerUid;
+        if(sv.file)v.hasFile=true;
+        changed=true;
+      }
+    }else{
+      local.unshift({id:sv.id,title:sv.title,scene:sv.scene,owner:sv.owner,ownerUid:sv.ownerUid,
+        status:'approved',ts:sv.ts||Date.now(),src:'server',shared:true,hasFile:!!sv.file});
+      changed=true;
+    }
+  });
+  /* 已在服务器被下架 / 拒绝的「服务器来源」条目，从本机列表移除 */
+  local=local.filter(function(v){return !(v.src==='server'&&!hallIds[v.id])});
+  if(changed)saveVideos(local);
+}
+function loadHall(){
+  try{
+    apiCall('/api/videos/hall',{silent:true}).then(function(r){
+      mergeHall((r.data&&r.data.videos)||[]);
+      render();
+      reuploadLocalVideoFiles(); /* 自己投稿的视频服务器缺文件时自动补传 */
+      syncVideoStatusFromServer().then(function(ch){if(ch)render()}); /* 管理员删除/拒绝后本机同步下架 */
+    }).catch(function(){});
+  }catch(e){}
+}
+
+render();
+loadHall();
 </script>
 </body>
 </html>

@@ -141,9 +141,14 @@ table.tb tbody tr:hover{background:#f8faff}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--g-media),1fr));gap:14px}
 .vc{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;
   box-shadow:0 2px 10px rgba(19,27,48,.05);display:flex;flex-direction:column}
-.vc .th{height:96px;display:grid;place-items:center;font-size:28px;position:relative;
+.vc .th{height:96px;display:grid;place-items:center;font-size:28px;position:relative;overflow:hidden;
   background:linear-gradient(135deg,#dbeafe,#e0e7ff)}
-.vc .th .dur{position:absolute;right:8px;bottom:8px;background:rgba(15,23,42,.75);color:#fff;
+.vc .th .vthumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vc .th .pl{position:relative;z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(15,23,42,.55);color:#fff;font-size:14px;pointer-events:none;
+  box-shadow:0 2px 8px rgba(15,23,42,.35)}
+.vc .th:hover .pl{background:rgba(59,91,219,.8)}
+.vc .th .dur{position:absolute;right:8px;bottom:8px;background:rgba(15,23,42,.75);color:#fff;z-index:2;
   font-size:var(--fs-2xs);padding:2px 7px;border-radius:6px;font-weight:700}
 .vc .bd2{padding:11px 12px;flex:1;display:flex;flex-direction:column;gap:6px}
 .vc .ti{font-weight:800;font-size:var(--fs-base);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;
@@ -156,7 +161,11 @@ table.tb tbody tr:hover{background:#f8faff}
 .ad-mask{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.5);backdrop-filter:blur(3px);
   display:flex;align-items:center;justify-content:center;padding:22px}
 .ad-mask .box{background:var(--panel);border-radius:16px;width:min(560px,94vw);max-height:88vh;overflow-y:auto;
-  padding:clamp(15px,2vw,22px) clamp(15px,2vw,22px);box-shadow:0 24px 60px rgba(15,23,42,.28)}
+  padding:clamp(15px,2vw,22px) clamp(15px,2vw,22px);box-shadow:0 24px 60px rgba(15,23,42,.28);position:relative}
+.ad-mask .mclose{position:absolute;top:10px;right:10px;z-index:3;width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font-size:14px;cursor:pointer;
+  display:grid;place-items:center;line-height:1;transition:.15s}
+.ad-mask .mclose:hover{background:#ef4444;border-color:#ef4444;color:#fff}
 .ad-mask h3{margin:0 0 4px;font-size:var(--fs-lg);font-weight:800;display:flex;align-items:center;gap:8px}
 .ad-mask .ms{font-size:var(--fs-xs);color:var(--ink3);margin-bottom:14px}
 .ad-mask .ft{display:flex;gap:9px;justify-content:flex-end;margin-top:16px}
@@ -279,17 +288,18 @@ table.tb tbody tr:hover{background:#f8faff}
     </div>
     <div class="sp"></div>
     <div class="who">👑 <b id="topWho">管理员</b> · 数据源：<span id="topSrc">本机浏览器</span></div>
-    <button class="ad-tbtn" id="topFront">← 返回前台</button>
     <button class="ad-tbtn" id="topOut">退出管理员</button>
   </header>
   <div class="ad-body">
     <aside class="ad-side">
       <div class="grp">数 据</div>
       <button class="ad-item" data-go="dash"><span class="ic">📊</span>概览</button>
+      <button class="ad-item" data-go="online"><span class="ic">🟢</span>实时在线<span class="cnt" id="sideOnline" style="background:#10b981"></span></button>
       <button class="ad-item" data-go="users"><span class="ic">👥</span>用户管理</button>
       <button class="ad-item" data-go="sessions"><span class="ic">🎤</span>面试数据</button>
       <div class="grp">运 营</div>
       <button class="ad-item" data-go="videos"><span class="ic">🎬</span>视频审核<span class="cnt" id="sideCnt"></span></button>
+      <button class="ad-item" data-go="feedback"><span class="ic">📮</span>用户反馈<span class="cnt" id="sideFb" style="background:#f59e0b"></span></button>
       <button class="ad-item" data-go="logs"><span class="ic">📜</span>操作日志</button>
       <div class="grp">系 统</div>
       <button class="ad-item" data-go="settings"><span class="ic">⚙️</span>系统设置</button>
@@ -300,10 +310,9 @@ table.tb tbody tr:hover{background:#f8faff}
 
 <div class="ad-mask" id="mask" style="display:none"><div class="box" id="mbox"></div></div>
 
-<script src="shared.js?v=20261109a"></script>
-<script src="cloud.js?v=20261107a"></script>
+<script src="shared.js?v=20261114b"></script>
 <script>
-var TAB='dash', VF='pending', KW={u:'',s:'',v:''};
+var TAB='dash', VF='pending', FBF='und', KW={u:'',s:'',v:'',f:''};
 var SESS_PAGE=80, SESS_SHOW=SESS_PAGE; /* 面试数据每次加载条数 / 当前已加载条数 */
 var $m=document.getElementById('main');
 var DATA=null; /* 当前后台数据集（来自本地后端，失败时回落本地 AdminDB） */
@@ -328,20 +337,34 @@ function mirrorBanStatus(u,status){
   }catch(e){}
 }
 
-/* 加载后台数据集：优先本地后端，失败 / 离线回落到本地 AdminDB */
+/* 加载后台数据集：仅使用服务器数据库；失败时抛错（不再回落本地演示数据，避免展示无效旧申请误导管理员） */
 async function adminLoad(){
-  try{
-    var r=await apiCall('/api/admin/db',{token:adminToken(),silent:true});
-    if(r.data&&r.data.ok){
-      var users=r.data.users||[];
-      var sessions=[],videos=[];
-      users.forEach(function(u){(u.sessions||[]).forEach(function(s){sessions.push({u:u,s:s})});(u.videos||[]).forEach(function(v){videos.push({u:u,v:v})})});
-      return {src:'server',users:users,stats:r.data.stats,day7:r.data.day7,logs:r.data.logs,sessions:sessions,videos:videos};
-    }
-  }catch(e){}
-  AdminDB.syncLocal();
-  return {src:'local',users:AdminDB.users(),stats:AdminDB.stats(),day7:AdminDB.day7(),logs:AdminDB.logs(),
-    sessions:AdminDB.sessions(),videos:AdminDB.videos()};
+  var r=await apiCall('/api/admin/db',{token:adminToken(),silent:true});
+  if(r&&r.data&&r.data.ok){
+    var users=r.data.users||[];
+    var sessions=[],videos=[];
+    users.forEach(function(u){(u.sessions||[]).forEach(function(s){sessions.push({u:u,s:s})});(u.videos||[]).forEach(function(v){videos.push({u:u,v:v})})});
+    /* 用户反馈：独立拉取，失败不阻塞主数据 */
+    var fb=[];
+    try{
+      var fr=await apiCall('/api/admin/feedback',{token:adminToken(),silent:true});
+      if(fr&&fr.data&&fr.data.ok)fb=fr.data.feedback||[];
+    }catch(e){}
+    return {src:'server',users:users,stats:r.data.stats,day7:r.data.day7,logs:r.data.logs,sessions:sessions,videos:videos,feedback:fb};
+  }
+  throw {loadFail:true,msg:(r&&r.data&&r.data.msg)||'服务器返回异常'};
+}
+/* 数据加载失败页：给出重试 / 重新登录入口 */
+function renderLoadFail(e){
+  $m.innerHTML='<div class="hd"><h1>⚠️ 无法连接服务器</h1><div class="sub">'+esc((e&&e.msg)||'加载数据失败')+'</div></div>'+
+   '<div class="card" style="text-align:center;padding:44px 20px">'+
+   '<div style="font-size:46px">🔌</div>'+
+   '<div style="font-size:15px;font-weight:700;margin:12px 0 6px">管理后台需要连接服务器数据库</div>'+
+   '<div style="font-size:12.5px;color:var(--ink3);line-height:1.9;margin-bottom:20px">可能是管理员登录已过期或网络异常。<br>旧版本的本地演示数据已停用，不会再展示。</div>'+
+   '<button class="btn" id="lfRetry">🔄 重试</button>'+
+   '<button class="btn gho" id="lfReLogin" style="margin-left:10px">🔑 重新登录</button></div>';
+  var r=document.getElementById('lfRetry'); if(r)r.onclick=function(){render()};
+  var l=document.getElementById('lfReLogin'); if(l)l.onclick=function(){setAdminToken(null);showGate()};
 }
 /* 管理动作：走后端；失败 / 离线时执行 fallback（本地 AdminDB） */
 async function adminAct(method,path,body,fallback){
@@ -384,11 +407,24 @@ function uCell(u){
   return '<div class="ucell"><span class="av">'+(u.avatar||'🙂')+'</span><span>'+
     '<span class="nm">'+esc(u.name)+'</span><br><span class="ac">@'+esc(u.account)+'</span></span></div>';
 }
-function openM(html){
-  document.getElementById('mbox').innerHTML=html;
+function openM(html,wide){
+  var box=document.getElementById('mbox');
+  box.innerHTML='<button class="mclose" title="关闭 (Esc)" onclick="closeM()">✕</button>'+html;
+  box.style.width=wide?'min(760px,94vw)':'';
   document.getElementById('mask').style.display='flex';
 }
-function closeM(){document.getElementById('mask').style.display='none'}
+function closeM(){
+  document.getElementById('mask').style.display='none';
+  /* 关闭时暂停并释放弹窗内的视频/音频 */
+  document.querySelectorAll('#mbox video,#mbox audio').forEach(function(m){try{m.pause();m.currentTime=0}catch(e){}});
+}
+document.addEventListener('keydown',function(e){
+  var mask=document.getElementById('mask');
+  if(e.key==='Escape'&&mask.style.display!=='none')closeM();
+});
+document.getElementById('mask').addEventListener('click',function(e){
+  if(e.target===this)closeM(); /* 点遮罩空白处也可退出 */
+});
 
 function viewDash(){
   var s=DATA.stats,d7=DATA.day7,max=Math.max.apply(null,d7.map(function(x){return x.n}).concat([1]));
@@ -399,7 +435,7 @@ function viewDash(){
   h+='<div class="hd"><h1>📊 数据概览</h1><div class="sub">全站用户训练与内容概况 · 每 60 秒自动刷新</div><div class="sp"></div>'+
      '<button class="btn sm" id="rf">🔄 刷新</button></div>';
   h+='<div class="kpis">'+
-    kpi('a','👥 注册用户',s.users,('封禁 '+s.banned+' 人'))+
+    kpi('a','👥 注册用户',s.users,('封禁 '+s.banned+' · 在线 '+s.online+' 人'))+
     kpi('b','🎤 累计面试场次',s.sessions,('今日 '+s.today+' · 近 7 天 '+s.week))+
     kpi('e','❓ 累计作答题数',s.questions,('平均 '+s.avgUsed+' 秒 / 场'))+
     kpi('c','🎬 视频投稿',s.videos,('播放 '+s.plays+' 次'))+
@@ -441,17 +477,20 @@ function viewUsers(){
   var h='<div class="hd"><h1>👥 用户管理</h1><div class="sub">共 '+DATA.users.length+' 位用户'+(DATA.src==='local'?'（本地缓存）':'')+'</div><div class="sp"></div>'+
     '<input class="ad-in" id="kwU" placeholder="搜索昵称 / 账号" value="'+esc(KW.u)+'" style="width:220px"></div>';
   h+='<div class="link-banner">🔗 后台与用户前台数据已关联：当前前台'+(cu.account?('账号 <b>@'+esc(cu.account)+'</b>'):('身份「'+esc(cu.name||'未登录')+'」'))+' 的所有面试与视频，都会实时同步到下方高亮条目。</div>';
-  h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
-  if(!us.length)h+='<tr><td colspan="8"><div class="empty">没有匹配的用户</div></td></tr>';
+  h+='<div class="tb-wrap"><table class="tb"><thead><tr><th>用户</th><th>注册时间</th><th>最近活跃</th><th>面试场次</th><th>平均自评</th><th>视频</th><th>题库</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody>';
+  if(!us.length)h+='<tr><td colspan="9"><div class="empty">没有匹配的用户</div></td></tr>';
   us.forEach(function(u){
     var ss=u.sessions||[],vs=u.videos||[];
     var avg=ss.length?Math.round(ss.reduce(function(a,b){return a+(b.avg||0)},0)/ss.length*10)/10:0;
     var me=isMeFn(u);
     var linkTag=me?' <span class="bd blue" title="与当前前台账号实时关联">🔗 当前前台用户</span>':'';
+    var favN=(u.bank&&u.bank.favs&&u.bank.favs.length)||0;
+    var onlineBadge=u.online?' <span class="bd ok" style="background:rgba(16,185,129,.13);color:#047857">🟢 在线</span>':'';
     h+='<tr'+(me?' class="row-me"':'')+'><td>'+uCell(u)+linkTag+'</td><td class="tb-date">'+day(u.joined)+'</td><td class="tb-date">'+ago(u.last||u.joined)+'</td>'+
       '<td><b>'+ss.length+'</b> 场 / '+(u.stat&&u.stat.questions?u.stat.questions+' 题':ss.reduce(function(a,b){return a+(b.count||0)},0)+' 题')+'</td>'+
       '<td>'+stars(avg)+'</td><td>'+vs.length+' 个（待审 '+vs.filter(function(v){return v.status==='pending'}).length+'）</td>'+
-      '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':'<span class="bd ok">正常</span>')+'</td>'+
+      '<td>'+favN+' 收藏'+(u.bank&&u.bank.practice?(' · 练 '+u.bank.practice+' 次'):'')+'</td>'+
+      '<td>'+(u.status==='banned'?'<span class="bd no">已封禁</span>':('<span class="bd ok">正常</span>'+onlineBadge))+'</td>'+
       '<td class="tb-acts">'+
         '<button class="btn sm" data-ud="'+u.id+'">详情</button> '+
         (u.status==='banned'?'<button class="btn sm" data-ub="'+u.id+'">解封</button>':'<button class="btn sm dan" data-ub="'+u.id+'">封禁</button>')+' '+
@@ -474,6 +513,8 @@ function userDetail(id){
       '<div class="k">上传视频</div><div class="v">'+vs.length+' 个</div>'+
       '<div class="k">账号状态</div><div class="v">'+(u.status==='banned'?'已封禁':'正常')+'</div>'+
       '<div class="k">连续签到</div><div class="v">'+(u.checkin||0)+' 天</div>'+
+      '<div class="k">题库收藏</div><div class="v">'+((u.bank&&u.bank.favs&&u.bank.favs.length)||0)+' 题'+(u.bank&&u.bank.practice?(' · 练习 '+u.bank.practice+' 次'):'')+'</div>'+
+      '<div class="k">实时状态</div><div class="v">'+(u.online?'🟢 在线':'⚪ 离线')+'</div>'+
     '</div>'+
     '<div class="ct" style="font-weight:800;font-size:13px;margin-bottom:8px">🎤 最近面试记录</div>'+
     (ss.length?('<table class="mini-tb"><thead><tr><th>时间</th><th>题型</th><th>场景</th><th>题数</th><th>自评</th><th>用时</th></tr></thead><tbody>'+
@@ -524,6 +565,16 @@ function viewSessions(){
   return h;
 }
 
+/* 播放用户投稿的视频本体（公开文件接口；关弹窗即停止播放释放内存） */
+function playVideoFile(vid,title,uname){
+  var url='/api/videos/file/'+encodeURIComponent(vid);
+  openM('<h3>▶ 视频内容预览</h3><div class="ms">'+esc(title)+(uname?' · '+esc(uname):'')+'</div>'+
+    '<video id="pvVideo" src="'+url+'" controls autoplay playsinline style="width:100%;max-height:56vh;border-radius:12px;background:#000;margin-top:8px"></video>'+
+    '<div class="ft" style="justify-content:space-between;align-items:center">'+
+      '<div class="ms" style="margin:0;font-size:12px;opacity:.75">💡 预览即审核：确认合规后点「通过」，违规用「拒绝」并填理由。</div>'+
+      '<button class="btn sm" onclick="closeM()">✕ 关闭</button>'+
+    '</div>',true);
+}
 function vcard(x){
   var v=x.v,u=x.u;
   var acts='';
@@ -532,11 +583,19 @@ function vcard(x){
   else
     acts='<button class="btn sm" data-vrst="'+u.id+'|'+v.id+'">↩ 改为待审</button>';
   acts+='<button class="btn sm" data-vdel="'+u.id+'|'+v.id+'">删除</button>';
+  if(v.file)acts='<button class="btn sm pri" data-vplay="'+v.id+'">▶ 看内容</button>'+acts;
   var g={job:'linear-gradient(135deg,#dbeafe,#e0e7ff)',tech:'linear-gradient(135deg,#d1fae5,#ccfbf1)',
     data:'linear-gradient(135deg,#fef3c7,#fde68a)',product:'linear-gradient(135deg,#ede9fe,#fae8ff)',
     general:'linear-gradient(135deg,#e0f2fe,#dbeafe)'}[v.scene]||'linear-gradient(135deg,#dbeafe,#e0e7ff)';
+  /* 有视频文件时封面直接展示首帧，可点击观看 */
+  var th,extra='';
+  if(v.file){
+    th='<video class="vthumb" src="/api/videos/file/'+encodeURIComponent(v.id)+'#t=0.1" preload="metadata" muted playsinline></video>'+
+       '<span class="pl">▶</span>';
+    extra=' data-vthumb="'+v.id+'" title="点击观看视频"';
+  }else th='🎬';
   return '<div class="vc">'+
-    '<div class="th" style="background:'+g+'">🎬<span class="dur">'+dur(v.dur)+'</span></div>'+
+    '<div class="th"'+extra+' style="background:'+g+(v.file?';cursor:pointer':'')+'">'+th+'<span class="dur">'+dur(v.dur)+'</span></div>'+
     '<div class="bd2"><div class="ti">'+esc(v.title)+'</div>'+
       '<div class="mt">'+uCell(u)+'</div>'+
       '<div class="mt"><span class="bd blue">'+esc(AdminDB.sceneName(v.scene))+'</span>'+stBadge(v.status)+
@@ -578,6 +637,46 @@ function rejectBox(uid,vid,title){
   };
 }
 
+function viewFeedback(){
+  var all=DATA.feedback||[];
+  var kw=(KW.f||'').toLowerCase();
+  var cnt={und:0,done:0,all:all.length};
+  all.forEach(function(f){if(f.done)cnt.done++;else cnt.und++});
+  var list=all.filter(function(f){
+    if(FBF!=='all'&&f.done!==(FBF==='done'))return false;
+    if(kw&&((f.name+' '+f.contact+' '+f.msg+' '+(f.uname||'')).toLowerCase().indexOf(kw)<0))return false;
+    return true;
+  });
+  var h='<div class="hd"><h1>📮 用户反馈</h1><div class="sub">用户在前台点「反馈给官方」提交的称呼 / 联系方式 / 问题建议</div><div class="sp"></div>'+
+    '<input class="ad-in" id="kwF" placeholder="搜索称呼 / 联系方式 / 内容" value="'+esc(KW.f)+'" style="width:220px"></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">'+
+    [['und','未处理'],['done','已处理'],['all','全部']].map(function(t){
+      return '<button class="btn'+(FBF===t[0]?' pri':'')+'" data-fbf="'+t[0]+'">'+t[1]+' '+(cnt[t[0]]||0)+'</button>'}).join('')+
+    '</div>';
+  if(!list.length){
+    h+='<div class="empty"><span class="big">'+(FBF==='und'?'📭':'🔍')+'</span>'+
+      (all.length?'没有匹配的反馈':'还没有收到用户反馈<br>用户在前台点右上角 ✉️「反馈给官方」提交后会出现在这里')+'</div>';
+  }else{
+    h+='<div class="vgrid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">'+list.map(function(f){
+      return '<div class="vc" style="'+(f.done?'opacity:.62':'')+'">'+
+        '<div class="bd2">'+
+          '<div class="ti" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+esc(f.name)+
+            (f.done?'<span class="bd ok">已处理</span>':'<span class="bd pend">未处理</span>')+
+            '<span style="font-size:var(--fs-2xs);color:var(--ink3);font-weight:400">'+dt(f.ts)+' · '+ago(f.ts)+'</span></div>'+
+          '<div class="mt">📩 '+esc(f.contact)+'</div>'+
+          '<div class="rs" style="color:var(--ink);background:var(--panel2);white-space:pre-wrap;line-height:1.7">'+esc(f.msg)+'</div>'+
+          '<div class="mt">'+(f.uname?'<span title="站内用户">👤 '+esc(f.uname)+'</span>':'<span>游客</span>')+
+            (f.page?'<span>来自 '+esc(f.page)+' 页</span>':'')+'</div>'+
+        '</div>'+
+        '<div class="ac">'+
+          '<button class="btn sm '+(f.done?'':'ok')+'" data-fbok="'+f.id+'" data-next="'+(f.done?0:1)+'">'+(f.done?'↩ 标记未处理':'✓ 标记已处理')+'</button>'+
+          '<button class="btn sm dan" data-fbdel="'+f.id+'">删除</button>'+
+        '</div></div>';
+    }).join('')+'</div>';
+  }
+  return h;
+}
+
 function viewLogs(){
   var l=DATA.logs;
   var h='<div class="hd"><h1>📜 操作日志</h1><div class="sub">记录后台所有审核与管理动作</div><div class="sp"></div>'+
@@ -594,41 +693,104 @@ function viewSettings(){
       '· <b>本人 / 本机真实用户</b>：你在前台实际完成的每一场模拟面试、上传的每一个视频，都会实时同步进后端数据库，并关联展示在用户管理的高亮条目。<br>'+
       '· <b>其余示例用户</b>：首次启动后端时生成的内置演示数据，用于展示后台能力，可一键重置。'+
       '</div></div>'+
-    '<div class="card"><div class="ct">👑 管理员账号（独立身份）</div>'+
+    '<div class="card"><div class="ct">👑 超级管理员（唯一管理员）</div>'+
       '<div class="kv"><div class="k">登录态</div><div class="v">会话级（关闭标签页失效）</div>'+
       '<div class="k">入口</div><div class="v">仅本页 admin.html（用户端不显示任何入口）</div></div>'+
       '<div style="font-size:12px;color:var(--ink3);line-height:1.9">'+
-        '· 管理员账号与用户账号是两套完全独立的体系：不共用身份、不共用数据、不互相叠加。<br>'+
-        '· 在用户端登录框输入管理员账号会被拒绝，并提示到本后台登录。<br>'+
-        '· 凭据已配置在后台，不在此页面明文展示；正式部署时应改为服务端校验 + 角色权限表。</div></div>'+
+        '· 本平台只有<b>一个超级管理员账号</b>（服务端 admin_account 表独立校验），不再支持把普通用户提升为管理员。<br>'+
+        '· 超级管理员账号与用户账号是两套完全独立的体系：不共用身份、不共用数据、不互相叠加。<br>'+
+        '· 在用户端登录框输入管理员账号会被拒绝，并提示到本后台登录。</div></div>'+
     '<div class="card"><div class="ct">🧰 维护操作</div>'+
       '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
         '<button class="btn" id="expBtn">⬇ 导出后台数据 JSON</button>'+
         '<button class="btn dan" id="rstBtn">♻ 重置为示例数据</button>'+
-        '<button class="btn" id="frontBtn">← 返回用户前台</button>'+
       '</div>'+
       '<div style="font-size:12px;color:var(--ink3);margin-top:10px">重置会清空后台已有的审核记录与示例用户，重新生成一份演示数据集。</div></div>';
 }
 
+var onlineTimer=null;
+function clearOnlineTimer(){ if(onlineTimer){clearInterval(onlineTimer);onlineTimer=null;} }
+function pageName(p){
+  return ({home:'首页',index:'首页',interview:'模拟面试',bank:'题库',square:'观摩大厅',
+    videos:'个人中心',relax:'轻松一下',admin:'管理后台'})[p]||(p||'未知');
+}
+function onlineListHtml(on,list){
+  var n=document.getElementById('onlineN'); if(n)n.textContent=on||0;
+  if(!list||!list.length)return '<div class="empty"><span class="big">🌙</span>当前没有在线用户（60 秒内心跳才会显示）</div>';
+  var now=Date.now();
+  return '<div class="vgrid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">'+list.map(function(u){
+    var dur=Math.floor((now-(u.onlineAt||now))/1000);
+    var dm = dur<60 ? (dur+' 秒') : (Math.floor(dur/60)+' 分 '+(dur%60)+' 秒');
+    var st = u.status==='banned'
+      ? '<span class="bd no">已封禁</span>'
+      : '<span class="bd ok" style="background:rgba(16,185,129,.13);color:#047857">🟢 在线</span>';
+    return '<div class="vc" style="flex-direction:row;align-items:center;gap:12px;padding:12px">'+
+      '<div class="av" style="width:42px;height:42px;font-size:20px;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#e0f2fe);display:grid;place-items:center;flex:none">'+(u.avatar||'🙂')+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+esc(u.name)+' '+st+'</div>'+
+        '<div style="font-size:11.5px;color:var(--ink3)">@'+esc(u.account)+'</div>'+
+        '<div style="font-size:12px;margin-top:4px;color:var(--ink2)">📍 正在浏览：<b>'+pageName(u.page)+'</b> · 已在线 '+dm+'</div>'+
+        '<div style="font-size:11.5px;margin-top:3px;color:var(--ink3)">面试 '+u.sessions+' 场 · 视频 '+u.videos+' 个 · 收藏 '+u.favs+' 题</div>'+
+      '</div></div>';
+  }).join('')+'</div>';
+}
+function viewOnline(){
+  clearOnlineTimer();
+  async function load(){
+    var box=document.getElementById('onlineBody'); if(!box)return;
+    var on=0,list=[];
+    try{
+      var r=await apiCall('/api/admin/online',{token:adminToken(),silent:true});
+      if(r.data&&r.data.ok){on=r.data.count;list=r.data.online||[];}
+    }catch(e){}
+    box.innerHTML=onlineListHtml(on,list);
+    var c=document.getElementById('sideOnline'); if(c){c.textContent=on||'';c.style.display=on?'grid':'none';}
+  }
+  var h='<div class="hd"><h1>🟢 实时在线</h1><div class="sub">当前已登录且活跃的用户（60 秒内心跳视为在线，每 5 秒自动刷新）</div><div class="sp"></div>'+
+    '<span class="src-badge src-server" style="background:rgba(16,185,129,.14);color:#047857;border-color:rgba(16,185,129,.4)"><span class="dot" style="background:#10b981;box-shadow:0 0 6px #10b981"></span><b id="onlineN">0</b> 人在线</span>'+
+    '<button class="btn sm" id="onRf" style="margin-left:10px">🔄 刷新</button></div>';
+  h+='<div class="card"><div class="ct">🟢 当前在线用户 <span class="sp"></span>'+
+     '<span style="font-size:12px;color:var(--ink3)">数据实时来自服务器数据库</span></div>'+
+     '<div id="onlineBody"><div class="empty"><span class="big">⏳</span>加载中…</div></div></div>';
+  /* 页面骨架插入后再发起首次加载并开启 5 秒轮询（本函数保持同步，避免返回 Promise） */
+  setTimeout(function(){
+    load();
+    if(onlineTimer)clearInterval(onlineTimer);
+    onlineTimer=setInterval(load,5000);
+    var rf=document.getElementById('onRf'); if(rf)rf.onclick=function(){load()};
+  },0);
+  return h;
+}
+
 async function render(){
   var t=TAB;
-  DATA=await adminLoad();
-  $m.innerHTML = t==='dash'?viewDash() : t==='users'?viewUsers() :
-                 t==='sessions'?viewSessions() : t==='videos'?viewVideos() :
+  clearOnlineTimer();
+  try{
+    DATA=await adminLoad();
+  }catch(e){
+    return renderLoadFail(e);
+  }
+  $m.innerHTML = t==='dash'?viewDash() : t==='online'?viewOnline() :
+                 t==='users'?viewUsers() : t==='sessions'?viewSessions() :
+                 t==='videos'?viewVideos() : t==='feedback'?viewFeedback() :
                  t==='logs'?viewLogs() : viewSettings();
-  /* 侧栏高亮 + 待审数量 */
+  /* 侧栏高亮 + 待审 / 在线数量 */
   document.querySelectorAll('.ad-item').forEach(function(b){
     b.classList.toggle('on',b.dataset.go===t);
   });
   var pc=DATA.stats.pend;
   var sc=document.getElementById('sideCnt');
   if(sc){sc.textContent=pc||'';sc.style.display=pc?'grid':'none';}
+  var oc=document.getElementById('sideOnline');
+  if(oc){var on=DATA.stats.online||0;oc.textContent=on||'';oc.style.display=on?'grid':'none';}
+  var fc=document.getElementById('sideFb');
+  if(fc){var und=(DATA.feedback||[]).filter(function(f){return !f.done}).length;fc.textContent=und||'';fc.style.display=und?'grid':'none';}
   var srcEl=document.getElementById('topSrc');
   if(srcEl){
     var isSrv=DATA.src==='server';
     srcEl.className='src-badge '+(isSrv?'src-server':'src-local');
-    srcEl.innerHTML=(isSrv?'<span class="dot"></span>本地后端':'<span class="dot"></span>本机浏览器');
-    srcEl.title=isSrv?'数据来自本地后端 localhost:3000':'后端不可达，当前使用浏览器本地缓存';
+    srcEl.innerHTML=(isSrv?'<span class="dot"></span>服务器数据库':'<span class="dot"></span>本机浏览器');
+    srcEl.title=isSrv?'数据来自服务器 MySQL 数据库':'后端不可达，当前使用浏览器本地缓存';
   }
   bind();
   window.scrollTo(0,0);
@@ -652,6 +814,23 @@ function bind(){
     var n=document.getElementById('kwV');if(n){n.focus();n.setSelectionRange(p,p)}}}
   document.querySelectorAll('[data-vf]').forEach(function(b){
     b.onclick=function(){VF=b.dataset.vf;render()}});
+  /* 用户反馈：筛选 / 搜索 / 标记 / 删除 */
+  document.querySelectorAll('[data-fbf]').forEach(function(b){
+    b.onclick=function(){FBF=b.dataset.fbf;render()}});
+  var kf=document.getElementById('kwF');
+  if(kf){kf.oninput=function(){KW.f=kf.value;var p=kf.selectionStart;render();
+    var n=document.getElementById('kwF');if(n){n.focus();n.setSelectionRange(p,p)}}}
+  document.querySelectorAll('[data-fbok]').forEach(function(b){
+    b.onclick=async function(){
+      await adminAct('PUT','/api/admin/feedback/'+b.dataset.fbok,{done:b.dataset.next==='1'},null);
+      toast(b.dataset.next==='1'?'已标记为已处理':'已改回未处理','ok');
+    }});
+  document.querySelectorAll('[data-fbdel]').forEach(function(b){
+    b.onclick=async function(){
+      if(!confirm('确定删除这条反馈？删除后不可恢复。'))return;
+      await adminAct('DELETE','/api/admin/feedback/'+b.dataset.fbdel,null,null);
+      toast('已删除该反馈','warn');
+    }});
   document.querySelectorAll('[data-ud]').forEach(function(b){
     b.onclick=function(){userDetail(b.dataset.ud)}});
   document.querySelectorAll('[data-ub]').forEach(function(b){
@@ -668,6 +847,20 @@ function bind(){
       if(!confirm('确定删除用户「'+u.name+'」？其面试与视频数据会一并移除。'))return;
       await adminAct('DELETE','/api/admin/user/'+id,null,function(){AdminDB.delUser(id)});
       toast('已删除 '+u.name,'warn');
+    }});
+  document.querySelectorAll('[data-vplay]').forEach(function(b){
+    b.onclick=function(){
+      var vid=b.dataset.vplay,item=null;
+      DATA.videos.forEach(function(x){if(x.v.id===vid)item=x});
+      if(!item)return;
+      playVideoFile(vid,item.v.title,item.u.name);
+    }});
+  document.querySelectorAll('[data-vthumb]').forEach(function(d){
+    d.onclick=function(){
+      var vid=d.dataset.vthumb,item=null;
+      DATA.videos.forEach(function(x){if(x.v.id===vid)item=x});
+      if(!item)return;
+      playVideoFile(vid,item.v.title,item.u.name);
     }});
   document.querySelectorAll('[data-vok]').forEach(function(b){
     b.onclick=async function(){
@@ -714,8 +907,6 @@ function bind(){
     await adminAct('POST','/api/admin/reset',null,function(){AdminDB.reset()});
     toast('已重置为示例数据','ok');
   };
-  var fb=document.getElementById('frontBtn');
-  if(fb)fb.onclick=function(){location.href='index.html'};
 }
 
 function showGate(){
@@ -725,13 +916,22 @@ function showGate(){
   async function sub(){
     var acc=(ga.value||'').trim(), pw=gp.value||'';
     if(!acc){ge.textContent='请输入管理员账号';return;}
-    /* 后端优先：用本地后端 /api/admin/login 校验；失败回落本地 */
+    /* 后端优先：用本地后端 /api/admin/login 校验；网络不通才回落本地 */
     withLoading(go,function(){
-      return apiCall('/api/admin/login',{method:'POST',body:{account:acc,password:pw}})
+      return apiCall('/api/admin/login',{method:'POST',silent:true,body:{account:acc,password:pw}})
         .then(function(r){
           if(r.data&&r.data.ok){setAdminToken(r.data.token||'');ge.textContent='';showApp();}
         })
-        .catch(function(){ gateLocal(acc,pw); });
+        .catch(function(err){
+          /* 后端明确拒绝（密码错误 / 账号不存在 / 限速锁定）：如实提示，不进本地初始化 */
+          if(err&&err.bizError){
+            ge.textContent=err.msg||'登录失败';
+            gp.value='';gp.focus();
+            return;
+          }
+          /* 真正的网络故障才走本机兜底 */
+          gateLocal(acc,pw);
+        });
     });
   }
   var initMode=false,gp2=document.getElementById('gPwd2');
@@ -767,14 +967,13 @@ function showApp(){
   document.getElementById('app').style.display='block';
   /* 支持 #videos / #users 这类深链（前台「审核中心」可直接跳进来） */
   var h=(location.hash||'').replace('#','');
-  if(['dash','users','sessions','videos','logs','settings'].indexOf(h)>=0)TAB=h;
+  if(['dash','users','sessions','videos','feedback','logs','settings'].indexOf(h)>=0)TAB=h;
   if(h==='videos')VF='pending';
   document.getElementById('topWho').textContent=(getAdminProfile()||{}).name||'管理员';
   document.getElementById('topOut').onclick=function(){
     setAdminToken(null);adminLogout();toast('已退出管理员','ok');
     setTimeout(function(){location.href='index.html'},420);
   };
-  document.getElementById('topFront').onclick=function(){location.href='index.html'};
   document.querySelectorAll('.ad-item').forEach(function(b){
     b.onclick=function(){TAB=b.dataset.go;render()};
   });
@@ -784,7 +983,7 @@ function showApp(){
   setInterval(function(){if(TAB==='dash')render()},60000);
 }
 async function boot(){
-  /* 已持有管理员 token：用后端 /api/admin/db 校验有效性（后端优先） */
+  /* 必须持有有效的服务器管理员 token 才能进入（本地演示模式已停用） */
   var tk=adminToken(), authed=false;
   if(tk){
     try{
@@ -792,9 +991,7 @@ async function boot(){
       if(r.data&&r.data.ok)authed=true;
     }catch(e){}
   }
-  /* 离线 / token 失效：回落本地会话（仅演示环境） */
-  if(!authed&&isAdmin())authed=true;
-  if(!authed){showGate();return;}
+  if(!authed){setAdminToken(null);showGate();return;}
   showApp();
 }
 boot();

@@ -7,7 +7,7 @@
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261110a">
+<link rel="stylesheet" href="shared.css?v=20261110n">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
@@ -1362,6 +1362,7 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
           <span class="hint txP" id="micHint"></span>
           <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
           <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「个人中心 · 我的回放」">📹 录制</button>
+          <button class="mic-btn" id="qMuteBtn" style="padding:9px 12px" title="开关面试官自动朗读（朗读当前题与追问）">🔊</button>
           <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
           <span class="hint" id="wordCnt">已输入 0 字</span>
           <button class="btn pri" id="submitBtn" style="margin-left:auto">提交作答</button>
@@ -1516,6 +1517,20 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
         <div class="coach" id="rvCoach"></div>
         <div id="rvSuggest" style="margin:14px 0"></div>
         <div id="rvWeak" style="margin-bottom:16px"></div>
+        <!-- AI 复盘教练：基于本场报告的追问对话（RAG 之外的第二个智能入口） -->
+        <div id="rvCoachChat" style="display:none;margin-bottom:16px;background:rgba(108,140,255,.05);border:1px solid rgba(108,140,255,.28);border-radius:16px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:18px">🧑‍🏫</span>
+            <b style="font-size:14px">AI 复盘教练</b>
+            <span style="font-size:11px;color:var(--ink3)">本场数据已注入 · 可追问「为什么这题只有 3 分」「下一步练什么」</span>
+          </div>
+          <div id="rccMsgs" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:10px 0"></div>
+          <div style="display:flex;gap:8px">
+            <input id="rccIn" placeholder="向复盘教练提问…" maxlength="200" style="flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:11px;padding:9px 13px;font-size:13px;color:var(--ink);outline:none">
+            <button class="btn pri sm" id="rccSend">发送</button>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap" id="rccQuick"></div>
+        </div>
         <div class="rv-export" id="rvExport"></div>
         <h4 style="font-size:14px;font-weight:800;margin-bottom:12px">逐题回顾 <span style="font-size:11px;color:var(--ink3);font-weight:500">（含 AI 逐题点评）</span></h4>
         <div id="rvList"></div>
@@ -1535,34 +1550,29 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
   </div>
 </div>
 
-<script src="shared.js?v=20261109a"></script>
-<script src="cloud.js?v=20261107a"></script>
+<script src="shared.js?v=20261114b"></script>
+<script src="cloud.js?v=20261114b"></script>
 <script>
-if(!initPage('interview',true))throw new Error('login required');
+initPage('interview');
 
 var RING_LEN=175.9;
 var S={scene:'job',count:5,sec:90,types:[],lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null,stressMode:false,sceneMode:'campus',resume:'',resumeSummary:''};
 
-var JOB_CATEGORIES=[
-  {id:'tech',label:'研发 / 技术',icon:'💻',subs:['后端开发','前端开发','客户端','测试开发','运维/DevOps','安全工程师']},
-  {id:'algorithm',label:'算法 / 数据',icon:'📊',subs:['算法工程师','数据分析师','数据开发','数据产品','AI工程师']},
-  {id:'product',label:'产品 / 策划',icon:'📦',subs:['C端产品','B端产品','策略产品','游戏策划','商业化产品']},
-  {id:'operation',label:'运营 / 营销',icon:'📈',subs:['用户运营','内容运营','活动运营','增长黑客','市场营销']},
-  {id:'design',label:'设计 / 交互',icon:'🎨',subs:['UI设计','交互设计','视觉设计','用户体验研究']},
-  {id:'business',label:'业务 / 销售',icon:'🤝',subs:['大客户销售','渠道销售','商务拓展(BD)','客户成功']},
-  {id:'support',label:'职能 / 支撑',icon:'🏢',subs:['人力资源(HR)','财务/审计','法务/合规','供应链/物流','行政/战略']}
-];
+/* 岗位轴直接取 shared.js 的 ROLES（全站唯一来源，与题库/观摩大厅同源） */
+var JOB_CATEGORIES=ROLES.filter(function(r){return r.id!=='general'}).map(function(r){
+  return {id:r.id,label:r.name,icon:r.icon,subs:r.subs};
+});
 /* ---- 面试场景与形式（用户在 Step 2 选择；决定 AI 面试官的提问风格与评分侧重） ----
    注意：与 S.scene（岗位方向，决定题库）不同，sceneMode 只影响面试风格/提示词。
    底层抽题与评分仍由六大题型（Q_CATEGORIES / S.types）驱动，此处不影响。 */
-var INTERVIEW_SCENES=[
-  {id:'campus',  icon:'🎓', name:'校招 / 实习',   desc:'侧重基础、潜力与培养价值'},
-  {id:'social',  icon:'💼', name:'社招 / 跳槽',   desc:'侧重项目深挖与业务落地'},
-  {id:'pressure',icon:'🛡️', name:'压力测试面',     desc:'打断、质疑、连环追问'},
-  {id:'behavior',icon:'🗣️', name:'行为面试 (STAR)',desc:'深挖过往经历与真实场景'},
-  {id:'hr',      icon:'🤝', name:'HR 综合面',     desc:'动机、稳定性、职业规划'},
-  {id:'scenario',icon:'🧩', name:'情景模拟面',     desc:'假设突发情况，考察应变'}
-];
+/* 面试类型轴同样取 shared.js 的 ROUNDS，保证三处命名一致 */
+var INTERVIEW_SCENES=ROUNDS.map(function(r){
+  return {id:r.id,icon:r.icon,name:r.name,desc:r.desc};
+});
+/* 题库从 MySQL 异步加载完成后，刷新岗位分类 / 题型推荐 / 预览（shared.js 会派发 ivsim:questions 事件） */
+window.addEventListener('ivsim:questions',function(){
+  try{renderJobCats();renderJobSubs();renderTypes();renderSummary();renderPreview(S.scene)}catch(e){}
+});
 /* 各场景对应的 AI 系统提示词增量（拼到面试官人格之后） */
 var SCENE_PROMPTS={
   campus:  '当前是校园招聘/实习面试。你更看重候选人的基础潜力、学习能力与态度，问题可以偏基础和潜力评估，不要过度苛求资深经验。',
@@ -1819,8 +1829,8 @@ function renderPreview(sc){
   var cnt=document.getElementById('scPoolCnt');
   if(cnt)cnt.textContent='题库 '+totalBank+' 题 · 本场约 '+plan.total+' 题';
   document.getElementById('scPreview').innerHTML=
-    '<div class="sp-card sp-hint">'+SCENES[sc].name+' · 全题库共 <b>'+totalBank+'</b> 题可抽取（AI 会从本方向 + 通用 + 其他方向按题型兜底），本场面试约 <b>'+plan.total+'</b> 题，以下预览前 3 道开场题：</div>'+
-    preview.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+SCENE_COLOR[q.scene]+'">'+LV_NAME[q.lv]+' · '+SCENES[q.scene].name+'</div>'+esc(q.q)+'</div>'}).join('');
+    '<div class="sp-card sp-hint">'+ROLE_MAP[roleOf({scene:sc})].name+' · 全题库共 <b>'+totalBank+'</b> 题可抽取（AI 会从本方向 + 通用 + 其他方向按题型兜底），本场面试约 <b>'+plan.total+'</b> 题，以下预览前 3 道开场题：</div>'+
+    preview.map(function(q){return '<div class="sp-card"><div class="sp-tag" style="color:'+ROLE_MAP[roleOf(q)].color+'">'+LV_NAME[q.lv]+' · '+ROLE_MAP[roleOf(q)].name+'</div>'+esc(q.q)+'</div>'}).join('');
 }
 renderPreview(S.scene);
 
@@ -1900,8 +1910,38 @@ function renderSummary(){
         '<div><span class="dm-l">作答方式</span><b>'+esc((md.ic?md.ic+' ':'')+(md.t||'未选择'))+'</b></div>'+
         '<div><span class="dm-l">简历定制</span><b>'+((S.resume&&S.resume.trim())?'✅ 已附简历':'⚪ 通用题库')+'</b></div>'+
         '<div><span class="dm-l">AI 引擎</span><b>'+(AI_ON()?'☁️ 真实大模型':'🧠 本地模拟')+'</b>'+
-          ' <button type="button" onclick="typeof openAiSettings===\'function\'&&openAiSettings()" style="margin-left:6px;padding:2px 10px;font-size:11px;border-radius:8px;background:rgba(108,140,255,.15);border:1px solid rgba(108,140,255,.4);color:var(--acc2);cursor:pointer">配置</button></div>'+
+          (AI_ON()?'':'<span style="margin-left:6px;font-size:11px;color:var(--ink3)">由服务端统一接入</span>')+'</div>'+
+      '</div>'+
+      /* 语音面试官：自动朗读开关 + 语速 + 试听（多模态：AI 读题 ↔ 语音识别作答 全语音闭环） */
+      '<div class="dash-meta" style="margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)">'+
+        '<div><span class="dm-l">🎙 面试官朗读</span><b id="voiceToggle">'+(ttsEnabled()?'🔊 已开启':'🔇 已关闭')+'</b></div>'+
+        '<div><span class="dm-l">语速</span><span id="voiceRate" style="display:inline-flex;gap:4px">'+
+          [['0.85','慢'],['1','正常'],['1.15','快']].map(function(r){
+            var cur=parseFloat(storeGet('ivsim_tts_rate','1'))||1;
+            return '<button type="button" class="chip'+(Math.abs(cur-parseFloat(r[0]))<0.01?' on':'')+'" data-vrate="'+r[0]+'" style="font-size:11px;padding:3px 10px">'+r[1]+'</button>';
+          }).join('')+'</span></div>'+
+        '<div><span class="dm-l">试听</span><button type="button" class="chip" id="voiceDemo" style="font-size:11px;padding:3px 10px">▶ 试听</button></div>'+
       '</div>';
+    /* 语音设置交互 */
+    var vt=document.getElementById('voiceToggle');
+    if(vt)vt.onclick=function(){
+      var on=!ttsEnabled();
+      storeSet('ivsim_anim_tts',on?'1':'0');
+      renderMuteBtn();renderSummary();
+      toast(on?'面试官朗读已开启：每道题会自动读出来':'面试官朗读已关闭','ok');
+    };
+    $$('#voiceRate button',box).forEach(function(b){
+      b.onclick=function(){
+        storeSet('ivsim_tts_rate',b.dataset.vrate);
+        renderSummary();
+        toast('语速已调整为「'+b.textContent+'」','ok');
+      };
+    });
+    var vd=document.getElementById('voiceDemo');
+    if(vd)vd.onclick=function(){
+      if(!canTTS()){toast('浏览器不支持语音朗读','warn');return}
+      speakTTS('你好，我是你的 AI 面试官。请用一分钟做一个自我介绍。',voiceOpt(S.scene));
+    };
   }
 }
 
@@ -2134,7 +2174,7 @@ function aiPlanDistribution(localPlan){
   var cats=sel.map(function(c){return c.id+':'+c.name+'（'+c.point+'）'}).join('；');
   var sc=INTERVIEW_SCENES.filter(function(s){return s.id===S.sceneMode})[0]||INTERVIEW_SCENES[0];
   var prompt='你是面试编排官。为这次模拟面试分配各题型题量与总题数。\n'+
-    '岗位：'+((SCENES[S.scene]&&SCENES[S.scene].name)||'综合')+(selectedSubJob?' · '+selectedSubJob:'')+'\n'+
+    '岗位：'+ROLE_MAP[roleOf({scene:S.scene})].name+(selectedSubJob?' · '+selectedSubJob:'')+'\n'+
     '面试场景：'+sc.name+' — '+(SCENE_PROMPTS[S.sceneMode]||SCENE_PROMPTS.campus)+'\n'+
     '按面试先后顺序的题型：'+cats+'\n'+
     '附简历：'+(S.resume&&S.resume.trim()?'是':'否')+'；压力模式：'+(S.stressMode?'是':'否')+
@@ -2377,7 +2417,7 @@ function camRecSave(chunks,mime){
   saveVideoBlob(id,blob).then(function(){
     CAMREC.saved++;
     addVideoMeta({id:id,
-      title:'模拟面试回放 · '+((SCENES[S.scene]&&SCENES[S.scene].name)||'综合')+(CAMREC.saved>1?'（第'+CAMREC.saved+'段）':''),
+      title:'模拟面试回放 · '+ROLE_MAP[roleOf({scene:S.scene})].name+(CAMREC.saved>1?'（第'+CAMREC.saved+'段）':''),
       scene:S.scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),
       status:'approved',ts:Date.now(),src:'interview',shared:false,
       dur:CAMREC.t0?Math.round((Date.now()-CAMREC.t0)/1000):0});
@@ -2401,6 +2441,12 @@ function nextQ(){
   document.getElementById('progBar').style.width=(S.idx/S.qs.length*100)+'%';
   document.getElementById('progTxt').textContent='第 '+(S.idx+1)+' / '+S.qs.length+' 题';
   lastQ=q.q;ttsBtn.textContent='📢 朗读题目';document.getElementById('animTtsBtn').textContent='📢 重听题目';stopSpeak();
+  /* 语音面试官：经典文字模式也自动朗读题目（与动画/摄像头模式共用同一朗读开关） */
+  if(S.mode==='text'&&ttsEnabled()&&canTTS()){
+    speakTTS(q.q,voiceOpt(S.scene));
+    ttsBtn.textContent='⏹ 停止朗读';
+    ttsUttr.onend=function(){ttsBtn.textContent='📢 朗读题目'};
+  }
   document.getElementById('ansTa').value='';
   document.getElementById('animTa').value='';
   if(S.mode==='cam'){document.getElementById('usText').textContent=''}
@@ -2886,6 +2932,54 @@ function finish(){
       $$('#rvWeak .weak-chip').forEach(function(b){b.onclick=function(){addWeakPoint(b.dataset.w);b.textContent='✓ 已收藏';b.disabled=true}});
     } else weakEl.innerHTML='';
   }
+  var rcc=document.getElementById('rvCoachChat');
+  if(rcc){
+    rcc.style.display='block';
+    var dimsLine=dims.map(function(d,i){return d+' '+dimsVals[i]+'分'}).join('、');
+    var perLine=S.recs.map(function(r,i){
+      var pq=sc.perQuestion&&sc.perQuestion[i];
+      return 'Q'+(i+1)+'「'+r.q.q.slice(0,40)+'」'+(pq?('得分'+pq.score+(pq.comment?('：'+String(pq.comment).slice(0,60)):'')):'(未评分)');
+    }).join('\n');
+    var rccCtx='你是一场模拟面试的复盘教练。本场报告数据：\n'+
+      '场景代码：'+S.scene+'；完成题数：'+total+'；用时：'+fmtSec(used)+'；平均作答字数：'+avgAnsLen+'\n'+
+      '能力维度：'+dimsLine+'\n整体点评：'+sc.overall+'\n逐题记录：\n'+perLine+'\n'+
+      (sc.suggestions&&sc.suggestions.length?('改进建议：'+sc.suggestions.join('；')+'\n'):'')+
+      '请以教练身份回答学员的追问：解释得分依据、指出短板原因、给出下一步练习计划。中文，简洁，200 字以内。';
+    var rccMsgs=document.getElementById('rccMsgs'),rccIn=document.getElementById('rccIn'),rccSend=document.getElementById('rccSend');
+    var rccHist=[];
+    function rccPush(html,me){
+      var d=document.createElement('div');
+      d.style.cssText='max-width:88%;padding:8px 12px;border-radius:12px;font-size:12.5px;line-height:1.7;'+
+        (me?'align-self:flex-end;background:rgba(108,140,255,.2)':'align-self:flex-start;background:rgba(255,255,255,.06)');
+      d.innerHTML=html;rccMsgs.appendChild(d);rccMsgs.scrollTop=rccMsgs.scrollHeight;return d;
+    }
+    function rccAsk(q){
+      if(!q)return;
+      rccPush(esc(q),true);
+      var ld=rccPush('<span class="typing"><i></i><i></i><i></i></span>');
+      rccHist.push({role:'user',content:q});
+      function fail(){
+        ld.remove();
+        var weakest=0;dimsVals.forEach(function(v,i){if(v<dimsVals[weakest])weakest=i});
+        rccPush('⚠️ AI 暂不可用。本地建议：优先补强「'+dims[weakest]+'」（当前 '+dimsVals[weakest]+' 分），去题库练 3 道同维度题，作答前先列 30 秒提纲。');
+      }
+      if(typeof CLOUD.aiText==='function'){
+        CLOUD.aiText(rccCtx,rccHist.slice(-8)).then(function(t){
+          ld.remove();rccHist.push({role:'assistant',content:t});
+          rccPush(String(t).replace(/\n/g,'<br>'));
+        })['catch'](fail);
+      } else fail();
+    }
+    rccSend.onclick=function(){var v=rccIn.value.trim();if(!v)return;rccIn.value='';rccAsk(v)};
+    rccIn.addEventListener('keydown',function(e){if(e.key==='Enter'){var v=rccIn.value.trim();if(!v)return;rccIn.value='';rccAsk(v)}});
+    var rccQuick=document.getElementById('rccQuick');
+    rccQuick.innerHTML='';
+    ['为什么这一场分数不高？','下一步该练什么？','哪道题最值得重练？'].forEach(function(qt){
+      var b=document.createElement('button');b.className='chip';b.textContent=qt;
+      b.style.cssText='font-size:11px;padding:4px 10px;cursor:pointer';
+      b.onclick=function(){rccAsk(qt)};rccQuick.appendChild(b);
+    });
+  }
   /* 导出报告 */
   var expEl=document.getElementById('rvExport');
   if(expEl){
@@ -3203,7 +3297,8 @@ function pickJobVoice(key){
 }
 function voiceOpt(key){
   var vc=(SCENE_META[key]||SCENE_META.general).voice||{};
-  var o={pitch:vc.pitch,rate:vc.rate};
+  var mul=parseFloat(storeGet('ivsim_tts_rate','1'))||1; /* 全局语速倍率（语音面试官设置） */
+  var o={pitch:vc.pitch,rate:(typeof vc.rate==='number'?vc.rate:0.95)*mul};
   var v=pickJobVoice(key);
   if(v)o.voice=v;
   return o;
@@ -3242,7 +3337,11 @@ function typeBubble(txt,onTyped){
 }
 
 function ttsEnabled(){return storeGet('ivsim_anim_tts','1')==='1'}
-function renderMuteBtn(){aiMute.textContent=ttsEnabled()?'🔊':'🔇';aiMute.title=ttsEnabled()?'点击静音面试官朗读':'点击开启面试官朗读'}
+function renderMuteBtn(){
+  aiMute.textContent=ttsEnabled()?'🔊':'🔇';aiMute.title=ttsEnabled()?'点击静音面试官朗读':'点击开启面试官朗读';
+  var qm=document.getElementById('qMuteBtn');
+  if(qm){qm.textContent=ttsEnabled()?'🔊':'🔇';qm.title=aiMute.title}
+}
 aiMute.onclick=function(){
   var on=!ttsEnabled();
   storeSet('ivsim_anim_tts',on?'1':'0');
@@ -3250,6 +3349,8 @@ aiMute.onclick=function(){
   if(!on)stopSpeak();
   toast(on?'面试官朗读已开启':'面试官朗读已静音','ok');
 };
+/* 经典文字模式的朗读开关（与动画模式同一设置） */
+document.getElementById('qMuteBtn').onclick=function(){aiMute.onclick.call(this)};
 
 /* 面试官提问：气泡打字 + TTS 朗读，两者都完成后进入作答状态 */
 function aiAsk(q){
