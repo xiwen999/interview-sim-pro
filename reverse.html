@@ -13,7 +13,7 @@ body{background:
   radial-gradient(ellipse 70% 45% at 30% -5%,rgba(167,139,250,.10),transparent),
   radial-gradient(ellipse 55% 40% at 85% 15%,rgba(65,224,200,.08),transparent),
   #0a1020}
-.rv-wrap{max-width:min(1500px,96vw);margin:0 auto;padding:clamp(14px,2.5vw,32px) clamp(12px,2.5vw,32px) 60px}
+.rv-wrap{max-width:none;width:100%;margin:0 auto;padding:clamp(14px,2.5vw,32px) clamp(12px,2.5vw,32px) 60px}
 .rv-head{display:flex;align-items:center;gap:14px;margin:0 0 22px;padding-bottom:18px;border-bottom:1px dashed var(--line)}
 .rv-head .big{font-size:36px}
 .rv-head h1{font-size:clamp(22px,2.8vw,30px);font-weight:900;margin:0}
@@ -23,11 +23,10 @@ body{background:
   background:rgba(255,255,255,.04);transition:.18s;user-select:none}
 .opt-grid .chip:hover{border-color:var(--acc)}
 .opt-grid .chip.on{background:rgba(108,140,255,.18);border-color:rgba(108,140,255,.6);font-weight:700}
-/* 反转面试三张卡：与模拟面试页同款——渐变面 + 22px 大圆角 + 多层柔和阴影，加大内边距 */
-#vPrep,#vLive,#vDone{padding:clamp(22px,2.6vw,34px) clamp(22px,2.8vw,38px);
-  border-radius:22px;border:1px solid rgba(255,255,255,.1);
-  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)) var(--card);
-  box-shadow:0 26px 64px -26px rgba(0,0,0,.7),0 5px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.07)}
+/* 反转面试三张卡：浅色主题下完全透明——卡内露出与外部同一张极光背景，颜色像素级一致 */
+#vPrep,#vLive,#vDone{padding:clamp(22px,2.6vw,34px) clamp(22px,2.8vw,38px)}
+body.light #vPrep,body.light #vLive,body.light #vDone{
+  background:transparent !important;border-color:transparent !important;box-shadow:none !important}
 /* 候选人卡 */
 .cand{display:flex;gap:16px;align-items:center;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.3);
   border-radius:18px;padding:16px 22px;margin-bottom:14px}
@@ -124,7 +123,7 @@ body{background:
   </div>
 </div>
 
-<script src="shared.js?v=20261114b"></script>
+<script src="shared.js?v=20261114d"></script>
 <script src="cloud.js?v=20261114b"></script>
 <script>
 initPage('reverse');

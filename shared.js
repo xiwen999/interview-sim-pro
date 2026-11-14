@@ -1980,6 +1980,20 @@ function openProfile(){
   });
 }
 
+function desktopSettings(method,data){
+  var opt={method:method,cache:'no-store',headers:{}};
+  var t=storeGet('ivsim_token',null);
+  if(t)opt.headers['Authorization']='Bearer '+t;
+  if(method==='POST'&&data){
+    opt.headers['Content-Type']='application/json';
+    opt.body=JSON.stringify(data);
+  }
+  return fetch('/api/desktop/settings',opt).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  });
+}
+
 function openSettings(){
   var st=storeGet('ivsim_settings',{});
   var isDark=st.theme!=='light';
@@ -1990,6 +2004,25 @@ function openSettings(){
     settingRow('主题模式','深色 / 浅色界面切换','chip '+(isDark?'on':''),'stTheme',isDark?'深色':'浅色')+
     settingRow('背景动效','关闭可减少卡顿、更省电','chip '+(st.motionOff?'':'on'),'stMotion',st.motionOff?'已关闭':'已开启')+
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
+    '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+        '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
+        '<span id="dsStatus" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">桌面助手常驻 Windows 后台，双击项目里的「启动AI助手-桌面球.bat」即可运行，可在这里随时开启或关闭悬浮球。</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)">'+
+        '<div><div style="font-weight:600;font-size:13px">桌面助手</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭后悬浮球消失，可随时在此重新开启</div></div>'+
+        '<button class="chip" id="dsPower" disabled>读取中…</button>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
+        '<div><div style="font-weight:600;font-size:13px">网页打开时隐藏悬浮球</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭网页后自动出现</div></div>'+
+        '<button class="chip" id="dsHide" disabled>读取中…</button>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
+        '<div><div style="font-weight:600;font-size:13px">开机自动启动</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">登录 Windows 后自动运行桌面助手</div></div>'+
+        '<button class="chip" id="dsStart" disabled>读取中…</button>'+
+      '</div>'+
+    '</div>'+
     '<div style="padding:14px 0"><div style="font-weight:700;font-size:14px;margin-bottom:4px">数据管理</div>'+
       '<button class="btn gho sm" id="stClear" style="color:var(--danger);border-color:rgba(251,113,133,.4)">清空全部本地数据</button></div>'+
     '<div style="font-size:11.5px;color:var(--ink3);text-align:center;margin-top:8px">训练营 Pro · 训练数据云端保存，跨设备同步</div>';
@@ -2005,6 +2038,52 @@ function openSettings(){
     ['ivsim_userdata','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
     closeMask();toast('本地数据已清空','ok');
   };
+
+  /* 桌面助手设置 */
+  var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
+  var ds={autoHide:true,autoStart:true,enabled:true,online:false,busy:false};
+  function dsPaint(){
+    if(!ds.online){
+      dsStatus.textContent='桌面助手服务未运行 · 正在重试…';
+      dsStatus.style.color='var(--ink3)';
+      dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;
+      dsPower.className='chip';dsPower.textContent='不可用';
+      dsHide.className='chip';dsHide.textContent='不可用';
+      dsStart.className='chip';dsStart.textContent='不可用';
+      return;
+    }
+    dsStatus.textContent=ds.enabled?'已连接 · 悬浮球运行中':'已连接 · 悬浮球已关闭';
+    dsStatus.style.color='#7EE7A7';
+    dsPower.disabled=false;dsHide.disabled=false;dsStart.disabled=false;
+    dsPower.className='chip '+(ds.enabled?'on':'');dsPower.textContent=ds.enabled?'已开启':'已关闭';
+    dsHide.className='chip '+(ds.autoHide?'on':'');dsHide.textContent=ds.autoHide?'已开启':'已关闭';
+    dsStart.className='chip '+(ds.autoStart?'on':'');dsStart.textContent=ds.autoStart?'已开启':'已关闭';
+  }
+  function dsSend(msg){
+    ds.busy=true;
+    desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;ds.busy=false;dsPaint();
+      toast(msg||'桌面助手设置已更新','ok');
+    })['catch'](function(){
+      ds.online=false;ds.busy=false;dsPaint();toast('连不上桌面助手服务，正在重试…','');
+    });
+  }
+  dsPower.onclick=function(){if(!ds.online)return;ds.enabled=!ds.enabled;dsPaint();dsSend(ds.enabled?'桌面助手已开启':'桌面助手已关闭')};
+  dsHide.onclick=function(){if(!ds.online)return;ds.autoHide=!ds.autoHide;dsPaint();dsSend()};
+  dsStart.onclick=function(){if(!ds.online)return;ds.autoStart=!ds.autoStart;dsPaint();dsSend()};
+  /* 弹层打开期间每 2.5 秒重试一次，服务恢复后自动连上 */
+  function dsRefresh(){
+    if(!$('#dsPower')) return;
+    desktopSettings('GET').then(function(r){
+      if(ds.busy)return;
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;dsPaint();
+    })['catch'](function(){
+      if(ds.busy)return;
+      ds.online=false;dsPaint();
+    });
+    setTimeout(dsRefresh,2500);
+  }
+  dsRefresh();
 }
 function settingRow(title,desc,btnClass,btnId,btnText){
   return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)">'+

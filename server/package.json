@@ -1,0 +1,15 @@
+{
+  "name": "interview-sim-backend",
+  "version": "1.0.0",
+  "description": "模拟面试训练营 Pro 本地后端（MySQL 存储版）",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "mysql2": "^3.24.6"
+  }
+}
