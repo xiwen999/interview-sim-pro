@@ -1638,15 +1638,9 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
         <div class="q-text" id="qText"></div>
         <div class="q-point" id="qPoint"></div>
         <textarea class="ans-ta" id="ansTa" placeholder="在这里写下你的回答思路，或点下方麦克风语音作答…" aria-label="回答输入区"></textarea>
-        <div class="vrec-box" id="vrecBox" style="display:none">
-          <div class="txP" style="font-size:11.5px;margin-bottom:6px">● 正在录制本题作答，点「⏹ 停止并保存」结束 · <span id="vrecTimer"></span></div>
-          <video id="vrecPrev" autoplay muted playsinline></video>
-        </div>
         <div class="ans-bar">
           <button class="mic-btn" id="micBtn" style="display:none"></button>
           <span class="hint txP" id="micHint" style="display:none"></span>
-          <select id="vrecLimit" class="mic-btn" style="display:none" title="单次录制最长时长，到时自动停止并保存"></select>
-          <button class="mic-btn" id="vrecBtn" style="display:none" title="录制本题视频作答，保存到「个人中心 · 我的回放」">📹 录制</button>
           <button class="mic-btn" id="qMuteBtn" style="display:none;padding:9px 12px" title="开关面试官自动朗读（朗读当前题与追问）">🔊</button>
           <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
           <span class="hint" id="wordCnt">已输入 0 字</span>
@@ -2601,43 +2595,7 @@ function _doStartInterview(){
   aiPlanDistribution(localPlan).then(withPlan);
 }
 
-var VR={stream:null,mr:null,chunks:[],on:false,timer:null,maxSec:0,remain:0,elapsed:0,autoStopped:false};
-var vrecBtn=document.getElementById('vrecBtn'),vrecBox=document.getElementById('vrecBox'),vrecPrev=document.getElementById('vrecPrev');
-vrecBtn.onclick=function(){if(!canUseFeature())return;VR.on?stopVRec():startVRec()};
-
-/* 单次录制最长时长（秒），0=不限；选择持久化，开始录制时固化到本次 VR.maxSec */
-var REC_LIMITS=[[30,'30 秒'],[60,'60 秒'],[90,'90 秒（推荐）'],[180,'3 分钟'],[300,'5 分钟'],[0,'不限时长']];
-var REC_MIN=0,REC_MAX=600; /* 边界裁剪：最长 10 分钟，防止异常值 */
-var vrecLimitSel=document.getElementById('vrecLimit'),vrecTimer=document.getElementById('vrecTimer');
-vrecLimitSel.innerHTML=REC_LIMITS.map(function(p){return '<option value="'+p[0]+'">'+p[1]+'</option>'}).join('');
-(function(){var saved=Math.min(REC_MAX,Math.max(REC_MIN,+storeGet('ivsim_recmax',90)||0));var ok=REC_LIMITS.some(function(p){return p[0]===saved});vrecLimitSel.value=String(ok?saved:90)})();
-vrecLimitSel.onchange=function(){storeSet('ivsim_recmax',+this.value)};
 function fmtClock(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x}
-function startRecTick(){
-  clearInterval(VR.timer);VR.elapsed=0;VR.autoStopped=false;
-  if(!VR.maxSec){
-    vrecTimer.textContent='不限时长 · 已录 00:00';
-    VR.timer=setInterval(function(){VR.elapsed++;vrecTimer.textContent='不限时长 · 已录 '+fmtClock(VR.elapsed)},1000);
-    return;
-  }
-  VR.remain=VR.maxSec;
-  vrecTimer.textContent='最长 '+fmtClock(VR.maxSec)+' · 剩余 '+fmtClock(VR.remain);
-  VR.timer=setInterval(function(){
-    VR.remain--;VR.elapsed++;
-    if(VR.remain<=0){
-      clearInterval(VR.timer);VR.timer=null;
-      vrecTimer.textContent='已达最长时长 '+fmtClock(VR.maxSec)+'，自动保存…';
-      VR.autoStopped=true;stopVRec();return;
-    }
-    vrecTimer.textContent='最长 '+fmtClock(VR.maxSec)+' · 剩余 '+fmtClock(VR.remain);
-  },1000);
-}
-function startVRec(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('当前浏览器不支持录制','warn');return}
-  navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(st){beginRec(st,false)}).catch(function(){
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){toast('摄像头不可用，已切换为仅录音','warn');beginRec(st,true)}).catch(function(){toast('无法访问摄像头/麦克风，请检查权限','warn')});
-  });
-}
 /* 选择当前浏览器支持的录制格式，并限制码率防止视频过大撑爆 IndexedDB（约 75KB/s） */
 function pickRecOpts(st){
   var hasVideo=st.getVideoTracks().length>0;
@@ -2653,35 +2611,6 @@ function pickRecOpts(st){
   if(hasVideo)opts.videoBitsPerSecond=500000; /* 500kbps */
   opts.audioBitsPerSecond=96000;              /* 96kbps */
   return opts;
-}
-function beginRec(st,audioOnly){
-  VR.stream=st;VR.chunks=[];
-  VR.maxSec=Math.min(REC_MAX,Math.max(REC_MIN,+vrecLimitSel.value||0)); /* 本次录制的上限，录制中改选择器不影响本次 */
-  try{VR.mr=new MediaRecorder(st,pickRecOpts(st))}catch(e){toast('当前浏览器不支持录制','warn');st.getTracks().forEach(function(t){t.stop()});return}
-  VR.mr.ondataavailable=function(e){if(e.data&&e.data.size)VR.chunks.push(e.data)};
-  VR.mr.onstop=onVRecStop;
-  VR.mr.start();VR.on=true;
-  vrecPrev.style.display=audioOnly?'none':'block';
-  if(!audioOnly){vrecPrev.srcObject=st;vrecPrev.play()}
-  vrecBox.style.display='block';vrecBtn.textContent='⏹ 停止并保存';vrecBtn.classList.add('recording');
-  vrecLimitSel.disabled=true;
-  startRecTick();
-  toast(VR.maxSec?'开始录制，最长 '+fmtClock(VR.maxSec)+'，到时自动保存':'开始录制本题作答（不限时长）','ok');
-}
-function stopVRec(){if(VR.mr&&VR.on){VR.mr.stop();VR.on=false}}
-function onVRecStop(){
-  if(VR.timer){clearInterval(VR.timer);VR.timer=null}
-  var wasAuto=VR.autoStopped,recSec=VR.elapsed;
-  var blob=new Blob(VR.chunks,{type:(VR.mr&&VR.mr.mimeType)||'video/webm'});
-  if(VR.stream)VR.stream.getTracks().forEach(function(t){t.stop()});
-  vrecPrev.srcObject=null;vrecBox.style.display='none';vrecBtn.textContent='📹 录制';vrecBtn.classList.remove('recording');
-  vrecLimitSel.disabled=false;
-  var id='v_'+Date.now();
-  saveVideoBlob(id,blob).then(function(){
-    addVideoMeta({id:id,title:(lastQ||'模拟面试作答').slice(0,30),scene:S.scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'approved',ts:Date.now(),src:'interview',shared:false});
-    playSound('unlock');
-    toast((wasAuto?'已达最长时长，':'')+'已录制 '+fmtClock(recSec)+'，保存到「个人中心 · 我的回放」，可投稿到观摩大厅','ok');
-  }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
 }
 
 var CAMREC={mr:null,chunks:[],on:false,maxTimer:null,guard:null,checkTimer:null,bytes:0,retry:0,saved:0,started:false,t0:0};
@@ -2840,7 +2769,6 @@ function submit(){
   stopMic();
   var used=Math.max(0,S.sec-Math.max(S.left,0));
   S.recs.push({q:q,ans:ans||'（未作答）',used:used});
-  stopVRec();
   if(S.mode==='cam'&&S.idx>=S.qs.length-1)stopCam(); /* 最后一题提交后释放摄像头 */
   /* 热身模式只有 1 题，仍然走单题反馈 */
   if(S.warmup){renderFb(q,S.recs[S.recs.length-1]);return}
@@ -3563,7 +3491,6 @@ var animTtsBtn=document.getElementById('animTtsBtn');
 var camMicBtn=document.getElementById('camMicBtn');
 var camHint=document.getElementById('camHint');
 var camSubmit=document.getElementById('camSubmit');
-var vrecLimitSel=document.getElementById('vrecLimit');
 
 /* 岗位 ↔ 场景图：设置页选哪个岗位，动画互动就进哪个房间。
    face 是该图里人物的脸/下颌百分比坐标（用于只让人物动），voice 是该岗位面试官的音色，
@@ -3972,9 +3899,6 @@ function applyModeUI(){
   animCtrls.style.display=(m==='anim')?'block':'none';
   camCtrls.style.display=(m==='cam')?'flex':'none';
   usRow.style.display=(m==='text')?'none':'flex';
-  /* cam 模式摄像头占用中，隐藏原有视频录制，避免重复申请权限 */
-  var vr=document.getElementById('vrecBtn');if(vr)vr.style.display=(m==='cam')?'none':'';
-  var vl=document.getElementById('vrecLimit');if(vl)vl.style.display=(m==='cam')?'none':'';
   if(m==='cam'&&S.camStream)showCamPreview();
   var u=getUser()||{};
   usAv.textContent=u.avatar||'🧑‍💼';
