@@ -7,7 +7,7 @@
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261115f10n">
+<link rel="stylesheet" href="shared.css?v=20261115g10n">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
@@ -1200,6 +1200,179 @@ body.light .dist-box .db-leg b{color:#0f172a}
   background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 58%)}
 body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#f1f5fd);
   border-color:rgba(37,99,235,.18);box-shadow:inset 0 1px 0 #ffffff,0 6px 16px -12px rgba(15,23,42,.4)}
+
+/* ===== 动画互动舞台：深夜面试间 · 电影化视觉小说（合并自 v20261115c，作用域限定不污染经典文字模式） ===== */
+.cinema-card{position:relative;border-radius:18px;overflow:hidden;
+  background:#0A0C0F;border:1px solid rgba(217,162,95,.22);
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.04)}
+.scene-stage{position:relative;width:100%;aspect-ratio:16/9;min-height:clamp(420px,62vh,680px);
+  overflow:hidden;border-radius:18px;background:#0A0C0F;
+  transition:border-color .35s,box-shadow .35s}
+/* 背景媒体 */
+.cinema-media{position:absolute;inset:0;overflow:hidden}
+.scene-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 38%;display:block;
+  filter:saturate(.92) contrast(1.02) brightness(.92)}
+/* 人物立绘已整合进场景背景图，隐藏独立精灵层 */
+.cinema-sprite{display:none}
+.cinema-sprite img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  opacity:0;transition:opacity .26s ease;display:block;animation:breath 6.5s ease-in-out infinite}
+.cinema-sprite img.show{opacity:1}
+@keyframes breath{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.006)}}
+.scene-stage.speaking .cinema-sprite img.show{animation-duration:2.4s}
+.scene-stage.listening .cinema-sprite img.show{animation-duration:5.2s}
+.scene-stage.thinking .cinema-sprite img.show{animation-duration:7s}
+.scene-stage.speaking .cinema-sprite{filter:drop-shadow(-22px 12px 46px rgba(0,0,0,.55)) saturate(1) brightness(.94)}
+.cinema-vignette{position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(120% 90% at 62% 55%, rgba(10,12,15,0) 32%, rgba(10,12,15,.5) 72%, rgba(10,12,15,.9) 100%),
+    linear-gradient(180deg, rgba(10,12,15,.6) 0%, rgba(10,12,15,.12) 30%, rgba(10,12,15,.18) 58%, rgba(8,9,11,.96) 100%)}
+.scene-sheen{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;z-index:1;
+  background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.1) 47%,rgba(217,162,95,.06) 53%,transparent 64%);
+  background-size:260% 100%;animation:sceneSheen 9s ease-in-out infinite}
+@keyframes sceneSheen{0%,52%{background-position:180% 0}100%{background-position:-80% 0}}
+.scene-dust{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.scene-dust i{position:absolute;bottom:-16px;width:4px;height:4px;border-radius:50%;
+  background:rgba(217,162,95,.4);box-shadow:0 0 8px rgba(217,162,95,.35);animation:sceneDust 12s linear infinite}
+.scene-dust i:nth-child(1){left:12%;animation-delay:-1s}.scene-dust i:nth-child(2){left:27%;width:3px;height:3px;animation-delay:-5s;animation-duration:15s}
+.scene-dust i:nth-child(3){left:46%;animation-delay:-8s;animation-duration:13s}.scene-dust i:nth-child(4){left:63%;width:5px;height:5px;animation-delay:-3s;animation-duration:16s}
+.scene-dust i:nth-child(5){left:78%;width:3px;height:3px;animation-delay:-10s}.scene-dust i:nth-child(6){left:89%;animation-delay:-6s;animation-duration:14s}
+@keyframes sceneDust{0%{transform:translateY(0) translateX(0);opacity:0}14%{opacity:.6}100%{transform:translateY(-540px) translateX(28px);opacity:0}}
+/* 顶部信息栏 */
+.cinema-top{position:absolute;z-index:4;top:0;left:0;right:0;display:flex;align-items:flex-start;justify-content:space-between;
+  padding:clamp(14px,2.4vh,26px) clamp(16px,2.6vw,36px);pointer-events:none}
+.cinema-top>*{pointer-events:auto}
+.cinema-job{display:flex;flex-direction:column;gap:5px}
+.cinema-job .k{font-size:11px;letter-spacing:.2em;color:rgba(239,231,216,.5)}
+.cinema-job .v{font-size:13px;letter-spacing:.08em;color:rgba(239,231,216,.78)}
+.cinema-job .v b{color:#EFE7D8;font-weight:600;margin-right:6px}
+.cinema-job .v em{font-style:normal;color:rgba(239,231,216,.55)}
+.cinema-job .cnt{font-size:clamp(16px,1.45vw,21px);font-weight:800;letter-spacing:.06em;line-height:1.2;
+  color:#F5EEE1;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.cinema-tools{display:flex;align-items:center;gap:8px}
+.cinema-mute{width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(239,231,216,.16);
+  border-radius:3px;background:rgba(10,12,15,.45);color:rgba(239,231,216,.7);font-size:15px;transition:.2s}
+.cinema-mute:hover{border-color:rgba(217,162,95,.5);color:#EFE7D8}
+/* 竖排幕次 */
+.cinema-act{position:absolute;z-index:4;left:8px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none}
+.cinema-act .line{width:1px;height:52px;background:linear-gradient(180deg,#D9A25F,transparent)}
+.cinema-act .txt{writing-mode:vertical-rl;font-size:12px;letter-spacing:.4em;color:rgba(239,231,216,.72);
+  text-shadow:0 1px 12px rgba(0,0,0,.8)}
+/* 状态波纹 */
+.cinema-wave{position:absolute;z-index:4;right:clamp(16px,2.6vw,36px);top:clamp(70px,11vh,100px);
+  display:flex;align-items:flex-end;gap:3px;height:22px;padding:6px 10px;border-radius:3px;
+  background:rgba(10,12,15,.45);border:1px solid rgba(239,231,216,.12);backdrop-filter:blur(4px)}
+.stage-wave i{width:3px;height:6px;border-radius:2px;background:rgba(239,231,216,.3)}
+.scene-stage.speaking .stage-wave i{background:#D9A25F;animation:aiwv .8s infinite ease-in-out}
+.scene-stage.listening .stage-wave i{background:#A8533F;animation:aiwv .7s infinite ease-in-out}
+.scene-stage.thinking .stage-wave i{background:#5F8F8C;animation:aiwv 1.6s infinite ease-in-out}
+.stage-wave i:nth-child(2){animation-delay:.12s}.stage-wave i:nth-child(3){animation-delay:.24s}
+.stage-wave i:nth-child(4){animation-delay:.36s}.stage-wave i:nth-child(5){animation-delay:.48s}
+@keyframes aiwv{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1.35)}}
+/* 舞台状态光 */
+.scene-stage.speaking{box-shadow:0 0 0 1px rgba(217,162,95,.25),0 0 42px -10px rgba(217,162,95,.5)}
+.scene-stage.listening{box-shadow:0 0 0 1px rgba(168,83,63,.25),0 0 42px -10px rgba(168,83,63,.45)}
+.scene-stage.thinking{box-shadow:0 0 0 1px rgba(95,143,140,.25),0 0 42px -10px rgba(95,143,140,.45)}
+/* 底部对话区 */
+.cinema-bottom{position:absolute;z-index:5;left:0;right:0;bottom:0;
+  padding:0 clamp(16px,2.6vw,36px) clamp(14px,2.4vh,28px)}
+.cinema-dialogue{position:relative;border-top:1px solid rgba(239,231,216,.2);
+  background:linear-gradient(180deg, rgba(10,12,15,.55) 0%, rgba(8,10,12,.94) 42%, rgba(7,8,10,.98) 100%);
+  padding:clamp(14px,2.2vh,22px) clamp(16px,2.4vw,32px) clamp(18px,2.6vh,26px);
+  backdrop-filter:blur(6px);border-radius:0}
+.speaker-line{display:flex;align-items:center;gap:12px;margin-bottom:clamp(8px,1.4vh,14px)}
+.speaker{font-size:clamp(13px,1.3vw,15px);letter-spacing:.22em;color:#F0C88F;font-weight:600}
+.ai-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ai-tags .tag{font-size:10px;padding:2px 8px;border:1px solid rgba(217,162,95,.4);color:#F0C88F;
+  letter-spacing:.08em;border-radius:2px;background:rgba(217,162,95,.08)}
+.speaker-line .rule{flex:1;height:1px;background:rgba(239,231,216,.12);max-width:100px}
+.ai-state{font-size:11px;font-weight:700;padding:2px 9px;border-radius:2px;background:rgba(239,231,216,.06);color:rgba(239,231,216,.5)}
+.ai-state.speaking{background:rgba(217,162,95,.16);color:#F0C88F}
+.ai-state.listening{background:rgba(168,83,63,.16);color:#D89B87}
+.ai-state.thinking{background:rgba(95,143,140,.16);color:#8FBDB8}
+.dlg-text{font-size:clamp(15px,1.6vw,19px);line-height:1.95;color:#EFE7D8;letter-spacing:.02em;
+  min-height:2.2em;max-width:62ch;cursor:pointer}
+.ai-caret{display:inline-block;width:2px;height:18px;background:#D9A25F;margin-left:3px;vertical-align:-3px;animation:aiblink 1s infinite}
+@keyframes aiblink{0%,93%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+.ai-point{font-size:12px;color:rgba(239,231,216,.5);margin-top:8px;line-height:1.6}
+/* 作答面板（金铜色主题仅作用于面试间内部） */
+.cinema-answer{margin-bottom:12px;padding:14px 16px 12px;border:1px solid rgba(239,231,216,.12);
+  background:rgba(12,15,19,.88);backdrop-filter:blur(6px);border-radius:3px}
+.cinema-answer .ans-ta{width:100%;min-height:clamp(72px,11vh,110px);max-height:24vh;resize:vertical;
+  background:rgba(10,12,15,.7);border:1px solid rgba(239,231,216,.12);border-radius:3px;
+  color:#EFE7D8;font-size:15px;line-height:1.8;padding:11px 13px;outline:none;transition:border-color .2s;
+  font-family:inherit}
+.cinema-answer .ans-ta:focus{border-color:rgba(217,162,95,.45)}
+.cinema-answer .ans-ta::placeholder{color:rgba(239,231,216,.35)}
+.cinema-answer .ans-bar{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.cinema-answer .mic-btn{display:flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid rgba(239,231,216,.14);
+  border-radius:3px;font-size:12.5px;color:rgba(239,231,216,.78);background:rgba(10,12,15,.5);transition:.2s;min-height:36px}
+.cinema-answer .mic-btn:hover{border-color:rgba(217,162,95,.4);color:#EFE7D8}
+.cinema-answer .mic-btn.on,.cinema-answer .mic-btn.recording{color:#E7A38C;background:rgba(168,83,63,.14);border-color:rgba(168,83,63,.5);animation:micp 1.1s infinite}
+@keyframes micp{0%,100%{box-shadow:0 0 0 0 rgba(168,83,63,.4)}50%{box-shadow:0 0 0 6px rgba(168,83,63,0)}}
+.cinema-answer .hint{font-size:11.5px;color:rgba(239,231,216,.45)}
+.cinema-answer .btn.pri{padding:9px 22px;border:1px solid rgba(217,162,95,.55);background:rgba(217,162,95,.14);
+  color:#EFE7D8;font-size:13px;font-weight:600;border-radius:3px;transition:.2s;min-height:36px;cursor:pointer}
+.cinema-answer .btn.pri:hover{background:rgba(217,162,95,.26);border-color:#D9A25F}
+/* 浅色模式：实色金底 + 深棕文字保证可读 */
+body.light .cinema-answer .btn.pri{background:#D9A25F;border-color:#b8863f;color:#3a2a10}
+body.light .cinema-answer .btn.pri:hover{background:#c9934a;border-color:#a8762f;color:#2a1d08}
+/* 计时圆环（限定面试间顶部，不影响经典文字模式的计时器） */
+.cinema-top .mini-timer{width:46px;height:46px}
+.cinema-top .mini-timer svg{width:100%;height:100%;display:block;transform:rotate(-90deg)}
+.cinema-top .mini-timer .mt-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:11px;line-height:1;color:#EFE7D8}
+.cinema-top .mini-timer.danger .mt-num{color:#A8533F}
+.cinema-top .mini-timer.free{width:auto;height:auto}
+.cinema-top .mini-timer.free svg,.cinema-top .mini-timer.free .mt-num{display:none}
+.cinema-top .mini-timer.free .mt-badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:3px;font-size:11px;
+  font-weight:700;color:#D9A25F;background:rgba(217,162,95,.1);border:1px solid rgba(217,162,95,.35);white-space:nowrap}
+/* 用户气泡 / 语音转写浮层：收窄宽度 + 玻璃质感 */
+.us-row{display:flex;gap:12px;align-items:flex-start;flex-direction:row-reverse;margin:0 0 12px;justify-content:flex-end}
+.us-main{flex:0 1 auto;max-width:56%;display:flex;flex-direction:column;align-items:flex-end;min-width:0}
+.us-av{width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:18px;overflow:hidden;
+  background:rgba(95,143,140,.2);border:1px solid rgba(95,143,140,.4)}
+.us-bubble{padding:10px 14px;border-radius:12px 4px 12px 12px;
+  background:linear-gradient(135deg,rgba(95,143,140,.72),rgba(80,120,118,.72));color:#EFE7D8;
+  border:1px solid rgba(143,189,184,.38);box-shadow:0 8px 22px -10px rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  font-size:14px;line-height:1.8;min-height:24px;max-width:100%;word-break:break-word;
+  max-height:clamp(60px,10vh,110px);overflow-y:auto}
+.us-bubble.live::after{content:'●';color:#F0C88F;margin-left:7px;font-size:11px;animation:aiblink 1s infinite}
+.us-who{font-size:11px;color:rgba(239,231,216,.4);margin-top:4px;text-align:right}
+@media (max-width:480px){.us-main{max-width:64%}}
+/* 摄像头预览：右上角大图 + 可拖拽/缩放/隐藏 */
+.cam-stage{position:absolute;z-index:6;right:clamp(16px,2.6vw,36px);top:clamp(118px,15vh,150px);
+  width:clamp(220px,21vw,300px);border-radius:18px;overflow:hidden;
+  border:1px solid rgba(239,231,216,.3);background:rgba(10,12,15,.6);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 18px 42px -12px rgba(0,0,0,.72),0 8px 20px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.06);
+  display:none;transition:box-shadow .25s,border-color .25s;touch-action:none}
+.cam-stage.on{display:block}
+.cam-stage.dragging{box-shadow:0 24px 52px -10px rgba(0,0,0,.82),0 0 0 1px rgba(217,162,95,.45);cursor:grabbing}
+.cam-stage video{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;transform:scaleX(-1);border-radius:17px}
+.cam-hint{position:absolute;left:0;right:0;bottom:0;padding:6px 8px 5px;text-align:center;
+  font-size:10.5px;letter-spacing:.05em;color:rgba(239,231,216,.55);pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(10,12,15,.62));text-shadow:0 1px 4px rgba(0,0,0,.7);
+  opacity:.85;transition:opacity .3s}
+.cam-stage:hover .cam-hint{opacity:1}
+.cam-tools{position:absolute;right:8px;top:8px;display:flex;gap:6px;z-index:3}
+.cam-tool{width:30px;height:30px;border-radius:50%;border:1px solid rgba(239,231,216,.28);
+  background:rgba(10,12,15,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:#EFE7D8;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:.2s}
+.cam-tool:hover{background:rgba(217,162,95,.28);border-color:rgba(217,162,95,.65);color:#fff}
+.cam-nocam{display:none;padding:14px;font-size:12px;color:#D89B87;line-height:1.7}
+.cam-stage.audio-only video,.cam-stage.audio-only .cam-tools,.cam-stage.audio-only .cam-resize,.cam-stage.audio-only .cam-hint{display:none}
+.cam-stage.audio-only .cam-nocam{display:block}
+.cam-tag{position:absolute;left:8px;top:8px;z-index:3;background:rgba(10,12,15,.6);backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);border:1px solid rgba(239,231,216,.18);font-size:10.5px;padding:3px 9px;
+  border-radius:99px;color:#EFE7D8;display:flex;gap:6px;align-items:center;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:grab}
+.cam-tag i{width:7px;height:7px;border-radius:50%;background:#A8533F;animation:aiblink 1.1s infinite;flex:none}
+.cam-resize{position:absolute;right:0;bottom:0;width:16px;height:16px;cursor:nwse-resize;z-index:4;
+  background:linear-gradient(135deg,transparent 50%,rgba(239,231,216,.55) 50%);border-bottom-right-radius:17px}
+.cam-stage.hide video,.cam-stage.hide .cam-hint,.cam-stage.hide .cam-resize{display:none}
+.cam-stage.hide{width:auto;min-width:0;padding:7px 10px;display:flex;align-items:center;gap:8px}
+.cam-stage.hide .cam-tag{position:static;background:none;border:none;padding:0;cursor:default}
+.cam-stage.hide .cam-tools{position:static}
+.voice-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -1376,77 +1549,53 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
       </div>
       </div><!-- /textPanel -->
 
-      <!-- 动画互动面板（模式2/3 共用） -->
+      <!-- 动画互动面板（模式2/3 共用）· 深夜面试间电影化风格 -->
       <div id="animPanel" style="display:none">
-        <div class="card chat-card rise d1">
-          <div class="anim-grid">
+        <div class="cinema-card">
+          <div class="scene-stage idle" id="sceneStage">
+            <!-- 背景媒体 -->
+            <div class="cinema-media">
+              <img class="scene-img" id="sceneImg" src="assets/scenes/general.jpg" alt="模拟面试场景">
+              <!-- 人物立绘：右侧定位 + 底部渐隐 + 呼吸动画 -->
+              <div class="cinema-sprite" id="sceneFigure">
+                <img class="show" data-e="idle" alt="面试官" src="">
+                <img data-e="smile" alt="面试官微笑" src="">
+                <img data-e="serious" alt="面试官严肃" src="">
+                <img data-e="think" alt="面试官思考" src="">
+              </div>
+              <div class="cinema-vignette"></div>
+              <div class="scene-sheen"></div>
+              <div class="scene-dust"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
 
-            <!-- 场景舞台：按所选岗位切换，人物持续微动 -->
-            <div class="scene-stage idle" id="sceneStage">
-              <div class="scene-media">
-                <div class="scene-figure" id="sceneFigure">
-                  <img class="scene-img" id="sceneImg" src="assets/scenes/general.jpg" alt="模拟面试场景">
-                  <!-- 人物层：复制同一张图，只露出头部 / 下颌，随提问做拟人动作 -->
-                  <div class="person-head" id="personHead">
-                    <img class="person-img" id="sceneHeadImg" src="assets/scenes/general.jpg" alt="" aria-hidden="true">
-                    <div class="person-jaw" id="personJaw">
-                      <img class="person-img" id="sceneJawImg" src="assets/scenes/general.jpg" alt="" aria-hidden="true">
-                    </div>
-                  </div>
+            <!-- 顶部信息栏 -->
+            <div class="cinema-top">
+              <div class="cinema-job">
+                <span class="k" id="sceneName">通用行为面试 · 休息区</span>
+                <span class="cnt" id="jobCount">第 1 题 · 已答 0 题</span>
+                <span class="v"><b id="ivName">行为面试官</b><em id="ivRole">STAR 行为面</em></span>
+              </div>
+              <div class="cinema-tools">
+                <div class="mini-timer" id="atBox">
+                  <svg width="46" height="46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(239,231,216,.16)" stroke-width="3.5"/>
+                  <circle id="atRing" cx="23" cy="23" r="19" fill="none" stroke="#D9A25F" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="0"/></svg>
+                  <div class="mt-num" id="atNum"></div>
+                  <span class="mt-badge">不计时</span>
                 </div>
-                <div class="scene-sheen"></div>
-                <div class="scene-dust"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-
-                <div class="stage-top">
-                  <span class="stage-live"><i></i>LIVE</span>
-                  <span class="stage-name" id="sceneName">通用行为面试 · 休息区</span>
-                  <div class="mini-timer" id="atBox">
-                    <svg width="48" height="48"><circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="4"/>
-                    <circle id="atRing" cx="24" cy="24" r="20" fill="none" stroke="#6C8CFF" stroke-width="4" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="0"/></svg>
-                    <div class="mt-num" id="atNum"></div>
-                    <span class="mt-badge">不计时</span>
-                  </div>
-                </div>
-
-                <div class="stage-bottom">
-                  <div class="stage-who"><b id="ivName">行为面试官</b><span id="ivRole">STAR 行为面</span></div>
-                  <div class="stage-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-                </div>
+                <button class="cinema-mute" id="aiMute" title="开关面试官朗读">🔊</button>
               </div>
             </div>
 
-            <!-- 对话区：面试官提问 ↔ 你的回答 -->
-            <div class="talk-col">
-              <div class="ai-name"><span id="aiTags"></span><span id="ivName2">行为面试官</span><span class="ai-state" id="aiState">准备好了</span>
-                <button class="ai-mute" id="aiMute" title="开关面试官朗读">🔊</button>
-              </div>
-              <div class="ai-bubble" id="aiBubble"><span id="aiBubbleText"></span><span class="ai-caret" id="aiCaret"></span></div>
-              <div class="ai-point" id="aiPoint"></div>
+            <!-- 竖排幕次 -->
+            <div class="cinema-act"><span class="txt" id="actText">面试进行中</span><span class="line"></span></div>
 
-              <!-- 用户侧（模式3：语音实时转写；模式2：随输入实时出现） -->
-              <div class="us-row" id="usRow">
-                <div class="us-av" id="usAv">🧑‍💼</div>
-                <div class="us-main">
-                  <div class="us-bubble" id="usBubble"><span id="usText"></span><span id="usPlaceholder" style="font-weight:400;font-size:12.5px;opacity:.7">✍️ 你输入的回答会实时出现在这里，像面对面交流一样</span></div>
-                  <div class="us-who" id="usWho"></div>
-                </div>
-              </div>
+            <!-- 状态波纹 -->
+            <div class="cinema-wave"><div class="stage-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
 
-              <!-- 摄像头预览（模式3） -->
-              <div class="cam-stage" id="camStage">
-                <video id="camVideo" autoplay muted playsinline></video>
-                <div class="cam-tag"><i></i><span id="camTag">摄像头已开启</span></div>
-                <div class="cam-tools">
-                  <button type="button" class="cam-tool" id="camToggleBtn" title="暂停摄像头画面">📷</button>
-                  <button type="button" class="cam-tool" id="camMuteBtn" title="静音">🎤</button>
-                </div>
-                <div class="cam-nocam">🎙 摄像头不可用，已切换为仅录音模式，语音作答照常进行</div>
-                <div class="cam-resize" id="camResize" title="拖拽缩放画面大小"></div>
-              </div>
-
-              <!-- 模式2：文字作答 -->
-              <div id="animCtrls">
-                <div class="ai-tip">点击问题可立即显示全文 · 计时结束自动提交</div>
+            <!-- 底部对话区 -->
+            <div class="cinema-bottom">
+              <!-- 文字作答 -->
+              <div class="cinema-answer" id="animCtrls">
                 <textarea class="ans-ta" id="animTa" placeholder="在这里写下你的回答，也可以点麦克风语音输入…" aria-label="回答输入区"></textarea>
                 <div class="ans-bar">
                   <button class="mic-btn" id="animMicBtn"></button>
@@ -1457,14 +1606,49 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
                 </div>
               </div>
 
-              <!-- 模式3：语音作答 -->
-              <div id="camCtrls" style="display:none">
+              <!-- 语音作答 -->
+              <div class="cinema-answer" id="camCtrls" style="display:none">
                 <div class="voice-bar">
                   <button class="mic-btn" id="camMicBtn" style="padding:10px 18px;font-size:13px"></button>
                   <span class="hint" id="camHint" style="font-size:12.5px"></span>
                   <button class="btn pri" id="camSubmit" style="margin-left:auto">完成作答</button>
                 </div>
               </div>
+
+              <!-- 用户气泡 -->
+              <div class="us-row" id="usRow">
+                <div class="us-av" id="usAv">🧑‍💼</div>
+                <div class="us-main">
+                  <div class="us-bubble" id="usBubble"><span id="usText"></span><span id="usPlaceholder" style="font-weight:400;font-size:12.5px;opacity:.7">✍️ 你输入的回答会实时出现在这里，像面对面交流一样</span></div>
+                  <div class="us-who" id="usWho"></div>
+                </div>
+              </div>
+
+              <!-- 对话框 -->
+              <div class="cinema-dialogue">
+                <div class="speaker-line">
+                  <span class="speaker" id="ivName2">行为面试官</span>
+                  <span class="ai-tags" id="aiTags"></span>
+                  <span class="rule"></span>
+                  <span class="ai-state" id="aiState">准备好了</span>
+                </div>
+                <div class="dlg-text" id="aiBubble"><span id="aiBubbleText"></span><span class="ai-caret" id="aiCaret"></span></div>
+                <div class="ai-point" id="aiPoint"></div>
+              </div>
+            </div>
+
+            <!-- 摄像头预览 -->
+            <div class="cam-stage" id="camStage">
+              <video id="camVideo" autoplay muted playsinline></video>
+              <div class="cam-hint">请直视设备摄像头</div>
+              <div class="cam-tag"><i></i><span id="camTag">摄像头已开启</span></div>
+              <div class="cam-tools">
+                <button type="button" class="cam-tool" id="camHideBtn" title="隐藏自己的画面">👁</button>
+                <button type="button" class="cam-tool" id="camToggleBtn" title="暂停摄像头画面">📷</button>
+                <button type="button" class="cam-tool" id="camMuteBtn" title="静音">🎤</button>
+              </div>
+              <div class="cam-resize" id="camResize" title="拖拽缩放画面大小"></div>
+              <div class="cam-nocam">🎙 摄像头不可用，已切换为仅录音模式，语音作答照常进行</div>
             </div>
           </div>
         </div>
@@ -1557,8 +1741,8 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
   </div>
 </div>
 
-<script src="shared.js?v=20261115f14d"></script>
-<script src="cloud.js?v=20261115f14b"></script>
+<script src="shared.js?v=20261115g14d"></script>
+<script src="cloud.js?v=20261115g14b"></script>
 <script>
 initPage('interview');
 
@@ -2135,6 +2319,7 @@ function beginWarmView(){
   document.getElementById('qPoint').textContent='快速答一下思路，答完直接看参考要点';
   document.getElementById('progBar').style.width='100%';
   document.getElementById('progTxt').textContent='热身 · 1 道';
+  var jc=document.getElementById('jobCount');if(jc)jc.textContent='热身题 · 已答 0 题';
   clearInterval(S.timer);S.left=999;
   timerBox.classList.add('free');timerBox.classList.remove('danger');
   if(atBox){atBox.classList.add('free');atBox.classList.remove('danger')}
@@ -2244,6 +2429,32 @@ function ensureIntroFirst(){
 var _starting=false;
 function startInterview(){
   if(!canUseFeature()||_starting)return;
+  /* 进入面试间前确认：进入后无返回按钮，需答完所有题目才能离开 */
+  var _previewPlan=planDistribution();
+  var _previewTotal=_previewPlan&&_previewPlan.total? _previewPlan.total : (S.count||12);
+  var sc=SCENE_META[S.scene]||SCENE_META.general;
+  openMask(
+    '<div class="m-head"><div><h3>🎬 即将进入面试间</h3><div class="m-sub">'+esc(sc.room)+' · '+esc(sc.iv)+'</div></div></div>'+
+    '<div style="padding:6px 4px 18px;line-height:1.8;color:var(--ink2);font-size:14px">'+
+      '⚠️ 进入面试间后<b style="color:#F87171">没有返回按钮</b>，需要完成全部 '+_previewTotal+' 道题目并生成复盘报告后才能离开。<br>'+
+      '面试过程中关闭或刷新页面将<b style="color:#F87171">丢失本场记录</b>，请确保准备就绪。<br><br>'+
+      '<b style="color:var(--ink)">面试官：</b>'+esc(sc.iv)+'<br>'+
+      '<b style="color:var(--ink)">面试岗位：</b>'+esc(sc.role)+'<br>'+
+      '<b style="color:var(--ink)">题目数量：</b>'+_previewTotal+' 道<br>'+
+      '<b style="color:var(--ink)">作答方式：</b>'+(S.mode==='cam'?'摄像头语音':(S.mode==='anim'?'动画互动':'经典文字'))+
+    '</div>'+
+    '<div style="display:flex;gap:10px">'+
+      '<button class="btn gho" id="ivConfirmCancel" style="flex:1">再想想</button>'+
+      '<button class="btn pri" id="ivConfirmOk" style="flex:1">确认进入 →</button>'+
+    '</div>');
+  document.getElementById('ivConfirmCancel').onclick=closeMask;
+  document.getElementById('ivConfirmOk').onclick=function(){
+    closeMask();
+    _doStartInterview();
+  };
+  return;
+}
+function _doStartInterview(){
   _starting=true;
   var btn=document.getElementById('wzNext');
   if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='准备中…'}
@@ -2471,6 +2682,7 @@ function nextQ(){
   document.getElementById('qPoint').textContent='考察点：'+q.point;
   document.getElementById('progBar').style.width=(S.idx/S.qs.length*100)+'%';
   document.getElementById('progTxt').textContent='第 '+(S.idx+1)+' / '+S.qs.length+' 题';
+  var jc=document.getElementById('jobCount');if(jc)jc.textContent='第 '+(S.idx+1)+' 题 · 已答 '+S.idx+' 题';
   lastQ=q.q;ttsBtn.textContent='📢 朗读题目';document.getElementById('animTtsBtn').textContent='📢 重听题目';stopSpeak();
   /* 语音面试官：经典文字模式也自动朗读题目（与动画/摄像头模式共用同一朗读开关） */
   if(S.mode==='text'&&ttsEnabled()&&canTTS()){
@@ -3217,10 +3429,6 @@ var usRow=document.getElementById('usRow');
 var sceneStage=document.getElementById('sceneStage');
 var sceneFigure=document.getElementById('sceneFigure');
 var sceneImg=document.getElementById('sceneImg');
-var sceneHeadImg=document.getElementById('sceneHeadImg');
-var sceneJawImg=document.getElementById('sceneJawImg');
-var personHead=document.getElementById('personHead');
-var personJaw=document.getElementById('personJaw');
 var sceneNameEl=document.getElementById('sceneName');
 var ivNameEl=document.getElementById('ivName');
 var ivName2El=document.getElementById('ivName2');
@@ -3296,30 +3504,8 @@ var SCENE_META={
 function preloadScene(k){var m=SCENE_META[k];if(m){var im=new Image();im.src=m.img}}
 function renderScene(){
   var m=SCENE_META[S.scene]||SCENE_META.general;
-  var f=m.face||{};
-  var spriteMode=!!SPRITE_SCENES[S.scene];
   if(sceneImg&&sceneImg.getAttribute('data-scene')!==S.scene){
     sceneImg.src=m.img;sceneImg.alt=m.room;sceneImg.setAttribute('data-scene',S.scene);
-    if(sceneHeadImg)sceneHeadImg.src=m.img;
-    if(sceneJawImg)sceneJawImg.src=m.img;
-  }
-  /* 照片场景：人物已整合进背景图，隐藏木偶层防穿帮，并取消默认 1.18 缩放避免裁切 */
-  if(sceneFigure){
-    if(sceneFigure.classList)sceneFigure.classList.toggle('sprite-mode',spriteMode);
-    sceneFigure.style.setProperty('--zoom',spriteMode?1:(f.zoom||1.18));
-    if(personHead)personHead.style.display=spriteMode?'none':'';
-    if(personJaw)personJaw.style.display=spriteMode?'none':'';
-  }
-  if(sceneFigure&&!spriteMode){
-    sceneFigure.style.setProperty('--hx',(f.x||50)+'%');
-    sceneFigure.style.setProperty('--hy',(f.y||24)+'%');
-    sceneFigure.style.setProperty('--hrx',(f.rx||10)+'%');
-    sceneFigure.style.setProperty('--hry',(f.ry||13)+'%');
-    sceneFigure.style.setProperty('--necky',(f.neck||38)+'%');
-    sceneFigure.style.setProperty('--jy',(f.mouth||32)+'%');
-    sceneFigure.style.setProperty('--jrx',(f.jrx||6)+'%');
-    sceneFigure.style.setProperty('--jry',(f.jry||4.4)+'%');
-    sceneFigure.style.setProperty('--zoom',f.zoom||1.18);
   }
   if(sceneNameEl)sceneNameEl.textContent=m.room;
   if(ivNameEl)ivNameEl.textContent=m.iv;
@@ -3538,6 +3724,17 @@ if(camMuteBtn)camMuteBtn.onclick=function(){
   a.forEach(function(t){t.enabled=on});
   toast(on?'麦克风已开启':'麦克风已静音，回放里不会录进你的声音','ok');
   setCamTag();
+};
+var camHideBtn=document.getElementById('camHideBtn');
+if(camHideBtn)camHideBtn.onclick=function(){
+  var hidden=camStage.classList.toggle('hide');
+  camHideBtn.textContent=hidden?'👁‍🗨':'👁';
+  camHideBtn.title=hidden?'显示自己的画面':'隐藏自己的画面';
+  if(hidden){
+    if(camTag)camTag.textContent='画面已隐藏';
+  }else{
+    setCamTag();
+  }
 };
 /* ===== 摄像头窗口：可拖拽 + 右下角可缩放 ===== */
 (function(){
