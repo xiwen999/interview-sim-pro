@@ -279,6 +279,95 @@ a{color:var(--acc);text-decoration:none}
 .closing .hero-actions{margin-left:auto}
 /* 浅色：首页收尾区不做硬切纯白，改透明融入极光背景，与深色模式/上方 hero 一致 */
 body.light .closing{background:transparent !important;border-top-color:rgba(15,23,42,.12) !important}
+
+/* ============ 新增板块（全部 .hero-sec 作用域，不污染全局） ============ */
+.hero-sec{max-width:920px;margin:0 auto}
+/* 板块：三步流程（重点板块：整段卡片化 + 渐变光晕突出） */
+.hero-sec.flow{position:relative;padding:clamp(20px,3vw,32px) clamp(18px,3vw,36px) clamp(22px,3vw,30px);
+  border:1px solid rgba(108,140,255,.28);border-radius:calc(var(--r) + 6px);
+  background:linear-gradient(160deg,rgba(108,140,255,.09),rgba(94,234,212,.05) 55%,rgba(108,140,255,.03))}
+.hero-sec.flow::before{content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(560px 190px at 50% 0%,rgba(108,140,255,.15),transparent 72%)}
+.hero-sec.flow .sec-head{position:relative}
+.hero-sec.flow .sec-head h2{font-size:clamp(21px,2.4vw,27px)}
+.hero-sec.flow .hl-badge{flex:none;font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;color:var(--acc2);
+  padding:5px 12px;border-radius:99px;border:1px solid rgba(108,140,255,.4);background:rgba(108,140,255,.1)}
+.hero-sec.flow .hs-flow{display:flex;align-items:stretch;gap:12px;margin-top:30px;flex-wrap:wrap}
+.hero-sec.flow .hs-step{position:relative;flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:9px;
+  padding:28px 20px 24px;border:1px solid rgba(108,140,255,.22);border-radius:var(--r);background:rgba(255,255,255,.04);
+  transition:transform .3s,border-color .3s,box-shadow .3s}
+.hero-sec.flow .hs-step::before{content:'';position:absolute;top:0;left:20px;right:20px;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,var(--acc),var(--acc2),transparent);opacity:.75}
+.hero-sec.flow .hs-step:hover{transform:translateY(-4px);border-color:rgba(108,140,255,.5);
+  box-shadow:0 14px 30px rgba(0,0,0,.3),0 0 22px rgba(108,140,255,.12)}
+.hero-sec.flow .hs-sno{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;
+  font-size:17px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));
+  box-shadow:0 4px 14px rgba(108,140,255,.35)}
+.hero-sec.flow .hs-step b{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:.5px}
+.hero-sec.flow .hs-sd{font-size:12.5px;color:var(--ink2);line-height:1.7}
+.hero-sec.flow .hs-arrow{align-self:center;font-size:22px;color:var(--acc2);flex:none;font-family:var(--mono)}
+.hero-sec.flow .hs-footnote{position:relative;margin-top:18px;text-align:center;font-family:var(--mono);font-size:11px;
+  color:var(--ink3);letter-spacing:1px}
+@media (max-width:640px){.hero-sec.flow .hs-arrow{transform:rotate(90deg);width:100%;text-align:center}}
+body.light .hero-sec.flow{border-color:rgba(108,140,255,.35);
+  background:linear-gradient(160deg,rgba(108,140,255,.08),rgba(94,234,212,.06) 55%,rgba(108,140,255,.03))}
+body.light .hero-sec.flow .hs-step{background:#fff;border-color:rgba(15,23,42,.08);box-shadow:0 2px 8px rgba(15,23,42,.05)}
+body.light .hero-sec.flow .hs-step:hover{box-shadow:0 14px 30px rgba(15,23,42,.12)}
+body.light .hero-sec.flow .hs-sd{color:var(--ink2)}
+
+/* 板块：能力模型 + 对比表 */
+.hero-sec.model .hs-model{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,44px);margin-top:30px}
+@media (max-width:767px){.hero-sec.model .hs-model{grid-template-columns:1fr}}
+.hero-sec.model .hs-col-t{display:block;font-family:var(--serif);font-size:16px;font-weight:700;
+  color:var(--ink);letter-spacing:.5px;margin-bottom:18px}
+.hero-sec.model .hs-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hero-sec.model .hs-bl{flex:none;width:76px;font-size:12.5px;color:var(--ink2)}
+.hero-sec.model .hs-track{flex:1;height:8px;border-radius:99px;background:rgba(127,127,127,.16);overflow:hidden}
+.hero-sec.model .hs-fill{display:block;height:100%;border-radius:99px;background:var(--grad)}
+.hero-sec.model .hs-score{flex:none;width:30px;text-align:right;font-family:var(--mono);font-size:12px;
+  font-weight:600;color:var(--acc2)}
+.hero-sec.model .hs-bar-note{margin-top:8px;font-size:11px;color:var(--ink3);line-height:1.7}
+.hero-sec.model .hs-vs-row{display:grid;grid-template-columns:1fr 90px 96px;gap:10px;align-items:center;
+  padding:11px 4px;border-bottom:1px solid var(--hair)}
+.hero-sec.model .hs-vs-row:last-child{border-bottom:none}
+.hero-sec.model .hs-vs-head{font-family:var(--mono);font-size:10.5px;color:var(--ink3);letter-spacing:1px}
+.hero-sec.model .hs-vq{font-size:12.5px;color:var(--ink2)}
+.hero-sec.model .hs-bad{font-size:12.5px;color:var(--ink3)}
+.hero-sec.model .hs-good{font-size:12.5px;color:var(--acc2);font-weight:700}
+@media (max-width:520px){.hero-sec.model .hs-vs-row{grid-template-columns:1fr 72px 78px;gap:8px}}
+
+/* 板块：数据墙 */
+.hero-sec.stats-wall .hs-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:30px}
+.hero-sec.stats-wall .hs-stat{flex:1 1 150px;max-width:200px;text-align:center;padding:24px 12px;
+  border:1px solid var(--hair);border-radius:var(--r);background:rgba(255,255,255,.02)}
+.hero-sec.stats-wall .hs-num{display:block;font-family:var(--mono);font-size:clamp(28px,3.4vw,40px);
+  font-weight:700;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sec.stats-wall .hs-lab{display:block;margin-top:10px;font-size:12px;color:var(--ink3);letter-spacing:1px}
+@media (max-width:479px){.hero-sec.stats-wall .hs-stat{flex:0 1 calc(33.33% - 10px)}}
+
+/* 板块：页面导航卡 */
+.hero-sec.explore .hs-explore{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+@media (max-width:767px){.hero-sec.explore .hs-explore{grid-template-columns:1fr}}
+.hero-sec.explore .hs-card{position:relative;display:flex;flex-direction:column;gap:9px;text-align:left;
+  min-height:44px;padding:22px 20px 46px;border:1px solid var(--hair);border-radius:var(--r);
+  background:rgba(255,255,255,.02);color:inherit;transition:border-color .3s,background .3s,transform .3s,box-shadow .3s}
+.hero-sec.explore .hs-card:hover{border-color:rgba(108,140,255,.55);background:rgba(108,140,255,.06);
+  transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.3),0 0 20px rgba(108,140,255,.14)}
+.hero-sec.explore .hs-ic{font-size:24px;line-height:1}
+.hero-sec.explore .hs-ct{font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:.5px}
+.hero-sec.explore .hs-cd{font-size:12px;color:var(--ink3);line-height:1.7}
+.hero-sec.explore .hs-go{position:absolute;right:18px;bottom:16px;font-family:var(--mono);
+  font-size:11px;color:var(--acc2);letter-spacing:1px}
+
+/* 浅色模式：新板块底色与阴影修正（保持文字高对比） */
+body.light .hero-sec .hs-step,body.light .hero-sec .hs-stat,
+body.light .hero-sec .hs-card{background:rgba(15,23,42,.03)}
+body.light .hero-sec .hs-card:hover{box-shadow:0 12px 26px rgba(15,23,42,.12)}
+
+/* 触屏：可点元素最小 44px */
+@media (pointer:coarse){
+  .hero-sec .hs-card{min-height:44px}
+}
 footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--hair);
   display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;
   color:var(--ink3);letter-spacing:1px;line-height:1.9}
@@ -300,7 +389,7 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body><div class="nav"><a class="logo" href="index.html" title="返回首页"><span class="lg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"></path></svg></span>模拟面试训练营 Pro</a><div class="links"><a href="interview.html" class="">模拟面试</a><a href="bank.html" class="">题库</a><a href="square.html" class="">观摩大厅</a><a href="videos.html" class="">个人中心</a><a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a></div><button class="icbtn" id="navFeedback" title="反馈给官方"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="icbtn" id="navSettings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87c.26.63.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.03z"></path></svg></button><div class="nav-acct" id="navAcct"><button class="acct-btn" id="navAcctBtn" title="登录 / 注册"><span class="avatar" id="navMeAvatar">🦊</span><span class="acct-txt">登录</span><span class="acct-arrow">▾</span></button><div class="acct-menu" id="navAcctMenu"><div class="acct-menu-in"><div class="acct-who">当前：<b>游客</b></div><button type="button" data-act="switch">🔄 登录 / 注册</button></div></div></div></div>
+<body><div class="nav"><a class="logo" href="index.html" title="返回首页"><span class="lg-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lgGrad" x1="0" y1="0.15" x2="1" y2="0.85"><stop offset="0" stop-color="#1e40af"/><stop offset="0.45" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><polygon points="24,2.5 42.5,13.25 42.5,34.75 24,45.5 5.5,34.75 5.5,13.25" fill="url(#lgGrad)" stroke="#151d3a" stroke-width="2.6" stroke-linejoin="round"/><path d="M11 34 L11 17.5 L17.5 27.5 L24 17.5 L30.5 27.5 L37 17.5 L37 34" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 36.5 L39 11.5 M39 11.5 L30.5 11.5 M39 11.5 L39 20" fill="none" stroke="#fff" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lg-txt">模拟面试训练营</span><span class="lg-pro">Pro</span></a><div class="links"><a href="interview.html" class="">模拟面试</a><a href="bank.html" class="">题库</a><a href="square.html" class="">观摩大厅</a><a href="product.html" class="">产品蓝图</a><a href="videos.html" class="">个人中心</a><a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a></div><button class="icbtn" id="navFeedback" title="反馈给官方"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></button><button class="icbtn" id="navSettings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.03 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87c.26.63.88 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.03z"></path></svg></button><div class="nav-acct" id="navAcct"><button class="acct-btn" id="navAcctBtn" title="登录 / 注册"><span class="avatar" id="navMeAvatar">🦊</span><span class="acct-txt">登录</span><span class="acct-arrow">▾</span></button><div class="acct-menu" id="navAcctMenu"><div class="acct-menu-in"><div class="acct-who">当前：<b>游客</b></div><button type="button" data-act="switch">🔄 登录 / 注册</button></div></div></div></div>
 <div class="wrap">
 
   <!-- ===== Hero ===== -->
@@ -329,9 +418,9 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
     </h1>
     <p class="lead">随机抽题、限时作答、语音转写、复盘报告，<span id="statQ2">…</span> 道高频真题覆盖 <span id="statS2">…</span> 大面试场景；<br>练累了就去「轻松一下」抽支签、翻张卡，让每一次练习都算数 —— 上场之前，先把底气练足。</p>
     <div class="feature-tags">
-      <span class="ftag">岗位定制</span>
-      <span class="ftag">超严标准</span>
-      <span class="ftag">报告诊断</span>
+      <span class="ftag">🎙 语音作答</span>
+      <span class="ftag">🤖 AI 现场追问</span>
+      <span class="ftag">📊 五维复盘</span>
     </div>
     <div class="hero-actions">
       <button class="btn pri lg hero-cta" onclick="goInterview()">
@@ -339,14 +428,103 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
       </button>
     </div>
     <button class="cd-pill" id="heroCd" title="点击设置面试日期"></button>
-    <div class="hero-foot">LOCAL DATA ONLY · EST. 18 MIN · 50 QUESTIONS</div>
+    <div class="hero-foot">CLOUD SYNC · EST. 18 MIN · <span id="heroFootQ">…</span> QUESTIONS</div>
+  </section>
+
+  <!-- ===== 三步流程 ===== -->
+  <section class="hero-sec flow">
+    <div class="sec-head"><span class="sec-num">02</span><h2>三步流程</h2><span class="hl-badge">核心玩法</span><span class="sec-line"></span><span class="sec-note">HOW IT WORKS</span></div>
+    <div class="hs-flow">
+      <div class="hs-step">
+        <span class="hs-sno">①</span>
+        <b>选场景</b>
+        <span class="hs-sd">八大岗位方向，按岗位出题</span>
+      </div>
+      <span class="hs-arrow">→</span>
+      <div class="hs-step">
+        <span class="hs-sno">②</span>
+        <b>限时作答</b>
+        <span class="hs-sd">60 / 90 / 120 秒，支持语音转写</span>
+      </div>
+      <span class="hs-arrow">→</span>
+      <div class="hs-step">
+        <span class="hs-sno">③</span>
+        <b>AI 复盘</b>
+        <span class="hs-sd">五维雷达、逐题点评、薄弱点本</span>
+      </div>
+    </div>
+    <p class="hs-footnote">大概 15 分钟，练完一场。</p>
+  </section>
+
+  <!-- ===== 能力模型 + 对比 ===== -->
+  <section class="hero-sec model">
+    <div class="sec-head"><span class="sec-num">03</span><h2>能力模型</h2><span class="sec-line"></span><span class="sec-note">ABILITY MODEL</span></div>
+    <div class="hs-model">
+      <div class="hs-bars">
+        <b class="hs-col-t">我们会从五个维度评你</b>
+        <div class="hs-bar-row"><span class="hs-bl">知识覆盖</span><span class="hs-track"><span class="hs-fill" style="width:84%"></span></span><span class="hs-score">4.2</span></div>
+        <div class="hs-bar-row"><span class="hs-bl">表达流畅度</span><span class="hs-track"><span class="hs-fill" style="width:76%"></span></span><span class="hs-score">3.8</span></div>
+        <div class="hs-bar-row"><span class="hs-bl">思考结构</span><span class="hs-track"><span class="hs-fill" style="width:90%"></span></span><span class="hs-score">4.5</span></div>
+        <div class="hs-bar-row"><span class="hs-bl">时间管理</span><span class="hs-track"><span class="hs-fill" style="width:64%"></span></span><span class="hs-score">3.2</span></div>
+        <div class="hs-bar-row"><span class="hs-bl">应变抗压</span><span class="hs-track"><span class="hs-fill" style="width:78%"></span></span><span class="hs-score">3.9</span></div>
+        <p class="hs-bar-note">示例画像：AI 复盘报告会为每一维度单独打分并给出提升建议</p>
+      </div>
+      <div class="hs-vs">
+        <b class="hs-col-t">自己练 vs 用训练营</b>
+        <div class="hs-vs-row hs-vs-head"><span></span><span>自己练</span><span>用训练营</span></div>
+        <div class="hs-vs-row"><span class="hs-vq">有人追问吗</span><span class="hs-bad">❌</span><span class="hs-good">✅</span></div>
+        <div class="hs-vs-row"><span class="hs-vq">答完知道差在哪</span><span class="hs-bad">靠感觉</span><span class="hs-good">五维雷达</span></div>
+        <div class="hs-vs-row"><span class="hs-vq">能回看自己吗</span><span class="hs-bad">❌</span><span class="hs-good">✅</span></div>
+        <div class="hs-vs-row"><span class="hs-vq">有题可练</span><span class="hs-bad">到处找面经</span><span class="hs-good" id="vsQNum">…</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 数据墙 ===== -->
+  <section class="hero-sec stats-wall">
+    <div class="sec-head"><span class="sec-num">04</span><h2>数据一览</h2><span class="sec-line"></span><span class="sec-note">BY THE NUMBERS</span></div>
+    <div class="hs-stats">
+      <div class="hs-stat"><b class="hs-num" id="dwQuestions">…</b><span class="hs-lab">题库总量</span></div>
+      <div class="hs-stat"><b class="hs-num" id="dwScenes">…</b><span class="hs-lab">面试场景</span></div>
+      <div class="hs-stat"><b class="hs-num" id="dwWritten">…</b><span class="hs-lab">笔试题</span></div>
+      <div class="hs-stat"><b class="hs-num" id="dwAchs">…</b><span class="hs-lab">成就</span></div>
+      <div class="hs-stat"><b class="hs-num">9</b><span class="hs-lab">训练玩法</span></div>
+    </div>
+  </section>
+
+  <!-- ===== 页面导航 ===== -->
+  <section class="hero-sec explore">
+    <div class="sec-head"><span class="sec-num">05</span><h2>继续探索</h2><span class="sec-line"></span><span class="sec-note">EXPLORE MORE</span></div>
+    <div class="hs-explore">
+      <button type="button" class="hs-card" onclick="location.href='bank.html'">
+        <span class="hs-ic">📚</span><b class="hs-ct">题库</b>
+        <span class="hs-cd">面试真题 + 笔试题，按岗位筛选</span>
+        <span class="hs-go">去看看 →</span>
+      </button>
+      <button type="button" class="hs-card" onclick="location.href='square.html'">
+        <span class="hs-ic">🌐</span><b class="hs-ct">观摩大厅</b>
+        <span class="hs-cd">看别人怎么答，取长补短</span>
+        <span class="hs-go">去看看 →</span>
+      </button>
+      <button type="button" class="hs-card" onclick="location.href='relax.html'">
+        <span class="hs-ic">🍀</span><b class="hs-ct">轻松一下</b>
+        <span class="hs-cd">运势、快答、翻卡，碎片时间练手</span>
+        <span class="hs-go">去看看 →</span>
+      </button>
+      <button type="button" class="hs-card" onclick="location.href='product.html'">
+        <span class="hs-ic">📐</span><b class="hs-ct">产品蓝图</b>
+        <span class="hs-cd">四层架构、技术栈，了解全貌</span>
+        <span class="hs-go">去看看 →</span>
+      </button>
+    </div>
   </section>
 
   <!-- ===== 收尾 ===== -->
   <div class="closing rise d3">
-    <h2>上场之前，<br><em>把底气练足。</em></h2>
+    <h2>练够了，<br><em>就去拿下它。</em></h2>
     <div class="hero-actions">
       <button class="btn pri lg" onclick="location.href='bank.html'">浏览题库 →</button>
+      <button class="btn link" onclick="location.href='product.html'">了解产品蓝图 →</button>
     </div>
   </div>
 
@@ -371,7 +549,27 @@ function fillStats(n,sc){
 try{fillStats(QUESTIONS.length,Object.keys(SCENES).length)}catch(e){}
 window.addEventListener('ivsim:questions',function(){
   try{fillStats(QUESTIONS.length,Object.keys(SCENES).length)}catch(e){}
+  refreshSectionNums();
 });
+
+/* ============ 新增板块：动态数字（纯展示，不写数据；题库云端加载后自动刷新） ============ */
+function refreshSectionNums(){
+  try{
+    var qLen=(typeof QUESTIONS!=='undefined'&&QUESTIONS&&QUESTIONS.length)?QUESTIONS.length:0;
+    var sLen=(typeof SCENES!=='undefined'&&SCENES)?Object.keys(SCENES).length:5;
+    var aLen=(typeof ACH_DEFS!=='undefined'&&ACH_DEFS&&ACH_DEFS.length)?ACH_DEFS.length:10;
+    /* 笔试题量：bank.html 加载后写入 localStorage，这里读取；取不到用内置题量 218 兜底 */
+    var wLen=parseInt(storeGet('ivsim_wr_count','0'),10)||0;
+    if(!wLen&&typeof WRITTEN_QUESTIONS!=='undefined'&&WRITTEN_QUESTIONS)wLen=WRITTEN_QUESTIONS.length;
+    if(!wLen)wLen=218;
+    var tLen=qLen+wLen;
+    var set=function(id,v){var el=document.getElementById(id);if(el&&v)el.textContent=String(v)};
+    set('dwQuestions',tLen);set('dwScenes',sLen);set('dwWritten',wLen);set('dwAchs',aLen);
+    set('vsQNum',qLen+' 道真题');
+    set('heroFootQ',tLen||qLen);
+  }catch(e){}
+}
+refreshSectionNums();
 
 /* 开始模拟面试属于功能，游客需先登录 */
 function goInterview(){

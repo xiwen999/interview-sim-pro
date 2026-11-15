@@ -881,3 +881,19 @@ body.banned-mode .quick-bar-btn{
   .ban-card{padding:28px 20px 22px}
   .ban-card-acts{flex-direction:column}
 }
+
+/* ============ 新版导航 Logo（六边形渐变）+ 登录窗品牌样式（合并自 v20261115c） ============ */
+.nav .logo .lg-ic{width:36px;height:36px;display:grid;place-items:center;transition:.2s;flex:none}
+.nav .logo .lg-ic svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 10px rgba(30,64,175,.5))}
+.nav .logo:hover .lg-ic{transform:translateY(-1px)}
+.nav .logo .lg-txt{position:relative;font-weight:900;color:var(--ink);letter-spacing:1px;line-height:1}
+.nav .logo .lg-txt::after{content:'';position:absolute;left:0;bottom:-7px;width:72%;height:5px;background:linear-gradient(90deg,#41e0c8,#6c8cff);border-radius:2px;transform:skewX(-24deg);opacity:.9}
+.nav .logo .lg-pro{background:linear-gradient(135deg,#ff9a2e,#ff6a00);color:#fff;font-size:var(--fs-sm);font-weight:900;padding:3px 14px;line-height:1.4;letter-spacing:.5px;clip-path:polygon(10% 0,100% 0,90% 100%,0 100%);box-shadow:0 3px 10px rgba(255,122,26,.4)}
+@media (max-width:1024px){.nav .logo .lg-ic{width:30px;height:30px}}
+@media (max-width:768px){.nav .logo .lg-ic{width:28px;height:28px}}
+
+/* 登录小窗：六边形品牌位 + Pro 徽标 */
+.lg-logo{width:72px;height:72px;border-radius:0;margin:2px auto 14px;display:grid;place-items:center;background:transparent;border:none;box-shadow:none}
+.lg-logo svg{width:64px;height:64px;display:block}
+.login-card h3{justify-content:center;font-size:var(--fs-2xl);margin-bottom:6px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.lg-pro{display:inline-block;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;font-size:var(--fs-sm);padding:3px 11px;border-radius:7px;font-weight:800;letter-spacing:.5px;box-shadow:0 3px 10px rgba(249,115,22,.35)}

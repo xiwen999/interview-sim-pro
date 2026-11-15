@@ -461,6 +461,9 @@ var WRITTEN_QUESTIONS = [
   {id:'wx72',scene:'xingce',lv:2,qtype:'single',q:'逻辑判断：「只有通过资格审核，才能参加复试。小张参加了复试。」可以推出？',options:[{k:'A',t:'小张通过了资格审核（必要条件：无审核则无复试，复试必有审核）'},{k:'B',t:'小张没通过审核'},{k:'C',t:'审核形同虚设'},{k:'D',t:'推不出'}],answer:'A',point:'考察「只有 P 才 Q」的必要条件推理。',tips:['只有 P 才 Q：Q→P（Q 是 P 的…注意方向）','「只有通过审核才复试」= 复试→已通过审核','肯定后件（参加复试）→ 肯定前件（通过审核）在必要条件下成立'],ans:['「只有 P，才 Q」表示 P 是 Q 的必要条件，逻辑形式为 Q→P（参加复试 → 通过了审核）。小张复试（Q 成立）推出审核通过（P 成立）。','注意与「如果 P 就 Q」（P→Q）区分：两类句型的推理方向相反，「只有…才」是行测高频易错句式。']},
 ];
 
+/* 首页数据墙需要笔试题量：加载后写入本地存储（index 侧 storeGet('ivsim_wr_count') 读取） */
+try{if(typeof storeSet==='function')storeSet('ivsim_wr_count',WRITTEN_QUESTIONS.length)}catch(e){}
+
 /* Tab 注册表：面试 / 笔试 各自的场景、配色、题目（单一数据源，render 从 activeBank 取） */
 var BANK_TABS = {
   iv:{icon:'🎤',name:'面试题库',scenes:SCENES,color:SCENE_COLOR,list:QUESTIONS},

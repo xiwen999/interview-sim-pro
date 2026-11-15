@@ -890,8 +890,8 @@ function openLoginModal(){
   var m=openMask(
     '<div class="login-card">'+
       '<div class="lg-top"><button class="m-x" id="lgX">✕</button></div>'+
-      '<div class="lg-logo"><span>'+ICONS.micNav+'</span></div>'+
-      '<h3>模拟面试训练营 Pro</h3>'+
+      '<div class="lg-logo"><svg viewBox="0 0 48 48" fill="none" aria-label="模拟面试训练营 Pro logo"><defs><linearGradient id="lgHex" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="0.55" stop-color="#0ea5e9"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><polygon points="24,2.5 43,13.25 43,34.75 24,45.5 5,34.75 5,13.25" fill="url(#lgHex)" stroke="#1e293b" stroke-width="2.4" stroke-linejoin="round"/><polygon points="5,34.75 24,45.5 13,38.5" fill="#f97316"/><path d="M10.5 34 L10.5 19 L17 27 L23.5 15.5 L30 27 L36 17" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 17 L41 12 L41 18 Z" fill="#fff"/></svg></div>'+
+      '<h3>模拟面试训练营 <span class="lg-pro">Pro</span></h3>'+
       '<div class="lg-sub">让每一次开口，都成为你的主场</div>'+
       '<div class="lg-tabs"><button type="button" class="on" data-mode="login">🔑 登录</button><button type="button" data-mode="reg">✨ 注册</button></div>'+
       '<input class="f-in" id="lgAcc" maxlength="20" placeholder="账号（3-20 位字母 / 数字 / 下划线）" autocomplete="username" aria-label="账号">'+
@@ -1313,13 +1313,14 @@ function mountNav(active){
   var notLogin=!!(u&&u.autoGuest); /* 初始未登录态：占位身份，不显示为「游客」 */
   var nav=document.createElement('nav');nav.className='nav';nav.setAttribute('aria-label','主导航');
   nav.innerHTML=
-    '<a class="logo" href="index.html" title="返回首页"><span class="lg-ic">'+ICONS.micNav+'</span>模拟面试训练营 Pro</a>'+
+    '<a class="logo" href="index.html" title="返回首页"><span class="lg-ic"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lgGrad2" x1="0" y1="0.15" x2="1" y2="0.85"><stop offset="0" stop-color="#1e40af"/><stop offset="0.45" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><polygon points="24,2.5 42.5,13.25 42.5,34.75 24,45.5 5.5,34.75 5.5,13.25" fill="url(#lgGrad2)" stroke="#151d3a" stroke-width="2.6" stroke-linejoin="round"/><path d="M11 34 L11 17.5 L17.5 27.5 L24 17.5 L30.5 27.5 L37 17.5 L37 34" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 36.5 L39 11.5 M39 11.5 L30.5 11.5 M39 11.5 L39 20" fill="none" stroke="#fff" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lg-txt">模拟面试训练营</span><span class="lg-pro">Pro</span></a>'+
     '<div class="links">'+
       '<a href="interview.html" class="'+(active==='interview'?'on':'')+'">模拟面试</a>'+
       '<a href="reverse.html" class="'+(active==='reverse'?'on':'')+'">反转面试</a>'+
       '<a href="bank.html" class="'+(active==='bank'?'on':'')+'">题库</a>'+
       '<a href="square.html" class="'+(active==='square'?'on':'')+'">观摩大厅</a>'+
       '<a href="relax.html" class="'+(active==='relax'?'on':'')+'">轻松一下</a>'+
+      '<a href="product.html" class="'+(active==='product'?'on':'')+'">产品蓝图</a>'+
       '<a href="videos.html" class="'+(active==='videos'?'on':'')+'">个人中心</a>'+
       '<a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a>'+
     '</div>'+
@@ -2006,6 +2007,13 @@ function openSettings(){
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+        '<div style="font-weight:700;font-size:14px">🤖 AI 大模型</div>'+
+        '<span id="stAiStat" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--ink3)">面试官追问、评分、复盘教练由服务端统一接入真实大模型（密钥保存在服务端，不经过浏览器），无需在本机配置。</div>'+
+    '</div>'+
+    '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
         '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
         '<span id="dsStatus" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
       '</div>'+
@@ -2038,6 +2046,15 @@ function openSettings(){
     ['ivsim_userdata','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
     closeMask();toast('本地数据已清空','ok');
   };
+
+  /* AI 大模型状态：服务端统一接入，检测云端配置是否生效 */
+  (function(){
+    var s=$('#stAiStat');if(!s)return;
+    var on=false;
+    try{on=typeof CLOUD!=='undefined'&&CLOUD.isConfigured&&CLOUD.isConfigured()}catch(e){}
+    s.textContent=on?'已接入 · 真实模型':'本地模拟';
+    s.style.color=on?'#7EE7A7':'var(--ink3)';
+  })();
 
   /* 桌面助手设置 */
   var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
