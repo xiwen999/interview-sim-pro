@@ -3,6 +3,10 @@ var SCENES = {
   tech:{id:'tech',name:'技术开发岗',desc:'大数据 / 后端开发面试：技术栈、项目深挖与系统设计',icon:'code',color:'tech'},
   data:{id:'data',name:'数据分析岗',desc:'数据分析 / 商业分析面试：分析思维、SQL 与业务题',icon:'chart',color:'data'},
   product:{id:'product',name:'产品 / 运营岗',desc:'产品经理与运营面试：用户思维、方案设计与案例题',icon:'target',color:'product'},
+  operation:{id:'operation',name:'运营 / 营销岗',desc:'运营营销面试：用户增长、活动策划与数据复盘',icon:'megaphone',color:'operation'},
+  design:{id:'design',name:'设计 / 交互岗',desc:'设计交互面试：作品集深挖、设计思维与用户体验',icon:'palette',color:'design'},
+  business:{id:'business',name:'业务 / 销售岗',desc:'业务销售面试：客户开拓、商务谈判与业绩抗压',icon:'handshake',color:'business'},
+  support:{id:'support',name:'职能 / 支撑岗',desc:'职能支撑面试：HR、财务、法务等专业能力与协作',icon:'building',color:'support'},
   general:{id:'general',name:'通用行为面试',desc:'STAR 行为面试高频题：优缺点、抗压、协作与复盘',icon:'users',color:'general'}
 };
 var ROLES = [
@@ -299,6 +303,10 @@ var ICONS = {
   code:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5EEAD4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15"/></svg>',
   chart:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M7 17v-5M12 17V8M17 17v-8"/><rect x="3" y="4" width="18" height="17" rx="2"/></svg>',
   target:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg>',
+  megaphone:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M14.5 8.5a5 5 0 0 1 0 7M17.5 6a9 9 0 0 1 0 12"/></svg>',
+  palette:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 9-9c0 2-1.5 3-3 3h-1.5a1.5 1.5 0 0 0-1 2.6c.4.4.5 1 .2 1.5-.3.6-1 .9-2.7.9z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7" r="1"/></svg>',
+  handshake:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l4-3 5 1.5L16 6l6 3-4.5 7.5-3.5-2-3.5 2L6 14 2 9z"/><path d="M8.5 12.5l3 2.5 3-2.5"/></svg>',
+  building:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 8h.01M12 8h.01M15 8h.01M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg>',
   users:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B7A6F9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75"/></svg>',
   mic:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>',
   star:'<svg viewBox="0 0 24 24"><path d="M12 2.8l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18l-5.8 3.1 1.1-6.5L2.6 9.6l6.5-.9z"/></svg>',
@@ -313,7 +321,7 @@ var ICONS = {
   book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
   micNav:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>'
 };
-var SCENE_COLOR = {job:'#8ABDFF',tech:'#5EEAD4',data:'#F472B6',product:'#FBBF24',general:'#B7A6F9'};
+var SCENE_COLOR = {job:'#8ABDFF',tech:'#5EEAD4',data:'#F472B6',product:'#FBBF24',operation:'#34D399',design:'#A78BFA',business:'#60A5FA',support:'#94A3B8',general:'#B7A6F9'};
 var LV_NAME = {1:'基础',2:'进阶',3:'高频难点'};
 var AVATARS = ['🦊','🐼','🐯','🦁','🐸','🐰','🐱','🐨','🐳','🦄'];
 /* 浅色人物头：自适应主题（stroke=currentColor），用于默认/未登录态，替代橙色狐狸 */
@@ -906,13 +914,12 @@ function openLoginModal(){
       '<div class="lg-alt"><button class="btn gho" id="lgQuick" style="width:100%">游客快速登录</button></div>'+
       '<div class="lg-adm-tip" id="lgAdmTip" style="display:none">👑 这是管理员专用账号，不能在用户账号里登录。<br>'+
         '管理后台是独立空间，请前往：<a href="admin.html" class="txA" style="text-decoration:underline">打开管理后台 →</a></div>'+
-      '<div class="lg-note" id="lgNote">无需真实手机号 · 仅用于模拟训练<br>注册后账号云端保存，换设备也能登录</div>'+
       '<div class="lg-foot"><a class="lg-adm" href="admin.html" title="管理员请在独立后台登录">👑 管理员登录</a></div>'+
     '</div>'
   );
   var accIn=$('#lgAcc'),passIn=$('#lgPass'),pass2In=$('#lgPass2'),
       emailIn=$('#lgEmail'),codeIn=$('#lgCode'),codeWrap=$('#lgCodeWrap'),
-      errEl=$('#lgErr'),goBtn=$('#lgGo'),noteEl=$('#lgNote'),
+      errEl=$('#lgErr'),goBtn=$('#lgGo'),
       sendBtn=$('#lgSendCode');
   var mode='login',countdown=0,codeTimer=null;
 
@@ -927,9 +934,6 @@ function openLoginModal(){
     goBtn.textContent=nm==='reg'?'✨ 注册并登录':'🔑 登录';
     passIn.setAttribute('autocomplete',nm==='reg'?'new-password':'current-password');
     pass2In.value='';clearErr();
-    noteEl.innerHTML=nm==='reg'
-      ?'邮箱验证码 5 分钟内有效 · 验证真实邮箱后完成注册<br>账号云端保存，换设备也能登录'
-      :'无需真实手机号 · 仅用于模拟训练<br>注册后账号云端保存，换设备也能登录';
   }
   /* 验证码按钮 60 秒倒计时 */
   function startCountdown(){
