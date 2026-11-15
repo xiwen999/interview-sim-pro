@@ -58,6 +58,59 @@ const MYSQL = {
   database: process.env.DB_NAME || M.database || 'interview_sim'
 };
 
+/* SMTP 邮件服务（注册邮箱验证码）：config.json 的 smtp 段或环境变量均可配置。
+   host/user/pass 任一为空 = 未配置，验证码接口自动进入开发模式（devCode 直接返回）。 */
+const S = CONFIG.smtp || {};
+const SMTP = {
+  host: process.env.SMTP_HOST || S.host || '',
+  port: Number(process.env.SMTP_PORT || S.port || 587),
+  secure: (process.env.SMTP_SSL || String(S.secure) || '') === '1' || S.secure === true,
+  user: process.env.SMTP_USER || S.user || '',
+  pass: process.env.SMTP_PASS || S.pass || '',
+  from: process.env.SMTP_FROM || S.from || ''
+};
+function smtpConfigured() { return !!(SMTP.host && SMTP.user && SMTP.pass); }
+let _transport = null;
+function mailTransport() {
+  if (!_transport) {
+    const nodemailer = require('nodemailer');   // 惰性加载：未安装也不影响其余功能启动
+    _transport = nodemailer.createTransport({
+      host: SMTP.host, port: SMTP.port, secure: SMTP.secure,
+      auth: { user: SMTP.user, pass: SMTP.pass }
+    });
+  }
+  return _transport;
+}
+
+/* 注册邮箱验证码：email -> { code, expires, lastSend }，进程内存存储（重启即失效，无需建表） */
+const MAIL_CODES = new Map();
+const MAIL_CODE_TTL = 5 * 60 * 1000;      // 5 分钟有效
+const MAIL_CODE_COOLDOWN = 60 * 1000;     // 同一邮箱 60 秒内不可重发
+const MAIL_CODE_MAX_TRIES = 5;            // 单个验证码最多校验 5 次，防暴力枚举
+function genMailCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
+function mailCodeCleanup() {
+  const now = Date.now();
+  for (const [k, v] of MAIL_CODES) if (now > v.expires) MAIL_CODES.delete(k);
+}
+function mailCodeSendTemplate(code) {
+  return '<div style="max-width:520px;margin:0 auto;font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;">'
+    + '<h2 style="color:#1d4ed8;margin-bottom:4px;">模拟面试训练营 Pro</h2>'
+    + '<p style="color:#475569;margin-top:0;">你正在注册账号，本次邮箱验证码为：</p>'
+    + '<div style="font-size:34px;font-weight:700;letter-spacing:10px;color:#0f172a;background:#f1f5f9;'
+    + 'border-radius:12px;padding:18px 0;text-align:center;">' + code + '</div>'
+    + '<p style="color:#94a3b8;font-size:13px;">验证码 5 分钟内有效，请勿泄露给他人。若非本人操作，请忽略本邮件。</p>'
+    + '</div>';
+}
+async function sendVerificationMail(to, code) {
+  const from = SMTP.from || SMTP.user;
+  await mailTransport().sendMail({
+    from: '"模拟面试训练营 Pro" <' + from + '>',
+    to: to,
+    subject: '【模拟面试训练营 Pro】注册验证码：' + code,
+    html: mailCodeSendTemplate(code)
+  });
+}
+
 const A = CONFIG.ai || {};
 const AI = {
   apiKey: process.env.AI_API_KEY || A.apiKey || '',
@@ -255,11 +308,19 @@ async function initDatabase() {
     'ADD COLUMN birthday VARCHAR(32) NULL',
     'ADD COLUMN goal_date VARCHAR(32) NULL',
     'ADD COLUMN goal_name VARCHAR(64) NULL',
-    'ADD COLUMN avatar_ext LONGTEXT NULL'
+    'ADD COLUMN avatar_ext LONGTEXT NULL',
+    'ADD COLUMN email VARCHAR(128) NULL'
   ];
   for (const ddl of EXTRA_COLUMNS) {
     try { await pool.query('ALTER TABLE users ' + ddl); }
     catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
+  }
+  /* 邮箱唯一索引（NULL 不参与唯一约束，老用户 email 为空不受影响） */
+  try { await pool.query('ALTER TABLE users ADD UNIQUE KEY uk_users_email (email)'); }
+  catch (e) {
+    if (e && e.code !== 'ER_DUP_KEYNAME' && e.code !== 'ER_DUP_ENTRY') {
+      if (!(e && /Duplicate key name|Duplicate entry/.test(e.message || ''))) throw e;
+    }
   }
 }
 
@@ -454,12 +515,13 @@ function getBearer(req) {
 }
 
 const RATE = new Map(); // ip -> { count, reset }
-function rateLimit(req, res, max, windowMs) {
+function rateLimit(req, res, max, windowMs, bucket) {
   const ip = String((req.headers['x-forwarded-for'] || req.socket.remoteAddress || '?'))
     .split(',')[0].trim();
+  const key = (bucket || 'global') + '|' + ip;   // 每个接口独立计数，避免互相挤占额度
   const now = Date.now();
-  let e = RATE.get(ip);
-  if (!e || now > e.reset) { e = { count: 0, reset: now + windowMs }; RATE.set(ip, e); }
+  let e = RATE.get(key);
+  if (!e || now > e.reset) { e = { count: 0, reset: now + windowMs }; RATE.set(key, e); }
   e.count++;
   if (RATE.size > 10000) { for (const [k, v] of RATE) if (now > v.reset) RATE.delete(k); }
   if (e.count > max) {
@@ -485,17 +547,82 @@ function authAdmin(req) {
   return !!(p && p.sub === 'admin');
 }
 
+async function findUserByEmail(email) {
+  if (!email) return null;
+  const r = await q1('SELECT * FROM users WHERE LOWER(email)=LOWER(?) LIMIT 1', [String(email)]);
+  return r ? rowUser(r) : null;
+}
+
+/* POST /api/mail/send-code：发送注册邮箱验证码（公开接口，IP 限速 + 同邮箱 60 秒冷却） */
+async function apiMailSendCode(req, res, body) {
+  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'mail')) return; // 单 IP 10 分钟最多 10 次
+  const email = String(body.email || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return send(res, 400, { ok: false, msg: '邮箱格式不正确' });
+  if (await findUserByEmail(email)) return send(res, 400, { ok: false, msg: '该邮箱已注册，请直接登录' });
+  mailCodeCleanup();
+  const key = email.toLowerCase();
+  const prev = MAIL_CODES.get(key);
+  const now = Date.now();
+  if (prev && now - prev.lastSend < MAIL_CODE_COOLDOWN) {
+    return send(res, 429, { ok: false, msg: '发送太频繁，请 ' + Math.ceil((MAIL_CODE_COOLDOWN - (now - prev.lastSend)) / 1000) + ' 秒后再试' });
+  }
+  const code = genMailCode();
+  MAIL_CODES.set(key, { code, expires: now + MAIL_CODE_TTL, lastSend: now, tries: 0 });
+  if (!smtpConfigured()) {
+    /* 开发模式：SMTP 未配置时把验证码直接带回，方便本地测试（上线前务必配置 SMTP） */
+    console.warn('[mail] SMTP 未配置，开发模式返回 devCode：' + code);
+    return send(res, 200, { ok: true, msg: '开发模式：SMTP 未配置，验证码已生成', devCode: code });
+  }
+  try {
+    await sendVerificationMail(email, code);
+    return send(res, 200, { ok: true, msg: '验证码已发送至邮箱' });
+  } catch (e) {
+    MAIL_CODES.delete(key);
+    console.error('[mail] 发送失败:', e && e.message);
+    return send(res, 500, { ok: false, msg: '邮件发送失败，请稍后重试（' + ((e && e.code) || e && e.message || 'SMTP 错误') + '）' });
+  }
+}
+
 async function apiRegister(req, res, body) {
-  if (!rateLimit(req, res, 5, 10 * 60 * 1000)) return; // 10 分钟最多注册 5 次
+  if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'register')) return; // 10 分钟最多注册 5 次
+  const acc = String(body.account || '').trim();
+  const pw = String(body.password || '');
+  const name = String(body.name || acc).trim() || acc;
+  const avatar = body.avatar || '🦊';
+  const email = String(body.email || '').trim();
+  const mailCode = String(body.mailCode || '').trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(acc)) return send(res, 400, { ok: false, msg: '账号需为 3-20 位字母、数字或下划线' });
+  if (pw.length < 6) return send(res, 400, { ok: false, msg: '密码至少 6 位' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return send(res, 400, { ok: false, msg: '请输入有效邮箱' });
+  /* 校验邮箱验证码：存在性 → 过期 → 次数 → 内容，通过后立即作废（一次性） */
+  const rec = MAIL_CODES.get(email.toLowerCase());
+  if (!rec) return send(res, 400, { ok: false, msg: '请先获取邮箱验证码' });
+  if (Date.now() > rec.expires) { MAIL_CODES.delete(email.toLowerCase()); return send(res, 400, { ok: false, msg: '验证码已过期，请重新获取' }); }
+  if (rec.tries >= MAIL_CODE_MAX_TRIES) { MAIL_CODES.delete(email.toLowerCase()); return send(res, 400, { ok: false, msg: '验证码错误次数过多，请重新获取' }); }
+  if (rec.code !== mailCode) { rec.tries++; return send(res, 400, { ok: false, msg: '验证码不正确' }); }
+  MAIL_CODES.delete(email.toLowerCase());
+  const adminRow = await getAdmin();
+  if (adminRow && acc.toLowerCase() === String(adminRow.account).toLowerCase()) return send(res, 400, { ok: false, msg: '该账号为管理员保留账号' });
+  if (await findUserByAccount(acc)) return send(res, 400, { ok: false, msg: '该账号已注册，请直接登录' });
+  if (await findUserByEmail(email)) return send(res, 400, { ok: false, msg: '该邮箱已注册，请直接登录' });
+  const uid = 'u_' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex');
+  const now = Date.now();
+  await q('INSERT INTO users (id,uid,account,name,avatar,bg,joined,last,status,demo,goal,checkin,pass_hash,bank_favs,bank_practice,email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    [uid, uid, acc, name, avatar, null, now, now, 'active', 0, 0, 0, hashPassword(pw), JSON.stringify([]), 0, email]);
+  const u = await userFull(await findUserByUid(uid));
+  const token = signToken({ uid, exp: now + 30 * 86400000 });
+  return send(res, 200, { ok: true, token, user: publicUser(u) });
+}
+/* POST /api/quick-register：游客快速登录专用（免邮箱，服务端严格限速防滥用） */
+async function apiQuickRegister(req, res, body) {
+  if (!rateLimit(req, res, 3, 10 * 60 * 1000, 'quickreg')) return; // 单 IP 10 分钟最多 3 个游客号
   const acc = String(body.account || '').trim();
   const pw = String(body.password || '');
   const name = String(body.name || acc).trim() || acc;
   const avatar = body.avatar || '🦊';
   if (!/^[A-Za-z0-9_]{3,20}$/.test(acc)) return send(res, 400, { ok: false, msg: '账号需为 3-20 位字母、数字或下划线' });
   if (pw.length < 6) return send(res, 400, { ok: false, msg: '密码至少 6 位' });
-  const adminRow = await getAdmin();
-  if (adminRow && acc.toLowerCase() === String(adminRow.account).toLowerCase()) return send(res, 400, { ok: false, msg: '该账号为管理员保留账号' });
-  if (await findUserByAccount(acc)) return send(res, 400, { ok: false, msg: '该账号已注册，请直接登录' });
+  if (await findUserByAccount(acc)) return send(res, 400, { ok: false, msg: '该账号已存在，请重试' });
   const uid = 'u_' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex');
   const now = Date.now();
   await q('INSERT INTO users (id,uid,account,name,avatar,bg,joined,last,status,demo,goal,checkin,pass_hash,bank_favs,bank_practice) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
@@ -504,8 +631,9 @@ async function apiRegister(req, res, body) {
   const token = signToken({ uid, exp: now + 30 * 86400000 });
   return send(res, 200, { ok: true, token, user: publicUser(u) });
 }
+
 async function apiLogin(req, res, body) {
-  if (!rateLimit(req, res, 10, 10 * 60 * 1000)) return; // 10 分钟最多尝试登录 10 次
+  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'login')) return; // 10 分钟最多尝试登录 10 次
   const acc = String(body.account || '').trim();
   const pw = String(body.password || '');
   const u = await findUserByAccount(acc);
@@ -744,7 +872,7 @@ async function apiDesktopSet(req, res, body) {
   return send(res, 200, Object.assign({ ok: true }, st));
 }
 async function apiFeedbackAdd(req, res, body) {
-  if (!rateLimit(req, res, 5, 10 * 60 * 1000)) return; // 10 分钟最多 5 条，防刷
+  if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条，防刷
   const name = String(body.name || '').trim().slice(0, 64);
   const contact = String(body.contact || '').trim().slice(0, 128);
   const msg = String(body.msg || '').trim().slice(0, 1200);
@@ -1525,6 +1653,8 @@ async function apiAiAsk(req, res, body) {
 
 const ROUTES = [
   ['POST', /^\/api\/register$/, apiRegister],
+  ['POST', /^\/api\/quick-register$/, apiQuickRegister],
+  ['POST', /^\/api\/mail\/send-code$/, apiMailSendCode],
   ['POST', /^\/api\/login$/, apiLogin],
   ['GET', /^\/api\/me$/, apiMe],
   ['POST', /^\/api\/interviews$/, apiAddInterview],

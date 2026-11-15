@@ -113,6 +113,11 @@ node index.js
 | `AI_API_KEY` | 空 | 大模型 Key（可选，留空则回退本地模拟） |
 | `AI_BASE_URL` | `https://maas-api.cn-huabei-1.xf-yun.com/v2` | 大模型网关地址（讯飞 MaaS，OpenAI 兼容协议） |
 | `AI_MODEL` | `spark-x2.6` | 模型名（更换网关时同步修改） |
+| `SMTP_HOST` | `smtp.qq.com` | 发信服务器（注册邮箱验证码用） |
+| `SMTP_PORT` | `587` | SMTP 端口 |
+| `SMTP_USER` | 空 | 发信邮箱账号；留空 = 开发模式，验证码不真实发信而是直接返回前端自动填入 |
+| `SMTP_PASS` | 空 | SMTP 授权码（QQ 邮箱在「设置-账户」开启 SMTP 后获取，非登录密码） |
+| `SMTP_FROM` | 空 | 发件人邮箱（默认同 SMTP_USER） |
 | `PORT` | `3000` | 服务端口 |
 | `BIND_HOST` | `0.0.0.0` | 监听地址（仅本机演示可改 `127.0.0.1`） |
 

@@ -1,14 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>个人中心 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261115g10n">
+<link rel="stylesheet" href="shared.css?v=20261115h16a">
 <style>
+/* ===== 个人中心专属背景：与卡片同源的白色玻璃渐变 ===== */
 /* 卡片语言 = rgba(255,255,255,.055→.02) 的白色玻璃渐变；背景用完全同源的白色光感，不带彩色色相 */
 body{background:
   radial-gradient(ellipse 100% 60% at 50% -18%,rgba(255,255,255,.06),transparent 62%),
@@ -24,19 +25,10 @@ body{background:
 .fp-shell::after{content:"";position:absolute;right:-90px;top:-90px;width:360px;height:360px;
   border-radius:50%;pointer-events:none;
   background:radial-gradient(circle,rgba(255,255,255,.055),rgba(255,255,255,.02) 46%,transparent 70%)}
-/* 浅色模式适配 */
-body.light{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 42%,#eff4ff 100%)}
-/* 与题库一致：壳体贴平，让极光背景连续铺满整页 */
-body.light .fp-shell{
-  background:transparent !important;
-  border-color:transparent !important;
-  box-shadow:none !important;
-  -webkit-backdrop-filter:none !important;
-  backdrop-filter:none !important;
-}
-body.light .fp-shell::before{display:none}
+/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
 body.light .fp-wrap::before{background:linear-gradient(180deg,rgba(37,99,235,.028),transparent 34%,transparent 74%,rgba(37,99,235,.016))}
 body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.5),rgba(255,255,255,.12) 46%,transparent 70%)}
+/* ===== 壳内星光层：复用全站 seedStars 三层视差上飘星空（与首页完全一致） ===== */
 .pc-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .vtabs{display:flex;gap:8px;margin:0 0 20px;flex-wrap:wrap;padding:6px;background:rgba(255,255,255,.03);
   border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
@@ -52,19 +44,8 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .vcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.25s;cursor:pointer;
   box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .vcard:hover{transform:translateY(-4px);border-color:rgba(108,140,255,.4);box-shadow:0 16px 36px rgba(0,0,0,.35),0 0 0 1px rgba(108,140,255,.15)}
-.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative;overflow:hidden}
-.vthumb .vph{line-height:1;transition:opacity .3s}
-.vthumb.has-poster .vph{opacity:0}
-/* 封面：视频随机一帧，图片就位后淡入（未取到画面时保留图标兜底） */
-.vthumb img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s;display:block;pointer-events:none;z-index:1}
-.vthumb img.vposter.on{opacity:1}
-.vthumb::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .4s;
-  background:linear-gradient(180deg,transparent 55%,rgba(6,10,22,.55))}
-.vthumb.has-poster::after{opacity:1}
-.vthumb.is-loading::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.06) 45%,transparent 70%);animation:vshim 1.3s linear infinite}
-@keyframes vshim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s;z-index:2}
+.vthumb{height:130px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative}
+.vthumb .vplay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(8,13,29,.35);opacity:0;transition:.2s}
 .vcard:hover .vplay{opacity:1}
 .vthumb .vplay span{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4f6ef0,#6C8CFF);display:grid;place-items:center;font-size:20px;color:#fff;box-shadow:0 8px 24px rgba(79,110,240,.5)}
 .vbody{padding:12px 14px}
@@ -79,13 +60,17 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .vempty{text-align:center;padding:clamp(44px,7vw,70px) 20px;color:var(--ink3);font-size:var(--fs-base)}
 .vempty .big{font-size:52px;margin-bottom:14px;display:inline-block;animation:float 3s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.up-card{max-width:540px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;
-  padding:clamp(20px,3vw,30px) clamp(16px,2.4vw,26px);
-  box-shadow:0 8px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.04)}
-.up-drop{border:2px dashed var(--line2);border-radius:16px;padding:clamp(24px,3.6vw,34px) 16px;text-align:center;color:var(--ink3);font-size:var(--fs-base);cursor:pointer;transition:.2s;margin-bottom:14px}
+.up-card{max-width:860px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:clamp(28px,4vw,42px) clamp(26px,3.6vw,44px);
+  box-shadow:0 10px 34px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04)}
+.up-drop{border:2px dashed var(--line2);border-radius:18px;padding:clamp(40px,5.5vw,64px) 20px;text-align:center;color:var(--ink3);font-size:var(--fs-lg);cursor:pointer;transition:.2s;margin-bottom:20px}
 .up-drop:hover,.up-drop.has{border-color:var(--acc);color:var(--ink2);background:rgba(108,140,255,.06)}
-.up-drop .big{font-size:36px;display:block;margin-bottom:8px}
-.up-note{margin-top:12px;font-size:var(--fs-xs);color:var(--ink3);line-height:1.8;padding:10px 14px;border-radius:12px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3)}
+.up-drop .big{font-size:56px;display:block;margin-bottom:12px}
+.up-card .f-lab{margin:18px 0 9px;font-size:var(--fs-base)}
+.up-card .f-in{padding:13px 15px;font-size:var(--fs-base);border-radius:14px}
+.up-card #upBtn{padding:14px;font-size:var(--fs-lg);margin-top:22px}
+.up-note{margin-top:16px;font-size:var(--fs-sm);color:var(--ink3);line-height:1.85;padding:13px 16px;border-radius:14px;background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.3)}
+/* ---- 视频管理 ---- */
 .mg-dot{display:inline-block;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#f59e0b;
   color:#1b1200;font-size:var(--fs-2xs);font-weight:800;line-height:17px;text-align:center;vertical-align:1px}
 .mg-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(var(--g-small),1fr));gap:12px;margin-bottom:16px}
@@ -101,11 +86,7 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .mg-row:last-child{border-bottom:0}
 .mg-row:hover{background:rgba(108,140,255,.05)}
 .mg-th{width:52px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:17px;
-  background:linear-gradient(135deg,rgba(60,80,160,.55),rgba(40,32,96,.5));cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--line)}
-.mg-th .vph{line-height:1}
-.mg-th img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s;z-index:1}
-.mg-th img.vposter.on{opacity:1}
-.mg-th.has-poster .vph{opacity:0}
+  background:linear-gradient(135deg,rgba(60,80,160,.55),rgba(50,40,110,.5));cursor:pointer}
 .mg-ti{font-size:var(--fs-base);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .mg-mt{font-size:var(--fs-xs);color:var(--ink3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
 .mg-reason{margin-top:5px;font-size:var(--fs-xs);color:#fda4af;line-height:1.6;background:rgba(251,113,133,.08);
@@ -127,6 +108,7 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
   .mg-ti{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.45;word-break:break-word}
 }
 
+/* ================= 个人中心 ================= */
 .myc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(var(--g-tile),1fr));gap:12px;margin-bottom:16px}
 .myc-card{background:var(--card);border:1px solid var(--line);border-radius:18px;
   padding:clamp(14px,1.8vw,18px) clamp(14px,1.8vw,18px) clamp(16px,2vw,20px);margin-bottom:14px;
@@ -149,6 +131,7 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
   -webkit-background-text-stroke:0;-webkit-background-clip:text;background-clip:text;color:transparent}
 .myc-cd .u{font-size:var(--fs-base);color:var(--ink3);margin-left:2px}
 .myc-cd .d{font-size:var(--fs-xs);color:var(--ink3);line-height:1.7}
+/* ---- 账号设置表单小件 ---- */
 .f-err{font-size:var(--fs-xs);color:#f87171;margin-top:4px;min-height:14px}
 .b-field label em.err{color:#f87171}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
@@ -160,6 +143,7 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
 .myc-fav .f:hover{border-color:rgba(108,140,255,.4);transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.28)}
 .myc-fav .ft{font-size:var(--fs-base);font-weight:700;line-height:1.5}
 .myc-fav .fm{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:var(--fs-xs);color:var(--ink3);flex-wrap:wrap}
+/* ---- 未登录门禁 ---- */
 .myc-gate{max-width:520px;margin:4px auto 0;background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(24px,3.6vw,34px) clamp(18px,2.8vw,30px) clamp(18px,2.4vw,26px);text-align:center;
   box-shadow:0 26px 64px -26px rgba(0,0,0,.7),0 5px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.07)}
@@ -179,6 +163,7 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
   .myc-row.head{display:none}
   .myc-row .tm,.myc-row .sc{grid-column:1}
 }
+/* ================= 方案B：个人指挥舱 ================= */
 /* 个人指挥舱：内容壳加宽至 1480px（窄屏自适应），壳体保留通栏质感 */
 .wrap.fp-wrap{max-width:min(98vw,1480px);padding:0 0 40px}
 .fp-shell{border-radius:0;border-left:0;border-right:0;border-top:0;
@@ -189,9 +174,18 @@ body.light .fp-shell::after{background:radial-gradient(circle,rgba(255,255,255,.
   padding-right:calc(clamp(18px,3vw,44px) + 104px);
   padding-left:calc(clamp(18px,3vw,44px) + 104px)}}
 .fp-shell::before{left:0;right:0}
+/* 与题库一致：壳体贴平，让极光背景连续铺满整页 */
+body.light .fp-shell{
+  background:transparent !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+body.light .fp-shell::before{display:none}
 .b-shell{display:grid;grid-template-columns:clamp(220px,23vw,292px) minmax(0,1fr);gap:18px;align-items:start;max-width:none}
 .b-main{min-width:0}
-.rail{position:relative;position:sticky;top:16px;border-radius:20px;padding:clamp(16px,2vw,24px) clamp(14px,1.6vw,20px);text-align:center;overflow:hidden;
+.rail{position:relative;border-radius:20px;padding:clamp(16px,2vw,24px) clamp(14px,1.6vw,20px);text-align:center;overflow:hidden;
   background:linear-gradient(180deg,rgba(108,140,255,.15),rgba(65,224,200,.04)),var(--card);
   border:1px solid var(--line);box-shadow:0 18px 44px -20px rgba(0,0,0,.55)}
 .rail::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;
@@ -274,11 +268,20 @@ body.light .b-avrow .av-emoji{background:#fff}
 .b-out:hover{background:rgba(251,113,133,.16);color:#fff}
 body.light .b-out{color:#be123c}
 body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
+/* ---- 双栏布局（≥769px）：身份卡固定高度，不随右侧内容拉伸 ---- */
+@media (min-width:769px){
+  #heroCard{align-self:start}
+  .rail{height:auto;display:flex;flex-direction:column}
+  .rail>*{flex-shrink:0}
+  .rail-mini{flex:none;align-content:center}
+  /* 吸附仍保留 */
+  #heroCard.hero-pin{position:sticky;top:80px;animation:heroPin .3s ease}
+  @keyframes heroPin{from{transform:translateY(-18px);opacity:.35}to{transform:none;opacity:1}}
+}
+/* ---- 桌面端（≥1000px）：左栏放大版身份卡 ---- */
 @media (min-width:1000px){
   .b-shell{grid-template-columns:clamp(300px,24vw,372px) minmax(0,1fr);gap:clamp(20px,2vw,28px)}
-  /* 让身份卡作为整列粘性元素：初始贴近视口垂直中心，滚动时持续跟随 */
-  #heroCard{position:sticky;top:max(80px,calc(50vh - 290px));align-self:start}
-  #heroCard>.rail{position:relative;top:auto;width:100%;border-radius:22px;padding:26px 20px 22px}
+  #heroCard>.rail{width:100%;border-radius:22px;padding:26px 20px 22px}
   .rail-avwrap{width:112px;margin-bottom:15px}
   .rail-av{width:112px;height:112px;font-size:54px}
   .rail-dot{width:14px;height:14px;right:3px;bottom:8px;border-width:3px}
@@ -297,6 +300,7 @@ body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
   .rail-badge{width:40px;height:40px;border-radius:12px;font-size:18px}
   .rail-logout{padding:12px;font-size:var(--fs-sm);border-radius:12px}
 }
+/* ---- 响应式：断点统一 480 / 768 / 1024 / 1280 ---- */
 @media (max-width:1024px){
   .b-set{grid-template-columns:1fr}
 }
@@ -361,9 +365,10 @@ body.light .b-out:hover{background:#be123c;border-color:#be123c;color:#fff}
   </div>
 </div>
 
-<script src="shared.js?v=20261115g14d"></script>
+<script src="shared.js?v=20261115h16a"></script>
+<script src="cloud.js?v=20261115g14b"></script>
 <script>
-initPage('videos');
+if(!initPage('videos',true))throw new Error('login required');
 
 var SEC=(location.hash||'').replace('#','')||'videos';
 var TAB='mine';
@@ -371,7 +376,10 @@ var pane=null;
 var guestMode=false;
 
 var SCENE_KEYS=Object.keys(SCENES);
+/* 身份卡/问候条上次渲染的 HTML——内容没变就不重写，避免定时刷新与分区切换时卡片闪烁跳动 */
+var heroCache={card:null,greet:null};
 
+/* ---------- 分区页签 ---------- */
 function bindSecTabs(){
   $$('#secTabs .vtab').forEach(function(b){
     b.onclick=function(){
@@ -394,6 +402,7 @@ function switchSec(s){
 }
 $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
 
+/* ---------- 未登录门禁：个人中心只对已登录账号开放 ---------- */
 function renderGate(){
   var box=document.getElementById('gateBox');if(!box)return;
   box.innerHTML='<div class="myc-gate rise">'+
@@ -404,7 +413,7 @@ function renderGate(){
       '<button class="btn pri" id="gLogin">🔑 登录 / 注册</button>'+
       '<button class="btn gho" id="gQuick">🎭 游客快速登录</button>'+
     '</div>'+
-    '<div class="gn">🔒 注册无需真实手机号，仅用于模拟训练；训练记录云端保存，可跨设备同步。<br>游客身份只能浏览公开内容（首页、题库、观摩大厅），个人中心需要登录后才解锁。</div>'+
+    '<div class="gn">🔒 数据只保存在本机浏览器，登录不会上传任何信息。<br>游客身份只能浏览公开内容（首页、题库、观摩大厅），个人中心需要登录后才解锁。</div>'+
     '<div class="gback"><a href="index.html">← 先随便逛逛</a></div>'+
   '</div>';
   document.getElementById('gLogin').onclick=function(){openLoginModal()};
@@ -432,6 +441,7 @@ function applyGate(){
   return true;
 }
 
+/* ---------- 顶部个人信息（方案B：左侧身份卡 + 右侧问候） ---------- */
 function renderHero(){
   if(guestMode)return;
   var box=document.getElementById('heroCard');if(!box)return;
@@ -448,7 +458,7 @@ function renderHero(){
   var cd=null;try{cd=cdParts()}catch(e){}
   var tip=cd?('距目标面试还有 '+cd.day+' 天 · 连续签到 '+(ci.days||0)+' 天'):('连续签到 '+(ci.days||0)+' 天 · 今天也来开口练一场');
 
-  box.innerHTML='<div class="rail">'+
+  var cardHTML='<div class="rail">'+
     '<div class="rail-avwrap"><div class="rail-av" id="heroAv"></div><span class="rail-dot"></span></div>'+
     '<div class="rail-nm">'+esc(u.name||'访客')+'</div>'+
     '<div class="rail-ac">@'+esc(u.account||'guest')+' · '+(u.guest?'游客':(u.oauth?'第三方':'本机账号'))+'</div>'+
@@ -463,16 +473,18 @@ function renderHero(){
     '<div class="rail-badges">'+a4+'</div>'+
     '<button class="rail-logout" id="heroOut">🚪 退出登录</button>'+
   '</div>';
+  if(heroCache.card!==cardHTML){box.innerHTML=cardHTML;heroCache.card=cardHTML}
 
   var g=document.getElementById('greetCard');
   if(g){
-    g.innerHTML='<div class="b-greet">'+
+    var greetHTML='<div class="b-greet">'+
       '<div><b>'+greet+'，'+esc(u.name||'访客')+'</b><span>'+tip+'</span></div>'+
       '<div class="b-quick">'+
         '<button class="pri" id="goPractice">▶ 继续练习</button>'+
         '<button id="goUpload">⬆ 上传视频</button>'+
       '</div>'+
     '</div>';
+    if(heroCache.greet!==greetHTML){g.innerHTML=greetHTML;heroCache.greet=greetHTML}
     var gp=document.getElementById('goPractice');if(gp)gp.onclick=function(){location.href='interview.html'};
     var gu=document.getElementById('goUpload');if(gu)gu.onclick=function(){TAB='upload';switchSec('videos')};
   }
@@ -487,6 +499,7 @@ function renderHero(){
   };
 }
 
+/* ---------- 主渲染 ---------- */
 function renderSec(){
   var host=document.getElementById('pane');
   if(SEC==='videos'){
@@ -524,10 +537,10 @@ function sceneTag(sc){
   return out;
 }
 
+/* ---- 卡片 ---- */
 function vCard(v,actions){
-  var ic=v.src==='interview'?'🎤':'📹';
   return '<div class="vcard" data-id="'+v.id+'">'+
-    '<div class="vthumb"><span class="vph">'+ic+'</span><img class="vposter" alt="" data-vposter="'+v.id+'"><div class="vplay"><span>▶</span></div></div>'+
+    '<div class="vthumb">'+(v.src==='interview'?'🎤':'📹')+'<div class="vplay"><span>▶</span></div></div>'+
     '<div class="vbody">'+
       '<div class="vtitle">'+esc(v.title)+'</div>'+
       '<div class="vmeta">'+stBadge(stOf(v))+sceneTag(v.scene)+'<span>'+esc(v.owner)+'</span><span>'+fmtTime(v.ts)+'</span></div>'+
@@ -536,6 +549,7 @@ function vCard(v,actions){
 }
 function emptyHtml(ic,txt){return '<div class="vempty"><div class="big">'+ic+'</div>'+txt+'</div>'}
 
+/* ---- 状态：仅本机 / 审核中 / 已通过 / 未通过 ---- */
 function stOf(v){
   if(!v.shared)return 'private';
   return v.status||'pending';
@@ -556,6 +570,7 @@ function myVideos(){
   });
 }
 
+/* ---- 渲染 ---- */
 function render(){
   var all=getVideos();
   var mine=myVideos();
@@ -575,10 +590,9 @@ function render(){
     renderManage();
   }
   bindCards();
-  /* 封面：用视频里的随机一帧替换图标 */
-  hydrateVideoPosters(pane);
 }
 
+/* ---- 视频管理：用户自查审核进度 + 自助管理 ---- */
 function renderManage(){
   var mine=myVideos().slice().sort(function(a,b){return (b.ts||0)-(a.ts||0)});
   if(!mine.length){
@@ -599,7 +613,7 @@ function renderManage(){
   mine.forEach(function(v){
     var s=stOf(v);
     h+='<div class="mg-row" data-id="'+v.id+'">'+
-      '<div class="mg-th" data-act="play"><span class="vph">'+(v.src==='interview'?'🎤':'📹')+'</span><img class="vposter" alt="" data-vposter="'+v.id+'"></div>'+
+      '<div class="mg-th" data-act="play">'+(v.src==='interview'?'🎤':'📹')+'</div>'+
       '<div class="mg-info"><div class="mg-ti" data-act="play">'+esc(v.title)+'</div>'+
         '<div class="mg-mt">'+sceneTag(v.scene)+
         '<span>'+(v.src==='interview'?'🎤 面试录制':'📹 上传投稿')+'</span>'+
@@ -622,11 +636,9 @@ function renderManage(){
       '</div>'+
     '</div>';
   });
-  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「观摩大厅」供所有用户观看；<b>未通过</b> 会给出理由，你可以修改后重新投稿。已投稿的视频文件会上传到服务器。</div>';
+  h+='</div><div class="mg-tip">📋 审核由平台管理员在后台完成：<b>审核中</b> 表示已提交待处理；<b>已通过</b> 的视频会展示在「观摩大厅」；<b>未通过</b> 会给出理由，你可以修改后重新投稿。视频文件只保存在本机浏览器，删除后不可恢复。</div>';
   pane.innerHTML=h;
   bindManage();
-  /* 管理列表的小封面同样取视频随机一帧 */
-  hydrateVideoPosters(pane);
 }
 function bindManage(){
   $$('#pane .mg-row').forEach(function(row){
@@ -639,18 +651,14 @@ function bindManage(){
         if(a==='play')return playVideo(id);
         if(a==='share'){
           updateVideoMeta(id,{shared:true,status:'pending',reason:''});
-          syncVideoMeta(id);
-          getVideoBlob(id).then(function(b){if(b)uploadVideoFile(id,b)});
           playSound('checkin');toast('已投稿，等待管理员审核','ok');render();return;
         }
         if(a==='undo'){
           updateVideoMeta(id,{shared:false,status:'private'});
-          syncVideoMeta(id);
           playSound('click');toast('已撤回，视频恢复为仅本机可见','ok');render();return;
         }
         if(a==='down'){
           updateVideoMeta(id,{shared:false,status:'private'});
-          syncVideoMeta(id);
           playSound('click');toast('已从观摩大厅撤下','ok');render();return;
         }
         if(a==='rename'){
@@ -659,11 +667,10 @@ function bindManage(){
           if(t==null)return;
           t=String(t).trim().slice(0,30);
           if(!t){toast('标题不能为空','warn');return}
-          updateVideoMeta(id,{title:t});syncVideoMeta(id);toast('标题已更新','ok');render();return;
+          updateVideoMeta(id,{title:t});toast('标题已更新','ok');render();return;
         }
         if(a==='del'){
           if(!confirm('删除后视频文件将从本机移除，且不可恢复，确定删除？'))return;
-          deleteVideoRemote(id);
           removeVideo(id).then(function(){toast('已删除','ok');render();renderHero()});
         }
       };
@@ -671,16 +678,14 @@ function bindManage(){
   });
 }
 
+/* ---- 卡片事件 ---- */
 function bindCards(){
   $$('#pane .vcard').forEach(function(c){
     var id=c.dataset.id;
     c.querySelector('.vthumb').onclick=function(){playVideo(id)};
     var share=c.querySelector('.act-share');
     if(share)share.onclick=function(e){e.stopPropagation();
-      updateVideoMeta(id,{shared:true,status:'pending'});
-      syncVideoMeta(id);
-      getVideoBlob(id).then(function(b){if(b)uploadVideoFile(id,b)});
-      playSound('click');toast('已投稿，等待审核通过后展示到观摩大厅','ok');render();renderHero();
+      updateVideoMeta(id,{shared:true,status:'pending'});playSound('click');toast('已投稿，等待审核通过后展示到观摩大厅','ok');render();renderHero();
     };
     var del=c.querySelector('.act-del');
     if(del)del.onclick=function(e){e.stopPropagation();
@@ -689,32 +694,30 @@ function bindCards(){
   });
 }
 
+/* ---- 播放 ---- */
 function playVideo(id){
   getVideoBlob(id).then(function(blob){
+    if(!blob){toast('视频文件不存在（可能已清理）','warn');return}
+    var url=URL.createObjectURL(blob);
     var v=getVideos().filter(function(x){return x.id===id})[0]||{};
-    var src=null;
-    if(blob){src=URL.createObjectURL(blob)}
-    else{src='/api/videos/file/'+encodeURIComponent(id)} /* 本机没有文件时尝试服务器（其他设备投稿的视频） */
     var m=openMask('<div class="m-head"><div><h3>'+esc(v.title||'视频回放')+'</h3><div class="m-sub">'+esc(v.owner||'')+' · '+fmtTime(v.ts||Date.now())+'</div></div><button class="m-x" id="vpX">✕</button></div>'+
-      '<video id="vpEl" src="'+src+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
+      '<video src="'+url+'" controls autoplay style="width:100%;border-radius:14px;background:#000;max-height:60vh"></video>');
     m.querySelector('#vpX').onclick=function(){closeMask()};
-    m.querySelector('#vpEl').onerror=function(){
-      closeMask();toast('视频文件不存在（仅保存于投稿者的设备，尚未上传服务器）','warn');
-    };
-    if(blob)m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(src)},300)});
+    m.addEventListener('click',function(){setTimeout(function(){URL.revokeObjectURL(url)},300)});
   });
 }
 
+/* ---- 上传 ---- */
 function renderUpload(){
-  var scOpts=SCENE_KEYS.map(function(k){return '<option value="'+k+'">'+SCENES[k].name+'</option>'}).join('');
+  var scOpts=ROUNDS.map(function(r){return '<option value="'+r.id+'">'+r.name+'</option>'}).join('');
   pane.innerHTML='<div class="up-card rise">'+
-    '<div class="up-drop" id="upDrop"><span class="big">📹</span><span id="upDropTxt">点击选择本地视频文件（mp4 / webm，建议 &lt; 500MB）</span><input type="file" id="upFile" accept="video/*" style="display:none"></div>'+
+    '<div class="up-drop" id="upDrop"><span class="big">📹</span><span id="upDropTxt">点击选择本地视频文件（mp4 / webm，建议 &lt; 200MB）</span><input type="file" id="upFile" accept="video/*" style="display:none"></div>'+
     '<div class="f-lab">视频标题 <span style="color:var(--danger)">*</span></div>'+
     '<input class="f-in" id="upTitle" maxlength="30" placeholder="比如：我的产品经理自我介绍实录">'+
     '<div class="f-lab" style="margin-top:12px">所属场景</div>'+
     '<select class="f-in" id="upScene">'+scOpts+'</select>'+
     '<button class="btn pri" id="upBtn" style="width:100%;margin-top:16px">提交审核</button>'+
-    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「观摩大厅」，其他用户即可观看。视频文件会自动上传到服务器（≤500MB），同时保留一份在本机浏览器。</div>'+
+    '<div class="up-note">📋 上传流程：选择视频 → 填写标题 → 提交后进入「审核中」→ 审核中心通过后展示到「观摩大厅」，其他用户才能看到。视频文件仅保存在本机浏览器（IndexedDB），不会上传到服务器。</div>'+
   '</div>';
   var file=null;
   var drop=document.getElementById('upDrop'),fi=document.getElementById('upFile');
@@ -728,21 +731,20 @@ function renderUpload(){
     var title=document.getElementById('upTitle').value.trim();
     var scene=document.getElementById('upScene').value;
     if(!file){toast('请先选择视频文件','warn');return}
-    if(file.size>500*1048576){toast('文件超过 500MB，请压缩后再传','warn');return}
+    if(file.size>200*1048576){toast('文件超过 200MB，请压缩后再传','warn');return}
     if(!title){toast('请填写视频标题','warn');return}
     var id='v_'+Date.now();
     saveVideoBlob(id,file).then(function(){
       addVideoMeta({id:id,title:title,scene:scene,owner:(getUser()||{}).name||'访客',ownerUid:ensureUid(),status:'pending',ts:Date.now(),src:'upload',shared:true});
       /* 同步到管理后台数据集，管理员可在「视频审核」中处理 */
       try{AdminDB.addVideo({id:id,title:title,scene:scene,status:'pending',ts:Date.now(),dur:0})}catch(e){}
-      /* 视频文件上传到服务器（尽力而为）：审核通过后其他用户可在观摩大厅播放 */
-      uploadVideoFile(id,file).then(function(ok){ if(!ok)console.warn('[videos] 文件上传失败，仅本机可播放'); });
       playSound('checkin');toast('已提交审核，可在「我的回放」查看状态，通过后展示到观摩大厅','ok');
       TAB='mine';renderSec();renderHero();
     }).catch(function(){toast('保存失败：浏览器存储空间不足','warn')});
   };
 }
 
+/* ================= 分区二：我的数据 ================= */
 function mySessions(){
   try{return AdminDB.sessions().filter(function(x){return x.u&&x.u.me}).slice(0,8)}
   catch(e){return []}
@@ -776,20 +778,24 @@ function renderData(){
       :'<div class="d" style="font-size:var(--fs-sm);color:var(--ink3);line-height:1.8">还没有设置目标面试日期，设置后导航栏和首页会同步显示倒计时。</div>')+
   '</div>';
 
-  /* 场景分布 */
-  var scCount=st.scenes||{};
-  var max=0;SCENE_KEYS.forEach(function(k){if((scCount[k]||0)>max)max=scCount[k]});
+  /* 面试轮次分布 */
+  var rdAll=[];
+  try{rdAll=AdminDB.sessions().filter(function(x){return x.u&&x.u.me})}catch(e){}
+  var rdCount={};
+  ROUNDS.forEach(function(r){rdCount[r.id]=0});
+  rdAll.forEach(function(x){var rd=roundOf(x.s||{});if(rdCount[rd]!=null)rdCount[rd]++});
+  var max=0;ROUNDS.forEach(function(r){if(rdCount[r.id]>max)max=rdCount[r.id]});
   var bars='';
-  SCENE_KEYS.forEach(function(k){
-    var n=scCount[k]||0;
+  ROUNDS.forEach(function(r){
+    var n=rdCount[r.id]||0;
     bars+='<div class="myc-bar">'+
-      '<div class="bn">'+SCENES[k].name+'</div>'+
-      '<div class="bt"><div class="bf" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+SCENE_COLOR[k]+'"></div></div>'+
+      '<div class="bn">'+r.name+'</div>'+
+      '<div class="bt"><div class="bf" style="width:'+(max?Math.round(n/max*100):0)+'%;background:'+r.color+'"></div></div>'+
       '<div class="bv">'+n+'</div>'+
     '</div>';
   });
   h+='<div class="myc-card" style="margin-bottom:14px">'+
-    '<div class="ct">🗺️ 场景练习分布 <span style="font-weight:400;color:var(--ink3);font-size:var(--fs-xs)">每个场景的完成场次</span></div>'+
+    '<div class="ct">🗺️ 场景练习分布 <span style="font-weight:400;color:var(--ink3);font-size:var(--fs-xs)">每个面试轮次的完成场次</span></div>'+
     (max?bars:'<div style="font-size:var(--fs-sm);color:var(--ink3);line-height:1.8">还没有练习记录，去「模拟面试」跑一场，这里会自动统计。</div>')+
   '</div>';
 
@@ -801,7 +807,7 @@ function renderData(){
       var s=x.s||{};
       h+='<div class="myc-row">'+
         '<div class="tm">'+fmtTime(s.ts||Date.now())+'</div>'+
-        '<div><div class="ti">'+esc(s.type||'综合')+' · '+esc((SCENES[s.scene]||{}).name||'综合')+'</div>'+
+        '<div><div class="ti">'+esc(s.type||'综合')+' · '+esc((ROUND_MAP[roundOf(s)]||{}).name||'综合')+'</div>'+
           (s.ai?'<div class="ai">🤖 '+esc(s.ai)+'</div>':'')+'</div>'+
         '<div class="sc">'+(s.count||0)+' 题</div>'+
         '<div class="sc txG">'+(s.avg?s.avg.toFixed(1):'—')+' 星</div>'+
@@ -823,6 +829,7 @@ function renderData(){
   if(ab)ab.onclick=function(){openAchievements()};
 }
 
+/* ================= 分区三：我的收藏 ================= */
 function renderFav(){
   var ids=getFavs();
   var dot=document.getElementById('favDot');
@@ -856,6 +863,7 @@ function renderFav(){
   });
 }
 
+/* ================= 分区三·补：薄弱点本（AI 复盘沉淀的薄弱知识点） ================= */
 function getWeakPoints(){
   var list=userGet('weak_points',[]);
   return Object.prototype.toString.call(list)==='[object Array]'?list:[];
@@ -895,6 +903,7 @@ function renderWeak(){
   });
 }
 
+/* ================= 分区四：账号设置（一体化资料卡 方案B） ================= */
 function renderSet(){
   var u=getUser()||{};
   var isCustomAv=typeof u.avatar==='string'&&u.avatar.indexOf('data:')===0;
@@ -933,7 +942,7 @@ function renderSet(){
         '<div class="b-field"><label>性别</label><select id="fGender" class="b-inp">'+genHtml+'</select></div>'+
         '<div class="b-field"><label>生日</label><input class="b-inp" id="fBd" value="'+esc(u.birthday||'')+'" placeholder="如 2000-01-01"></div>'+
       '</div>'+
-      '<div class="b-savebar"><button class="b-save" id="editSave">💾 保存资料</button><span>资料云端保存 · 跨设备同步</span></div>'+
+      '<div class="b-savebar"><button class="b-save" id="editSave">💾 保存资料</button><span>所有数据仅保存在本机浏览器</span></div>'+
     '</div>'+
     /* 退出登录 */
     '<div class="b-scard b-danger">'+
@@ -942,6 +951,7 @@ function renderSet(){
     '</div>'+
   '</div>';
 
+  /* ---- 编辑资料交互 ---- */
   var editState={avatar:u.avatar||'__person__'};
   var curAvBox=document.getElementById('curAvBox');
   function refreshAv(){
@@ -987,13 +997,12 @@ function renderSet(){
     else document.getElementById('sigErr').textContent='';
     if(err)return;
     var btn=this;
-    /* 资料保存：本地即时生效，同时经 /api/profile 同步云端 */
+    /* 资料只保存在本机浏览器，无需模拟网络请求，直接写入 */
     var nu=getUser()||{};
     nu.name=name;nu.avatar=editState.avatar;
     nu.signature=sigVal;nu.gender=document.getElementById('fGender').value;
     nu.birthday=document.getElementById('fBd').value.trim();
     storeSet('ivsim_user',nu);
-    try{syncProfile()}catch(e){}
     refreshNavAvatar();renderHero();
     btn.disabled=true;btn.innerHTML='✅ 已保存';
     toast('资料已保存','ok');
@@ -1007,6 +1016,7 @@ function renderSet(){
   };
 }
 
+/* ---- 启动 ---- */
 bindSecTabs();
 /* 壳内星空：与首页 .bg-fx 同一套 seedStars（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘） */
 seedStars('pcStars1',700,1,60);
@@ -1017,9 +1027,6 @@ function boot(){
   $$('#secTabs .vtab').forEach(function(b){b.classList.toggle('on',b.dataset.s===SEC)});
   renderHero();
   renderSec();
-  /* 与服务器对齐审核状态：管理员在后台通过 / 拒绝后，本机状态与理由自动更新 */
-  syncVideoStatusFromServer().then(function(ch){if(ch){renderHero();renderSec()}});
-  reuploadLocalVideoFiles(); /* 已通过审核的视频若服务器缺文件，自动补传 */
 }
 boot();
 /* 登录成功后（登录弹窗里登录 / 注册 / 游客快速登录）自动解锁个人中心 */
@@ -1032,6 +1039,34 @@ window.addEventListener('ivsim:login',function(){
 /* 资料卡片在别的弹层里改过之后自动刷新 */
 setInterval(function(){if(!guestMode)renderHero()},3000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&!guestMode)renderHero()});
+
+/* ---- 方案D 温和吸附：身份卡默认跟随内容滚动，即将滚出视口顶部时才吸附（往回滚无缝释放） ---- */
+var heroPin={el:null,pinned:false,baseBottom:0,at:140}; /* at=卡片底边距视口顶小于该值时吸附 */
+function heroPinUpdate(){
+  var el=heroPin.el||(heroPin.el=document.getElementById('heroCard'));
+  if(!el)return;
+  var y=window.scrollY||0;
+  if(window.innerWidth<769){
+    if(heroPin.pinned){heroPin.pinned=false;el.classList.remove('hero-pin')}
+    return;
+  }
+  /* 卡片已竖向铺满整列时吸附无意义，直接跳过 */
+  var main=document.querySelector('.b-main');
+  if(main&&el.offsetHeight>=main.offsetHeight-48){
+    if(heroPin.pinned){heroPin.pinned=false;el.classList.remove('hero-pin')}
+    return;
+  }
+  if(!heroPin.pinned){
+    heroPin.baseBottom=el.getBoundingClientRect().bottom+y; /* 仅未吸附时测量，得到文档自然底边 */
+    if(y>=heroPin.baseBottom-heroPin.at){heroPin.pinned=true;el.classList.add('hero-pin')}
+  }else if(y<=heroPin.baseBottom-el.offsetHeight-80){
+    /* 迟滞区间：上滚到「自然位置正好落在吸附点」时才释放，交还瞬间无跳变 */
+    heroPin.pinned=false;el.classList.remove('hero-pin');
+  }
+}
+window.addEventListener('scroll',heroPinUpdate,{passive:true});
+window.addEventListener('resize',function(){heroPin.pinned=false;if(heroPin.el)heroPin.el.classList.remove('hero-pin');heroPinUpdate()});
+heroPinUpdate();
 </script>
 </body>
 </html>

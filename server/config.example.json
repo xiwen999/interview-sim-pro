@@ -15,5 +15,13 @@
     "maxTokens": 8192,
     "timeoutMs": 120000,
     "thinking": "disabled"
+  },
+  "smtp": {
+    "host": "smtp.qq.com",
+    "port": 587,
+    "secure": false,
+    "user": "你的QQ邮箱@qq.com",
+    "pass": "QQ邮箱SMTP授权码（非登录密码）",
+    "from": "你的QQ邮箱@qq.com"
   }
 }
