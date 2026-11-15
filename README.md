@@ -111,8 +111,8 @@ node index.js
 | `DB_PASSWORD` | 空 | MySQL 密码（**必填**） |
 | `DB_NAME` | `interview_sim` | 数据库名 |
 | `AI_API_KEY` | 空 | 大模型 Key（可选，留空则回退本地模拟） |
-| `AI_BASE_URL` | `https://api.deepseek.com/v1` | 大模型网关地址 |
-| `AI_MODEL` | `deepseek-chat` | 模型名 |
+| `AI_BASE_URL` | `https://maas-api.cn-huabei-1.xf-yun.com/v2` | 大模型网关地址（讯飞 MaaS，OpenAI 兼容协议） |
+| `AI_MODEL` | `spark-x2.6` | 模型名（更换网关时同步修改） |
 | `PORT` | `3000` | 服务端口 |
 | `BIND_HOST` | `0.0.0.0` | 监听地址（仅本机演示可改 `127.0.0.1`） |
 
