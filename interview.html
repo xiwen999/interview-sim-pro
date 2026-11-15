@@ -7,7 +7,7 @@
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261115g10n">
+<link rel="stylesheet" href="shared.css?v=20261115h10a">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
@@ -1373,6 +1373,85 @@ body.light .cinema-answer .btn.pri:hover{background:#c9934a;border-color:#a8762f
 .cam-stage.hide .cam-tag{position:static;background:none;border:none;padding:0;cursor:default}
 .cam-stage.hide .cam-tools{position:static}
 .voice-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ---- ≤900：舞台自适应，对话区压缩 ---- */
+@media (max-width:900px){
+  .scene-stage{aspect-ratio:16/10;min-height:clamp(380px,56vh,560px)}
+  .us-av{display:none}
+  .dlg-text{max-width:100%}
+  .cinema-act{display:none}
+}
+/* ---- ≤768：压缩电影面板垂直占用 ---- */
+@media (max-width:768px){
+  .cinema-top{padding:12px 14px}
+  .cinema-bottom{padding:0 14px 14px}
+  .cinema-dialogue{padding:12px 14px 16px}
+  .speaker{font-size:12px}
+  .dlg-text{font-size:15px;line-height:1.8}
+  .us-row{gap:8px;margin-bottom:9px}
+  .us-av{width:30px;height:30px;font-size:16px}
+  .us-bubble{font-size:13px;line-height:1.6;max-height:72px;padding:8px 12px}
+  .cam-stage{width:min(180px,36vw);top:clamp(100px,16vh,128px);bottom:auto}
+  .cinema-answer{padding:10px 12px;margin-bottom:9px}
+  .ans-ta{min-height:64px;font-size:14px;padding:9px 11px}
+  .ans-bar{margin-top:7px}
+  .cinema-wave{top:58px}
+  .cinema-sprite{right:-8vw;height:min(52vh,440px);bottom:clamp(28vh,34vh,40vh);opacity:.96}
+}
+/* ---- ≤480：极窄屏再压一层 ---- */
+@media (max-width:480px){
+  .scene-stage{min-height:clamp(340px,52vh,440px)}
+  .cinema-top{padding:10px 10px}
+  .cinema-bottom{padding:0 10px 10px}
+  .cinema-dialogue{padding:10px 12px 14px}
+  .speaker-line{gap:8px;margin-bottom:8px}
+  .dlg-text{font-size:14px;line-height:1.7;min-height:2em}
+  .us-row{gap:7px}
+  .us-av{display:none}
+  .us-bubble{padding:8px 11px;max-height:60px;font-size:13px}
+  .us-who{display:none}
+  .cinema-answer{padding:8px 10px;margin-bottom:8px}
+  .ans-ta{min-height:52px;padding:8px 10px;font-size:13px}
+  .cinema-wave{top:52px;right:10px;padding:4px 8px}
+  .cam-stage{width:min(140px,34vw);top:clamp(90px,15vh,108px);right:10px}
+  .cam-tool{width:26px;height:26px;font-size:11px}
+}
+
+/* ===== 动画互动 · 面试间全屏铺满 ===== */
+body.cinema-fs{overflow:hidden}
+body.cinema-fs .nav{display:none!important}
+body.cinema-fs .bg-fx{display:none}
+body.cinema-fs .wrap{padding:0;max-width:none}
+body.cinema-fs .stage{max-width:none}
+body.cinema-fs #vSession,#vSession.wide-anim{max-width:none;margin:0;padding:0;height:100vh;position:relative}
+body.cinema-fs #animPanel{height:100%}
+body.cinema-fs .cinema-card{height:100%;border-radius:0;border:0;box-shadow:none;background:#0A0C0F}
+body.cinema-fs .scene-stage{height:100%;min-height:0;aspect-ratio:auto;border-radius:0;box-shadow:none!important}
+body.cinema-fs .scene-img{object-position:62% 34%}
+/* 面试间内不显示顶部进度条（题数量已在左上角展示） */
+body.cinema-fs #vSession .s-head{display:none}
+body.cinema-fs .cinema-top{padding-top:clamp(14px,2.4vh,26px)}
+/* 面试间内隐藏右侧快捷栏与助手球 */
+body.cinema-fs .qbar{display:none!important}
+body.cinema-fs .agent-fab{display:none!important}
+/* 底部：作答卡收到左下角，人物（右侧）不被遮挡 */
+body.cinema-fs .cinema-bottom{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+body.cinema-fs .cinema-bottom>.cinema-answer{width:100%;max-width:min(520px,62vw);margin:0}
+body.cinema-fs .cinema-bottom>.us-row{width:100%;max-width:min(520px,62vw);margin:0;
+  flex-direction:row;justify-content:flex-start}
+body.cinema-fs .us-main{align-items:flex-start}
+body.cinema-fs .us-bubble{border-radius:4px 12px 12px 12px}
+body.cinema-fs .cinema-bottom>.cinema-dialogue{width:100%}
+/* 作答输入框在深色舞台里始终是深色玻璃，不随浅色主题变白 */
+body.cinema-fs #animPanel .cinema-answer .ans-ta{background:rgba(8,10,13,.72)!important;
+  color:#EFE7D8!important;border-color:rgba(239,231,216,.16)!important}
+body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231,216,.4)!important}
+@media (max-width:768px){
+  body.cinema-fs .cinema-bottom>.cinema-answer,
+  body.cinema-fs .cinema-bottom>.us-row{max-width:100%}
+  body.cinema-fs .cinema-bottom{padding:0 12px 12px}
+  body.cinema-fs .cinema-top{padding-top:clamp(10px,2vh,18px)}
+}
 </style>
 </head>
 <body>
@@ -1741,8 +1820,8 @@ body.light .cinema-answer .btn.pri:hover{background:#c9934a;border-color:#a8762f
   </div>
 </div>
 
-<script src="shared.js?v=20261115g14d"></script>
-<script src="cloud.js?v=20261115g14b"></script>
+<script src="shared.js?v=20261115h14a"></script>
+<script src="cloud.js?v=20261115h14b"></script>
 <script>
 initPage('interview');
 
@@ -2334,6 +2413,8 @@ function beginWarmView(){
 function show(id){
   $$('.view').forEach(function(v){v.classList.remove('on')});
   document.getElementById(id).classList.add('on');
+  /* 动画互动 / 语音互动：面试间铺满整个视口 */
+  document.body.classList.toggle('cinema-fs',id==='vSession'&&S.mode!=='text');
   var wa=document.getElementById('wzActions');
   if(wa)wa.classList.toggle('on',id==='vSetup'); /* 底部向导操作栏只在设置页显示 */
   scrollTo(0,0);
