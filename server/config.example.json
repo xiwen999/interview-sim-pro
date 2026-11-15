@@ -23,7 +23,5 @@
     "user": "你的QQ邮箱@qq.com",
     "pass": "QQ邮箱SMTP授权码（非登录密码）",
     "from": "你的QQ邮箱@qq.com"
-  },
-  "wxAppId": "微信开放平台网站应用AppID（wx开头），Secret 建议放环境变量 WX_APPSECRET 更安全",
-  "wxRedirectOrigin": "https://你的已备案域名（需与开放平台后台「授权回调域」一致，留空则自动取当前访问域名）"
+  }
 }

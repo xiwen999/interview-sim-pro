@@ -48,25 +48,6 @@ function loadConfig() {
 }
 const CONFIG = loadConfig();
 const PORT = process.env.PORT || CONFIG.port || 3000;
-
-/* ---- 微信扫码登录（开放平台「网站应用」OAuth2） ----
-   配置方式（三选一，推荐环境变量，避免密钥进仓库）：
-     环境变量 WX_APPID / WX_APPSECRET / WX_REDIRECT_ORIGIN（可选，授权回调域名，默认自动取当前 host）
-   或 server/config.json： { "wxAppId": "...", "wxAppSecret": "...", "wxRedirectOrigin": "https://your.domain" }
-   开放平台后台「授权回调域」需填与 wxRedirectOrigin 一致的已备案域名。 */
-const WX_APPID = process.env.WX_APPID || CONFIG.wxAppId || '';
-const WX_SECRET = process.env.WX_APPSECRET || process.env.WX_SECRET || CONFIG.wxAppSecret || '';
-const WX_REDIRECT_ORIGIN = process.env.WX_REDIRECT_ORIGIN || CONFIG.wxRedirectOrigin || '';
-const WX_STATES = new Map();          // state -> {status:'pending'|'ok', ts, token, user}
-const WX_STATE_TTL = 5 * 60 * 1000;   // 扫码会话 5 分钟有效
-function wxEnabled() { return !!(WX_APPID && WX_SECRET); }
-function wxOrigin(req) {
-  if (WX_REDIRECT_ORIGIN) return WX_REDIRECT_ORIGIN;
-  const host = String(req.headers.host || '');
-  const proto = String(req.headers['x-forwarded-proto'] || '');
-  if (proto) return proto + '://' + host;
-  return /^localhost|127\.0\.0\.1/.test(host) ? ('http://' + host) : ('https://' + host);
-}
 const M = CONFIG.mysql || {};
 const MYSQL = {
   host: process.env.DB_HOST || M.host || '127.0.0.1',
@@ -328,8 +309,7 @@ async function initDatabase() {
     'ADD COLUMN goal_date VARCHAR(32) NULL',
     'ADD COLUMN goal_name VARCHAR(64) NULL',
     'ADD COLUMN avatar_ext LONGTEXT NULL',
-    'ADD COLUMN email VARCHAR(128) NULL',
-    'ADD COLUMN wx_openid VARCHAR(64) NULL'
+    'ADD COLUMN email VARCHAR(128) NULL'
   ];
   for (const ddl of EXTRA_COLUMNS) {
     try { await pool.query('ALTER TABLE users ' + ddl); }
@@ -337,13 +317,6 @@ async function initDatabase() {
   }
   /* 邮箱唯一索引（NULL 不参与唯一约束，老用户 email 为空不受影响） */
   try { await pool.query('ALTER TABLE users ADD UNIQUE KEY uk_users_email (email)'); }
-  catch (e) {
-    if (e && e.code !== 'ER_DUP_KEYNAME' && e.code !== 'ER_DUP_ENTRY') {
-      if (!(e && /Duplicate key name|Duplicate entry/.test(e.message || ''))) throw e;
-    }
-  }
-  /* 微信 openid 唯一索引（一个微信号只绑一个账号；NULL 不参与唯一约束） */
-  try { await pool.query('ALTER TABLE users ADD UNIQUE KEY uk_users_wx (wx_openid)'); }
   catch (e) {
     if (e && e.code !== 'ER_DUP_KEYNAME' && e.code !== 'ER_DUP_ENTRY') {
       if (!(e && /Duplicate key name|Duplicate entry/.test(e.message || ''))) throw e;
@@ -677,91 +650,6 @@ async function apiMe(req, res) {
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
   return send(res, 200, { ok: true, user: publicUser(await userFull(u)) });
 }
-
-/* ============ 微信扫码登录（开放平台「网站应用」OAuth2） ============ */
-async function findUserByWx(openid) {
-  const r = await q1('SELECT * FROM users WHERE wx_openid=? LIMIT 1', [openid]);
-  return r ? rowUser(r) : null;
-}
-/* GET /api/wx/config：返回微信扫码登录是否已配置及 AppID（AppID 是公开信息，Secret 永不下发） */
-async function apiWxConfig(req, res) {
-  return send(res, 200, { ok: true, enabled: wxEnabled(), appId: WX_APPID || '' });
-}
-/* GET /api/wx/state：生成一次性扫码会话 state，返回回调地址给前端渲染二维码 */
-async function apiWxState(req, res) {
-  if (!wxEnabled()) return send(res, 400, { ok: false, msg: '微信扫码登录未配置（服务端缺 WX_APPID / WX_APPSECRET）' });
-  if (!rateLimit(req, res, 30, 10 * 60 * 1000, 'wxstate')) return;
-  for (const [k, v] of WX_STATES) if (Date.now() - v.ts > WX_STATE_TTL) WX_STATES.delete(k);
-  const state = 'wx_' + crypto.randomBytes(16).toString('hex');
-  WX_STATES.set(state, { status: 'pending', ts: Date.now() });
-  return send(res, 200, { ok: true, state, appId: WX_APPID, redirect: wxOrigin(req) + '/api/wx/callback' });
-}
-/* GET /api/wx/callback：微信扫码确认后的跳转落点——code 换身份、找/建用户、把 token 挂回 state */
-async function apiWxCallback(req, res) {
-  const qp = new URL(req.url, 'http://localhost').searchParams;
-  const state = String(qp.get('state') || '');
-  const code = String(qp.get('code') || '');
-  const html = (msg, ok) => {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end('<!doctype html><html lang="zh"><meta charset="utf-8"><title>微信登录</title><body style="font-family:system-ui,sans-serif;display:grid;place-items:center;height:100vh;margin:0;background:#0b1220;color:#e2e8f0"><div style="text-align:center"><div style="font-size:46px">' + (ok ? '✅' : '❌') + '</div><p style="color:#94a3b8">' + msg + '</p></div></body></html>');
-  };
-  const st = WX_STATES.get(state);
-  if (!st) return html('登录会话已过期，请回到网页重新扫码', false);
-  if (!code) return html('未收到微信授权码（用户取消了授权）', false);
-  try {
-    const tokUrl = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + encodeURIComponent(WX_APPID) +
-      '&secret=' + encodeURIComponent(WX_SECRET) + '&code=' + encodeURIComponent(code) + '&grant_type=authorization_code';
-    const tr = await fetch(tokUrl);
-    const tj = await tr.json().catch(() => null);
-    if (!tj || !tj.access_token) return html('微信授权失败：' + ((tj && tj.errmsg) || '未知错误'), false);
-    let nickname = '微信用户' + String(tj.openid).slice(-4);
-    try {
-      const ur = await fetch('https://api.weixin.qq.com/sns/userinfo?access_token=' + encodeURIComponent(tj.access_token) + '&openid=' + encodeURIComponent(tj.openid));
-      const uj = await ur.json().catch(() => null);
-      if (uj && uj.nickname) nickname = String(uj.nickname).slice(0, 20);
-    } catch (e) {}
-    const openid = String(tj.openid);
-    let user = await findUserByWx(openid);
-    let token;
-    if (user) {
-      if (user.status === 'banned') return html('该微信绑定的账号已被封禁，无法登录', false);
-      token = signToken({ uid: user.uid, exp: Date.now() + 30 * 86400000 });
-      await q('UPDATE users SET last=?, wx_openid=? WHERE uid=?', [Date.now(), openid, user.uid]);
-      user = await userFull(await findUserByUid(user.uid));
-    } else {
-      /* 首次扫码：自动注册（随机账号密码，昵称取微信昵称），一个 openid 只建一个账号 */
-      let acc;
-      do { acc = 'wx' + Math.random().toString(36).slice(2, 8); } while (await findUserByAccount(acc));
-      const uid = 'u_' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex');
-      const now = Date.now();
-      const pw = crypto.randomBytes(12).toString('hex');
-      await q('INSERT INTO users (id,uid,account,name,avatar,bg,joined,last,status,demo,goal,checkin,pass_hash,bank_favs,bank_practice,wx_openid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [uid, uid, acc, nickname, '🦊', null, now, now, 'active', 0, 0, 0, hashPassword(pw), JSON.stringify([]), 0, openid]);
-      user = await userFull(await findUserByUid(uid));
-      token = signToken({ uid, exp: now + 30 * 86400000 });
-    }
-    st.status = 'ok'; st.token = token; st.user = publicUser(user); st.ts = Date.now();
-    return html('登录成功，请回到网页继续使用', true);
-  } catch (e) {
-    console.error('[WX] 回调异常', e && e.message ? e.message : e);
-    return html('微信登录异常，请稍后重试', false);
-  }
-}
-/* GET /api/wx/poll：前端轮询扫码结果；成功时一次性下发 token 并销毁 state */
-async function apiWxPoll(req, res) {
-  const qp = new URL(req.url, 'http://localhost').searchParams;
-  const state = String(qp.get('state') || '');
-  const st = WX_STATES.get(state);
-  if (!st) return send(res, 200, { ok: true, status: 'expired' });
-  if (st.status === 'ok') {
-    const token = st.token, user = st.user;
-    WX_STATES.delete(state);
-    return send(res, 200, { ok: true, status: 'ok', token, user });
-  }
-  if (Date.now() - st.ts > WX_STATE_TTL) { WX_STATES.delete(state); return send(res, 200, { ok: true, status: 'expired' }); }
-  return send(res, 200, { ok: true, status: 'pending' });
-}
-
 async function apiAddInterview(req, res, body) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -1768,10 +1656,6 @@ const ROUTES = [
   ['POST', /^\/api\/quick-register$/, apiQuickRegister],
   ['POST', /^\/api\/mail\/send-code$/, apiMailSendCode],
   ['POST', /^\/api\/login$/, apiLogin],
-  ['GET', /^\/api\/wx\/config$/, apiWxConfig],
-  ['GET', /^\/api\/wx\/state$/, apiWxState],
-  ['GET', /^\/api\/wx\/callback$/, apiWxCallback],
-  ['GET', /^\/api\/wx\/poll$/, apiWxPoll],
   ['GET', /^\/api\/me$/, apiMe],
   ['POST', /^\/api\/interviews$/, apiAddInterview],
   ['POST', /^\/api\/videos$/, apiAddVideo],
@@ -1878,9 +1762,7 @@ function serveStatic(req, res, pathname) {
     const ext = path.extname(filePath).toLowerCase();
     if (!MIME[ext]) return send(res, 403, { ok: false, msg: 'forbidden' });
     const data = fs.readFileSync(filePath);
-    /* HTML 不缓存：保证前端改动后用户无需强刷即可拿到最新页面；其余静态资源由 Nginx 缓存 */
-    const cache = ext === '.html' ? { 'Cache-Control': 'no-cache, must-revalidate' } : {};
-    res.writeHead(200, { 'Content-Type': MIME[ext], ...cache });
+    res.writeHead(200, { 'Content-Type': MIME[ext] });
     res.end(data);
   } catch (e) { send(res, 404, { ok: false, msg: 'not found' }); }
 }

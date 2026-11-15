@@ -893,95 +893,6 @@ function hashPass(pw,salt){
 }
 
 /* 登录小窗：全站共用，点导航栏「登录」后弹出 */
-/* 微信扫码登录：开放平台「网站应用」OAuth2。流程：
-   1. /api/wx/config 确认服务端已配置 AppID/Secret；2. /api/wx/state 取一次性 state 与回调地址；
-   3. 官方 wxLogin.js 渲染二维码；4. 用户扫码确认后微信跳转 /api/wx/callback，服务端换身份挂 token；
-   5. 前端每 1.6s 轮询 /api/wx/poll，拿到 token 即登录成功。 */
-var _wxLoginJsP=null;
-function loadWxLoginJs(){
-  if(window.WxLogin)return Promise.resolve();
-  if(_wxLoginJsP)return _wxLoginJsP;
-  _wxLoginJsP=new Promise(function(res,rej){
-    var s=document.createElement('script');
-    s.src='https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js';
-    s.onload=res;s.onerror=function(){_wxLoginJsP=null;rej(new Error('wxLogin.js 加载失败'))};
-    document.head.appendChild(s);
-  });
-  return _wxLoginJsP;
-}
-function openWxScan(){
-  var card=document.querySelector('.login-card');
-  if(!card){toast('请先打开登录窗口','warn');return;}
-  toast('正在生成微信二维码…');
-  apiCall('/api/wx/config',{silent:true}).then(function(r){
-    var cfg=(r&&r.data)||{};
-    if(!cfg.enabled||!cfg.appId){
-      toast('微信扫码登录未配置：请先在服务端配置微信开放平台 AppID / Secret','warn');
-      return;
-    }
-    return apiCall('/api/wx/state',{silent:true}).then(function(r2){
-      var st=(r2&&r2.data)||{};
-      if(!st.state||!st.redirect)throw new Error('获取扫码会话失败');
-      return loadWxLoginJs().then(function(){
-        /* 把弹窗主体替换为扫码面板 */
-        card.innerHTML=
-          '<div class="lg-top"><span></span><button class="m-x" id="lgWxClose">✕</button></div>'+
-          '<div class="lg-logo">🔗</div>'+
-          '<h3>微信扫码登录</h3>'+
-          '<div class="lg-sub">请使用微信扫描二维码登录</div>'+
-          '<div id="wxQrBox" style="display:flex;justify-content:center;align-items:center;min-height:230px;margin:8px 0">正在生成二维码…</div>'+
-          '<div class="lg-err" id="lgWxErr"></div>'+
-          '<button class="btn gho" id="lgWxRefresh" style="width:100%;display:none">🔄 二维码已过期，点击刷新</button>'+
-          '<button class="btn gho" id="lgWxCancel" style="width:100%;margin-top:8px">← 返回账号登录</button>';
-        var wxErr=$('#lgWxErr');
-        function showErr(msg){ if(wxErr){wxErr.textContent=msg;wxErr.classList.add('show')} }
-        function clearErr(){ if(wxErr){wxErr.textContent='';wxErr.classList.remove('show')} }
-        $('#lgWxClose').onclick=function(){ if(pollT)clearInterval(pollT); closeMask(); };
-        $('#lgWxCancel').onclick=function(){ if(pollT)clearInterval(pollT); openLoginModal(); };
-        $('#lgWxRefresh').onclick=function(){ if(pollT)clearInterval(pollT); openWxScan(); };
-        try{
-          new window.WxLogin({
-            id:'wxQrBox',
-            appid:cfg.appid||cfg.appId,
-            scope:'snsapi_login',
-            redirect_uri:encodeURIComponent(st.redirect),
-            state:st.state,
-            style:'black',
-            href:'data:text/css;base64,'
-          });
-        }catch(e){ showErr('二维码渲染失败：'+e.message); return; }
-        /* 轮询扫码结果 */
-        var pollT=setInterval(function(){
-          apiCall('/api/wx/poll?state='+encodeURIComponent(st.state),{silent:true}).then(function(r3){
-            var s3=(r3&&r3.data&&r3.data.status)||'';
-            if(s3==='ok'){
-              clearInterval(pollT);pollT=null;
-              API.setToken(r3.data.token);
-              var u=getUser()||{};
-              if(r3.data.user&&r3.data.user.uid){
-                u.uid=r3.data.user.uid;u.name=r3.data.user.name||u.name;u.avatar=r3.data.user.avatar||u.avatar;
-                storeSet('ivsim_user',u);
-              }
-              toast('微信登录成功','ok');
-              setTimeout(function(){location.reload()},520);
-            }else if(s3==='expired'){
-              clearInterval(pollT);pollT=null;
-              $('#wxQrBox').innerHTML='<div style="text-align:center;color:var(--ink3);font-size:13px;padding:20px 0">⏳ 二维码已过期</div>';
-              $('#lgWxRefresh').style.display='';
-            }
-          }).catch(function(){});
-        },1600);
-        /* 弹窗关闭时停止轮询：定时挂在 card 上，元素被移除即停 */
-        var mo=new MutationObserver(function(){
-          if(!document.body.contains(card)&&pollT){clearInterval(pollT);pollT=null;mo.disconnect();}
-        });
-        mo.observe(document.body,{childList:true,subtree:true});
-      });
-    });
-  }).catch(function(e){
-    toast('微信扫码登录暂不可用：'+(e&&e.message||'网络异常'),'warn');
-  });
-}
 function openLoginModal(){
   var u=getUser()||{};
   var m=openMask(
@@ -1174,7 +1085,7 @@ function openLoginModal(){
     passIn.type=isPw?'text':'password';
     this.textContent=isPw?'🙈':'👁';
   };
-  $('#lgWx').onclick=openWxScan;
+  $('#lgWx').onclick=function(){toast('微信扫码登录暂未开放，请使用账号密码登录','warn')};
   sendBtn.onclick=sendCode;
   /* 输入 admin 时提示这是管理员账号 */
   var admTip=$('#lgAdmTip');
