@@ -12,7 +12,9 @@ if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
 .stage{width:100%;max-width:none;margin:0 auto}
-#vSession,#vFb,#vRate,#vReview{max-width:var(--reading-max);margin:0 auto}
+#vSession,#vFb{max-width:var(--reading-max);margin:0 auto}
+/* 自评 / 复盘信息密度高（雷达图、统计、题目清单），允许向左右铺开 */
+#vRate,#vReview{max-width:min(94vw,1720px);margin:0 auto}
 /* 动画互动 / 摄像头模式：让场景舞台有更大的展示宽度 */
 #vSession.wide-anim{max-width:min(97vw,1720px)}
 .view{display:none}
@@ -364,6 +366,28 @@ if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}
 .ans-ta{min-height:200px;font-size:var(--fs-lg);line-height:1.85;padding:18px 20px;border-radius:16px}
 #animTa{min-height:115px;margin-top:14px}
 
+/* ===== 文字答题卡 · 参考版式：宽卡片 + 渐变光晕 + 橙色提交 + 深灰跳过 ===== */
+#vSession{max-width:min(97vw,1560px)}
+#vSession .s-head{margin-bottom:12px}
+#vSession .qcard{border-radius:28px;
+  border:1px solid rgba(108,140,255,.34);
+  box-shadow:0 0 0 6px rgba(108,140,255,.07),0 0 34px rgba(108,140,255,.16),
+    0 26px 64px -26px rgba(0,0,0,.7),0 5px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.07)}
+body.light #vSession .qcard{border-color:rgba(108,140,255,.30);
+  box-shadow:0 0 0 6px rgba(108,140,255,.06),0 0 34px rgba(108,140,255,.13),
+    0 22px 50px -22px rgba(30,58,138,.28),0 4px 14px rgba(30,58,138,.12),inset 0 1px 0 rgba(255,255,255,.9)}
+#vSession .q-text{font-size:clamp(22px,2.3vw,30px)}
+#submitBtn{background:linear-gradient(135deg,#f6a444,#ef8f2d);color:#fff;
+  box-shadow:0 8px 22px rgba(240,150,50,.4);border:none;font-weight:700}
+#submitBtn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(240,150,50,.52)}
+.skip-btn{padding:9px 16px;border-radius:11px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(70,78,96,.85);color:#e8ecf6;font-size:var(--fs-base);cursor:pointer;
+  transition:.18s;font-family:inherit}
+.skip-btn:hover{background:rgba(88,96,118,.95);border-color:rgba(255,255,255,.24);transform:translateY(-1px)}
+body.light .skip-btn{background:#565d6b;border-color:#565d6b;color:#fff}
+body.light .skip-btn:hover{background:#454c59}
+@media (max-width:640px){.skip-btn{padding:8px 12px;font-size:var(--fs-sm)}}
+
 .rv-card{padding:clamp(14px,1.8vw,22px);border-radius:18px;border:1px solid var(--line);
   background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
   box-shadow:0 8px 22px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.05);margin-bottom:14px}
@@ -379,6 +403,19 @@ if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}
 .rv-sub{font-size:var(--fs-base);color:var(--ink3);margin-top:9px;line-height:1.85;max-width:760px}
 .rate-foot{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
 .rate-foot .btn{flex:1 1 clamp(140px,18vw,220px);min-width:0;padding:14px;font-size:var(--fs-md)}
+@media (max-width:768px){.rv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 复盘页/分析页 移动端自适应 */
+@media (max-width:640px){
+  .rv{padding:16px 14px}
+  .rv-card{padding:14px}
+  .rv-card .rq{font-size:16px;line-height:1.6}
+  .rv-radar-wrap{grid-template-columns:1fr !important;gap:14px;padding:14px}
+  .rv-radar-wrap #rvRadar{width:200px;height:200px;margin:0 auto}
+  .rv-actions .btn{flex:1 1 100% !important}
+  .rate-foot .btn{flex:1 1 100% !important;padding:13px;font-size:15px}
+  .rv-item .ri-h{padding:12px 14px;font-size:14px}
+  .rv-item .ri-b{padding:0 14px 14px}
+}
 .ai-review{margin-top:20px;padding:clamp(14px,1.8vw,22px);border-radius:18px;
   background:linear-gradient(135deg,rgba(108,140,255,.12),rgba(65,224,200,.06));
   border:1px solid rgba(108,140,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.3)}
@@ -1613,6 +1650,7 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
           <video id="vrecPrev" autoplay muted playsinline></video>
         </div>
         <div class="ans-bar">
+          <button class="skip-btn" id="skipBtn" title="本题不答，直接进入下一题">⏭ 跳过题目</button>
           <button class="mic-btn" id="micBtn"></button>
           <span class="hint txP" id="micHint"></span>
           <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
@@ -1772,9 +1810,10 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
     <!-- 复盘 -->
     <div class="view" id="vReview">
       <div class="card rv rise">
+        <button type="button" class="btn gho sm" id="backToRate" style="margin-bottom:14px">← 返回作答分析</button>
         <h2 style="font-size:21px;font-weight:900">📊 本场复盘报告</h2>
         <div class="rv-grid" id="rvGrid"></div>
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px">
+        <div class="rv-radar-wrap" style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px">
           <canvas id="rvRadar" width="240" height="240" style="max-width:100%"></canvas>
           <div>
             <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">能力雷达图（AI 结构化评分，5 分制）</div>
@@ -1806,7 +1845,7 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
           <div style="flex:1;font-size:var(--fs-xs);line-height:1.7;color:var(--ink2)" id="rvVideoTxt">本场摄像头作答的回放正在保存…</div>
           <button class="btn pri sm" style="flex:none" onclick="location.href='videos.html#videos'">去个人中心看回放</button>
         </div>
-        <div style="display:flex;gap:10px;margin-top:22px">
+        <div class="rv-actions" style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
           <button class="btn gho" style="flex:1" onclick="location.href='index.html'">回首页</button>
           <button class="btn gho" style="flex:1" onclick="location.href='bank.html'">去题库巩固</button>
           <button class="btn pri" style="flex:1" onclick="location.reload()">再练一场</button>
@@ -2916,7 +2955,11 @@ var IV_PERSONA={
   tech:   {sys:'你是资深技术面试官（后端/大数据方向），语气严谨，重点考察技术深度、项目真实度、系统设计与排错能力。候选人回答模糊时追问技术选型原因、数据规模、踩过的坑。每次只说一两句；禁止闲聊、禁止直接给答案。'},
   data:   {sys:'你是数据分析方向的资深面试官，关注分析思维、SQL 基本功、指标体系与业务落地。会追问口径、验证方法与业务含义。每次只说一两句；禁止闲聊、禁止直接给答案。'},
   product:{sys:'你是产品/运营方向的面试官，关注用户思维、方案设计、案例拆解与执行力。会追问目标定义、用户场景与效果衡量。每次只说一两句；禁止闲聊、禁止直接给答案。'},
-  general:{sys:'你是 STAR 行为面试官，关注过往经历的真实度、抗压、协作与复盘。会用 STAR 结构追问细节（背景/任务/行动/结果）。每次只说一两句；禁止闲聊、禁止直接给答案。'}
+  general:{sys:'你是 STAR 行为面试官，关注过往经历的真实度、抗压、协作与复盘。会用 STAR 结构追问细节（背景/任务/行动/结果）。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  operation:{sys:'你是运营/营销方向的面试官，关注用户思维、活动策划、内容敏感度、数据驱动增长与执行力。会追问活动目标、用户画像、渠道选择、效果衡量与复盘方法。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  design:{sys:'你是设计/交互方向的面试官，关注设计思维、用户体验、视觉审美、交互逻辑与设计落地能力。会追问设计目标、用户研究、方案取舍、可用性测试与设计规范。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  business:{sys:'你是业务/销售方向的面试官，关注客户洞察、谈判能力、渠道拓展、抗压能力与结果导向。会追问客户需求挖掘、成单策略、异议处理、业绩数据与复盘。每次只说一两句；禁止闲聊、禁止直接给答案。'},
+  support:{sys:'你是职能/支撑方向的面试官（HR/财务/法务等），关注专业功底、合规意识、流程思维、沟通协调与职业稳定性。会追问专业案例、风险把控、跨部门协作与职业规划。每次只说一两句；禁止闲聊、禁止直接给答案。'}
 };
 function personaSys(scene){ return (IV_PERSONA[scene]||IV_PERSONA.general).sys; }
 
@@ -3181,6 +3224,9 @@ document.getElementById('aiReviewBtn').onclick=function(){
 document.getElementById('toReviewBtn').onclick=function(){
   finish();
 };
+document.getElementById('backToRate').onclick=function(){
+  show('vRate');
+};
 
 function finish(){
   var total=S.recs.length;
@@ -3393,6 +3439,14 @@ function renderReviewVideoBox(){
 var recog=null,micOn=false,micMode='ta',micFinal='',micWantRun=false;
 var micBtn=document.getElementById('micBtn');
 micBtn.innerHTML=ICONS.mic+' 语音作答';
+/* 跳过题目：本题不答不保存，直接进入下一题（与「下一题」按钮同款跳转逻辑） */
+var skipBtn=document.getElementById('skipBtn');
+if(skipBtn)skipBtn.onclick=function(){
+  stopMic();
+  S.idx++;
+  nextQ();
+  toast('已跳过，进入下一题','ok');
+};
 function startMic(mode){
   var st=storeGet('ivsim_settings',{});
   if(st.voiceOff){miniPop('语音功能已关闭','可在右上角「设置」里重新开启语音作答。');return false}
