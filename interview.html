@@ -906,17 +906,28 @@ details.cfg-card.acc[open] .cfg-sub{opacity:.55}
 .strat-k{font-size:var(--fs-sm);font-weight:700;color:var(--ink3)}
 @media(max-width:560px){.strat-row{grid-template-columns:1fr;gap:8px}}
 
-/* 题量分配：左侧大字总数 + 右侧纯文本配比（去胶囊降噪） */
-.dist-box{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;
+/* 题量分配：左侧大字总数 + 右侧当前面试场景卡（六大题型配比只在底层抽题使用，不再展示） */
+.dist-box{display:flex;align-items:center;gap:clamp(14px,1.6vw,24px);flex-wrap:wrap;
   padding:0;background:transparent;border:0;box-shadow:none}
-.dist-box .db-left{display:flex;align-items:baseline;gap:6px}
+.dist-box .db-left{display:flex;align-items:baseline;gap:6px;flex:none}
 .dist-box .db-num{font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif;
   font-size:clamp(26px,3vw,34px);font-weight:900;line-height:1;
   background:linear-gradient(135deg,#fff,#9ec5ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .dist-box .db-unit{font-size:var(--fs-xs);color:var(--ink3);font-weight:600}
-.dist-box .db-right{font-size:var(--fs-sm);color:var(--ink2);line-height:1.7;flex:1;min-width:200px}
-.dist-box .db-right b{color:var(--acc2);font-weight:800;
-  font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif}
+.dist-box .db-scene{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;
+  padding:11px 16px;border-radius:12px;
+  background:linear-gradient(120deg,rgba(108,140,255,.14),rgba(65,224,200,.05));
+  border:1px solid rgba(108,140,255,.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 18px -14px rgba(108,140,255,.8)}
+.dist-box .db-scene .ds-ic{font-size:var(--fs-lg);line-height:1;flex:none;
+  filter:drop-shadow(0 0 8px rgba(140,166,255,.45))}
+.dist-box .db-scene .ds-main{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;min-width:0}
+.dist-box .db-scene b{font-size:var(--fs-sm);font-weight:800;color:var(--ink);white-space:nowrap}
+.dist-box .db-scene .ds-desc{font-size:var(--fs-xs);color:var(--ink3);line-height:1.5}
+body.light .dist-box .db-scene{background:linear-gradient(120deg,rgba(37,99,235,.08),rgba(15,118,110,.05));
+  border-color:rgba(37,99,235,.3);box-shadow:inset 0 1px 0 #ffffff,0 6px 16px -14px rgba(15,23,42,.35)}
+body.light .dist-box .db-scene b{color:#0f172a}
+body.light .dist-box .db-scene .ds-desc{color:#64748b}
 
 /* 分段控制器（每题限时 / 难度偏向） */
 .seg{display:flex;gap:0;background:rgba(255,255,255,.04);border:1px solid var(--line);
@@ -1177,20 +1188,6 @@ body.light #vSetup .m-pick .mp-tags span{background:rgba(15,23,42,.03);border-co
 .dropzone .fake-tags span{font-size:var(--fs-2xs);color:var(--ink3);
   padding:3px 9px;border-radius:7px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.03)}
 body.light .dropzone .fake-tags span{border-color:rgba(15,23,42,.16);background:rgba(15,23,42,.03);color:#64748b}
-
-.dist-box{display:flex;flex-direction:column;gap:9px;align-items:stretch;flex-wrap:nowrap}
-.dist-box .db-left{display:flex;align-items:baseline;gap:6px}
-.dist-box .db-bar{display:flex;gap:2px;height:14px;border-radius:99px;overflow:hidden;
-  background:rgba(255,255,255,.06);border:1px solid var(--line)}
-.dist-box .db-seg{display:block;height:100%;min-width:6px;border-radius:2px;transition:flex .3s}
-.dist-box .db-legend{display:flex;flex-wrap:wrap;gap:6px 12px}
-.dist-box .db-leg{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-2xs);color:var(--ink3)}
-.dist-box .db-leg i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
-.dist-box .db-leg b{color:var(--ink2);font-weight:800;
-  font-family:'Roboto','DIN Alternate','Segoe UI',system-ui,sans-serif}
-body.light .dist-box .db-bar{background:rgba(15,23,42,.06);border-color:rgba(15,23,42,.12)}
-body.light .dist-box .db-leg{color:#64748b}
-body.light .dist-box .db-leg b{color:#0f172a}
 
 #vSetup .dash-metrics .dm{position:relative;padding:12px 8px;
   background:linear-gradient(160deg,rgba(108,140,255,.16),rgba(65,224,200,.05));
@@ -1994,8 +1991,6 @@ var Q_CAT_MAP={
  c1:'self',c2:'self',c3:'self',c4:'stable',c5:'stress',c6:'stress',c7:'stable',c8:'fit',c9:'self',c10:'culture'
 };
 function catOf(q){return Q_CAT_MAP[q.id]||'ability'}
-/* 六大题型配色（右侧仪表盘配比条形图 / 图例用） */
-var CAT_COLOR={self:'#6C8CFF',fit:'#41E0C8',ability:'#A78BFA',stable:'#FBBF24',stress:'#FB7185',culture:'#60A5FA'};
 
 /* 直接读源数据：推荐组 = 当前大类专属，通用组 = GENERAL_TYPES */
 function recommendTypes(catId){
@@ -2152,17 +2147,10 @@ function renderSummary(){
   /* 左：面试策略卡 — 大字总数 + 当前面试场景（六大题型配比已下沉为底层抽题/评分算法，不再向用户展示） */
   var db=document.getElementById('distBox');
   if(db){
-    /* 按题型题量生成横向堆叠进度条：每段颜色对应 CAT_COLOR，段宽 = 该题型题数 */
-    var used=Q_CATEGORIES.filter(function(c){return plan.counts[c.id]});
+    /* 大字题量 + 当前面试场景（题型配比仅用于底层抽题与评分，不再向用户展示） */
     db.innerHTML='<div class="db-left"><span class="db-num">'+plan.total+'</span><span class="db-unit">题 · 由 AI 自动分配</span></div>'+
-      '<div class="db-bar">'+used.map(function(c){
-        return '<span class="db-seg" style="flex:'+plan.counts[c.id]+';background:'+CAT_COLOR[c.id]+
-          '" title="'+esc(c.name)+' '+plan.counts[c.id]+' 题"></span>';
-      }).join('')+'</div>'+
-      '<div class="db-legend">'+used.map(function(c){
-        return '<span class="db-leg"><i style="background:'+CAT_COLOR[c.id]+'"></i>'+
-          esc(c.name.replace('类',''))+' <b>'+plan.counts[c.id]+'</b></span>';
-      }).join('')+'</div>';
+      '<div class="db-scene"><span class="ds-ic">'+curScene.icon+'</span>'+
+        '<div class="ds-main"><b>'+esc(curScene.name)+'</b><span class="ds-desc">'+esc(curScene.desc)+'</span></div></div>';
   }
   /* 右：实时反馈仪表盘 */
   var box=document.getElementById('wzSummary');
