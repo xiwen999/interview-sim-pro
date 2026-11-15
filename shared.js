@@ -889,7 +889,7 @@ function openLoginModal(){
   var u=getUser()||{};
   var m=openMask(
     '<div class="login-card">'+
-      '<div class="lg-top"><button class="m-x" id="lgX">✕</button></div>'+
+      '<div class="lg-top"><div class="lg-wx-wrap"><button type="button" class="lg-wx" id="lgWx" aria-label="微信扫码登录" title="微信扫码登录"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 15h3v3h-3zM21 15v6h-6M15 21h3"/></svg></button><span class="lg-wx-tip">微信扫码登录</span></div><button class="m-x" id="lgX">✕</button></div>'+
       '<div class="lg-logo"><svg viewBox="0 0 48 48" fill="none" aria-label="模拟面试训练营 Pro logo"><defs><linearGradient id="lgHex" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="0.55" stop-color="#0ea5e9"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><polygon points="24,2.5 43,13.25 43,34.75 24,45.5 5,34.75 5,13.25" fill="url(#lgHex)" stroke="#1e293b" stroke-width="2.4" stroke-linejoin="round"/><polygon points="5,34.75 24,45.5 13,38.5" fill="#f97316"/><path d="M10.5 34 L10.5 19 L17 27 L23.5 15.5 L30 27 L36 17" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 17 L41 12 L41 18 Z" fill="#fff"/></svg></div>'+
       '<h3>模拟面试训练营 <span class="lg-pro">Pro</span></h3>'+
       '<div class="lg-sub">让每一次开口，都成为你的主场</div>'+
@@ -898,76 +898,82 @@ function openLoginModal(){
       '<div class="lg-pass"><input class="f-in" id="lgPass" type="password" maxlength="32" placeholder="密码（至少 6 位）" autocomplete="current-password" aria-label="密码">'+
         '<button type="button" class="lg-eye" id="lgEye" title="显示密码" aria-label="显示或隐藏密码">👁</button></div>'+
       '<input class="f-in" id="lgPass2" type="password" maxlength="32" placeholder="再次输入密码" style="display:none" autocomplete="new-password" aria-label="再次输入密码">'+
-      '<div class="lg-cap"><canvas id="lgCap" width="104" height="40" title="点击换一张" role="img" aria-label="图形验证码，点击可更换"></canvas>'+
-        '<input class="f-in" id="lgCapIn" maxlength="4" placeholder="验证码" autocomplete="off" aria-label="验证码">'+
-        '<button type="button" class="lg-cap-r" id="lgCapR" title="换一张验证码">↻</button></div>'+
+      '<input class="f-in" id="lgEmail" maxlength="64" type="email" placeholder="请输入邮箱" autocomplete="email" aria-label="邮箱" style="display:none">'+
+      '<div class="lg-pass" id="lgCodeWrap" style="display:none"><input class="f-in" id="lgCode" maxlength="6" inputmode="numeric" placeholder="邮箱验证码" autocomplete="one-time-code" aria-label="邮箱验证码">'+
+        '<button type="button" class="lg-sendcode" id="lgSendCode">获取验证码</button></div>'+
       '<div class="lg-err" id="lgErr"></div>'+
       '<button class="btn pri lg-go" id="lgGo" style="width:100%">🔑 登录</button>'+
       '<div class="lg-alt"><button class="btn gho" id="lgQuick" style="width:100%">游客快速登录</button></div>'+
       '<div class="lg-adm-tip" id="lgAdmTip" style="display:none">👑 这是管理员专用账号，不能在用户账号里登录。<br>'+
         '管理后台是独立空间，请前往：<a href="admin.html" class="txA" style="text-decoration:underline">打开管理后台 →</a></div>'+
-      '<div class="lg-note">无需真实手机号 · 仅用于模拟训练<br>注册后账号云端保存，换设备也能登录</div>'+
+      '<div class="lg-note" id="lgNote">无需真实手机号 · 仅用于模拟训练<br>注册后账号云端保存，换设备也能登录</div>'+
       '<div class="lg-foot"><a class="lg-adm" href="admin.html" title="管理员请在独立后台登录">👑 管理员登录</a></div>'+
     '</div>'
   );
   var accIn=$('#lgAcc'),passIn=$('#lgPass'),pass2In=$('#lgPass2'),
-      capIn=$('#lgCapIn'),errEl=$('#lgErr'),goBtn=$('#lgGo');
-  var mode='login',capCode='';
+      emailIn=$('#lgEmail'),codeIn=$('#lgCode'),codeWrap=$('#lgCodeWrap'),
+      errEl=$('#lgErr'),goBtn=$('#lgGo'),noteEl=$('#lgNote'),
+      sendBtn=$('#lgSendCode');
+  var mode='login',countdown=0,codeTimer=null;
 
-  function drawCap(){
-    var cv=$('#lgCap');if(!cv)return;
-    var ctx=cv.getContext('2d');
-    var w=104,h=40;
-    /* 高分屏按 devicePixelRatio 放大后备缓冲，文字才不糊；CSS 尺寸保持 104×40 */
-    var dpr=Math.max(1,Math.min(window.devicePixelRatio||1,2));
-    if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){
-      cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
-      cv.style.width=w+'px';cv.style.height=h+'px';
-    }
-    /* 必须先清空：否则每次重绘都叠在旧像素上，点几次就糊成一团 */
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.globalAlpha=1;
-    ctx.clearRect(0,0,w,h);
-    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    capCode='';
-    for(var i=0;i<4;i++)capCode+=chars.charAt(Math.floor(Math.random()*chars.length));
-    /* 浅色模式下验证码要画深色，否则白底上看不清 */
-    var capLight=document.body.classList.contains('light');
-    var g=ctx.createLinearGradient(0,0,w,h);
-    if(capLight){g.addColorStop(0,'rgba(37,99,235,.14)');g.addColorStop(1,'rgba(13,148,136,.12)')}
-    else{g.addColorStop(0,'rgba(108,140,255,.22)');g.addColorStop(1,'rgba(65,224,200,.16)')}
-    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-    var noiseC=capLight?'rgba(15,23,42,':'rgba(255,255,255,';
-    for(var l=0;l<4;l++){
-      ctx.strokeStyle=noiseC+(0.12+Math.random()*0.18)+')';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(Math.random()*w,Math.random()*h);ctx.lineTo(Math.random()*w,Math.random()*h);ctx.stroke();
-    }
-    for(var d=0;d<26;d++){
-      ctx.fillStyle=noiseC+(0.08+Math.random()*0.14)+')';
-      ctx.fillRect(Math.random()*w,Math.random()*h,2,2);
-    }
-    var colors=capLight?['#1d4ed8','#2563eb','#0f766e','#b45309','#be185d']
-                       :['#cdd8ff','#8ABDFF','#7EE7A7','#FBBF24','#F9A8D4'];
-    for(var j=0;j<4;j++){
-      ctx.save();
-      ctx.translate(16+j*22,h/2+2);
-      ctx.rotate((Math.random()-.5)*0.5);
-      ctx.font='bold 21px "JetBrains Mono",monospace';
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillStyle=colors[j%colors.length];
-      ctx.fillText(capCode.charAt(j),0,0);
-      ctx.restore();
-    }
-  }
   function showErr(msg){errEl.textContent=msg;errEl.classList.add('show')}
   function clearErr(){errEl.textContent='';errEl.classList.remove('show')}
   function setMode(nm){
     mode=nm;
     $$('.lg-tabs button',m).forEach(function(b){b.classList.toggle('on',b.dataset.mode===nm)});
     pass2In.style.display=nm==='reg'?'':'none';
+    emailIn.style.display=nm==='reg'?'':'none';
+    codeWrap.style.display=nm==='reg'?'flex':'none';
     goBtn.textContent=nm==='reg'?'✨ 注册并登录':'🔑 登录';
     passIn.setAttribute('autocomplete',nm==='reg'?'new-password':'current-password');
-    pass2In.value='';clearErr();drawCap();capIn.value='';
+    pass2In.value='';clearErr();
+    noteEl.innerHTML=nm==='reg'
+      ?'邮箱验证码 5 分钟内有效 · 验证真实邮箱后完成注册<br>账号云端保存，换设备也能登录'
+      :'无需真实手机号 · 仅用于模拟训练<br>注册后账号云端保存，换设备也能登录';
+  }
+  /* 验证码按钮 60 秒倒计时 */
+  function startCountdown(){
+    if(codeTimer)clearInterval(codeTimer);
+    countdown=60;
+    sendBtn.disabled=true;sendBtn.classList.add('cd');sendBtn.textContent=countdown+'s 后重发';
+    codeTimer=setInterval(function(){
+      countdown--;
+      if(countdown<=0){
+        clearInterval(codeTimer);codeTimer=null;
+        sendBtn.disabled=false;sendBtn.classList.remove('cd');sendBtn.textContent='获取验证码';
+      }else{
+        sendBtn.textContent=countdown+'s 后重发';
+      }
+    },1000);
+  }
+  /* 发送注册邮箱验证码：POST /api/mail/send-code */
+  function sendCode(){
+    if(mode!=='reg')return;
+    var email=(emailIn.value||'').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr('请输入有效邮箱');emailIn.focus();return}
+    clearErr();sendBtn.disabled=true;sendBtn.textContent='发送中…';
+    apiCall('/api/mail/send-code',{method:'POST',body:{email:email},silent:true})
+      .then(function(r){
+        var d=r.data||{};
+        if(d.ok&&d.devCode){
+          /* 开发模式：服务端 SMTP 未配置，验证码直接带回并自动填入（上线前请配置 SMTP） */
+          codeIn.value=d.devCode;
+          startCountdown();
+          toast('开发模式：SMTP 未配置，验证码 '+d.devCode+' 已自动填入','warn');
+          codeIn.focus();
+        }else if(d.ok){
+          startCountdown();
+          toast('验证码已发送至 '+email+'，请注意查收','ok');
+          codeIn.focus();
+        }else{
+          showErr(d.msg||'发送失败，请重试');
+          sendBtn.disabled=false;sendBtn.textContent='获取验证码';
+        }
+      })
+      .catch(function(err){
+        showErr(err&&err.bizError?(err.msg||'发送失败，请重试'):'无法连接服务器，请稍后重试');
+        sendBtn.disabled=false;sendBtn.textContent='获取验证码';
+      });
   }
   function signIn(rec, token){
     if(token)API.setToken(token);
@@ -1017,18 +1023,26 @@ function openLoginModal(){
     var pw=passIn.value||'';
     if(!/^[A-Za-z0-9_]{3,20}$/.test(acc)){showErr('账号需为 3-20 位字母、数字或下划线');accIn.focus();return}
     if(pw.length<6){showErr('密码至少 6 位');passIn.focus();return}
-    if(mode==='reg'&&pw!==pass2In.value){showErr('两次输入的密码不一致');passIn.focus();return}
-    if((capIn.value||'').trim().toUpperCase()!==capCode){showErr('验证码不正确，请重新输入');capIn.value='';capIn.focus();drawCap();return}
+    var email='',code='';
+    if(mode==='reg'){
+      if(pw!==pass2In.value){showErr('两次输入的密码不一致');pass2In.focus();return}
+      email=(emailIn.value||'').trim();
+      code=(codeIn.value||'').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr('请输入有效邮箱');emailIn.focus();return}
+      if(!/^\d{6}$/.test(code)){showErr('请输入 6 位数字验证码');codeIn.focus();return}
+    }
     var isAdmAcc=acc.toLowerCase()===adminAccountName().toLowerCase()&&adminAccountName()!=='';
     if(isAdmAcc){
       showErr('这是管理员专用账号，请在独立的管理后台登录（admin.html）');
-      drawCap();capIn.value='';return;
+      return;
     }
     var avatar=AVATARS[Math.floor(Math.random()*AVATARS.length)];
     /* 优先走本地后端；业务错误由 apiCall 弹 toast 显示后端 msg；
-       网络错误由 apiCall 提示后回落到本地账号逻辑 */
+       网络错误：登录回落到本地账号逻辑；注册需要真实邮箱验证，不可离线 */
     withLoading(goBtn,function(){
-      return apiCall('/api/'+(mode==='reg'?'register':'login'),{method:'POST',body:{account:acc,password:pw,name:acc,avatar:avatar}})
+      var body={account:acc,password:pw,name:acc,avatar:avatar};
+      if(mode==='reg'){body.email=email;body.mailCode=code;}
+      return apiCall('/api/'+(mode==='reg'?'register':'login'),{method:'POST',body:body})
         .then(function(r){
           if(r.data.token){
             var buid=(r.data.user&&r.data.user.uid)||genUid();
@@ -1040,48 +1054,45 @@ function openLoginModal(){
           }
         })
         .catch(function(err){
-          /* 网络错误才回落到本地；业务错误已由 apiCall 弹过 toast，不再回落 */
-          if(err&&err.networkError)localAuth();
+          /* 网络错误才回落到本地（仅登录）；业务错误已由 apiCall 弹过 toast，不再回落 */
+          if(err&&err.networkError){
+            if(mode==='login')localAuth();
+            else showErr('无法连接服务器，注册需要联网验证邮箱，请稍后重试');
+          }
         });
     });
 
     function localAuth(){
       var list=getAccounts(),found=null,foundIdx=-1;
       for(var i=0;i<list.length;i++){if(String(list[i].account).toLowerCase()===acc.toLowerCase()){found=list[i];foundIdx=i;break}}
-      if(mode==='reg'){
-        if(found){showErr('该账号已注册，请直接登录');drawCap();capIn.value='';return}
-        var rec={account:acc,salt:randSalt(),name:acc,avatar:avatar,t:Date.now(),uid:genUid()};
-        rec.pass=hashPass(pw,rec.salt);
-        list.push(rec);saveAccounts(list);
-        signIn(rec);toast('已离线注册（本地），欢迎 '+acc,'ok');
-      }else{
-        if(!found||found.pass!==hashPass(pw,found.salt)){showErr('账号或密码不正确');drawCap();capIn.value='';return}
-        /* 旧账号可能没有 uid，回填一个并持久化，保证后续登录 uid 稳定 */
-        if(!found.uid){found.uid=genUid();list[foundIdx]=found;saveAccounts(list)}
-        signIn(found);toast('已离线登录（本地），欢迎 '+(found.name||found.account),'ok');
-      }
+      if(!found||found.pass!==hashPass(pw,found.salt)){showErr('账号或密码不正确');return}
+      /* 旧账号可能没有 uid，回填一个并持久化，保证后续登录 uid 稳定 */
+      if(!found.uid){found.uid=genUid();list[foundIdx]=found;saveAccounts(list)}
+      signIn(found);toast('已离线登录（本地），欢迎 '+(found.name||found.account),'ok');
       setTimeout(function(){location.reload()},520);
     }
   }
 
-  /* 关掉登录窗就把待跳转目标作废，避免之后误跳 */
-  $('#lgX').onclick=function(){window.__navAfterLogin=null;closeMask()};
+  /* 关掉登录窗就把待跳转目标作废，并停掉验证码倒计时 */
+  $('#lgX').onclick=function(){window.__navAfterLogin=null;if(codeTimer)clearInterval(codeTimer);closeMask()};
   $$('.lg-tabs button',m).forEach(function(b){b.onclick=function(){setMode(b.dataset.mode)}});
   $('#lgEye').onclick=function(){
     var isPw=passIn.type==='password';
     passIn.type=isPw?'text':'password';
     this.textContent=isPw?'🙈':'👁';
   };
-  $('#lgCap').onclick=drawCap;
-  $('#lgCapR').onclick=drawCap;
+  $('#lgWx').onclick=function(){toast('微信扫码登录暂未开放，请使用账号密码登录','warn')};
+  sendBtn.onclick=sendCode;
   /* 输入 admin 时提示这是管理员账号 */
   var admTip=$('#lgAdmTip');
-  accIn.addEventListener('input',function(){
-    if(admTip)admTip.style.display=adminAccountName()!==''&&(accIn.value||'').trim().toLowerCase()===adminAccountName().toLowerCase()?'':'none';
-    if(errEl.classList.contains('show'))clearErr();
+  [accIn,emailIn,codeIn].forEach(function(el){
+    el.addEventListener('input',function(){
+      if(el===accIn&&admTip)admTip.style.display=adminAccountName()!==''&&(accIn.value||'').trim().toLowerCase()===adminAccountName().toLowerCase()?'':'none';
+      if(errEl.classList.contains('show'))clearErr();
+    });
   });
   goBtn.onclick=submit;
-  [accIn,passIn,pass2In,capIn].forEach(function(el){
+  [accIn,passIn,pass2In,emailIn,codeIn].forEach(function(el){
     el.addEventListener('keydown',function(e){if(e.key==='Enter')submit()});
   });
   $('#lgQuick').onclick=function(){
@@ -1096,13 +1107,12 @@ function openLoginModal(){
     rec.pass=hashPass(pwQuick,rec.salt);
     list.push(rec);saveAccounts(list);
     signIn(rec);toast('已以游客身份登录','ok');
-    /* 尽力同步到后端，让其出现在管理后台（失败不影响本地体验） */
-    apiCall('/api/register',{method:'POST',body:{account:account,password:pwQuick,name:name,avatar:avatar},silent:true})
+    /* 尽力同步到后端，让其出现在管理后台（游客号免邮箱，走专用限速接口；失败不影响本地体验） */
+    apiCall('/api/quick-register',{method:'POST',body:{account:account,password:pwQuick,name:name,avatar:avatar},silent:true})
       .then(function(r){ if(r.data.token){API.setToken(r.data.token);var u=getUser()||{};u.uid=r.data.user.uid;storeSet('ivsim_user',u);} })
       .catch(function(){});
     setTimeout(function(){location.reload()},520);
   };
-  drawCap();
   setTimeout(function(){accIn.focus()},160);
 }
 
@@ -1320,7 +1330,6 @@ function mountNav(active){
       '<a href="bank.html" class="'+(active==='bank'?'on':'')+'">题库</a>'+
       '<a href="square.html" class="'+(active==='square'?'on':'')+'">观摩大厅</a>'+
       '<a href="relax.html" class="'+(active==='relax'?'on':'')+'">轻松一下</a>'+
-      '<a href="product.html" class="'+(active==='product'?'on':'')+'">产品蓝图</a>'+
       '<a href="videos.html" class="'+(active==='videos'?'on':'')+'">个人中心</a>'+
       '<a class="ai-nav-link" href="javascript:;">🤖 AI 助手</a>'+
     '</div>'+
@@ -2006,12 +2015,6 @@ function openSettings(){
     settingRow('背景动效','关闭可减少卡顿、更省电','chip '+(st.motionOff?'':'on'),'stMotion',st.motionOff?'已关闭':'已开启')+
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
-        '<div style="font-weight:700;font-size:14px">🤖 AI 大模型</div>'+
-        '<span id="stAiStat" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
-      '</div>'+
-      '<div style="font-size:12px;color:var(--ink3)">面试官追问、评分、复盘教练由服务端统一接入真实大模型（密钥保存在服务端，不经过浏览器），无需在本机配置。</div>'+
-    '</div>'+
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
         '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
@@ -2046,15 +2049,6 @@ function openSettings(){
     ['ivsim_userdata','ivsim_settings','ivsim_accounts'].forEach(function(k){localStorage.removeItem(k)});
     closeMask();toast('本地数据已清空','ok');
   };
-
-  /* AI 大模型状态：服务端统一接入，检测云端配置是否生效 */
-  (function(){
-    var s=$('#stAiStat');if(!s)return;
-    var on=false;
-    try{on=typeof CLOUD!=='undefined'&&CLOUD.isConfigured&&CLOUD.isConfigured()}catch(e){}
-    s.textContent=on?'已接入 · 真实模型':'本地模拟';
-    s.style.color=on?'#7EE7A7':'var(--ink3)';
-  })();
 
   /* 桌面助手设置 */
   var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
@@ -2495,7 +2489,7 @@ var AGENT_RULES=[
   {k:['头像','昵称','改名','个人中心'],r:'点右上角你的头像，就能打开个人中心：改昵称、换头像、签到打卡、看成就进度。'},
   {k:['主题','深浅色','夜间模式','白底'],r:'点右上角设置 ⚙ 可以切换深色 / 浅色主题，切换后全站生效。'},
   {k:['反馈','官方','off','建议','bug','问题反馈'],r:'可以点右上角 ✉️ 图标或下方按钮，把问题直接发给官方（off）。称呼、联系方式、问题描述三项必填，方便官方回复你。',acts:[{t:'立即反馈',fb:1}]},
-  {k:['登录','账号','注册'],r:'点击右上角「登录」可以注册本地账号：账号 3-20 位字母/数字/下划线，密码至少 6 位，再输入图形验证码即可。注册后账号会保存到云端，换设备也能用同一账号登录。不想填表可以点「游客快速登录」，系统会直接为你生成一个游客身份并进入。'},
+  {k:['登录','账号','注册'],r:'点击右上角「登录」可以注册账号：账号 3-20 位字母/数字/下划线，密码至少 6 位，再填入邮箱并输入收到的 6 位邮箱验证码即可。注册后账号会保存到云端，换设备也能用同一账号登录。不想填表可以点「游客快速登录」，系统会直接为你生成一个游客身份并进入。'},
   {k:['数据','隐私','安全'],r:'训练记录、视频、个人设置会保存到云端服务器，用于跨设备同步和观摩大厅展示；你的练习视频只有审核通过后才会公开，可随时在个人中心管理或删除自己的数据。'},
   {k:['签到','打卡','每日签到'],r:'右下角有 ✔️ 签到按钮，或者浮动快捷菜单里也能一键签到。连续签到 3 天、累计签到 15 天都能解锁成就哦！',acts:[{t:'去签到',act:'checkin'}]},
   {k:['成就','勋章','徽章','解锁'],r:'目前有 '+ACH_DEFS.length+' 个成就可以解锁，包括初次面试、全场景王者、连续签到、面试人格测试等。右下角 🏅 按钮可以查看已解锁的成就墙。',acts:[{t:'查看成就墙',act:'ach'}]},
