@@ -3221,19 +3221,19 @@ var vrecLimitSel=document.getElementById('vrecLimit');
    face 是该图里人物的脸/下颌百分比坐标（用于只让人物动），voice 是该岗位面试官的音色。 */
 var SCENE_META={
   job:{img:'assets/scenes/job.svg',room:'求职实习 · HR 办公室',iv:'HR 面试官',role:'校园招聘 · 实习岗',
-    face:{x:50,y:24.5,rx:10.4,ry:12.6,mouth:29.8,jrx:4.8,jry:2.4,neck:37,zoom:1.24},
+    face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'f',pitch:1.1,rate:.97,prefer:['xiaoxiao','晓晓','xiaoyi','晓伊','huihui','yaoyao','慧慧','瑶瑶']}},
   tech:{img:'assets/scenes/tech.svg',room:'技术开发 · 高端会议室',iv:'技术面试官',role:'技术面 · 项目深挖',
-    face:{x:50,y:22.5,rx:9.4,ry:16.8,mouth:32.2,jrx:4.4,jry:2.6,neck:42.5,zoom:1.15},
+    face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.9,rate:.95,prefer:['yunxi','云希','yunjian','云健','yunyang','云扬','kangkang','康康']}},
   data:{img:'assets/scenes/data.svg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面',
-    face:{x:50.5,y:25,rx:9.6,ry:17,mouth:35.8,jrx:5,jry:2.7,neck:45,zoom:1.2},
+    face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.82,rate:.88,prefer:['yunjian','云健','kangkang','康康','yunyang','云扬','yunxi','云希']}},
   product:{img:'assets/scenes/product.svg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗',
-    face:{x:50.5,y:27,rx:9,ry:15,mouth:35.8,jrx:4.4,jry:2.3,neck:44,zoom:1.22},
+    face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:1.04,rate:1.05,prefer:['yunyang','云扬','yunxi','云希','yunjian','云健','kangkang','康康']}},
   general:{img:'assets/scenes/general.svg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面',
-    face:{x:51.5,y:20.3,rx:8.4,ry:14,mouth:26.6,jrx:4.2,jry:2.1,neck:35,zoom:1.18},
+    face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.95,rate:.9,prefer:['yunxia','云夏','yunjian','云健','yunyang','云扬','kangkang','康康']}}
 };
 function preloadScene(k){var m=SCENE_META[k];if(m){var im=new Image();im.src=m.img}}
