@@ -380,13 +380,6 @@ body.light #vSession .qcard{border-color:rgba(108,140,255,.30);
 #submitBtn{background:linear-gradient(135deg,#f6a444,#ef8f2d);color:#fff;
   box-shadow:0 8px 22px rgba(240,150,50,.4);border:none;font-weight:700}
 #submitBtn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(240,150,50,.52)}
-.skip-btn{padding:9px 16px;border-radius:11px;border:1px solid rgba(255,255,255,.14);
-  background:rgba(70,78,96,.85);color:#e8ecf6;font-size:var(--fs-base);cursor:pointer;
-  transition:.18s;font-family:inherit}
-.skip-btn:hover{background:rgba(88,96,118,.95);border-color:rgba(255,255,255,.24);transform:translateY(-1px)}
-body.light .skip-btn{background:#565d6b;border-color:#565d6b;color:#fff}
-body.light .skip-btn:hover{background:#454c59}
-@media (max-width:640px){.skip-btn{padding:8px 12px;font-size:var(--fs-sm)}}
 
 .rv-card{padding:clamp(14px,1.8vw,22px);border-radius:18px;border:1px solid var(--line);
   background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
@@ -1650,12 +1643,11 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
           <video id="vrecPrev" autoplay muted playsinline></video>
         </div>
         <div class="ans-bar">
-          <button class="skip-btn" id="skipBtn" title="本题不答，直接进入下一题">⏭ 跳过题目</button>
-          <button class="mic-btn" id="micBtn"></button>
-          <span class="hint txP" id="micHint"></span>
-          <select id="vrecLimit" class="mic-btn" style="padding:8px 8px" title="单次录制最长时长，到时自动停止并保存"></select>
-          <button class="mic-btn" id="vrecBtn" title="录制本题视频作答，保存到「个人中心 · 我的回放」">📹 录制</button>
-          <button class="mic-btn" id="qMuteBtn" style="padding:9px 12px" title="开关面试官自动朗读（朗读当前题与追问）">🔊</button>
+          <button class="mic-btn" id="micBtn" style="display:none"></button>
+          <span class="hint txP" id="micHint" style="display:none"></span>
+          <select id="vrecLimit" class="mic-btn" style="display:none" title="单次录制最长时长，到时自动停止并保存"></select>
+          <button class="mic-btn" id="vrecBtn" style="display:none" title="录制本题视频作答，保存到「个人中心 · 我的回放」">📹 录制</button>
+          <button class="mic-btn" id="qMuteBtn" style="display:none;padding:9px 12px" title="开关面试官自动朗读（朗读当前题与追问）">🔊</button>
           <button class="mic-btn" id="ttsBtn" style="padding:9px 12px">📢 朗读题目</button>
           <span class="hint" id="wordCnt">已输入 0 字</span>
           <button class="btn pri" id="submitBtn" style="margin-left:auto">提交作答</button>
@@ -3439,14 +3431,6 @@ function renderReviewVideoBox(){
 var recog=null,micOn=false,micMode='ta',micFinal='',micWantRun=false;
 var micBtn=document.getElementById('micBtn');
 micBtn.innerHTML=ICONS.mic+' 语音作答';
-/* 跳过题目：本题不答不保存，直接进入下一题（与「下一题」按钮同款跳转逻辑） */
-var skipBtn=document.getElementById('skipBtn');
-if(skipBtn)skipBtn.onclick=function(){
-  stopMic();
-  S.idx++;
-  nextQ();
-  toast('已跳过，进入下一题','ok');
-};
 function startMic(mode){
   var st=storeGet('ivsim_settings',{});
   if(st.voiceOff){miniPop('语音功能已关闭','可在右上角「设置」里重新开启语音作答。');return false}
