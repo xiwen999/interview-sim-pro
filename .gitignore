@@ -14,7 +14,7 @@ AI助手-桌面球.ps1
 # 开发杂物 / 第三方依赖
 node_modules/
 deploy/
-_trae-html-share-packages/
+.trae-html-share-packages/
 .vscode/
 .workbuddy/
 _tmp_check.js
