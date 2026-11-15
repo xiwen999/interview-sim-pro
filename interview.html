@@ -7,7 +7,7 @@
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>开始模拟面试 · 模拟面试训练营 Pro</title>
-<link rel="stylesheet" href="shared.css?v=20261115e10n">
+<link rel="stylesheet" href="shared.css?v=20261115f10n">
 <style>
 /* 内容壳：设置页在宽屏上铺开；作答 / 自评 / 复盘属正文阅读区，单独限行宽 */
 .wrap{max-width:2400px}
@@ -1385,12 +1385,12 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
             <div class="scene-stage idle" id="sceneStage">
               <div class="scene-media">
                 <div class="scene-figure" id="sceneFigure">
-                  <img class="scene-img" id="sceneImg" src="assets/scenes/general.svg" alt="模拟面试场景">
+                  <img class="scene-img" id="sceneImg" src="assets/scenes/general.jpg" alt="模拟面试场景">
                   <!-- 人物层：复制同一张图，只露出头部 / 下颌，随提问做拟人动作 -->
                   <div class="person-head" id="personHead">
-                    <img class="person-img" id="sceneHeadImg" src="assets/scenes/general.svg" alt="" aria-hidden="true">
+                    <img class="person-img" id="sceneHeadImg" src="assets/scenes/general.jpg" alt="" aria-hidden="true">
                     <div class="person-jaw" id="personJaw">
-                      <img class="person-img" id="sceneJawImg" src="assets/scenes/general.svg" alt="" aria-hidden="true">
+                      <img class="person-img" id="sceneJawImg" src="assets/scenes/general.jpg" alt="" aria-hidden="true">
                     </div>
                   </div>
                 </div>
@@ -1557,8 +1557,8 @@ body.light #vSetup .dash-metrics .dm{background:linear-gradient(160deg,#fcfdff,#
   </div>
 </div>
 
-<script src="shared.js?v=20261115e14d"></script>
-<script src="cloud.js?v=20261115e14b"></script>
+<script src="shared.js?v=20261115f14d"></script>
+<script src="cloud.js?v=20261115f14b"></script>
 <script>
 initPage('interview');
 
@@ -3253,26 +3253,26 @@ var vrecLimitSel=document.getElementById('vrecLimit');
 /* 岗位 ↔ 场景图：设置页选哪个岗位，动画互动就进哪个房间。
    face 是该图里人物的脸/下颌百分比坐标（用于只让人物动），voice 是该岗位面试官的音色，
    greet 是进入面试间时面试官的欢迎语（用对应音色朗读，性别与人物一致）。
-   老五景走 SVG 木偶说话动画；新四景（operation/design/business/support）走表情精灵动画（SPRITE_SCENES 标记）。 */
-var SPRITE_SCENES={operation:1,design:1,business:1,support:1};
+   九景全部使用实景照片（人物已整合进背景图，右下角水印已全部清理）；照片场景隐藏 SVG 木偶层防穿帮。 */
+var SPRITE_SCENES={job:1,tech:1,data:1,product:1,general:1,operation:1,design:1,business:1,support:1};
 var SCENE_META={
-  job:{img:'assets/scenes/job.svg',room:'求职实习 · HR 办公室',iv:'HR 面试官',role:'校园招聘 · 实习岗',
+  job:{img:'assets/scenes/job.jpg',room:'求职实习 · HR 办公室',iv:'HR 面试官',role:'校园招聘 · 实习岗',
     greet:'你好，我是今天的校园招聘面试官，欢迎你来参加实习面试，请放轻松。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'f',pitch:1.1,rate:.97,prefer:['xiaoxiao','晓晓','xiaoyi','晓伊','huihui','yaoyao','慧慧','瑶瑶']}},
-  tech:{img:'assets/scenes/tech.svg',room:'技术开发 · 高端会议室',iv:'技术面试官',role:'技术面 · 项目深挖',
+  tech:{img:'assets/scenes/tech.jpg',room:'技术开发 · 高端会议室',iv:'技术面试官',role:'技术面 · 项目深挖',
     greet:'你好，我是技术方向的面试官，今天我们会聊一些技术相关的话题，请做好准备。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.9,rate:.95,prefer:['yunxi','云希','yunjian','云健','yunyang','云扬','kangkang','康康']}},
-  data:{img:'assets/scenes/data.svg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面',
+  data:{img:'assets/scenes/data.jpg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面',
     greet:'你好，我是数据方向的面试官，接下来我们聊聊数据分析和业务理解相关的内容。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.82,rate:.88,prefer:['yunjian','云健','kangkang','康康','yunyang','云扬','yunxi','云希']}},
-  product:{img:'assets/scenes/product.svg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗',
+  product:{img:'assets/scenes/product.jpg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗',
     greet:'你好，我是产品方向的面试官，今天我们会探讨产品思维和相关的实战问题。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:1.04,rate:1.05,prefer:['yunyang','云扬','yunxi','云希','yunjian','云健','kangkang','康康']}},
-  general:{img:'assets/scenes/general.svg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面',
+  general:{img:'assets/scenes/general.jpg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面',
     greet:'你好，我是行为面试面试官，请放轻松，我们通过一些问题来了解你的经历和能力。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
     voice:{gender:'m',pitch:.95,rate:.9,prefer:['yunxia','云夏','yunjian','云健','yunyang','云扬','kangkang','康康']}},
@@ -3303,9 +3303,10 @@ function renderScene(){
     if(sceneHeadImg)sceneHeadImg.src=m.img;
     if(sceneJawImg)sceneJawImg.src=m.img;
   }
-  /* 混合动画模式：照片场景（新四景）人物已整合进背景图，隐藏木偶层防穿帮；SVG 场景照常木偶动画 */
+  /* 照片场景：人物已整合进背景图，隐藏木偶层防穿帮，并取消默认 1.18 缩放避免裁切 */
   if(sceneFigure){
     if(sceneFigure.classList)sceneFigure.classList.toggle('sprite-mode',spriteMode);
+    sceneFigure.style.setProperty('--zoom',spriteMode?1:(f.zoom||1.18));
     if(personHead)personHead.style.display=spriteMode?'none':'';
     if(personJaw)personJaw.style.display=spriteMode?'none':'';
   }
