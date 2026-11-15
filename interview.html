@@ -3556,7 +3556,7 @@ var SCENE_META={
   data:{img:'assets/scenes/data.jpg',room:'数据分析 · 高端会议室',iv:'数据面试官',role:'数据分析 · 业务面',
     greet:'你好，我是数据方向的面试官，接下来我们聊聊数据分析和业务理解相关的内容。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
-    voice:{gender:'m',pitch:.82,rate:.88,prefer:['yunjian','云健','kangkang','康康','yunyang','云扬','yunxi','云希']}},
+    voice:{gender:'f',pitch:.98,rate:.96,prefer:['xiaoyi','晓伊','xiaomo','晓墨','xiaoshuang','晓双','xiaoxiao','晓晓','huihui','慧慧','yaoyao','瑶瑶']}},
   product:{img:'assets/scenes/product.jpg',room:'产品运营 · 创意办公区',iv:'业务面试官',role:'产品 / 运营岗',
     greet:'你好，我是产品方向的面试官，今天我们会探讨产品思维和相关的实战问题。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
@@ -3564,15 +3564,15 @@ var SCENE_META={
   general:{img:'assets/scenes/general.jpg',room:'通用行为面试 · 休息区',iv:'行为面试官',role:'STAR 行为面',
     greet:'你好，我是行为面试面试官，请放轻松，我们通过一些问题来了解你的经历和能力。',
     face:{x:50,y:24,rx:10,ry:13.1,mouth:30,jrx:5,jry:2.2,neck:35.5,zoom:1.15},
-    voice:{gender:'m',pitch:.95,rate:.9,prefer:['yunxia','云夏','yunjian','云健','yunyang','云扬','kangkang','康康']}},
+    voice:{gender:'m',pitch:.95,rate:.9,prefer:['yunjian','云健','yunxi','云希','yunyang','云扬','kangkang','康康']}},
   operation:{img:'assets/scenes/operation.jpg',room:'运营营销 · 创意办公区',iv:'运营面试官',role:'用户运营 / 内容运营 / 活动运营',
     greet:'你好，我是运营方向的面试官，很高兴和你交流运营策划和增长相关的话题。',
     face:{x:50,y:25,rx:9,ry:15,mouth:33,jrx:4.5,jry:2.4,neck:40,zoom:1.2},
-    voice:{gender:'f',pitch:1.12,rate:1.04,prefer:['xiaoxiao','晓晓','xiaoyi','晓伊','huihui','慧慧','yaoyao','瑶瑶']}},
+    voice:{gender:'f',pitch:1.12,rate:1.04,prefer:['xiaomo','晓墨','xiaoxiao','晓晓','xiaoyi','晓伊','huihui','慧慧','yaoyao','瑶瑶']}},
   design:{img:'assets/scenes/design.jpg',room:'设计交互 · 设计工作室',iv:'设计面试官',role:'UI设计 / 交互设计 / 视觉设计',
     greet:'你好，我是设计方向的面试官，今天我们会聊聊设计思维、交互体验和视觉表达。',
     face:{x:50,y:24,rx:9.2,ry:15.5,mouth:32,jrx:4.6,jry:2.4,neck:39,zoom:1.21},
-    voice:{gender:'f',pitch:1.0,rate:.96,prefer:['xiaoyi','晓伊','xiaoxiao','晓晓','huihui','慧慧','yaoyao','瑶瑶']}},
+    voice:{gender:'f',pitch:1.0,rate:.96,prefer:['xiaoxuan','晓萱','xiaoyi','晓伊','xiaoxiao','晓晓','huihui','慧慧','yaoyao','瑶瑶']}},
   business:{img:'assets/scenes/business.jpg',room:'业务销售 · 高端会议室',iv:'销售面试官',role:'大客户销售 / 渠道销售 / 商务拓展(BD)',
     greet:'你好，我是销售业务方向的面试官，我们开始今天的面试吧，请展现你的销售能力。',
     face:{x:50,y:23,rx:9.5,ry:16,mouth:31.5,jrx:4.6,jry:2.5,neck:41,zoom:1.19},
@@ -3580,7 +3580,7 @@ var SCENE_META={
   support:{img:'assets/scenes/support.jpg',room:'职能支撑 · HR 办公室',iv:'HR 面试官',role:'人力资源(HR) / 财务 / 审计 / 法务 / 合规',
     greet:'你好，我是HR方向的面试官，欢迎参加今天的职能岗位面试，我们简单聊几个问题。',
     face:{x:50,y:25.5,rx:9.3,ry:15.8,mouth:33.5,jrx:4.5,jry:2.4,neck:40,zoom:1.2},
-    voice:{gender:'f',pitch:1.05,rate:.94,prefer:['xiaoxiao','晓晓','huihui','慧慧','xiaoyi','晓伊','yaoyao','瑶瑶']}}
+    voice:{gender:'f',pitch:1.05,rate:.94,prefer:['xiaohan','晓涵','xiaoxiao','晓晓','huihui','慧慧','xiaoyi','晓伊','yaoyao','瑶瑶']}}
 };
 function preloadScene(k){var m=SCENE_META[k];if(m){var im=new Image();im.src=m.img}}
 function renderScene(){
@@ -3603,8 +3603,8 @@ function zhVoiceList(){
 }
 function voiceGender(v){
   var n=(v.name||'').toLowerCase();
-  if(/xiaoxiao|晓晓|xiaoyi|晓伊|huihui|慧慧|yaoyao|瑶瑶|xiaomo|晓墨|xiaohan|晓涵|xiaoxuan|晓萱|xiaorui|晓睿|xiaoshuang|晓双|yating|亚婷|xiaobei|晓北|xiaoni|晓妮|xiaoyu|晓雨|xiaoman|晓曼|xiaojia|晓佳|xiaozhen|晓臻|female|女/i.test(n))return 'f';
-  if(/yunxi|云希|yunjian|云健|yunyang|云扬|yunkai|云凯|yunye|云野|yunxia|云夏|yunlong|云龙|yunzhe|云哲|kangkang|康康|male|男/i.test(n))return 'm';
+  if(/xiaoxiao|晓晓|xiaoyi|晓伊|huihui|慧慧|yaoyao|瑶瑶|xiaomo|晓墨|xiaohan|晓涵|xiaoxuan|晓萱|xiaorui|晓睿|xiaoshuang|晓双|yating|亚婷|xiaobei|晓北|xiaoni|晓妮|xiaoyu|晓雨|xiaoman|晓曼|xiaojia|晓佳|xiaozhen|晓臻|yunxia|云夏|female|女/i.test(n))return 'f';
+  if(/yunxi|云希|yunjian|云健|yunyang|云扬|yunkai|云凯|yunye|云野|yunlong|云龙|yunzhe|云哲|kangkang|康康|male|男/i.test(n))return 'm';
   return '';
 }
 function pickJobVoice(key){
