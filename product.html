@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+<script>/* 首帧前应用已保存的主题 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>产品蓝图 · 模拟面试训练营 Pro</title>
@@ -21,12 +21,12 @@ body{background:
     radial-gradient(circle at 48% 72%,rgba(183,166,249,.04) 0 1px,transparent 1px);
   background-size:190px 190px,230px 230px,170px 170px;opacity:.5}
 .fp-shell{position:relative;overflow:hidden}
-/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+/* 壳内动态星光层 */
 .fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .fp-shell::after{content:"📐";position:absolute;right:-28px;top:-38px;font-size:195px;opacity:.025;
   transform:rotate(-8deg);pointer-events:none;filter:grayscale(.25)}
 @media (max-width:1024px){.fp-shell::after{font-size:135px;right:-18px;top:-28px}}
-/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
+/* 浅色模式适配 */
 body.light .fp-wrap::before{opacity:.25}
 body.light .fp-shell::after{opacity:.018}
 /* Hero：深色玻璃面板，与设置页一致 */
@@ -246,10 +246,10 @@ footer{margin-top:50px;text-align:center;font-size:var(--fs-xs);color:var(--ink3
   </div>
 </div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script src="cloud.js?v=20261115g07a"></script>
 <script>if(!initPage('product',true))throw new Error('login required');
-/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+/* 壳内动态星空 */
 seedStars('pdStars1',700,1,60);seedStars('pdStars2',200,2,120);seedStars('pdStars3',100,3,180);</script>
 </body>
 </html>

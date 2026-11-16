@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+<script>/* 首帧前应用已保存的主题 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>观摩大厅 · 模拟面试训练营 Pro</title>
@@ -20,12 +20,12 @@ body{background:
     radial-gradient(circle at 50% 75%,rgba(138,189,255,.04) 0 1px,transparent 1px);
   background-size:200px 200px,180px 180px,240px 240px;opacity:.5}
 .fp-shell{position:relative;overflow:hidden}
-/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+/* 壳内动态星光层 */
 .fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .fp-shell::after{content:"🎬";position:absolute;right:-25px;top:-35px;font-size:190px;opacity:.028;
   transform:rotate(-12deg);pointer-events:none;filter:grayscale(.2)}
 @media (max-width:1024px){.fp-shell::after{font-size:130px;right:-15px;top:-25px}}
-/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
+/* 浅色模式适配 */
 body.light .fp-wrap::before{opacity:.22}
 body.light .fp-shell::after{opacity:.018}
 /* 与题库一致：壳体贴平，让极光背景连续铺满整页 */
@@ -60,7 +60,7 @@ body.light .fp-shell::before{display:none}
 .vthumb{height:140px;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,rgba(30,40,80,.9),rgba(38,32,72,.85));position:relative;overflow:hidden}
 .vthumb .vph{line-height:1;transition:opacity .3s}
 .vthumb.has-poster .vph{opacity:0}
-/* 封面：视频随机一帧，图片就位后淡入（未取到画面时保留图标兜底） */
+
 .vthumb img.vposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s;display:block;pointer-events:none;z-index:1}
 .vthumb img.vposter.on{opacity:1}
 .vthumb::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 55%,rgba(6,10,22,.55));opacity:0;transition:opacity .4s;pointer-events:none}
@@ -113,11 +113,11 @@ body.light .fp-shell::before{display:none}
   </div>
 </div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script src="cloud.js?v=20261115g14b"></script>
 <script>
 initPage('square');
-/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+/* 壳内动态星空 */
 seedStars('sqStars1',700,1,60);seedStars('sqStars2',200,2,120);seedStars('sqStars3',100,3,180);
 
 var ROLE_F='all', ROUND_F='all';
@@ -176,8 +176,7 @@ function render(){
   $$('#list .vcard').forEach(function(c){
     c.onclick=function(){playVideo(c.dataset.id)};
   });
-  /* 封面：用视频里的随机一帧替换图标（命中缓存则瞬间显示） */
-  hydrateVideoPosters(document.getElementById('list'));
+    hydrateVideoPosters(document.getElementById('list'));
 }
 
 function playVideo(id){
@@ -196,9 +195,7 @@ function playVideo(id){
   });
 }
 
-/* ---- 从服务器拉取审核通过的视频，合并进本机列表（其他用户的投稿也能看到） ----
- * 大厅以服务器为唯一事实来源：管理员删除/拒绝的视频立即从大厅消失；
- * 自己投稿的审核状态由 syncOwnVideoStatuses 同步（shared.js） */
+/* 从服务器拉取审核通过的视频 */
 function mergeHall(hall){
   var local=getVideos(),byId={},changed=false;
   local.forEach(function(v,i){byId[v.id]=i});
@@ -207,7 +204,7 @@ function mergeHall(hall){
     hallIds[sv.id]=1;
     var v=local[byId[sv.id]];
     if(v){
-      /* 本机已有（可能是自己的投稿）：审核状态以服务器为准，作者名同步为服务器上的昵称 */
+      /* 本机已有 */
       if(v.status!=='approved'||!v.shared||v.owner!==sv.owner){
         v.status='approved';v.shared=true;v.owner=sv.owner;v.ownerUid=sv.ownerUid;
         if(sv.file)v.hasFile=true;
@@ -219,7 +216,7 @@ function mergeHall(hall){
       changed=true;
     }
   });
-  /* 已在服务器被下架 / 拒绝的「服务器来源」条目，从本机列表移除 */
+  /* 已在服务器被下架 / 拒绝的 */
   local=local.filter(function(v){return !(v.src==='server'&&!hallIds[v.id])});
   if(changed)saveVideos(local);
 }

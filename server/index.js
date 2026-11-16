@@ -1,19 +1,5 @@
 'use strict';
-/*
- * 模拟面试训练营 Pro · 本地后端（MySQL 存储版）
- * ------------------------------------------------------------
- * 依赖：mysql2（npm install 已装好）
- * 运行：  node server/index.js   （或 npm start）
- * 访问：  http://localhost:3000  （本服务同时静态托管前端页面）
- *
- * 设计目标：
- *   1. 与原 JSON 版完全相同的 /api 契约，前端（shared.js / admin.html）零改动。
- *   2. 数据库：MySQL 5.7+，连接配置见 server/config.json（支持环境变量覆盖）。
- *      首次启动自动建库建表；若 users 表为空且存在旧 server/data/db.json，
- *      自动把旧数据（用户 / 面试 / 视频 / 日志）导入 MySQL，无缝切换。
- *   3. 用户态用 HMAC 签名的无状态 token；管理后台用独立 admin token。
- *   4. 密码用 scrypt 加盐哈希，不存明文。
- */
+/* 模拟面试训练营 Pro · */
 
 const http = require('http');
 const fs = require('fs');
@@ -34,12 +20,12 @@ const mysql = require('mysql2/promise');
 const ROOT = path.resolve(__dirname, '..');           // 前端项目根目录（index.html 所在）
 const DATA_DIR = path.join(__dirname, 'data');
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');    // 投稿视频文件（供观摩大厅跨设备播放）
-const SECRET_FILE = path.join(DATA_DIR, 'secret.txt');// 签名密钥（沿用旧文件，token 不失效）
-const LEGACY_DB_FILE = path.join(DATA_DIR, 'db.json');    // 旧 JSON 数据：首次启动自动导入 MySQL（导入后保留作备份）
+const SECRET_FILE = path.join(DATA_DIR, 'secret.txt');// 签名密钥
+const LEGACY_DB_FILE = path.join(DATA_DIR, 'db.json');    // 旧 JSON 数据
 const LEGACY_ADMIN_FILE = path.join(DATA_DIR, 'admin.json');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
-/* 在线判定窗口：用户在该时长内发过心跳即视为「在线」。 */
+/* 在线判定窗口 */
 const ONLINE_TTL = 60 * 1000;
 
 function loadConfig() {
@@ -58,8 +44,7 @@ const MYSQL = {
   database: process.env.DB_NAME || M.database || 'interview_sim'
 };
 
-/* SMTP 邮件服务（注册邮箱验证码）：config.json 的 smtp 段或环境变量均可配置。
-   host/user/pass 任一为空 = 未配置，验证码接口自动进入开发模式（devCode 直接返回）。 */
+/* SMTP 邮件服务 */
 const S = CONFIG.smtp || {};
 const SMTP = {
   host: process.env.SMTP_HOST || S.host || '',
@@ -82,11 +67,11 @@ function mailTransport() {
   return _transport;
 }
 
-/* 注册邮箱验证码：email -> { code, expires, lastSend }，进程内存存储（重启即失效，无需建表） */
+/* 注册邮箱验证码 */
 const MAIL_CODES = new Map();
 const MAIL_CODE_TTL = 5 * 60 * 1000;      // 5 分钟有效
 const MAIL_CODE_COOLDOWN = 60 * 1000;     // 同一邮箱 60 秒内不可重发
-const MAIL_CODE_MAX_TRIES = 5;            // 单个验证码最多校验 5 次，防暴力枚举
+const MAIL_CODE_MAX_TRIES = 5;            // 单个验证码最多校验 5 次
 function genMailCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
 function mailCodeCleanup() {
   const now = Date.now();
@@ -119,14 +104,13 @@ const AI = {
   temperature: Number(A.temperature != null ? A.temperature : 0.7),
   maxTokens: Number(A.maxTokens != null ? A.maxTokens : 2048),
   timeoutMs: Number(A.timeoutMs != null ? A.timeoutMs : 90000),
-  /* 思考链开关：spark-x2.6 实测开启思考链首答 ~13s，关闭后 ~2.5s。
-     默认关闭；config.json ai 段设 "thinking": "enabled" 可重新打开。 */
+  /* 思考链开关 */
   thinking: A.thinking === 'enabled' ? 'enabled' : 'disabled',
   perUser: { max: Number((A.rateLimit && A.rateLimit.max) != null ? A.rateLimit.max : 60),
              windowMs: Number((A.rateLimit && A.rateLimit.windowMs) != null ? A.rateLimit.windowMs : 10 * 60 * 1000) }
 };
 function aiEnabled() { return !!AI.apiKey; }
-/* 关闭思考链时给上游附加的参数（讯飞星辰/兼容协议用 thinking.type 控制） */
+/* 关闭思考链时给上游附加的参数 */
 const AI_THINK_EXTRA = AI.thinking === 'enabled' ? {} : { thinking: { type: 'disabled' } };
 
 function loadSecret() {
@@ -188,7 +172,7 @@ async function q1(sql, params) {
   return rows[0] || null;
 }
 
-/* 建库建表（MySQL 5.7 兼容：JSON 列用 LONGTEXT 存储 + JS 解析，任何 5.7 小版本都可用） */
+/* 建库建表 */
 async function initDatabase() {
   const boot = await mysql.createPool({
     host: MYSQL.host, port: MYSQL.port, user: MYSQL.user, password: MYSQL.password,
@@ -300,7 +284,7 @@ async function initDatabase() {
   ];
   for (const s of DDL) await pool.query(s);
 
-  /* 增量迁移：为老库补齐个人资料扩展列（已存在则跳过） */
+  /* 增量迁移 */
   const EXTRA_COLUMNS = [
     'ADD COLUMN role VARCHAR(16) NOT NULL DEFAULT \'user\'',
     'ADD COLUMN signature VARCHAR(255) NULL',
@@ -315,7 +299,7 @@ async function initDatabase() {
     try { await pool.query('ALTER TABLE users ' + ddl); }
     catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
   }
-  /* 邮箱唯一索引（NULL 不参与唯一约束，老用户 email 为空不受影响） */
+  /* 邮箱唯一索引 */
   try { await pool.query('ALTER TABLE users ADD UNIQUE KEY uk_users_email (email)'); }
   catch (e) {
     if (e && e.code !== 'ER_DUP_KEYNAME' && e.code !== 'ER_DUP_ENTRY') {
@@ -398,9 +382,8 @@ async function userFull(u) {
   return u;
 }
 
-/* ---- 投稿视频文件（server/data/uploads/<id>）----
- * 元数据在 MySQL videos 表；文件本体上传到服务器后，任何用户都能在观摩大厅播放。 */
-const VIDEO_FILE_MAX = 500 * 1024 * 1024; // 500MB（需与 Nginx client_max_body_size 匹配）
+/* 投稿视频文件---- */
+const VIDEO_FILE_MAX = 500 * 1024 * 1024; // 500MB
 function videoFilePath(id) {
   if (!/^[\w-]{1,128}$/.test(String(id || ''))) return null; // 防目录穿越
   return path.join(UPLOAD_DIR, String(id));
@@ -418,7 +401,7 @@ function readRawBody(req, maxBytes) {
     req.on('error', reject);
   });
 }
-/* 大文件流式写盘（500MB 不再整块占内存）：边收边写，超限即中断并清理半成品 */
+/* 大文件流式写盘 */
 function saveStreamToFile(req, filePath, maxBytes) {
   return new Promise((resolve, reject) => {
     let size = 0, done = false;
@@ -453,7 +436,7 @@ async function getAdmin() { return q1('SELECT * FROM admin_account LIMIT 1'); }
 async function addLog(action, target, extra) {
   await q('INSERT INTO admin_logs (ts, action, target, extra, actor) VALUES (?,?,?,?,?)',
     [Date.now(), action || '', target || '', extra || '', '管理员']);
-  /* 只保留最近 60 条（与旧版行为一致） */
+  /* 只保留最近 60 条 */
   await q('DELETE FROM admin_logs WHERE id NOT IN (SELECT id FROM (SELECT id FROM admin_logs ORDER BY id DESC LIMIT 60) x)');
 }
 async function getLogs() {
@@ -530,13 +513,13 @@ function rateLimit(req, res, max, windowMs, bucket) {
   }
   return true;
 }
-/* 反解 token 得到用户（不检查封禁状态，供 /api/me 使用） */
+/* 反解 token 得到用户 */
 async function resolveUser(req) {
   const p = verifyToken(getBearer(req));
   if (!p || p.sub) return null;
   return findUserByUid(p.uid);
 }
-/* 严格的用户鉴权：封禁用户视为未登录（用于会写入数据的接口） */
+/* 严格的用户鉴权 */
 async function authUser(req) {
   const u = await resolveUser(req);
   if (!u || u.status === 'banned') return null;
@@ -553,7 +536,7 @@ async function findUserByEmail(email) {
   return r ? rowUser(r) : null;
 }
 
-/* POST /api/mail/send-code：发送注册邮箱验证码（公开接口，IP 限速 + 同邮箱 60 秒冷却） */
+/* POST /api/mail */
 async function apiMailSendCode(req, res, body) {
   if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'mail')) return; // 单 IP 10 分钟最多 10 次
   const email = String(body.email || '').trim();
@@ -569,7 +552,7 @@ async function apiMailSendCode(req, res, body) {
   const code = genMailCode();
   MAIL_CODES.set(key, { code, expires: now + MAIL_CODE_TTL, lastSend: now, tries: 0 });
   if (!smtpConfigured()) {
-    /* 开发模式：SMTP 未配置时把验证码直接带回，方便本地测试（上线前务必配置 SMTP） */
+    /* 开发模式 */
     console.warn('[mail] SMTP 未配置，开发模式返回 devCode：' + code);
     return send(res, 200, { ok: true, msg: '开发模式：SMTP 未配置，验证码已生成', devCode: code });
   }
@@ -594,7 +577,7 @@ async function apiRegister(req, res, body) {
   if (!/^[A-Za-z0-9_]{3,20}$/.test(acc)) return send(res, 400, { ok: false, msg: '账号需为 3-20 位字母、数字或下划线' });
   if (pw.length < 6) return send(res, 400, { ok: false, msg: '密码至少 6 位' });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return send(res, 400, { ok: false, msg: '请输入有效邮箱' });
-  /* 校验邮箱验证码：存在性 → 过期 → 次数 → 内容，通过后立即作废（一次性） */
+  /* 校验邮箱验证码 */
   const rec = MAIL_CODES.get(email.toLowerCase());
   if (!rec) return send(res, 400, { ok: false, msg: '请先获取邮箱验证码' });
   if (Date.now() > rec.expires) { MAIL_CODES.delete(email.toLowerCase()); return send(res, 400, { ok: false, msg: '验证码已过期，请重新获取' }); }
@@ -613,7 +596,7 @@ async function apiRegister(req, res, body) {
   const token = signToken({ uid, exp: now + 30 * 86400000 });
   return send(res, 200, { ok: true, token, user: publicUser(u) });
 }
-/* POST /api/quick-register：游客快速登录专用（免邮箱，服务端严格限速防滥用） */
+/* POST /api/ */
 async function apiQuickRegister(req, res, body) {
   if (!rateLimit(req, res, 3, 10 * 60 * 1000, 'quickreg')) return; // 单 IP 10 分钟最多 3 个游客号
   const acc = String(body.account || '').trim();
@@ -678,7 +661,7 @@ async function apiAddVideo(req, res, body) {
   await q('UPDATE users SET last=? WHERE id=?', [Date.now(), u.id]);
   return send(res, 200, { ok: true });
 }
-/* 已登录用户上报心跳：刷新在线状态与最近活跃时间，并记录当前所在模块页面 */
+/* 已登录用户上报心跳 */
 async function apiHeartbeat(req, res, body) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -687,7 +670,7 @@ async function apiHeartbeat(req, res, body) {
     [now, now, body && body.page ? String(body.page).slice(0, 24) : null, u.id]);
   return send(res, 200, { ok: true, online: true, ttl: ONLINE_TTL });
 }
-/* 已登录用户同步题库数据（收藏题目 id 列表 / 练习数），整合进用户画像 */
+/* 已登录用户同步题库数据 */
 async function apiBank(req, res, body) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -700,7 +683,7 @@ async function apiBank(req, res, body) {
   return send(res, 200, { ok: true, bank: { favs, practice } });
 }
 
-/* 个人资料同步：昵称/头像/签名/性别/生日/目标面试日/签到（前端尽力而为上报） */
+/* 个人资料同步 */
 async function apiProfile(req, res, body) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -734,18 +717,20 @@ async function apiProfile(req, res, body) {
   await q('UPDATE users SET last=? WHERE id=?', [Date.now(), u.id]);
   return send(res, 200, { ok: true });
 }
-/* 题库列表（公开接口：题库页游客可浏览，与原前端内置数据一致） */
+/* 题库列表 */
 async function apiQuestions(req, res) {
   const rows = await q('SELECT * FROM questions ORDER BY sort ASC, id ASC');
   const questions = rows.map(r => ({
     id: r.id, scene: r.scene, lv: Number(r.lv), q: r.q,
     point: r.point || '',
     tips: parseJsonSafe(r.tips, []),
-    ans: parseJsonSafe(r.ans, [])
+    ans: parseJsonSafe(r.ans, []),
+    ...(r.role ? { role: r.role } : {}),
+    ...(r.round ? { round: r.round } : {})
   }));
   return send(res, 200, { ok: true, questions, source: 'mysql' });
 }
-/* 观摩大厅（公开接口）：所有审核通过的视频 + 作者昵称/头像，供所有用户展示 */
+/* 观摩大厅 */
 async function apiVideoHall(req, res) {
   const rows = await q(`SELECT v.*, u.name AS uname, u.avatar AS uavatar
     FROM videos v JOIN users u ON u.uid=v.user_id
@@ -759,7 +744,7 @@ async function apiVideoHall(req, res) {
   }));
   return send(res, 200, { ok: true, videos: hall });
 }
-/* 投稿视频文件上传（登录用户；二进制 octet-stream，流式写盘，上限 500MB） */
+/* 投稿视频文件上传 */
 async function apiVideoFileUpload(req, res, body, m) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -767,8 +752,7 @@ async function apiVideoFileUpload(req, res, body, m) {
   if (!p) return send(res, 400, { ok: false, msg: '非法的视频 ID' });
   const v = await q1('SELECT id FROM videos WHERE id=? AND user_id=?', [m[1], u.uid]);
   if (!v) {
-    /* 客户端元数据上报与文件上传并发，记录尚未落库时先补建占位记录（后续元数据上报会覆盖更新） */
-    await q(`INSERT INTO videos (id,user_id,ts,title,scene,status,plays,reports,reason)
+        await q(`INSERT INTO videos (id,user_id,ts,title,scene,status,plays,reports,reason)
       VALUES (?,?,?,?,?,?,0,0,'') ON DUPLICATE KEY UPDATE user_id=VALUES(user_id)`,
       [m[1], u.uid, Date.now(), '未命名回放', 'general', 'pending']);
   }
@@ -780,7 +764,7 @@ async function apiVideoFileUpload(req, res, body, m) {
   await q('UPDATE users SET last=? WHERE id=?', [Date.now(), u.id]);
   return send(res, 200, { ok: true, size });
 }
-/* 投稿视频文件下载（公开：观摩大厅/管理后台播放用；流式 + Range 分段，支持大文件与进度条拖动） */
+/* 投稿视频文件下载 */
 function sniffVideoMime(p) {
   try {
     const fd = fs.openSync(p, 'r');
@@ -814,7 +798,7 @@ async function apiVideoFileGet(req, res, body, m) {
   res.writeHead(200, head);
   fs.createReadStream(p).pipe(res);
 }
-/* 投稿者撤回 / 删除自己的视频（连同服务器文件一起清理） */
+/* 投稿者撤回 / */
 async function apiVideoDelete(req, res, body, m) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -824,7 +808,7 @@ async function apiVideoDelete(req, res, body, m) {
   delVideoFile(m[1]);
   return send(res, 200, { ok: true });
 }
-/* 从 shared.js 提取内置题库字面量作为种子（单一数据源，仅含字符串/数字/数组，eval 安全） */
+/* 从 shared.js */
 function extractQuestionsFromSharedJs() {
   try {
     const src = fs.readFileSync(path.join(ROOT, 'shared.js'), 'utf8');
@@ -834,7 +818,7 @@ function extractQuestionsFromSharedJs() {
     return (Array.isArray(arr) && arr.length) ? arr : null;
   } catch (e) { console.error('[题库] 提取内置题库失败：' + (e && e.message ? e.message : e)); return null; }
 }
-/* questions 表为空时，用内置题库完成种子导入（已有数据不覆盖，便于后续在库中维护） */
+/* questions 表为空时 */
 async function seedQuestionsIfEmpty() {
   const c = await q1('SELECT COUNT(*) AS c FROM questions');
   if (Number(c.c) > 0) return 0;
@@ -842,13 +826,28 @@ async function seedQuestionsIfEmpty() {
   if (!list) return 0;
   for (let i = 0; i < list.length; i++) {
     const t = list[i];
-    await q(`INSERT INTO questions (id,scene,lv,q,point,tips,ans,sort) VALUES (?,?,?,?,?,?,?,?)
+    await q(`INSERT INTO questions (id,scene,lv,q,point,tips,ans,sort,role,\`round\`) VALUES (?,?,?,?,?,?,?,?,?,?)
       ON DUPLICATE KEY UPDATE scene=VALUES(scene), lv=VALUES(lv), q=VALUES(q),
-        point=VALUES(point), tips=VALUES(tips), ans=VALUES(ans), sort=VALUES(sort)`,
+        point=VALUES(point), tips=VALUES(tips), ans=VALUES(ans), sort=VALUES(sort),
+        role=VALUES(role), \`round\`=VALUES(\`round\`)`,
       [t.id, t.scene || 'general', t.lv || 1, t.q, t.point || '',
-        JSON.stringify(t.tips || []), JSON.stringify(t.ans || []), i]);
+        JSON.stringify(t.tips || []), JSON.stringify(t.ans || []), i, t.role || null, t.round || null]);
   }
   return list.length;
+}
+/* 每次启动补齐 shared. */
+async function syncBuiltInQuestions() {
+  const list = extractQuestionsFromSharedJs();
+  if (!list) return 0;
+  let added = 0;
+  for (let i = 0; i < list.length; i++) {
+    const t = list[i];
+    const r = await q(`INSERT IGNORE INTO questions (id,scene,lv,q,point,tips,ans,sort,role,\`round\`) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+      [t.id, t.scene || 'general', t.lv || 1, t.q, t.point || '',
+        JSON.stringify(t.tips || []), JSON.stringify(t.ans || []), i, t.role || null, t.round || null]);
+    if (r && r.affectedRows) added++;
+  }
+  return added;
 }
 function desktopRow(r) {
   return r
@@ -872,7 +871,7 @@ async function apiDesktopSet(req, res, body) {
   return send(res, 200, Object.assign({ ok: true }, st));
 }
 async function apiFeedbackAdd(req, res, body) {
-  if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条，防刷
+  if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条
   const name = String(body.name || '').trim().slice(0, 64);
   const contact = String(body.contact || '').trim().slice(0, 128);
   const msg = String(body.msg || '').trim().slice(0, 1200);
@@ -909,7 +908,7 @@ async function apiAdminFeedbackDel(req, res, body, mm) {
   return send(res, 200, { ok: true });
 }
 
-/* 管理员登录失败计数（按 IP）：只计「失败」，成功登录立即清零；错 5 次锁 15 分钟 */
+/* 管理员登录失败计数 */
 const ADMIN_FAILS = new Map(); // ip -> {count, lockUntil}
 async function apiAdminLogin(req, res, body) {
   const ip = String((req.headers['x-forwarded-for'] || req.socket.remoteAddress || '?')).split(',')[0].trim();
@@ -921,7 +920,7 @@ async function apiAdminLogin(req, res, body) {
   if (f.lockUntil && f.lockUntil <= now) { f.count = 0; f.lockUntil = 0; } // 锁定期满自动解锁
   const acc = String(body.account || '').trim();
   const pw = String(body.password || '');
-  /* 仅超级管理员可登录（admin_account 表，独立于用户体系） */
+  /* 仅超级管理员可登录 */
   const row = await getAdmin();
   const fail = (msg) => {
     f.count++;
@@ -1068,7 +1067,7 @@ async function seedDemo() {
     /* 不再生成示例视频：观摩大厅只展示用户真实投稿 */
   }
 }
-/* 把旧 JSON 数据（db.json）导入 MySQL，返回导入的用户数（失败返回 false） */
+/* 把旧 JSON 数据导入 */
 async function importLegacyJson() {
   let d;
   try { d = JSON.parse(fs.readFileSync(LEGACY_DB_FILE, 'utf8')); }
@@ -1106,7 +1105,7 @@ async function importLegacyJson() {
 async function initAdmin() {
   const row = await getAdmin();
   if (row) return;
-  /* 尝试从旧 admin.json 导入凭据，让原管理员密码继续可用 */
+  /* 尝试从旧 admin. */
   try {
     const a = JSON.parse(fs.readFileSync(LEGACY_ADMIN_FILE, 'utf8'));
     if (a && a.account && a.passHash) {
@@ -1124,7 +1123,7 @@ async function initAdmin() {
   console.log('  密码: ' + pass + '   （请妥善保存；也可用环境变量 ADMIN_PASSWORD 指定）\n');
 }
 
-/* 状态接口：公开（只暴露 是否可用 + 模型名），供前端判断走真实 AI 还是本地模拟 */
+/* 状态接口 */
 async function apiAiStatus(req, res) {
   return send(res, 200, { ok: true, enabled: aiEnabled(), model: aiEnabled() ? AI.model : '' });
 }
@@ -1152,7 +1151,7 @@ function safetyFilterOutput(text) {
   return s;
 }
 
-/* 按用户限速（防刷 Key 消耗额度）：uid 计数，超限 429 */
+/* 按用户限速 */
 const AI_USE = new Map(); // uid -> { count, reset }
 function aiRateLimit(res, uid) {
   const now = Date.now();
@@ -1167,10 +1166,7 @@ function aiRateLimit(res, uid) {
   return true;
 }
 
-/* 对话代理：body = { messages:[{role,content}...], stream?:bool, json?:bool }
- * 非流式返回 { ok:true, text }；流式按 SSE 原样转发上游增量。
- * messages 由前端按各自场景构造（系统提示词 + 对话历史），服务端只做
- * 白名单过滤 / 长度截断 / 限速，不感知业务。 */
+/* 对话代理 */
 async function apiAiChat(req, res, body) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '请先登录后再使用 AI 功能' });
@@ -1179,10 +1175,10 @@ async function apiAiChat(req, res, body) {
 
   const msgs = (Array.isArray(body.messages) ? body.messages : [])
     .filter(m => m && typeof m.role === 'string' && typeof m.content === 'string' && m.content.length > 0)
-    .slice(-40) // 最多保留最近 40 条，防止超长请求刷额度
+    .slice(-40) // 最多保留最近 40 条
     .map(m => ({ role: (m.role === 'assistant' || m.role === 'user' || m.role === 'system') ? m.role : 'user', content: m.content.slice(0, 16000) }));
   if (!msgs.length) return send(res, 400, { ok: false, msg: 'messages 不能为空' });
-  /* 输入安全：拦截违法/危险内容与提示词注入（只校验用户侧消息） */
+  /* 输入安全 */
   for (const m of msgs) {
     if (m.role === 'user') {
       const sc = safetyCheckInput(m.content);
@@ -1196,10 +1192,7 @@ async function apiAiChat(req, res, body) {
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), AI.timeoutMs);
-  /* 客户端提前断开连接时立即停止上游调用：
-     注意要监听 res 的 close 且仅在响应未正常结束时中止
-     （req 的 close 在请求体读完后就会触发，不能用作断开信号） */
-  res.on('close', () => { if (!res.writableEnded) ac.abort(); });
+    res.on('close', () => { if (!res.writableEnded) ac.abort(); });
   let up;
   try {
     up = await fetch(AI.baseURL + '/chat/completions', {
@@ -1232,8 +1225,7 @@ async function apiAiChat(req, res, body) {
     return send(res, 200, { ok: true, text: safetyFilterOutput(String(text)) });
   }
 
-  /* 流式：SSE 原样转发。X-Accel-Buffering:no 让 Nginx 对该响应关闭缓冲，逐字到达 */
-  res.writeHead(200, {
+    res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
     'Cache-Control': 'no-store',
     'Connection': 'keep-alive',
@@ -1295,7 +1287,7 @@ const AGENT_SYS =
   '【输出要求】简洁中文，重点突出，300 字以内；计划类回答用短列表。\n' +
   '【网站模块】模拟面试（多轮对话+语音作答+AI 评分复盘）、题库（收藏与练习）、观摩大厅（审核通过的视频）、个人中心（薄弱点本）、首页（签到/成就/每日挑战）。';
 
-/* Agent 专属限速：单次 Agent 请求最多触发 4 轮模型调用，比单轮代理更耗额度 */
+/* Agent 专属限速 */
 const AI_AGENT_USE = new Map();
 function aiAgentLimit(res, uid) {
   const now = Date.now(), max = 20, win = 10 * 60 * 1000;
@@ -1310,7 +1302,7 @@ function aiAgentLimit(res, uid) {
   return true;
 }
 
-/* 执行一个工具调用：全部按当前用户隔离查询，返回紧凑 JSON */
+/* 执行一个工具调用 */
 async function agentToolRun(uid, name, rawArgs) {
   let args = {};
   try { args = rawArgs ? JSON.parse(rawArgs) : {}; } catch (e) { args = {}; }
@@ -1808,8 +1800,18 @@ async function main() {
     if (n) console.log('已从旧 server/data/db.json 导入 ' + n + ' 个用户的数据（原文件保留作备份）');
     else { await seedDemo(); console.log('已生成内置示例数据'); }
   }
+  /* questions 表补齐 role/round 双轴列（老库平滑迁移） */
+  try {
+    const cols = await q(`SELECT COLUMN_NAME AS n FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='questions'`);
+    const names = cols.map(c => String(c.n || c.COLUMN_NAME || '').toLowerCase());
+    if (!names.includes('role')) await q(`ALTER TABLE questions ADD COLUMN role VARCHAR(20) NULL`);
+    if (!names.includes('round')) await q(`ALTER TABLE questions ADD COLUMN round VARCHAR(20) NULL`);
+  } catch (e) { console.log('questions 表列迁移跳过：' + e.message); }
   const qn = await seedQuestionsIfEmpty();
   if (qn) console.log('题库已导入 MySQL：' + qn + ' 道题（questions 表）');
+  const sn = await syncBuiltInQuestions();
+  if (sn) console.log('题库同步：本次从 shared.js 补充内置题 ' + sn + ' 道（INSERT IGNORE，不动已有数据）');
   const BIND = process.env.BIND_HOST || CONFIG.bindHost || '0.0.0.0';
   server.listen(PORT, BIND, () => {
     console.log('模拟面试训练营 Pro · 本地后端已启动（MySQL 存储版）');

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN" style="--bgA: #1b2a6b; --bgB: #0e4d5c; --bgC: #3b1d5d; --ink: #eef2ff; --ink2: #aab4d8; --ink3: #7c86ad;"><head>
-<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+<script>/* 首帧前应用已保存的主题 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>首页 · 模拟面试训练营 Pro</title>
 <link rel="stylesheet" href="shared.css?v=20261115h16a">
-<!-- 字体走本地系统字栈（Manrope/Noto Serif SC/JetBrains Mono 已装则用，未装回退系统中西文衬线/等宽），
-     不再从 Google Fonts 同步加载：该域名在国内网络下不稳定，渲染阻塞会直接拖住首屏。 -->
+<!-- 字体走本地系统字栈 -->
 <style>
 :root{
   --grad:linear-gradient(135deg,var(--acc),var(--acc2));
@@ -277,12 +276,12 @@ a{color:var(--acc);text-decoration:none}
 .closing h2{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3.4vw,40px);line-height:1.35;letter-spacing:1px;color:var(--ink)}
 .closing h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .closing .hero-actions{margin-left:auto}
-/* 浅色：首页收尾区不做硬切纯白，改透明融入极光背景，与深色模式/上方 hero 一致 */
+
 body.light .closing{background:transparent !important;border-top-color:rgba(15,23,42,.12) !important}
 
-/* ============ 新增板块（全部 .hero-sec 作用域，不污染全局） ============ */
+/* 新增板块 */
 .hero-sec{max-width:920px;margin:0 auto}
-/* 板块：三步流程（重点板块：整段卡片化 + 渐变光晕突出） */
+
 .hero-sec.flow{position:relative;padding:clamp(20px,3vw,32px) clamp(18px,3vw,36px) clamp(22px,3vw,30px);
   border:1px solid rgba(108,140,255,.28);border-radius:calc(var(--r) + 6px);
   background:linear-gradient(160deg,rgba(108,140,255,.09),rgba(94,234,212,.05) 55%,rgba(108,140,255,.03))}
@@ -534,12 +533,12 @@ footer .fr svg{width:13px;height:13px;vertical-align:-2px;margin:0 1px}
   </footer>
 </div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script src="cloud.js?v=20261115g14b"></script>
 <script>
 initPage('home');
 
-/* 营销数字动态取真实值（内置题库为准，后端题库加载完成后自动更新） */
+/* 营销数字动态取真实值 */
 function fillStats(n,sc){
   ['statQ','statQ2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=n;});
   ['statS','statS2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=sc;});
@@ -551,13 +550,13 @@ window.addEventListener('ivsim:questions',function(){
   refreshSectionNums();
 });
 
-/* ============ 新增板块：动态数字（纯展示，不写数据；题库云端加载后自动刷新） ============ */
+/* 新增板块 */
 function refreshSectionNums(){
   try{
     var qLen=(typeof QUESTIONS!=='undefined'&&QUESTIONS&&QUESTIONS.length)?QUESTIONS.length:0;
     var sLen=(typeof SCENES!=='undefined'&&SCENES)?Object.keys(SCENES).length:5;
     var aLen=(typeof ACH_DEFS!=='undefined'&&ACH_DEFS&&ACH_DEFS.length)?ACH_DEFS.length:10;
-    /* 笔试题量：bank.html 加载后写入 localStorage，这里读取；取不到用内置题量 218 兜底 */
+    /* 笔试题量 */
     var wLen=parseInt(storeGet('ivsim_wr_count','0'),10)||0;
     if(!wLen&&typeof WRITTEN_QUESTIONS!=='undefined'&&WRITTEN_QUESTIONS)wLen=WRITTEN_QUESTIONS.length;
     if(!wLen)wLen=218;
@@ -576,7 +575,7 @@ function goInterview(){
   location.href='interview.html';
 }
 
-/* 首页面试倒计时胶囊：点击直接打开设置（无需先登录） */
+/* 首页面试倒计时胶囊 */
 var heroCd=document.getElementById('heroCd');
 if(heroCd)heroCd.onclick=function(){openCountdownModal()};
 </script>

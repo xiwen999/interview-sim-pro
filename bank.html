@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+<script>/* 首帧前应用已保存的主题 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>浏览题库 · 模拟面试训练营 Pro</title>
@@ -20,15 +20,15 @@ body{background:
     radial-gradient(circle at 45% 65%,rgba(108,140,255,.04) 0 1px,transparent 1px);
   background-size:180px 180px,220px 220px,160px 160px;opacity:.6}
 .fp-shell{position:relative;overflow:hidden}
-/* 壳内动态星光层：与首页/个人中心同一套 seedStars 三层视差上飘星空 */
+/* 壳内动态星光层 */
 .fx-stars{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .fp-shell::after{content:"📚";position:absolute;right:-20px;top:-30px;font-size:180px;opacity:.03;
   transform:rotate(15deg);pointer-events:none;filter:grayscale(.3)}
 @media (max-width:1024px){.fp-shell::after{font-size:120px;right:-10px;top:-20px}}
-/* 浅色模式适配（背景由 shared.css 的 body.light .bg-fx 统一提供） */
+/* 浅色模式适配 */
 body.light .fp-wrap::before{opacity:.25}
 body.light .fp-shell::after{opacity:.02}
-/* 题库大卡片与页面背景融合：去掉壳体的底色 / 描边 / 投影，让极光背景连续铺满 */
+/* 题库大卡片与页面背景融合 */
 body.light .fp-shell{
   background:transparent !important;
   border-color:transparent !important;
@@ -37,7 +37,7 @@ body.light .fp-shell{
   backdrop-filter:none !important;
 }
 body.light .fp-shell::before{display:none}
-/* 壳体透明后，题目卡成为唯一的“卡片层”：蓝 → 薄荷的对角渐变呼应页面极光 */
+/* 壳体透明后 */
 body.light .q-item{
   background:
     linear-gradient(135deg,rgba(108,140,255,.10) 0%,rgba(255,255,255,0) 48%,rgba(45,212,191,.10) 100%),
@@ -54,7 +54,7 @@ body.light .q-item.open{
   border-color:rgba(108,140,255,.30);
   box-shadow:0 12px 30px -20px rgba(37,99,235,.45),inset 0 1px 0 #fff;
 }
-/* 筛选按钮：对齐 interview 设置页选项风格（JS 仍用 .chip/.on，仅改视觉） */
+/* 筛选按钮 */
 .filters .chip{padding:10px 16px;border-radius:13px;font-size:var(--fs-base);font-weight:600;color:var(--ink2);
   background:var(--card);border:1.5px solid var(--line);
   box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -88,7 +88,7 @@ body.light .q-item.open{
 .empty{text-align:center;padding:clamp(40px,6vw,60px) 20px;color:var(--ink3);font-size:var(--fs-base)}
 .empty .e-ic{font-size:44px;display:block;margin-bottom:12px}
 
-/* ≤480：题目行改为多行排列，标签/按钮不再挤压题干 */
+
 @media (max-width:480px){
   .q-item .qi-h{flex-wrap:wrap;row-gap:8px}
   .q-item .qi-h .qt{flex:1 1 100%;order:3}
@@ -104,7 +104,7 @@ body.light .q-item.open{
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
-/* 核心 Tab：🎤 面试题库 / 📝 笔试题库 分段切换（搜索框下方，最醒目） */
+/* 核心 Tab */
 .bk-tabs{display:flex;gap:6px;padding:5px;margin:2px 0 14px;
   background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;
   width:fit-content;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
@@ -114,13 +114,13 @@ body.light .q-item.open{
 .bk-tabs button.on{color:#fff;background:linear-gradient(135deg,#2dd4bf 0%,#4f6ef0 60%,#6C8CFF 100%);
   box-shadow:0 6px 18px rgba(79,110,240,.45),inset 0 0 0 1px rgba(255,255,255,.18)}
 
-/* 筛选分栏：用竖线 | 分组（场景 | 难度/收藏），视线瞬间找到维度 */
+/* 筛选分栏 */
 .filters-bar{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
 .filters-bar .filters{margin-top:0}
 .fg-sep{width:1px;height:22px;background:var(--line2);opacity:.55;flex:none}
 @media(max-width:560px){.fg-sep{display:none}.filters-bar{gap:6px}}
 
-/* 右上角帮助图标 (?)：hover 才显示使用指南，不占黄金位置 */
+/* 右上角帮助图标 ( */
 .bk-help{width:34px;height:34px;border-radius:50%;flex:none;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;
   color:var(--ink3);background:rgba(255,255,255,.04);border:1px solid var(--line);transition:.18s;position:relative}
@@ -133,21 +133,21 @@ body.light .q-item.open{
 .bk-help:hover::after,.bk-help:focus::after{opacity:1;visibility:visible;transform:translateY(0)}
 body.light .bk-help::after{background:#ffffff;color:#334155}
 
-/* 列表行最左侧：极小题型图标（🎤 面试 / 📝 笔试），一眼区分 */
+/* 列表行最左侧 */
 .q-item .qi-h .qtype-ic{flex:none;font-size:14px;width:26px;height:26px;border-radius:8px;
   display:inline-flex;align-items:center;justify-content:center;
   background:rgba(255,255,255,.05);border:1px solid var(--line)}
 
-/* 练这道 / 看解析：蓝色微光边框次要按钮，hover 变亮，增加点击欲望 */
+/* 练这道 / 看解析 */
 .qi-practice{background:rgba(108,140,255,.10);border:1px solid rgba(108,140,255,.5);color:#dbe4ff;
   box-shadow:0 4px 14px -6px rgba(108,140,255,.45);transition:.18s}
 .qi-practice:hover{background:rgba(108,140,255,.22);border-color:rgba(108,140,255,.9);color:#fff;
   box-shadow:0 0 12px rgba(108,140,255,.45),0 6px 18px -6px rgba(108,140,255,.6);transform:translateY(-1px)}
 
-/* 行内题型小标签（单选/多选/判断/填空/简答），略小于场景标签 */
+/* 行内题型小标签 */
 .qtype-tag{font-size:var(--fs-2xs)!important;padding:3px 9px!important;border-radius:7px!important;font-weight:700}
 
-/* 收起态内联选项：选择题不展开也能看到 A/B/C/D，缩进对齐题干 */
+/* 收起态内联选项 */
 .qi-opts{margin:0 20px 14px 48px;display:grid;gap:7px}
 .qi-opts .opt{display:flex;align-items:flex-start;gap:9px;padding:8px 12px;border-radius:9px;
   background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:default;transition:.18s}
@@ -156,7 +156,7 @@ body.light .bk-help::after{background:#ffffff;color:#334155}
   font-size:var(--fs-xs);font-weight:800;color:var(--ink2);background:rgba(255,255,255,.08);border:1px solid var(--line)}
 .qi-opts .opt-t{flex:1;min-width:0;font-size:var(--fs-sm);color:var(--ink2);line-height:1.65;padding-top:2px}
 
-/* 正确项：收起态不透露答案，展开（.open）后才高亮为绿色 + 打勾 */
+
 .qi-opts .opt.is-ans{position:relative}
 .q-item.open .qi-opts .opt.is-ans{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.6);color:#e8fff5}
 .q-item.open .qi-opts .opt.is-ans .opt-t{color:#c8f7e5}
@@ -218,11 +218,11 @@ body.light .ans-box p{color:#334155}
   </div>
 </div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script src="cloud.js?v=20261115g14b"></script>
 <script>
 initPage('bank');
-/* 壳内动态星空（700×1px/60s、200×2px/120s、100×3px/180s 视差上飘，与首页一致） */
+/* 壳内动态星空 */
 seedStars('bkStars1',700,1,60);seedStars('bkStars2',200,2,120);seedStars('bkStars3',100,3,180);
 document.getElementById('srchIc').innerHTML=ICONS.search;
 
@@ -232,7 +232,7 @@ var WRITTEN_SCENES = {
   xingce:{id:'xingce',name:'行测 / 综合',desc:'言语理解 / 数量关系 / 逻辑推理 行测题'}
 };
 var WRITTEN_COLOR = {fe:'#60A5FA',algo:'#34D399',xingce:'#F472B6'};
-/* 笔试题型：单选 / 多选 / 判断 / 填空 / 简答，配一个识别色做行内小标签 */
+/* 笔试题型 */
 var WR_QTYPE = {
   single:{name:'单选',color:'#60A5FA'},
   multiple:{name:'多选',color:'#F472B6'},
@@ -461,10 +461,10 @@ var WRITTEN_QUESTIONS = [
   {id:'wx72',scene:'xingce',lv:2,qtype:'single',q:'逻辑判断：「只有通过资格审核，才能参加复试。小张参加了复试。」可以推出？',options:[{k:'A',t:'小张通过了资格审核（必要条件：无审核则无复试，复试必有审核）'},{k:'B',t:'小张没通过审核'},{k:'C',t:'审核形同虚设'},{k:'D',t:'推不出'}],answer:'A',point:'考察「只有 P 才 Q」的必要条件推理。',tips:['只有 P 才 Q：Q→P（Q 是 P 的…注意方向）','「只有通过审核才复试」= 复试→已通过审核','肯定后件（参加复试）→ 肯定前件（通过审核）在必要条件下成立'],ans:['「只有 P，才 Q」表示 P 是 Q 的必要条件，逻辑形式为 Q→P（参加复试 → 通过了审核）。小张复试（Q 成立）推出审核通过（P 成立）。','注意与「如果 P 就 Q」（P→Q）区分：两类句型的推理方向相反，「只有…才」是行测高频易错句式。']},
 ];
 
-/* 首页数据墙需要笔试题量：加载后写入本地存储（index 侧 storeGet('ivsim_wr_count') 读取） */
+/* 首页数据墙需要笔试题量 */
 try{if(typeof storeSet==='function')storeSet('ivsim_wr_count',WRITTEN_QUESTIONS.length)}catch(e){}
 
-/* Tab 注册表：面试 / 笔试 各自的场景、配色、题目（单一数据源，render 从 activeBank 取） */
+/* Tab 注册表 */
 var BANK_TABS = {
   iv:{icon:'🎤',name:'面试题库',scenes:SCENES,color:SCENE_COLOR,list:QUESTIONS},
   wr:{icon:'📝',name:'笔试题库',scenes:WRITTEN_SCENES,color:WRITTEN_COLOR,list:WRITTEN_QUESTIONS}
@@ -473,7 +473,7 @@ function activeBank(){return BANK_TABS[F.type]||BANK_TABS.iv}
 
 var F={type:'iv',role:'all',round:'all',scene:'all',lv:0,kw:'',fav:false};
 
-/* 核心 Tab + 双轴筛选（面试：岗位 × 面试类型；笔试：科目） */
+/* 核心 Tab + 双轴筛选 */
 function renderTabs(){
   var box=document.getElementById('bkTabs');
   box.innerHTML=Object.keys(BANK_TABS).map(function(k){
@@ -522,7 +522,7 @@ function renderFilters(){
   if(isIv)rdF.style.display='';
 }
 renderTabs();renderFilters();
-/* 题库从 MySQL 异步加载完成后刷新筛选与列表（shared.js 派发 ivsim:questions 事件） */
+/* 题库从 MySQL */
 window.addEventListener('ivsim:questions',function(){try{renderFilters();render()}catch(e){}});
 
 /* 难度筛选 */
@@ -537,10 +537,10 @@ var kwTimer=null;
 document.getElementById('kw').addEventListener('input',function(){
   var v=this.value.trim();
   clearTimeout(kwTimer);
-  kwTimer=setTimeout(function(){F.kw=v;render()},200); /* 200ms debounce，避免每敲一个字就全量重渲染 */
+  kwTimer=setTimeout(function(){F.kw=v;render()},200); /* 200ms debounce */
 });
 
-/* 支持从 URL 带入搜索词/岗位/面试类型（薄弱点本「去题库搜练」、首页跳转等） */
+/* 支持从 URL 带入搜索词/ */
 (function(){
   try{
     var p=new URLSearchParams(location.search);
@@ -548,7 +548,7 @@ document.getElementById('kw').addEventListener('input',function(){
     if(p.get('type')==='wr')F.type='wr';
     var rl=p.get('role');if(rl&&ROLE_MAP[rl])F.role=rl;
     var rd=p.get('round');if(rd&&ROUND_MAP[rd])F.round=rd;
-    /* 兼容旧链接 ?scene=tech 等：映射到岗位轴 + 面试类型轴 */
+    /* 兼容旧链接 */
     var sc=p.get('scene');
     if(sc&&SCENE_AXES[sc]){F.role=SCENE_AXES[sc].role;F.round=SCENE_AXES[sc].round}
     if(F.type==='wr'&&sc&&WRITTEN_SCENES[sc])F.scene=sc;
@@ -585,7 +585,7 @@ function render(){
     /* 题型小标签（笔试：单选/多选/判断/填空/简答） */
     var qtTag='';
     if(isWr){var qt=WR_QTYPE[q.qtype]||WR_QTYPE.short;qtTag='<span class="tag qtype-tag" style="background:'+qt.color+'22;color:'+qt.color+';flex:none">'+qt.name+'</span>'}
-    /* 收起态内联展示选项（笔试选择题：不展开也能看到 A/B/C/D） */
+    /* 收起态内联展示选项 */
     var optsHtml='';
     if(isWr&&q.options&&q.options.length){
       var isAns=function(k){return Array.isArray(q.answer)?q.answer.indexOf(k)>=0:q.answer===k};
@@ -593,8 +593,7 @@ function render(){
         return '<div class="opt'+(isAns(o.k)?' is-ans':'')+'" data-k="'+o.k+'"><span class="opt-k">'+o.k+'</span><span class="opt-t">'+esc(o.t)+'</span></div>';
       }).join('')+'</div>';
     }
-    /* 展开区：笔试用「正确答案 + 解析」语义；面试保持「考察点/技巧/参考要点」 */
-    var bodyHtml;
+        var bodyHtml;
     if(isWr){
       var ansKey=Array.isArray(q.answer)?q.answer.join('、'):q.answer;
       bodyHtml='<div class="wr-ans"><span class="wr-ans-lab">✅ 正确答案</span><span class="wr-ans-key">'+esc(ansKey)+'</span></div>'+
@@ -624,7 +623,7 @@ function render(){
   $$('#list .qi-h').forEach(function(h){h.addEventListener('click',function(e){
     if(e.target.classList.contains('qi-practice')||e.target.classList.contains('qi-fav'))return;
     h.parentNode.classList.toggle('open')})});
-  /* 点击选项不触发展开（仅阅读题干与选项）；看解析/收藏属于功能，游客需先登录 */
+  /* 点击选项不触发展开 */
   $$('#list .qi-opts').forEach(function(o){o.addEventListener('click',function(e){e.stopPropagation()})});
   $$('#list .qi-practice').forEach(function(b){b.onclick=function(e){
     e.stopPropagation();

@@ -76,7 +76,7 @@ button{font-family:inherit;cursor:pointer}
 .card+.card{margin-top:16px}
 .card .ct{font-size:var(--fs-base);font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .card .ct .sp{flex:1}
-/* KPI 固定列数：6 → 3（≤1024）→ 2（≤768），同一行高度一致 */
+/* KPI 固定列数 */
 .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
 .kpis>*{min-width:0}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;
@@ -228,7 +228,7 @@ table.tb tbody tr:hover{background:#f8faff}
   .ad-mask{padding:14px}
   .ad-mask .ft{flex-wrap:wrap}
   .ad-mask .ft .btn{flex:1 1 0}
-  /* 表格：收窄最小宽度、日期与操作列收紧，长文本允许换行 */
+  
   table.tb{min-width:540px;font-size:var(--fs-xs)}
   table.tb th,table.tb td{padding:9px 8px}
   table.tb td{word-break:break-word}
@@ -238,7 +238,7 @@ table.tb tbody tr:hover{background:#f8faff}
   .tb-acts .btn.sm{padding:4px 8px}
 }
 @media (max-width:480px){
-  /* 品牌收成图标，把宽度让给操作按钮，保证顶栏单行不溢出 */
+  /* 品牌收成图标 */
   .ad-top .lg{font-size:0;gap:0}
   .ad-top .lg .ic{width:28px;height:28px}
   .ad-tbtn{padding:6px 9px;font-size:var(--fs-xs);white-space:nowrap}
@@ -310,22 +310,19 @@ table.tb tbody tr:hover{background:#f8faff}
 
 <div class="ad-mask" id="mask" style="display:none"><div class="box" id="mbox"></div></div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script>
 var TAB='dash', VF='pending', FBF='und', KW={u:'',s:'',v:'',f:''};
 var SESS_PAGE=80, SESS_SHOW=SESS_PAGE; /* 面试数据每次加载条数 / 当前已加载条数 */
 var $m=document.getElementById('main');
-var DATA=null; /* 当前后台数据集（来自本地后端，失败时回落本地 AdminDB） */
+var DATA=null; /* 当前后台数据集 */
 
-/* 管理端鉴权 token（localStorage 持久化；后端优先，离线回落本地 ADMIN_ACCOUNT） */
+/* 管理端鉴权 token */
 var ADMIN_TOKEN_KEY='ivsim_admin_token';
 function adminToken(){return storeGet(ADMIN_TOKEN_KEY,null)}
 function setAdminToken(t){if(t)storeSet(ADMIN_TOKEN_KEY,t);else storeRemove(ADMIN_TOKEN_KEY)}
 function findUser(id){(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)return u});
   var f=null;(DATA&&DATA.users||[]).forEach(function(u){if(u.id===id)f=u});return f}
-/* 封禁 / 解封后把状态镜像到本地副本 ivsim_admin_db。
-   前台的封禁门禁只读这份本地数据；后端在线时 adminAct 走 /api 而不执行 fallback，
-   不镜像的话前台既感知不到封禁，也无法在解封后自动恢复。 */
 function mirrorBanStatus(u,status){
   try{
     var d=AdminDB.db(),hit=null,acc=String(u.account||'').toLowerCase();
@@ -337,7 +334,7 @@ function mirrorBanStatus(u,status){
   }catch(e){}
 }
 
-/* 加载后台数据集：仅使用服务器数据库；失败时抛错（不再回落本地演示数据，避免展示无效旧申请误导管理员） */
+/* 加载后台数据集 */
 async function adminLoad(){
   var r=await apiCall('/api/admin/db',{token:adminToken(),silent:true});
   if(r&&r.data&&r.data.ok){
@@ -366,13 +363,13 @@ function renderLoadFail(e){
   var r=document.getElementById('lfRetry'); if(r)r.onclick=function(){render()};
   var l=document.getElementById('lfReLogin'); if(l)l.onclick=function(){setAdminToken(null);showGate()};
 }
-/* 管理动作：走后端；失败 / 离线时执行 fallback（本地 AdminDB） */
+/* 管理动作 */
 async function adminAct(method,path,body,fallback){
   try{
     var r=await apiCall(path,{method:method,body:body,token:adminToken()});
     if(r.ok){render();return true;}
   }catch(e){
-    /* 网络错误才回落本地；业务错误已弹 toast，不回落 */
+    /* 网络错误才回落本地 */
     if(e&&e.networkError&&fallback){fallback();render();}
   }
   return false;
@@ -565,7 +562,7 @@ function viewSessions(){
   return h;
 }
 
-/* 播放用户投稿的视频本体（公开文件接口；关弹窗即停止播放释放内存） */
+/* 播放用户投稿的视频本体 */
 function playVideoFile(vid,title,uname){
   var url='/api/videos/file/'+encodeURIComponent(vid);
   openM('<h3>▶ 视频内容预览</h3><div class="ms">'+esc(title)+(uname?' · '+esc(uname):'')+'</div>'+
@@ -752,8 +749,7 @@ function viewOnline(){
   h+='<div class="card"><div class="ct">🟢 当前在线用户 <span class="sp"></span>'+
      '<span style="font-size:12px;color:var(--ink3)">数据实时来自服务器数据库</span></div>'+
      '<div id="onlineBody"><div class="empty"><span class="big">⏳</span>加载中…</div></div></div>';
-  /* 页面骨架插入后再发起首次加载并开启 5 秒轮询（本函数保持同步，避免返回 Promise） */
-  setTimeout(function(){
+    setTimeout(function(){
     load();
     if(onlineTimer)clearInterval(onlineTimer);
     onlineTimer=setInterval(load,5000);
@@ -916,14 +912,14 @@ function showGate(){
   async function sub(){
     var acc=(ga.value||'').trim(), pw=gp.value||'';
     if(!acc){ge.textContent='请输入管理员账号';return;}
-    /* 后端优先：用本地后端 /api/admin/login 校验；网络不通才回落本地 */
+    /* 后端优先 */
     withLoading(go,function(){
       return apiCall('/api/admin/login',{method:'POST',silent:true,body:{account:acc,password:pw}})
         .then(function(r){
           if(r.data&&r.data.ok){setAdminToken(r.data.token||'');ge.textContent='';showApp();}
         })
         .catch(function(err){
-          /* 后端明确拒绝（密码错误 / 账号不存在 / 限速锁定）：如实提示，不进本地初始化 */
+          /* 后端明确拒绝 */
           if(err&&err.bizError){
             ge.textContent=err.msg||'登录失败';
             gp.value='';gp.focus();
@@ -937,7 +933,7 @@ function showGate(){
   var initMode=false,gp2=document.getElementById('gPwd2');
   function gateLocal(acc,pw){
     var l=adminLogin(acc,pw);
-    /* 本机从未设置管理员：进入初始化流程（账号+加盐哈希仅写本机 localStorage） */
+    /* 本机从未设置管理员 */
     if(!l.ok&&l.needInit&&!initMode){
       initMode=true;
       document.getElementById('gPwd2F').style.display='block';
@@ -965,7 +961,7 @@ function showGate(){
 function showApp(){
   document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='block';
-  /* 支持 #videos / #users 这类深链（前台「审核中心」可直接跳进来） */
+  /* 支持 #videos / # */
   var h=(location.hash||'').replace('#','');
   if(['dash','users','sessions','videos','feedback','logs','settings'].indexOf(h)>=0)TAB=h;
   if(h==='videos')VF='pending';
@@ -983,7 +979,7 @@ function showApp(){
   setInterval(function(){if(TAB==='dash')render()},60000);
 }
 async function boot(){
-  /* 必须持有有效的服务器管理员 token 才能进入（本地演示模式已停用） */
+  /* 必须持有有效的服务器管理员 */
   var tk=adminToken(), authed=false;
   if(tk){
     try{

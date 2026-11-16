@@ -1,11 +1,11 @@
 (function (global) {
   'use strict';
 
-  /* 服务器 AI 状态缓存：null=未知（乐观视为可用），false=未配置/不可用 */
+  /* 服务器 AI 状态缓存 */
   var _status = { enabled: null, model: '' };
 
   function getToken() {
-    /* 与 shared.js 的 API.token() 同源：ivsim_token 经 JSON.stringify 存储 */
+    /* 与 shared.js 的 */
     try {
       var v = localStorage.getItem('ivsim_token');
       if (!v) return null;
@@ -13,7 +13,7 @@
     } catch (e) { return null; }
   }
 
-  /* 拉取服务器 AI 状态（各页加载本文件时自动调用一次） */
+  /* 拉取服务器 AI 状态 */
   function refreshStatus() {
     return fetch('/api/ai/status').then(function (r) { return r.json(); }).then(function (j) {
       _status.enabled = !!(j && j.enabled);
@@ -23,9 +23,9 @@
   }
   try { refreshStatus(); } catch (e) {}
 
-  /* 已配置且可能可用：状态未知时乐观返回 true（真不可用时调用方自行回退本地模拟） */
+  /* 已配置且可能可用 */
   function isConfigured() { return _status.enabled !== false; }
-  /* 兼容 interview.html 现有调用约定：CLOUD.isCloud() */
+  /* 兼容 interview. */
   function isCloud() { return isConfigured(); }
   function serverModel() { return _status.model || ''; }
 
@@ -38,7 +38,7 @@
     return msgs;
   }
 
-  /* 原始请求：POST /api/ai/chat（需登录，后端转发并限速）；失败 reject */
+  /* 原始请求 */
   function rawChat(messages, opts) {
     opts = opts || {};
     var headers = { 'Content-Type': 'application/json' };
@@ -57,8 +57,7 @@
       });
   }
 
-  /* 非流式：后端返回 { ok:true, text }，返回完整文本 */
-  function aiText(sys, messages) {
+    function aiText(sys, messages) {
     return rawChat(buildMessages(sys, messages), {}).then(function (r) { return r.json(); })
       .then(function (j) {
         var t = j && j.ok && j.text;
@@ -67,8 +66,7 @@
       });
   }
 
-  /* 流式：后端按 SSE 逐字转发上游增量；onToken(delta, fullSoFar)；resolve 完整文本 */
-  function aiStream(sys, messages, onToken) {
+    function aiStream(sys, messages, onToken) {
     return rawChat(buildMessages(sys, messages), { stream: true }).then(function (r) {
       if (!r.body || !r.body.getReader) {
         /* 浏览器不支持流式读取，降级为整包文本 */
@@ -105,7 +103,7 @@
     });
   }
 
-  /* 从模型输出里抠出 JSON：去代码栅栏 → 找最外层 {} → 解析；失败返回 null */
+  /* 从模型输出里抠出 JSON */
   function extractJson(text) {
     if (!text) return null;
     var t = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -116,8 +114,7 @@
     try { return JSON.parse(t); } catch (e) { return null; }
   }
 
-  /* 强制 JSON：请求带 json 标记（后端转 response_format），再 extractJson；
-     解析失败 reject({badJson:true, text})，由调用方决定是否回退本地。 */
+  /* 强制 JSON */
   function aiJson(sys, messages) {
     return rawChat(buildMessages(sys, messages), { json: true }).then(function (r) { return r.json(); })
       .then(function (j) {
@@ -128,7 +125,7 @@
       });
   }
 
-  /* AI 训练教练 Agent：服务端跑 Function Calling 工具循环，返回 { ok, text, steps } */
+  /* AI 训练教练 Agent */
   function aiAgent(messages) {
     var headers = { 'Content-Type': 'application/json' };
     var t = getToken();
@@ -148,11 +145,7 @@
       });
   }
 
-  /* Agent 流式版（思考过程可视化 + 正文逐字流式）：SSE 事件流——
-     {type:'step'} 工具步骤 / {type:'think'} 思考链增量 / {type:'delta'} 正文增量
-     / {type:'reset'} 清空已显示正文 / {type:'done'} 最终全文。
-     onStep(label) 工具步骤；onDelta(t, full) 正文增量；onThink(t) 思考链增量。
-     resolve { text, steps } */
+  /* Agent 流式版 */
   function aiAgentStream(messages, onStep, onDelta, onThink) {
     var headers = { 'Content-Type': 'application/json' };
     var t = getToken();
@@ -199,8 +192,7 @@
       });
   }
 
-  /* 真 RAG 检索增强答题：服务端 TF-IDF 检索题库 Top-3 → 注入提示词 → 生成回答。
-     返回 { text, sources:[{q,scene,lv,score}] } */
+  /* 真 RAG 检索增强答题 */
   function aiAsk(question, history) {
     var headers = { 'Content-Type': 'application/json' };
     var t = getToken();

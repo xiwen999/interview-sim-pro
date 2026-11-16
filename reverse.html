@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>/* 首帧前应用已保存的主题，避免切页/刷新时先闪一下深色默认底 */
+<script>/* 首帧前应用已保存的主题 */
 (function(){try{var s=JSON.parse(localStorage.getItem("ivsim_settings")||"{}");
 if(s.theme==="light")document.documentElement.classList.add("light");}catch(e){}})();</script>
 <title>反转面试 · 模拟面试训练营 Pro</title>
@@ -23,7 +23,7 @@ body{background:
   background:rgba(255,255,255,.04);transition:.18s;user-select:none}
 .opt-grid .chip:hover{border-color:var(--acc)}
 .opt-grid .chip.on{background:rgba(108,140,255,.18);border-color:rgba(108,140,255,.6);font-weight:700}
-/* 反转面试三张卡：浅色主题下完全透明——卡内露出与外部同一张极光背景，颜色像素级一致 */
+/* 反转面试三张卡 */
 #vPrep,#vLive,#vDone{padding:clamp(22px,2.6vw,34px) clamp(22px,2.8vw,38px)}
 body.light #vPrep,body.light #vLive,body.light #vDone{
   background:transparent !important;border-color:transparent !important;box-shadow:none !important}
@@ -123,7 +123,7 @@ body.light #vPrep,body.light #vLive,body.light #vDone{
   </div>
 </div>
 
-<script src="shared.js?v=20261115h16c"></script>
+<script src="shared.js?v=20261115h16e"></script>
 <script src="cloud.js?v=20261115g14b"></script>
 <script>
 initPage('reverse');
@@ -291,7 +291,7 @@ function rnEnd(){
     document.getElementById('rdNotes').innerHTML=(sc.notes||[]).map(function(n){
       return '<div class="rn-note"><b style="color:var(--ink)">问：'+esc(String(n.q).slice(0,60))+'</b><br>'+esc(n.comment||'')+'</div>'}).join('')||'<div style="font-size:12px;color:var(--ink3)">（无逐问点评）</div>';
     document.getElementById('rdSug').innerHTML=(sc.suggestions||[]).map(function(s){return '· '+esc(s)}).join('<br>')||'—';
-    /* 云端存档：type=反转面试，avg 换算 5 分制 */
+    /* 云端存档 */
     var total=parseFloat(sc.total)||0;
     try{
       apiCall('/api/interviews',{method:'POST',silent:true,body:{
