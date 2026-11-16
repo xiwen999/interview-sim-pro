@@ -2450,14 +2450,15 @@ function openProfile(){
 }
 
 function desktopSettings(method,data){
+  /* 直连本机桌面助手服务（AI助手-服务.ps1，端口 47821）。
+     服务支持 CORS，http 页面（本地与线上）均可访问 127.0.0.1；
+     服务未运行时 fetch 失败，设置面板会如实显示「服务未运行」。 */
   var opt={method:method,cache:'no-store',headers:{}};
-  var t=storeGet('ivsim_token',null);
-  if(t)opt.headers['Authorization']='Bearer '+t;
   if(method==='POST'&&data){
     opt.headers['Content-Type']='application/json';
     opt.body=JSON.stringify(data);
   }
-  return fetch('/api/desktop/settings',opt).then(function(r){
+  return fetch('http://127.0.0.1:47821/settings',opt).then(function(r){
     if(!r.ok)throw new Error('HTTP '+r.status);
     return r.json();
   });
@@ -2511,10 +2512,10 @@ function openSettings(){
 
   /* 桌面助手设置 */
   var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
-  var ds={autoHide:true,autoStart:true,enabled:true,online:false,busy:false};
+  var ds={autoHide:true,autoStart:true,enabled:true,ball:false,online:false,busy:false};
   function dsPaint(){
     if(!ds.online){
-      dsStatus.textContent='桌面助手服务未运行 · 正在重试…';
+      dsStatus.textContent='桌面助手服务未运行 · 请双击「启动AI助手-桌面球.bat」';
       dsStatus.style.color='var(--ink3)';
       dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;
       dsPower.className='chip';dsPower.textContent='不可用';
@@ -2522,7 +2523,7 @@ function openSettings(){
       dsStart.className='chip';dsStart.textContent='不可用';
       return;
     }
-    dsStatus.textContent=ds.enabled?'已连接 · 悬浮球运行中':'已连接 · 悬浮球已关闭';
+    dsStatus.textContent=!ds.enabled?'已连接 · 桌面助手已关闭':(ds.ball?'已连接 · 悬浮球运行中':'已连接 · 悬浮球未启动');
     dsStatus.style.color='#7EE7A7';
     dsPower.disabled=false;dsHide.disabled=false;dsStart.disabled=false;
     dsPower.className='chip '+(ds.enabled?'on':'');dsPower.textContent=ds.enabled?'已开启':'已关闭';
@@ -2532,7 +2533,7 @@ function openSettings(){
   function dsSend(msg){
     ds.busy=true;
     desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;ds.busy=false;dsPaint();
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.ball=!!r.ball;ds.online=true;ds.busy=false;dsPaint();
       toast(msg||'桌面助手设置已更新','ok');
     })['catch'](function(){
       ds.online=false;ds.busy=false;dsPaint();toast('连不上桌面助手服务，正在重试…','');
@@ -2546,7 +2547,7 @@ function openSettings(){
     if(!$('#dsPower')) return;
     desktopSettings('GET').then(function(r){
       if(ds.busy)return;
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.online=true;dsPaint();
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.ball=!!r.ball;ds.online=true;dsPaint();
     })['catch'](function(){
       if(ds.busy)return;
       ds.online=false;dsPaint();
