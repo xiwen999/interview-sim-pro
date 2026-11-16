@@ -1842,7 +1842,7 @@ body.cinema-fs #animPanel .cinema-answer .ans-ta::placeholder{color:rgba(239,231
   </div>
 </div>
 
-<script src="shared.js?v=20261115h16b"></script>
+<script src="shared.js?v=20261115h16c"></script>
 <script src="cloud.js?v=20261115h14b"></script>
 <script>
 initPage('interview');
@@ -2015,7 +2015,17 @@ var Q_CAT_MAP={
  p1:'self',p2:'fit',p3:'ability',p4:'ability',p5:'ability',p6:'ability',p7:'ability',p8:'stress',p9:'ability',p10:'self',
  c1:'self',c2:'self',c3:'self',c4:'stable',c5:'stress',c6:'stress',c7:'stable',c8:'fit',c9:'self',c10:'culture'
 };
-function catOf(q){return Q_CAT_MAP[q.id]||'ability'}
+/* 关键词兜底分类：题库 250 题远多于手工映射的 50 条，未映射的按题面关键词归类，缺省能力类 */
+function catGuess(q){
+  var t=(q&&q.q)||'';
+  if(/自我介绍|优缺点|优点|缺点|性格|评价你|成就感/.test(t))return 'self';
+  if(/为什么选择|为什么想做|为什么我们应该|为什么适合|为什么想成为|选择你|对这份工作|对我们公司|岗位理解|匹配/.test(t))return 'fit';
+  if(/职业规划|规划|离职|跳槽|期望薪资|考研|考公|实习几天|实习多久|哪个城市|长期发展|稳定|三年|五年/.test(t))return 'stable';
+  if(/压力|失败|挫折|分歧|意见不合|批评|deadline|紧迫|情绪|不确定|焦虑|负面反馈/.test(t)||(/冲突/.test(t)&&!/代码冲突/.test(t)))return 'stress';
+  if(/团队|协作|合作|沟通|说服|领导|文化|氛围|加班|兴趣爱好|想问我们|反问/.test(t))return 'culture';
+  return 'ability';
+}
+function catOf(q){return Q_CAT_MAP[q.id]||catGuess(q)}
 
 /* 直接读源数据：推荐组 = 当前大类专属，通用组 = GENERAL_TYPES */
 function recommendTypes(catId){
@@ -2395,7 +2405,9 @@ function bindCamTracks(){
 /* 热身按钮 */
 document.getElementById('warmBtn').onclick=function(){
   if(!canUseFeature())return;
-  var pool=buildPool(S.scene,S.types,S.lv);
+  var plan=planDistribution();
+  var pool=buildPool(plan);
+  if(!pool.length)pool=QUESTIONS.slice();
   S.qs=[pool[Math.floor(Math.random()*pool.length)]];
   S.idx=0;S.recs=[];S.warmup=true;S.sec=999;
   enterSession(function(){
@@ -2489,10 +2501,14 @@ function buildPool(plan){
   var sel=Q_CATEGORIES.filter(function(c){return (plan.counts[c.id]||0)>0});
   sel.forEach(function(cat){
     var need=plan.counts[cat.id]||0;
+    /* 抽题分层保底：本岗位专属 → 通用行为 → 通用求职（场景中立）→ 其他专业场景。
+       每层内部打乱，但层间严格按优先级取用，保证抽出的题尽量贴合所选岗位，
+       避免"研发技术面抽出产品/数据分析题"这种错位（旧实现整池 shuffle 无优先级）。 */
     var same=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene===S.scene});
     var gen=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene==='general'});
-    var other=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene!==S.scene&&q.scene!=='general'});
-    var full=same.concat(gen,other);       /* 未过滤难度的完整题池，用于保底与强制开场题 */
+    var jobq=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&S.scene!=='job'&&q.scene==='job'});
+    var spec=QUESTIONS.filter(function(q){return catOf(q)===cat.id&&q.scene!==S.scene&&q.scene!=='general'&&q.scene!=='job'});
+    var full=shuffle(same).concat(shuffle(gen),shuffle(jobq),shuffle(spec));       /* 未过滤难度的完整题池，用于保底与强制开场题 */
     var pool=full.slice();
     if(S.lv>=1)pool=pool.filter(function(q){return q.lv>=S.lv});
     else if(S.lv===-1)pool=pool.filter(function(q){return q.lv===1});
@@ -2507,7 +2523,8 @@ function buildPool(plan){
       for(var k=0;k<full.length;k++){if(full[k].q.indexOf('自我介绍')>=0){picked.push(full[k]);break}}
     }
     var rest=pool.filter(function(q){return picked.indexOf(q)<0});
-    picked=picked.concat(shuffle(rest).slice(0,need-picked.length));
+    /* pool 已按"本岗位→通用→求职→其他"分层排好序，直接按序取用，不再整池打乱 */
+    picked=picked.concat(rest.slice(0,need-picked.length));
     if(picked.length<need){full.filter(function(q){return picked.indexOf(q)<0}).forEach(function(q){if(picked.length<need)picked.push(q)})}
     picked.forEach(function(q){result.push(q)});
   });

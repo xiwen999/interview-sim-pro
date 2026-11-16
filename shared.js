@@ -339,6 +339,15 @@ var BG_PRESETS = [
 function $(s,r){return (r||document).querySelector(s)}
 function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+/* AI 回复轻量 Markdown 渲染：**粗体**、`代码`、# 标题、- 列表（先转义防注入，再转标签） */
+function mdLite(t){
+  var s=esc(String(t==null?'':t));
+  s=s.replace(/`([^`\n]+)`/g,'<code style="background:rgba(108,140,255,.14);border:1px solid rgba(108,140,255,.28);padding:1px 5px;border-radius:5px;font-family:Consolas,monospace;font-size:.92em">$1</code>');
+  s=s.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');
+  s=s.replace(/(^|\n)\s*#{1,4}\s*([^\n<]+)/g,function(m,p,h){return p+'<b>'+h+'</b>'});
+  s=s.replace(/(^|\n)\s*[-*]\s+/g,function(m,p){return p+'• '});
+  return s.replace(/\n/g,'<br>');
+}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 function fmtSec(s){var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x}
 function storeGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -2250,7 +2259,7 @@ function mountAgent(){
         var html='';
         if(steps&&steps.length) html+='<div style="font-size:11px;color:#8fb7ff;background:rgba(108,140,255,.08);border:1px solid rgba(108,140,255,.25);border-radius:8px;padding:4px 8px;margin-bottom:6px">🛠 Agent 工具调用：'+esc(steps.map(function(s){return AGENT_STEP_ICON[s]||s}).join(' → '))+'</div>';
         if(sources&&sources.length) html+='<div style="font-size:11px;color:#2dd4bf;background:rgba(65,224,200,.08);border:1px solid rgba(65,224,200,.3);border-radius:8px;padding:5px 8px;margin-bottom:6px">📚 RAG 检索到 '+sources.length+' 道相关题：<br>'+sources.map(function(s,i){return '<span style="opacity:.85">'+(i+1)+'. '+esc(s.q.slice(0,32))+(s.q.length>32?'…':'')+'</span>'}).join('<br>')+'</div>';
-        html+=String(t).replace(/\n/g,'<br>');
+        html+=mdLite(t);
         push(html);
         updateStatus();
       }
@@ -2286,7 +2295,8 @@ function mountAgent(){
             body.scrollTop=body.scrollHeight;
           }
           function showStream(full){
-            loading.innerHTML=stepHtml()+'<div style="font-size:var(--fs-sm);line-height:1.75;word-break:break-word">'+String(full).replace(/\n/g,'<br>')+'<span style="opacity:.45">▍</span></div>';
+            /* 流式期间先剥掉末尾未闭合的 ** 标记，避免星号闪现 */
+            loading.innerHTML=stepHtml()+'<div style="font-size:var(--fs-sm);line-height:1.75;word-break:break-word">'+mdLite(String(full).replace(/\*\*[^*\n]*$/,''))+'<span style="opacity:.45">▍</span></div>';
             body.scrollTop=body.scrollHeight;
           }
           showThink('🤔 正在思考…');
