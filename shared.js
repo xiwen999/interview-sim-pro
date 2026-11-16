@@ -2450,17 +2450,20 @@ function openProfile(){
 }
 
 function desktopSettings(method,data){
-  /* 直连本机桌面助手服务（AI助手-服务.ps1，端口 47821）。
-     服务支持 CORS，http 页面（本地与线上）均可访问 127.0.0.1；
-     服务未运行时 fetch 失败，设置面板会如实显示「服务未运行」。 */
   var opt={method:method,cache:'no-store',headers:{}};
   if(method==='POST'&&data){
     opt.headers['Content-Type']='application/json';
     opt.body=JSON.stringify(data);
   }
-  return fetch('http://127.0.0.1:47821/settings',opt).then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return r.json();
+  function ok(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); }
+  /* 优先直连本机桌面助手服务（本地页面可用，即时生效）；
+     公网 http 页面浏览器会拦截 127.0.0.1 请求，自动退回后端中转，
+     由桌面助手服务心跳拉取设置生效（约 3 秒延迟）。 */
+  return fetch('http://127.0.0.1:47821/settings',opt).then(ok,function(){
+    return fetch('/api/desktop/settings',opt).then(ok);
+  }).then(function(r){
+    r._local=!!r.running;
+    return r;
   });
 }
 
@@ -2533,8 +2536,9 @@ function openSettings(){
   function dsSend(msg){
     ds.busy=true;
     desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.ball=!!r.ball;ds.online=true;ds.busy=false;dsPaint();
-      toast(msg||'桌面助手设置已更新','ok');
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
+      ds.ball=r._local?!!r.ball:!!r.online;ds.online=r._local?true:!!r.online;ds.busy=false;dsPaint();
+      toast(msg||'桌面助手设置已更新'+(r._local?'':'（桌面助手将在数秒内自动生效）'),'ok');
     })['catch'](function(){
       ds.online=false;ds.busy=false;dsPaint();toast('连不上桌面助手服务，正在重试…','');
     });
@@ -2547,7 +2551,8 @@ function openSettings(){
     if(!$('#dsPower')) return;
     desktopSettings('GET').then(function(r){
       if(ds.busy)return;
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;ds.ball=!!r.ball;ds.online=true;dsPaint();
+      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
+      ds.ball=r._local?!!r.ball:!!r.online;ds.online=r._local?true:!!r.online;dsPaint();
     })['catch'](function(){
       if(ds.busy)return;
       ds.online=false;dsPaint();

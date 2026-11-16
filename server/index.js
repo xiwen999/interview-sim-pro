@@ -279,10 +279,19 @@ async function initDatabase() {
       id TINYINT NOT NULL PRIMARY KEY,
       autoHide TINYINT NOT NULL DEFAULT 1,
       autoStart TINYINT NOT NULL DEFAULT 1,
-      enabled TINYINT NOT NULL DEFAULT 1
+      enabled TINYINT NOT NULL DEFAULT 1,
+      updatedAt BIGINT NOT NULL DEFAULT 0,
+      lastSeen BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
   ];
   for (const s of DDL) await pool.query(s);
+
+  /* 桌面助手设置表增量迁移：updatedAt（网页开关时间戳）/ lastSeen（桌面助手服务心跳） */
+  try { await pool.query('ALTER TABLE desktop_settings ADD COLUMN updatedAt BIGINT NOT NULL DEFAULT 0'); }
+  catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
+  try { await pool.query('ALTER TABLE desktop_settings ADD COLUMN lastSeen BIGINT NOT NULL DEFAULT 0'); }
+  catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
+  try { await pool.query('INSERT IGNORE INTO desktop_settings (id) VALUES (1)'); } catch (e) {}
 
   /* 增量迁移 */
   const EXTRA_COLUMNS = [
@@ -854,9 +863,14 @@ function desktopRow(r) {
     ? { autoHide: !!Number(r.autoHide), autoStart: !!Number(r.autoStart), enabled: !!Number(r.enabled) }
     : { autoHide: true, autoStart: true, enabled: true };
 }
+/* 桌面助手服务是否在线：心跳 12 秒内有更新 */
+function desktopOnline(r) {
+  return !!(r && Number(r.lastSeen) && (Date.now() - Number(r.lastSeen)) < 12000);
+}
 async function apiDesktopGet(req, res) {
   const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
-  return send(res, 200, Object.assign({ ok: true }, desktopRow(rows[0])));
+  const r = rows[0];
+  return send(res, 200, Object.assign({ ok: true, online: desktopOnline(r), updatedAt: r ? Number(r.updatedAt) || 0 : 0 }, desktopRow(r)));
 }
 async function apiDesktopSet(req, res, body) {
   const u = await authUser(req);
@@ -866,9 +880,19 @@ async function apiDesktopSet(req, res, body) {
   if (body && body.autoHide !== undefined) st.autoHide = !!body.autoHide;
   if (body && body.autoStart !== undefined) st.autoStart = !!body.autoStart;
   if (body && body.enabled !== undefined) st.enabled = !!body.enabled;
-  await q('REPLACE INTO desktop_settings (id,autoHide,autoStart,enabled) VALUES (1,?,?,?)',
-    [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0]);
-  return send(res, 200, Object.assign({ ok: true }, st));
+  await q('REPLACE INTO desktop_settings (id,autoHide,autoStart,enabled,updatedAt) VALUES (1,?,?,?,?)',
+    [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0, Date.now()]);
+  const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
+  return send(res, 200, Object.assign({ ok: true, online: desktopOnline(rows[0]), updatedAt: Number(rows[0].updatedAt) || 0 }, desktopRow(rows[0])));
+}
+/* 桌面助手服务心跳：上报本地状态，只更新 lastSeen，不动设置本身 */
+async function apiDesktopPing(req, res, body) {
+  const cur = (await q('SELECT * FROM desktop_settings WHERE id=1'))[0];
+  if (!cur) await q('REPLACE INTO desktop_settings (id) VALUES (1)');
+  await q('UPDATE desktop_settings SET lastSeen=? WHERE id=1', [Date.now()]);
+  const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
+  const r = rows[0];
+  return send(res, 200, Object.assign({ ok: true, online: true, updatedAt: r ? Number(r.updatedAt) || 0 : 0 }, desktopRow(r)));
 }
 async function apiFeedbackAdd(req, res, body) {
   if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条
@@ -1662,6 +1686,7 @@ const ROUTES = [
   ['POST', /^\/api\/feedback$/, apiFeedbackAdd],
   ['GET', /^\/api\/desktop\/settings$/, apiDesktopGet],
   ['POST', /^\/api\/desktop\/settings$/, apiDesktopSet],
+  ['POST', /^\/api\/desktop\/heartbeat$/, apiDesktopPing],
   ['GET', /^\/api\/admin\/feedback$/, apiAdminFeedbackList],
   ['PUT', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackPut],
   ['DELETE', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackDel],
