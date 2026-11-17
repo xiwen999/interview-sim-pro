@@ -2498,10 +2498,6 @@ function openSettings(){
         '<button class="chip" id="dsPower" disabled>读取中…</button>'+
       '</div>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
-        '<div><div style="font-weight:600;font-size:13px">网页打开时隐藏悬浮球</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">打开本网站时自动隐藏，关闭网页后出现</div></div>'+
-        '<button class="chip" id="dsHide" disabled>读取中…</button>'+
-      '</div>'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
         '<div><div style="font-weight:600;font-size:13px">开机自动启动</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">登录 Windows 后自动运行你电脑上的桌面助手</div></div>'+
         '<button class="chip" id="dsStart" disabled>读取中…</button>'+
       '</div>'+
@@ -2523,29 +2519,27 @@ function openSettings(){
   };
 
   /* 桌面助手设置（按账号） */
-  var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus'),dsPairBtn=$('#dsPairBtn');
-  var ds={autoHide:true,autoStart:true,enabled:true,online:false,loggedIn:false,busy:false};
+  var dsPower=$('#dsPower'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus'),dsPairBtn=$('#dsPairBtn');
+  var ds={autoStart:true,enabled:true,online:false,loggedIn:false,busy:false};
   function dsPaint(){
     if(!ds.loggedIn){
       dsStatus.textContent='请先登录，登录后可绑定自己的桌面助手';
       dsStatus.style.color='var(--ink3)';
-      dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;dsPairBtn.disabled=true;
+      dsPower.disabled=true;dsStart.disabled=true;dsPairBtn.disabled=true;
       dsPower.className='chip';dsPower.textContent='不可用';
-      dsHide.className='chip';dsHide.textContent='不可用';
       dsStart.className='chip';dsStart.textContent='不可用';
       return;
     }
     dsStatus.textContent=ds.online?'已连接 · 你电脑的悬浮球在线':'未检测到在线的绑定电脑 · 可生成配对码绑定';
     dsStatus.style.color=ds.online?'#7EE7A7':'var(--ink3)';
-    dsPower.disabled=false;dsHide.disabled=false;dsStart.disabled=false;
+    dsPower.disabled=false;dsStart.disabled=false;
     dsPower.className='chip '+(ds.enabled?'on':'');dsPower.textContent=ds.enabled?'已开启':'已关闭';
-    dsHide.className='chip '+(ds.autoHide?'on':'');dsHide.textContent=ds.autoHide?'已开启':'已关闭';
     dsStart.className='chip '+(ds.autoStart?'on':'');dsStart.textContent=ds.autoStart?'已开启':'已关闭';
   }
   function dsSend(msg){
     ds.busy=true;
-    desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
+    desktopSettings('POST',{autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
+      ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
       ds.online=!!r.online;ds.loggedIn=!!r.loggedIn;ds.busy=false;dsPaint();
       toast(msg||'桌面助手设置已更新'+(ds.online?'':'（绑定电脑在线后自动生效）'),'ok');
     })['catch'](function(){
@@ -2553,7 +2547,6 @@ function openSettings(){
     });
   }
   dsPower.onclick=function(){ds.enabled=!ds.enabled;dsPaint();dsSend(ds.enabled?'桌面助手已开启':'桌面助手已关闭')};
-  dsHide.onclick=function(){ds.autoHide=!ds.autoHide;dsPaint();dsSend()};
   dsStart.onclick=function(){ds.autoStart=!ds.autoStart;dsPaint();dsSend()};
   dsPairBtn.onclick=function(){
     var t=storeGet('ivsim_token',null);
@@ -2578,7 +2571,7 @@ function openSettings(){
     if(!$('#dsPower')) return;
     desktopSettings('GET').then(function(r){
       if(ds.busy)return;
-      ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
+      ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
       ds.online=!!r.online;ds.loggedIn=!!r.loggedIn;dsPaint();
     })['catch'](function(){
       if(ds.busy)return;
