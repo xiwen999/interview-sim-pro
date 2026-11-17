@@ -880,7 +880,8 @@ async function apiDesktopSet(req, res, body) {
   if (body && body.autoHide !== undefined) st.autoHide = !!body.autoHide;
   if (body && body.autoStart !== undefined) st.autoStart = !!body.autoStart;
   if (body && body.enabled !== undefined) st.enabled = !!body.enabled;
-  await q('REPLACE INTO desktop_settings (id,autoHide,autoStart,enabled,updatedAt) VALUES (1,?,?,?,?)',
+  /* 用 UPDATE 而非 REPLACE，避免覆盖掉心跳列 lastSeen */
+  await q('UPDATE desktop_settings SET autoHide=?,autoStart=?,enabled=?,updatedAt=? WHERE id=1',
     [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0, Date.now()]);
   const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
   return send(res, 200, Object.assign({ ok: true, online: desktopOnline(rows[0]), updatedAt: Number(rows[0].updatedAt) || 0 }, desktopRow(rows[0])));
