@@ -6,11 +6,6 @@ secret.txt
 *.bak
 *.sql
 *.log
-# 桌面助手二进制/脚本（因安全原因不纳入版本库，见归档）
-AI-Assistant.exe
-AI助手-服务.ps1
-AI助手-桌面球.ps1
-启动AI助手-桌面球.bat
 # 开发杂物 / 第三方依赖
 node_modules/
 deploy/

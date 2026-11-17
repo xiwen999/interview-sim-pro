@@ -1,6 +1,6 @@
 # 模拟面试训练营 Pro · AI 模拟面试 Web 应用
 
-> 面向求职者的 AI 模拟面试训练平台：覆盖模拟面试、题库训练、视频观摩、放松减压、反转面试、管理后台与桌面 AI 助手等模块。
+> 面向求职者的 AI 模拟面试训练平台：覆盖模拟面试、题库训练、视频观摩、轻松一下、反转面试、个人中心、AI 面试助手与管理后台等模块。
 
 ---
 
@@ -13,7 +13,7 @@
 - **视频观摩大厅**：用户投稿的面试实录视频，跨设备点播（服务端代理 + Range 支持）。
 - **反转面试**：角色反转，用户扮演面试官向 AI 考官提问，换位理解考察逻辑。
 - **放松减压 / 管理后台**：配套页面完善产品闭环。
-- **桌面 AI 助手（可选）**：Windows 悬浮球助手，本地常驻提供快捷答疑。
+- **AI 面试助手**：独立全屏对话页，面试之外可继续向助手追问，与站内面试官共用同一套大模型代理。
 
 ---
 
@@ -24,7 +24,6 @@
 | 前端 | 原生 HTML / CSS / JavaScript（无构建步骤） | Web Speech API 语音作答；统一状态机控制会话流程；`shared.js` 为公共逻辑 |
 | 后端 | Node.js（内置 `http` 模块，零框架依赖）+ MySQL（`mysql2`） | `server/index.js` 提供静态托管、REST API、JWT 鉴权、视频流 |
 | AI 层 | `cloud.js` 前端零配置代理 | 统一经服务端 `POST /api/ai/chat`（需登录 + 限速）调用大模型；失败自动回退本地智能模拟 |
-| 桌面助手 | PowerShell 脚本 + 原生启动器（**未纳入本仓库**） | 本地 HTTP 设置接口（`127.0.0.1:47821`），悬浮球进程管理 |
 | 存储 | MySQL（主）/ 浏览器 `localStorage`（离线回落） | 用户、会话、视频、题库、反馈存 MySQL；纯静态打开时回落本地存储 |
 
 **架构要点**
@@ -42,23 +41,25 @@
 ├── index.html            首页
 ├── interview.html        模拟面试
 ├── bank.html             题库训练
-├── square.html           视频观摩大厅
-├── relax.html            放松减压
+├── square.html           观摩大厅（视频投稿与点播）
+├── relax.html            轻松一下（抽签、卡片等减压互动）
 ├── reverse.html          反转面试
-├── videos.html           视频管理
+├── videos.html           个人中心
 ├── admin.html            管理后台
-├── assistant.html        桌面助手内嵌页
+├── assistant.html        AI 面试助手（独立全屏对话页）
 ├── shared.css            公共样式
-├── shared.js             公共前端逻辑（导航 / 鉴权 / 状态机）
+├── shared.js             公共前端逻辑（导航 / 鉴权 / 状态机 / 题库数据）
 ├── cloud.js              大模型接入层（前端代理）
 ├── architecture.png      架构图
+├── LICENSE               MIT 许可证
+├── 启动本地服务.bat        Windows 一键启动后端（自动读取 .env）
 ├── assets/               图片等静态资源
-├── server/               后端（Node.js + MySQL）
-│   ├── index.js          服务入口（API / 静态托管 / 鉴权 / 视频流）
-│   ├── package.json      后端依赖与脚本
-│   ├── config.example.json  配置模板（真实 config.json 不入库）
-│   └── .env.example         环境变量模板（真实 .env 不入库）
-└── （桌面助手相关 .ps1 / .exe / .bat 已通过 .gitignore 排除，不纳入仓库）
+└── server/               后端（Node.js + MySQL）
+    ├── index.js          服务入口（API / 静态托管 / 鉴权 / 视频流）
+    ├── package.json      后端依赖与脚本
+    ├── package-lock.json 依赖锁定，保证安装可复现
+    ├── config.example.json  配置模板（真实 config.json 不入库）
+    └── .env.example         环境变量模板（真实 .env 不入库）
 ```
 
 ---
@@ -75,8 +76,8 @@
 
 ```bash
 # 1. 克隆仓库
-git clone <your-repo-url>
-cd 模拟面试网页
+git clone https://github.com/xiwen999/interview-sim-pro.git
+cd interview-sim-pro
 
 # 2. 安装后端依赖
 cd server
@@ -118,6 +119,9 @@ node index.js
 | `SMTP_USER` | 空 | 发信邮箱账号；留空 = 开发模式，验证码不真实发信而是直接返回前端自动填入 |
 | `SMTP_PASS` | 空 | SMTP 授权码（QQ 邮箱在「设置-账户」开启 SMTP 后获取，非登录密码） |
 | `SMTP_FROM` | 空 | 发件人邮箱（默认同 SMTP_USER） |
+| `SMTP_SSL` | 空 | 置 `1` 走 465 端口 SSL 直连；留空则按端口自动判定（587 用 STARTTLS） |
+| `ADMIN_ACCOUNT` | `admin` | 管理后台初始账号（仅首次建库时生效） |
+| `ADMIN_PASSWORD` | 空 | 管理后台初始密码；留空则首次启动自动生成 12 位随机密码并打印在控制台 |
 | `PORT` | `3000` | 服务端口 |
 | `BIND_HOST` | `0.0.0.0` | 监听地址（仅本机演示可改 `127.0.0.1`） |
 
@@ -127,7 +131,7 @@ node index.js
 
 ## 七、依赖清单
 
-- **运行时依赖（后端）**：`mysql2` `^3.24.6`
+- **运行时依赖（后端）**：`mysql2` `^3.24.6`（MySQL 驱动）、`nodemailer` `^10.5.0`（注册邮箱验证码发信）
 - **前端依赖**：无第三方依赖（原生 HTML/CSS/JS 实现）
 - **运行环境**：Node.js ≥ 14、MySQL ≥ 5.7
 
@@ -155,7 +159,7 @@ node index.js
 - 静态托管采用显式白名单，禁止访问 `server/`、`node_modules/`、`data/`、`deploy/`、密钥与备份文件。
 - **提交前请确认**仓库内不包含任何真实密钥：
   ```bash
-  git ls-files | grep -E '\.env$|config\.json|secret|AI-Assistant'
+  git ls-files | grep -E '\.env$|config\.json|secret'
   # 应仅看到 server/.env.example 与 server/config.example.json，其余不应出现
   ```
 

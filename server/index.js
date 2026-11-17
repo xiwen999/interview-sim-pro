@@ -273,32 +273,9 @@ async function initDatabase() {
       page VARCHAR(32) NULL,
       done TINYINT NOT NULL DEFAULT 0,
       KEY idx_feedback_ts (ts)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
-    `CREATE TABLE IF NOT EXISTS desktop_settings (
-      id TINYINT NOT NULL PRIMARY KEY,
-      autoHide TINYINT NOT NULL DEFAULT 1,
-      autoStart TINYINT NOT NULL DEFAULT 1,
-      enabled TINYINT NOT NULL DEFAULT 1,
-      updatedAt BIGINT NOT NULL DEFAULT 0,
-      lastSeen BIGINT NOT NULL DEFAULT 0
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
-    `CREATE TABLE IF NOT EXISTS desktop_prefs (
-      uid VARCHAR(64) NOT NULL PRIMARY KEY,
-      autoHide TINYINT NOT NULL DEFAULT 1,
-      autoStart TINYINT NOT NULL DEFAULT 1,
-      enabled TINYINT NOT NULL DEFAULT 1,
-      updatedAt BIGINT NOT NULL DEFAULT 0,
-      lastSeen BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
   ];
   for (const s of DDL) await pool.query(s);
-
-  /* 桌面助手设置表增量迁移：updatedAt（网页开关时间戳）/ lastSeen（桌面助手服务心跳） */
-  try { await pool.query('ALTER TABLE desktop_settings ADD COLUMN updatedAt BIGINT NOT NULL DEFAULT 0'); }
-  catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
-  try { await pool.query('ALTER TABLE desktop_settings ADD COLUMN lastSeen BIGINT NOT NULL DEFAULT 0'); }
-  catch (e) { if (e && e.code !== 'ER_DUP_FIELDNAME') throw e; }
-  try { await pool.query('INSERT IGNORE INTO desktop_settings (id) VALUES (1)'); } catch (e) {}
 
   /* 增量迁移 */
   const EXTRA_COLUMNS = [
@@ -861,96 +838,6 @@ async function syncBuiltInQuestions() {
     if (r && r.affectedRows) added++;
   }
   return added;
-}
-/* ---------- 桌面助手（按账号区分：每个用户绑定自己电脑上的悬浮球） ---------- */
-/* 配对码：网页生成 -> 用户在悬浮球右键"绑定账号"里输入 -> 换长期设备令牌 */
-const DESK_PAIR = new Map(); // code -> { uid, exp }
-
-function prefsRow(r) {
-  return r
-    ? { autoHide: !!Number(r.autoHide), autoStart: !!Number(r.autoStart), enabled: !!Number(r.enabled) }
-    : { autoHide: true, autoStart: true, enabled: true };
-}
-function prefsOnline(r) {
-  return !!(r && Number(r.lastSeen) && (Date.now() - Number(r.lastSeen)) < 12000);
-}
-/* 用户令牌或桌面助手设备令牌（sub='desktop'）都能定位到同一账号 */
-async function resolveUserOrDevice(req) {
-  const p = verifyToken(getBearer(req));
-  if (!p || p.sub === 'admin') return null;
-  const u = await findUserByUid(p.uid);
-  return (u && u.status !== 'banned') ? u : null;
-}
-async function apiDesktopGet(req, res) {
-  const u = await resolveUserOrDevice(req);
-  if (!u) return send(res, 200, { ok: true, loggedIn: false, online: false, updatedAt: 0, autoHide: true, autoStart: true, enabled: true });
-  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]);
-  const r = rows[0];
-  return send(res, 200, Object.assign(
-    { ok: true, loggedIn: true, online: prefsOnline(r), updatedAt: r ? Number(r.updatedAt) || 0 : 0 },
-    prefsRow(r)));
-}
-async function apiDesktopSet(req, res, body) {
-  const u = await resolveUserOrDevice(req);
-  if (!u) return send(res, 401, { ok: false, msg: '请先登录后再设置桌面助手' });
-  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [u.uid]);
-  const cur = (await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]))[0];
-  const st = prefsRow(cur);
-  if (body && body.autoHide !== undefined) st.autoHide = !!body.autoHide;
-  if (body && body.autoStart !== undefined) st.autoStart = !!body.autoStart;
-  if (body && body.enabled !== undefined) st.enabled = !!body.enabled;
-  /* 用 UPDATE 而非 REPLACE，避免覆盖掉心跳列 lastSeen */
-  await q('UPDATE desktop_prefs SET autoHide=?,autoStart=?,enabled=?,updatedAt=? WHERE uid=?',
-    [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0, Date.now(), u.uid]);
-  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]);
-  const r = rows[0];
-  return send(res, 200, Object.assign(
-    { ok: true, loggedIn: true, online: prefsOnline(r), updatedAt: Number(r.updatedAt) || 0 },
-    prefsRow(r)));
-}
-/* 网页生成本账号的配对码（5 分钟有效） */
-async function apiDesktopPairCode(req, res) {
-  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'deskpair')) return;
-  const u = await authUser(req);
-  if (!u) return send(res, 401, { ok: false, msg: '请先登录后再生成配对码' });
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  DESK_PAIR.set(code, { uid: u.uid, exp: Date.now() + 5 * 60 * 1000 });
-  if (DESK_PAIR.size > 500) { const now = Date.now(); for (const [k, v] of DESK_PAIR) if (now > v.exp) DESK_PAIR.delete(k); }
-  return send(res, 200, { ok: true, code });
-}
-/* 桌面助手服务用配对码换取长期设备令牌（绑定到对应账号） */
-async function apiDesktopPair(req, res, body) {
-  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'deskbind')) return;
-  const code = String((body && body.code) || '').trim();
-  const rec = DESK_PAIR.get(code);
-  if (!rec || Date.now() > rec.exp) {
-    DESK_PAIR.delete(code);
-    return send(res, 400, { ok: false, msg: '配对码无效或已过期，请到网页设置里重新生成' });
-  }
-  DESK_PAIR.delete(code);
-  const token = signToken({ uid: rec.uid, sub: 'desktop', exp: Date.now() + 3650 * 86400000 });
-  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [rec.uid]);
-  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [rec.uid]);
-  return send(res, 200, Object.assign(
-    { ok: true, token, uid: rec.uid, online: true, updatedAt: Number(rows[0].updatedAt) || 0 },
-    prefsRow(rows[0])));
-}
-/* 心跳：桌面助手服务携带设备令牌上报状态并拉取绑定账号的最新设置 */
-async function apiDesktopPing(req, res, body) {
-  if (!rateLimit(req, res, 60, 60 * 1000, 'deskping')) return;
-  const p = verifyToken(getBearer(req) || (body && body.token));
-  if (!p || p.sub !== 'desktop') {
-    /* 未绑定设备：只返回默认值，不影响任何账号数据 */
-    return send(res, 200, { ok: true, paired: false, online: true, updatedAt: 0, autoHide: true, autoStart: true, enabled: true });
-  }
-  const uid = p.uid;
-  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [uid]);
-  await q('UPDATE desktop_prefs SET lastSeen=? WHERE uid=?', [Date.now(), uid]);
-  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [uid]);
-  const r = rows[0];
-  return send(res, 200, Object.assign(
-    { ok: true, paired: true, online: true, updatedAt: Number(r.updatedAt) || 0 },
-    prefsRow(r)));
 }
 async function apiFeedbackAdd(req, res, body) {
   if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条
@@ -1741,11 +1628,6 @@ const ROUTES = [
   ['POST', /^\/api\/profile$/, apiProfile],
   ['GET', /^\/api\/questions$/, apiQuestions],
   ['POST', /^\/api\/feedback$/, apiFeedbackAdd],
-  ['GET', /^\/api\/desktop\/settings$/, apiDesktopGet],
-  ['POST', /^\/api\/desktop\/settings$/, apiDesktopSet],
-  ['POST', /^\/api\/desktop\/heartbeat$/, apiDesktopPing],
-  ['POST', /^\/api\/desktop\/pair$/, apiDesktopPair],
-  ['POST', /^\/api\/desktop\/pair-code$/, apiDesktopPairCode],
   ['GET', /^\/api\/admin\/feedback$/, apiAdminFeedbackList],
   ['PUT', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackPut],
   ['DELETE', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackDel],
@@ -1821,7 +1703,7 @@ const PUBLIC_FILES = new Set([
   'videos.html', 'admin.html', 'assistant.html', 'reverse.html',
   'shared.css', 'shared.js', 'cloud.js', 'architecture.png', 'favicon.ico', 'robots.txt'
 ]);
-const PUBLIC_DIRS = new Set(['assets', 'downloads']);
+const PUBLIC_DIRS = new Set(['assets']);
 function serveStatic(req, res, pathname) {
   let rel = pathname === '/' ? '/index.html' : pathname;
   try { rel = decodeURIComponent(rel); } catch (e) {}
