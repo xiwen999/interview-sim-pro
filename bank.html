@@ -540,7 +540,6 @@ document.getElementById('kw').addEventListener('input',function(){
   kwTimer=setTimeout(function(){F.kw=v;render()},200); /* 200ms debounce */
 });
 
-/* 支持从 URL 带入搜索词/ */
 (function(){
   try{
     var p=new URLSearchParams(location.search);

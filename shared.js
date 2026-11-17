@@ -844,7 +844,6 @@ function toast(msg,type){
 function getUser(){return storeGet('ivsim_user',null)}
 /* 稳定的前台用户唯一 id */
 function genUid(){return 'u_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-/* 确保当前 */
 function ensureUid(){
   var u=getUser();
   if(!u)return null;
@@ -909,7 +908,6 @@ function migrateUserData(){
 var API = {
   token:function(){return storeGet('ivsim_token',null)},
   setToken:function(t){ if(t)storeSet('ivsim_token',t); else storeRemove('ivsim_token'); },
-  /* 真正可达 */
   call:function(path,opts){
     opts=opts||{};
     var headers={'Content-Type':'application/json'};
@@ -1856,7 +1854,6 @@ function mountNav(active){
   aiLink.onclick=function(){
     var fab=document.querySelector('.agent-fab');
     if(!fab){/* 还没 mount */ mountAgent();fab=document.querySelector('.agent-fab')}
-    /* 触发 fab.click → */
     if(fab)fab.click();
   };
   renderAvatar(document.getElementById('navMeAvatar'),notLogin?'__person__':(u.avatar||'__person__'));
@@ -3141,7 +3138,6 @@ function drawRadar(canvas,labels,values,opt){
   canvas.width=w;canvas.height=h;var cx=w/2,cy=h/2,r=Math.min(w,h)/2-30;
   var c=canvas.getContext('2d');c.clearRect(0,0,w,h);
   var n=labels.length;
-  /* 浅色模式下换成深色线条 / */
   var isLight=document.body.classList.contains('light');
   var gridC=isLight?'rgba(15,23,42,.16)':'rgba(255,255,255,.12)';
   var lineC=isLight?'#2563eb':'#8ABDFF';
@@ -3196,7 +3192,6 @@ var THEME_DARK={
 };
 function applyTheme(){
   var st=storeGet('ivsim_settings',{});var isDark=st.theme!=='light';
-  /* html.light 供 < */
   document.documentElement.classList.toggle('light',!isDark);
   document.body.classList.toggle('light',!isDark);
   var T=isDark?THEME_DARK:THEME_LIGHT,r=document.documentElement.style;
@@ -3304,7 +3299,6 @@ function mountBanGuard(){
     /* 后端在线时定期复查 /api */
     if(API.token()&&(++tick%5===0))refreshMe().then(function(){render()});
   }
-  /* 后台在另一个标签页封禁 / */
   window.addEventListener('storage',function(e){
     if(!e.key||e.key==='ivsim_admin_db'||e.key==='ivsim_user')render();
   });

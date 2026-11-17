@@ -795,7 +795,6 @@ body.light .tg-tip,body.light .tg-empty{background:rgba(15,23,42,.04);
 
 /* 浅色模式适配 */
 body.light #vSetup .setup{border-color:rgba(15,23,42,.1) !important;
-  /* 与题库题卡同一套「蓝 → */
   background:
     radial-gradient(900px 420px at 4% -14%,rgba(37,99,235,.13),transparent 64%),
     radial-gradient(760px 420px at 100% -6%,rgba(45,212,191,.12),transparent 66%),
@@ -1848,7 +1847,6 @@ initPage('interview');
 var RING_LEN=175.9;
 var S={scene:'job',count:5,sec:90,types:[],lv:0,qs:[],idx:0,recs:[],left:0,timer:null,t0:0,rated:0,mode:'text',camStream:null,stressMode:false,sceneMode:'campus',resume:'',resumeSummary:''};
 
-/* 岗位轴直接取 shared. */
 var JOB_CATEGORIES=ROLES.filter(function(r){return r.id!=='general'}).map(function(r){
   return {id:r.id,label:r.name,icon:r.icon,subs:r.subs};
 });
@@ -2378,7 +2376,6 @@ function openCamStream(ok,fail){
     });
   });
 }
-/* 设备被拔掉 / */
 function bindCamTracks(){
   if(!S.camStream)return;
   S.camStream.getTracks().forEach(function(t){
@@ -3795,7 +3792,6 @@ if(camHideBtn)camHideBtn.onclick=function(){
     return [x,y];
   }
   stage.addEventListener('pointerdown',function(e){
-    /* 点工具按钮 / */
     if(e.target.closest('.cam-tool')||e.target.closest('.cam-resize'))return;
     if(stage.classList.contains('hide'))return;
     dragging=true;moved=false;

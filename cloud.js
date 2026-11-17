@@ -25,7 +25,6 @@
 
   /* 已配置且可能可用 */
   function isConfigured() { return _status.enabled !== false; }
-  /* 兼容 interview. */
   function isCloud() { return isConfigured(); }
   function serverModel() { return _status.model || ''; }
 

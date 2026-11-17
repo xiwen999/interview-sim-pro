@@ -1,5 +1,4 @@
 'use strict';
-/* 模拟面试训练营 Pro · */
 
 const http = require('http');
 const fs = require('fs');
@@ -613,7 +612,6 @@ async function apiRegister(req, res, body) {
   const token = signToken({ uid, exp: now + 30 * 86400000 });
   return send(res, 200, { ok: true, token, user: publicUser(u) });
 }
-/* POST /api/ */
 async function apiQuickRegister(req, res, body) {
   if (!rateLimit(req, res, 3, 10 * 60 * 1000, 'quickreg')) return; // 单 IP 10 分钟最多 3 个游客号
   const acc = String(body.account || '').trim();
@@ -815,7 +813,6 @@ async function apiVideoFileGet(req, res, body, m) {
   res.writeHead(200, head);
   fs.createReadStream(p).pipe(res);
 }
-/* 投稿者撤回 / */
 async function apiVideoDelete(req, res, body, m) {
   const u = await authUser(req);
   if (!u) return send(res, 401, { ok: false, msg: '未登录或登录已过期' });
@@ -852,7 +849,6 @@ async function seedQuestionsIfEmpty() {
   }
   return list.length;
 }
-/* 每次启动补齐 shared. */
 async function syncBuiltInQuestions() {
   const list = extractQuestionsFromSharedJs();
   if (!list) return 0;
@@ -1191,7 +1187,6 @@ async function importLegacyJson() {
 async function initAdmin() {
   const row = await getAdmin();
   if (row) return;
-  /* 尝试从旧 admin. */
   try {
     const a = JSON.parse(fs.readFileSync(LEGACY_ADMIN_FILE, 'utf8'));
     if (a && a.account && a.passHash) {
@@ -1823,7 +1818,7 @@ const MIME = {
    投稿视频走独立 /api/videos/file/:id 路由（带 Range 与 id 校验），不经过此处。 */
 const PUBLIC_FILES = new Set([
   'index.html', 'interview.html', 'bank.html', 'square.html', 'relax.html',
-  'videos.html', 'admin.html', 'assistant.html', 'reverse.html',
+  'videos.html', 'admin.html', 'assistant.html', 'reverse.html', 'product.html',
   'shared.css', 'shared.js', 'cloud.js', 'architecture.png', 'favicon.ico', 'robots.txt'
 ]);
 const PUBLIC_DIRS = new Set(['assets', 'downloads']);
