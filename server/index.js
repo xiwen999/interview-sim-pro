@@ -282,6 +282,14 @@ async function initDatabase() {
       enabled TINYINT NOT NULL DEFAULT 1,
       updatedAt BIGINT NOT NULL DEFAULT 0,
       lastSeen BIGINT NOT NULL DEFAULT 0
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    `CREATE TABLE IF NOT EXISTS desktop_prefs (
+      uid VARCHAR(64) NOT NULL PRIMARY KEY,
+      autoHide TINYINT NOT NULL DEFAULT 1,
+      autoStart TINYINT NOT NULL DEFAULT 1,
+      enabled TINYINT NOT NULL DEFAULT 1,
+      updatedAt BIGINT NOT NULL DEFAULT 0,
+      lastSeen BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
   ];
   for (const s of DDL) await pool.query(s);
@@ -858,42 +866,95 @@ async function syncBuiltInQuestions() {
   }
   return added;
 }
-function desktopRow(r) {
+/* ---------- 桌面助手（按账号区分：每个用户绑定自己电脑上的悬浮球） ---------- */
+/* 配对码：网页生成 -> 用户在悬浮球右键"绑定账号"里输入 -> 换长期设备令牌 */
+const DESK_PAIR = new Map(); // code -> { uid, exp }
+
+function prefsRow(r) {
   return r
     ? { autoHide: !!Number(r.autoHide), autoStart: !!Number(r.autoStart), enabled: !!Number(r.enabled) }
     : { autoHide: true, autoStart: true, enabled: true };
 }
-/* 桌面助手服务是否在线：心跳 12 秒内有更新 */
-function desktopOnline(r) {
+function prefsOnline(r) {
   return !!(r && Number(r.lastSeen) && (Date.now() - Number(r.lastSeen)) < 12000);
 }
+/* 用户令牌或桌面助手设备令牌（sub='desktop'）都能定位到同一账号 */
+async function resolveUserOrDevice(req) {
+  const p = verifyToken(getBearer(req));
+  if (!p || p.sub === 'admin') return null;
+  const u = await findUserByUid(p.uid);
+  return (u && u.status !== 'banned') ? u : null;
+}
 async function apiDesktopGet(req, res) {
-  const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
+  const u = await resolveUserOrDevice(req);
+  if (!u) return send(res, 200, { ok: true, loggedIn: false, online: false, updatedAt: 0, autoHide: true, autoStart: true, enabled: true });
+  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]);
   const r = rows[0];
-  return send(res, 200, Object.assign({ ok: true, online: desktopOnline(r), updatedAt: r ? Number(r.updatedAt) || 0 : 0 }, desktopRow(r)));
+  return send(res, 200, Object.assign(
+    { ok: true, loggedIn: true, online: prefsOnline(r), updatedAt: r ? Number(r.updatedAt) || 0 : 0 },
+    prefsRow(r)));
 }
 async function apiDesktopSet(req, res, body) {
-  const u = await authUser(req);
+  const u = await resolveUserOrDevice(req);
   if (!u) return send(res, 401, { ok: false, msg: '请先登录后再设置桌面助手' });
-  const cur = (await q('SELECT * FROM desktop_settings WHERE id=1'))[0];
-  const st = desktopRow(cur);
+  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [u.uid]);
+  const cur = (await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]))[0];
+  const st = prefsRow(cur);
   if (body && body.autoHide !== undefined) st.autoHide = !!body.autoHide;
   if (body && body.autoStart !== undefined) st.autoStart = !!body.autoStart;
   if (body && body.enabled !== undefined) st.enabled = !!body.enabled;
   /* 用 UPDATE 而非 REPLACE，避免覆盖掉心跳列 lastSeen */
-  await q('UPDATE desktop_settings SET autoHide=?,autoStart=?,enabled=?,updatedAt=? WHERE id=1',
-    [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0, Date.now()]);
-  const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
-  return send(res, 200, Object.assign({ ok: true, online: desktopOnline(rows[0]), updatedAt: Number(rows[0].updatedAt) || 0 }, desktopRow(rows[0])));
-}
-/* 桌面助手服务心跳：上报本地状态，只更新 lastSeen，不动设置本身 */
-async function apiDesktopPing(req, res, body) {
-  const cur = (await q('SELECT * FROM desktop_settings WHERE id=1'))[0];
-  if (!cur) await q('REPLACE INTO desktop_settings (id) VALUES (1)');
-  await q('UPDATE desktop_settings SET lastSeen=? WHERE id=1', [Date.now()]);
-  const rows = await q('SELECT * FROM desktop_settings WHERE id=1');
+  await q('UPDATE desktop_prefs SET autoHide=?,autoStart=?,enabled=?,updatedAt=? WHERE uid=?',
+    [st.autoHide ? 1 : 0, st.autoStart ? 1 : 0, st.enabled ? 1 : 0, Date.now(), u.uid]);
+  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [u.uid]);
   const r = rows[0];
-  return send(res, 200, Object.assign({ ok: true, online: true, updatedAt: r ? Number(r.updatedAt) || 0 : 0 }, desktopRow(r)));
+  return send(res, 200, Object.assign(
+    { ok: true, loggedIn: true, online: prefsOnline(r), updatedAt: Number(r.updatedAt) || 0 },
+    prefsRow(r)));
+}
+/* 网页生成本账号的配对码（5 分钟有效） */
+async function apiDesktopPairCode(req, res) {
+  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'deskpair')) return;
+  const u = await authUser(req);
+  if (!u) return send(res, 401, { ok: false, msg: '请先登录后再生成配对码' });
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  DESK_PAIR.set(code, { uid: u.uid, exp: Date.now() + 5 * 60 * 1000 });
+  if (DESK_PAIR.size > 500) { const now = Date.now(); for (const [k, v] of DESK_PAIR) if (now > v.exp) DESK_PAIR.delete(k); }
+  return send(res, 200, { ok: true, code });
+}
+/* 桌面助手服务用配对码换取长期设备令牌（绑定到对应账号） */
+async function apiDesktopPair(req, res, body) {
+  if (!rateLimit(req, res, 10, 10 * 60 * 1000, 'deskbind')) return;
+  const code = String((body && body.code) || '').trim();
+  const rec = DESK_PAIR.get(code);
+  if (!rec || Date.now() > rec.exp) {
+    DESK_PAIR.delete(code);
+    return send(res, 400, { ok: false, msg: '配对码无效或已过期，请到网页设置里重新生成' });
+  }
+  DESK_PAIR.delete(code);
+  const token = signToken({ uid: rec.uid, sub: 'desktop', exp: Date.now() + 3650 * 86400000 });
+  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [rec.uid]);
+  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [rec.uid]);
+  return send(res, 200, Object.assign(
+    { ok: true, token, uid: rec.uid, online: true, updatedAt: Number(rows[0].updatedAt) || 0 },
+    prefsRow(rows[0])));
+}
+/* 心跳：桌面助手服务携带设备令牌上报状态并拉取绑定账号的最新设置 */
+async function apiDesktopPing(req, res, body) {
+  if (!rateLimit(req, res, 60, 60 * 1000, 'deskping')) return;
+  const p = verifyToken(getBearer(req) || (body && body.token));
+  if (!p || p.sub !== 'desktop') {
+    /* 未绑定设备：只返回默认值，不影响任何账号数据 */
+    return send(res, 200, { ok: true, paired: false, online: true, updatedAt: 0, autoHide: true, autoStart: true, enabled: true });
+  }
+  const uid = p.uid;
+  await q('INSERT IGNORE INTO desktop_prefs (uid) VALUES (?)', [uid]);
+  await q('UPDATE desktop_prefs SET lastSeen=? WHERE uid=?', [Date.now(), uid]);
+  const rows = await q('SELECT * FROM desktop_prefs WHERE uid=?', [uid]);
+  const r = rows[0];
+  return send(res, 200, Object.assign(
+    { ok: true, paired: true, online: true, updatedAt: Number(r.updatedAt) || 0 },
+    prefsRow(r)));
 }
 async function apiFeedbackAdd(req, res, body) {
   if (!rateLimit(req, res, 5, 10 * 60 * 1000, 'feedback')) return; // 10 分钟最多 5 条
@@ -1688,6 +1749,8 @@ const ROUTES = [
   ['GET', /^\/api\/desktop\/settings$/, apiDesktopGet],
   ['POST', /^\/api\/desktop\/settings$/, apiDesktopSet],
   ['POST', /^\/api\/desktop\/heartbeat$/, apiDesktopPing],
+  ['POST', /^\/api\/desktop\/pair$/, apiDesktopPair],
+  ['POST', /^\/api\/desktop\/pair-code$/, apiDesktopPairCode],
   ['GET', /^\/api\/admin\/feedback$/, apiAdminFeedbackList],
   ['PUT', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackPut],
   ['DELETE', /^\/api\/admin\/feedback\/(\d+)$/, apiAdminFeedbackDel],
@@ -1753,7 +1816,8 @@ const MIME = {
   '.js': 'application/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.gif': 'image/gif', '.ico': 'image/x-icon', '.webp': 'image/webp',
-  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf'
+  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf',
+  '.zip': 'application/zip'
 };
 /* 仅允许白名单内的前端资源对外提供，杜绝把 server/、node_modules/、data/、deploy/、密钥、备份、配置文件等暴露出去。
    投稿视频走独立 /api/videos/file/:id 路由（带 Range 与 id 校验），不经过此处。 */
@@ -1762,7 +1826,7 @@ const PUBLIC_FILES = new Set([
   'videos.html', 'admin.html', 'assistant.html', 'reverse.html',
   'shared.css', 'shared.js', 'cloud.js', 'architecture.png', 'favicon.ico', 'robots.txt'
 ]);
-const PUBLIC_DIRS = new Set(['assets']);
+const PUBLIC_DIRS = new Set(['assets', 'downloads']);
 function serveStatic(req, res, pathname) {
   let rel = pathname === '/' ? '/index.html' : pathname;
   try { rel = decodeURIComponent(rel); } catch (e) {}

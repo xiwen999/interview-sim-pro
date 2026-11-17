@@ -2450,20 +2450,18 @@ function openProfile(){
 }
 
 function desktopSettings(method,data){
+  /* 桌面助手设置走网站后端，按登录账号区分——
+     每个用户绑定自己电脑上的悬浮球，互不影响 */
   var opt={method:method,cache:'no-store',headers:{}};
+  var t=storeGet('ivsim_token',null);
+  if(t)opt.headers['Authorization']='Bearer '+t;
   if(method==='POST'&&data){
     opt.headers['Content-Type']='application/json';
     opt.body=JSON.stringify(data);
   }
-  function ok(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); }
-  /* 优先直连本机桌面助手服务（本地页面可用，即时生效）；
-     公网 http 页面浏览器会拦截 127.0.0.1 请求，自动退回后端中转，
-     由桌面助手服务心跳拉取设置生效（约 3 秒延迟）。 */
-  return fetch('http://127.0.0.1:47821/settings',opt).then(ok,function(){
-    return fetch('/api/desktop/settings',opt).then(ok);
-  }).then(function(r){
-    r._local=!!r.running;
-    return r;
+  return fetch('/api/desktop/settings',opt).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
   });
 }
 
@@ -2478,22 +2476,33 @@ function openSettings(){
     settingRow('背景动效','关闭可减少卡顿、更省电','chip '+(st.motionOff?'':'on'),'stMotion',st.motionOff?'已关闭':'已开启')+
     settingRow('音效 / 签到反馈','签到、成就解锁的音效','chip '+(st.voiceOff?'':'on'),'stVoice',st.voiceOff?'已关闭':'已开启')+
     '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
-    '<div style="padding:16px 0;border-bottom:1px solid var(--line)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
-        '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手</div>'+
+        '<div style="font-weight:700;font-size:14px">🖥️ 桌面助手（悬浮球）</div>'+
         '<span id="dsStatus" style="font-size:11.5px;color:var(--ink3)">检测中…</span>'+
       '</div>'+
-      '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">桌面助手常驻 Windows 后台，双击项目里的「启动AI助手-桌面球.bat」即可运行，可在这里随时开启或关闭悬浮球。</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">安装在 Windows 电脑上的悬浮球助手，按账号绑定——开关只影响你自己电脑的球，其他设备和用户互不影响。手机上无法显示桌面悬浮球。</div>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)">'+
-        '<div><div style="font-weight:600;font-size:13px">桌面助手</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭后悬浮球消失，可随时在此重新开启</div></div>'+
+        '<div><div style="font-weight:600;font-size:13px">下载安装包</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">Windows 电脑下载解压后双击「启动桌面助手.bat」</div></div>'+
+        '<a class="chip" href="downloads/ivsim-desktop.zip" download style="text-decoration:none">下载</a>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
+        '<div><div style="font-weight:600;font-size:13px">绑定这台电脑</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">生成配对码，在悬浮球右键「绑定账号」里输入即可绑定</div></div>'+
+        '<button class="chip" id="dsPairBtn">生成配对码</button>'+
+      '</div>'+
+      '<div id="dsPairBox" style="display:none;padding:10px 12px;border-radius:10px;background:rgba(108,140,255,.12);margin:4px 0">'+
+        '<div style="font-size:12px;color:var(--ink3);margin-bottom:4px">配对码（5 分钟内有效）：</div>'+
+        '<div id="dsPairCode" style="font-size:26px;font-weight:800;letter-spacing:6px;color:var(--ink)">------</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)">'+
+        '<div><div style="font-weight:600;font-size:13px">桌面助手</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭后你电脑上的悬浮球消失，可随时重新开启</div></div>'+
         '<button class="chip" id="dsPower" disabled>读取中…</button>'+
       '</div>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
-        '<div><div style="font-weight:600;font-size:13px">网页打开时隐藏悬浮球</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">关闭网页后自动出现</div></div>'+
+        '<div><div style="font-weight:600;font-size:13px">网页打开时隐藏悬浮球</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">打开本网站时自动隐藏，关闭网页后出现</div></div>'+
         '<button class="chip" id="dsHide" disabled>读取中…</button>'+
       '</div>'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">'+
-        '<div><div style="font-weight:600;font-size:13px">开机自动启动</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">登录 Windows 后自动运行桌面助手</div></div>'+
+        '<div><div style="font-weight:600;font-size:13px">开机自动启动</div><div style="font-size:11.5px;color:var(--ink3);margin-top:2px">登录 Windows 后自动运行你电脑上的桌面助手</div></div>'+
         '<button class="chip" id="dsStart" disabled>读取中…</button>'+
       '</div>'+
     '</div>'+
@@ -2513,21 +2522,21 @@ function openSettings(){
     closeMask();toast('本地数据已清空','ok');
   };
 
-  /* 桌面助手设置 */
-  var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus');
-  var ds={autoHide:true,autoStart:true,enabled:true,ball:false,online:false,busy:false};
+  /* 桌面助手设置（按账号） */
+  var dsPower=$('#dsPower'),dsHide=$('#dsHide'),dsStart=$('#dsStart'),dsStatus=$('#dsStatus'),dsPairBtn=$('#dsPairBtn');
+  var ds={autoHide:true,autoStart:true,enabled:true,online:false,loggedIn:false,busy:false};
   function dsPaint(){
-    if(!ds.online){
-      dsStatus.textContent='桌面助手服务未运行 · 请双击「启动AI助手-桌面球.bat」';
+    if(!ds.loggedIn){
+      dsStatus.textContent='请先登录，登录后可绑定自己的桌面助手';
       dsStatus.style.color='var(--ink3)';
-      dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;
+      dsPower.disabled=true;dsHide.disabled=true;dsStart.disabled=true;dsPairBtn.disabled=true;
       dsPower.className='chip';dsPower.textContent='不可用';
       dsHide.className='chip';dsHide.textContent='不可用';
       dsStart.className='chip';dsStart.textContent='不可用';
       return;
     }
-    dsStatus.textContent=!ds.enabled?'已连接 · 桌面助手已关闭':(ds.ball?'已连接 · 悬浮球运行中':'已连接 · 悬浮球未启动');
-    dsStatus.style.color='#7EE7A7';
+    dsStatus.textContent=ds.online?'已连接 · 你电脑的悬浮球在线':'未检测到在线的绑定电脑 · 可生成配对码绑定';
+    dsStatus.style.color=ds.online?'#7EE7A7':'var(--ink3)';
     dsPower.disabled=false;dsHide.disabled=false;dsStart.disabled=false;
     dsPower.className='chip '+(ds.enabled?'on':'');dsPower.textContent=ds.enabled?'已开启':'已关闭';
     dsHide.className='chip '+(ds.autoHide?'on':'');dsHide.textContent=ds.autoHide?'已开启':'已关闭';
@@ -2537,25 +2546,43 @@ function openSettings(){
     ds.busy=true;
     desktopSettings('POST',{autoHide:ds.autoHide,autoStart:ds.autoStart,enabled:ds.enabled}).then(function(r){
       ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
-      ds.ball=r._local?!!r.ball:!!r.online;ds.online=r._local?true:!!r.online;ds.busy=false;dsPaint();
-      toast(msg||'桌面助手设置已更新'+(r._local?'':'（桌面助手将在数秒内自动生效）'),'ok');
+      ds.online=!!r.online;ds.loggedIn=!!r.loggedIn;ds.busy=false;dsPaint();
+      toast(msg||'桌面助手设置已更新'+(ds.online?'':'（绑定电脑在线后自动生效）'),'ok');
     })['catch'](function(){
-      ds.online=false;ds.busy=false;dsPaint();toast('连不上桌面助手服务，正在重试…','');
+      ds.busy=false;dsPaint();toast('设置保存失败，请稍后重试','');
     });
   }
-  dsPower.onclick=function(){if(!ds.online)return;ds.enabled=!ds.enabled;dsPaint();dsSend(ds.enabled?'桌面助手已开启':'桌面助手已关闭')};
-  dsHide.onclick=function(){if(!ds.online)return;ds.autoHide=!ds.autoHide;dsPaint();dsSend()};
-  dsStart.onclick=function(){if(!ds.online)return;ds.autoStart=!ds.autoStart;dsPaint();dsSend()};
-  /* 弹层打开期间每 2.5 */
+  dsPower.onclick=function(){ds.enabled=!ds.enabled;dsPaint();dsSend(ds.enabled?'桌面助手已开启':'桌面助手已关闭')};
+  dsHide.onclick=function(){ds.autoHide=!ds.autoHide;dsPaint();dsSend()};
+  dsStart.onclick=function(){ds.autoStart=!ds.autoStart;dsPaint();dsSend()};
+  dsPairBtn.onclick=function(){
+    var t=storeGet('ivsim_token',null);
+    if(!t){toast('请先登录后再生成配对码','');return;}
+    dsPairBtn.disabled=true;dsPairBtn.textContent='生成中…';
+    fetch('/api/desktop/pair-code',{method:'POST',cache:'no-store',headers:{'Authorization':'Bearer '+t}})
+      .then(function(r){return r.json()})
+      .then(function(j){
+        if(j&&j.ok&&j.code){
+          $('#dsPairBox').style.display='block';
+          $('#dsPairCode').textContent=String(j.code);
+        }else{
+          toast((j&&j.msg)||'生成失败，请稍后重试','');
+        }
+        dsPairBtn.disabled=false;dsPairBtn.textContent='重新生成';
+      })['catch'](function(){
+        toast('生成失败，请检查网络','');dsPairBtn.disabled=false;dsPairBtn.textContent='生成配对码';
+      });
+  };
+  /* 弹层打开期间每 2.5 秒刷新绑定电脑在线状态 */
   function dsRefresh(){
     if(!$('#dsPower')) return;
     desktopSettings('GET').then(function(r){
       if(ds.busy)return;
       ds.autoHide=!!r.autoHide;ds.autoStart=!!r.autoStart;ds.enabled=!!r.enabled;
-      ds.ball=r._local?!!r.ball:!!r.online;ds.online=r._local?true:!!r.online;dsPaint();
+      ds.online=!!r.online;ds.loggedIn=!!r.loggedIn;dsPaint();
     })['catch'](function(){
       if(ds.busy)return;
-      ds.online=false;dsPaint();
+      ds.loggedIn=false;ds.online=false;dsPaint();
     });
     setTimeout(dsRefresh,2500);
   }
