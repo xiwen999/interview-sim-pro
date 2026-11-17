@@ -1818,7 +1818,7 @@ const MIME = {
    投稿视频走独立 /api/videos/file/:id 路由（带 Range 与 id 校验），不经过此处。 */
 const PUBLIC_FILES = new Set([
   'index.html', 'interview.html', 'bank.html', 'square.html', 'relax.html',
-  'videos.html', 'admin.html', 'assistant.html', 'reverse.html', 'product.html',
+  'videos.html', 'admin.html', 'assistant.html', 'reverse.html',
   'shared.css', 'shared.js', 'cloud.js', 'architecture.png', 'favicon.ico', 'robots.txt'
 ]);
 const PUBLIC_DIRS = new Set(['assets', 'downloads']);
